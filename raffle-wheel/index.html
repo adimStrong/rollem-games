@@ -1,0 +1,290 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Raffle Wheel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F3F4F8; --panel:#FFFFFF; --ink:#181A2C; --muted:#5E6280; --line:#DDE0EB;
+  --accent:#E0352B; --accent-ink:#FFFFFF; --field:#FAFAFD; --shadow:0 10px 30px rgba(24,26,44,.08);
+  --hub:#181A2C; --hub-ink:#FFFFFF;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Figtree", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#10111C; --panel:#1A1C2B; --ink:#EEEFF7; --muted:#9EA2BD; --line:#2C2F44;
+    --accent:#FF5A48; --accent-ink:#10111C; --field:#141522; --shadow:0 10px 30px rgba(0,0,0,.35);
+    --hub:#EEEFF7; --hub-ink:#10111C;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#10111C; --panel:#1A1C2B; --ink:#EEEFF7; --muted:#9EA2BD; --line:#2C2F44;
+  --accent:#FF5A48; --accent-ink:#10111C; --field:#141522; --shadow:0 10px 30px rgba(0,0,0,.35);
+  --hub:#EEEFF7; --hub-ink:#10111C;
+}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:28px 48px;display:flex;flex-direction:column;gap:24px}
+header h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,5vw,44px);line-height:1.05;margin:0;text-wrap:balance;letter-spacing:-.01em}
+header p{margin:6px 0 0;color:var(--muted);max-width:60ch}
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:1fr}}
+.stage{display:flex;flex-direction:column;align-items:center;gap:18px}
+.wheel-box{position:relative;width:100%;max-width:520px;aspect-ratio:1/1}
+canvas{width:100%;height:100%;display:block}
+.pointer{position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:0;height:0;
+  border-left:18px solid transparent;border-right:18px solid transparent;border-top:34px solid var(--accent);
+  filter:drop-shadow(0 3px 3px rgba(0,0,0,.25));z-index:2}
+.btn{font-family:var(--f-body);font-weight:600;font-size:15px;border-radius:10px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);padding:10px 16px;cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+.btn:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-spin{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-family:var(--f-display);
+  font-weight:800;font-size:22px;letter-spacing:.06em;text-transform:uppercase;padding:14px 48px;border-radius:999px}
+.btn-spin:hover{filter:brightness(1.06);border-color:var(--accent)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow)}
+.panel h2{font-family:var(--f-display);font-weight:600;font-size:19px;margin:0}
+.label-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.count{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+textarea{width:100%;box-sizing:border-box;min-height:220px;resize:vertical;font:inherit;font-size:15px;line-height:1.6;
+  background:var(--field);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:12px}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.check{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink)}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+.history{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.history li{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:8px;background:var(--field);border:1px solid var(--line);font-size:14px}
+.history li span:last-child{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.history .empty{color:var(--muted);background:none;border:none;padding:0}
+.sample-tag{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.overlay{position:fixed;inset:0;background:rgba(10,11,20,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.card{background:var(--panel);color:var(--ink);border-radius:18px;padding:28px 24px;max-width:420px;width:100%;text-align:center;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.card .eyebrow{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.card .winner{font-family:var(--f-display);font-weight:800;font-size:clamp(30px,8vw,44px);line-height:1.1;overflow-wrap:anywhere;color:var(--accent)}
+.card .row{justify-content:center}
+.sim{display:flex;flex-direction:column;gap:8px}
+.sim-row{display:grid;grid-template-columns:minmax(0,9rem) minmax(0,1fr) 5.5rem;gap:10px;align-items:center;font-size:13px}
+.sim-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sim-track{position:relative;height:12px;background:var(--field);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.sim-bar{position:absolute;inset:0 auto 0 0;border-radius:6px}
+.sim-num{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sim-summary{font-size:13px;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Raffle Wheel</h1>
+    <p>Ilagay ang mga pangalan ng kasali, tapos pindutin ang Spin. Patas at random ang pagpili ng panalo.</p>
+  </header>
+
+  <div class="grid">
+    <section class="stage" aria-label="Wheel">
+      <div class="wheel-box">
+        <div class="pointer" aria-hidden="true"></div>
+        <canvas id="wheel" width="1040" height="1040" role="img" aria-label="Spin the wheel na may mga pangalan"></canvas>
+      </div>
+      <button class="btn btn-spin" id="spinBtn" type="button">Spin</button>
+    </section>
+
+    <aside class="panel">
+      <div class="label-row">
+        <h2><label for="names">Mga kasali</label></h2>
+        <span class="count" id="count">0 pangalan</span>
+      </div>
+      <span class="sample-tag" id="sampleTag">Halimbawang pangalan · palitan ng totoo</span>
+      <textarea id="names" spellcheck="false">Juan Dela Cruz
+Maria Santos
+Paolo Reyes
+Angel Bautista
+Mark Villanueva
+Kristine Garcia
+Jericho Mendoza
+Aira Castillo</textarea>
+      <p class="hint">Isang pangalan kada linya. Puwedeng mag-paste ng listahan mula sa Telegram o Excel.</p>
+      <div class="row">
+        <button class="btn" id="shuffleBtn" type="button">Shuffle</button>
+        <button class="btn" id="dedupeBtn" type="button">Tanggalin ang doble</button>
+        <button class="btn" id="clearBtn" type="button">Burahin lahat</button>
+      </div>
+      <label class="check"><input type="checkbox" id="removeWinner" checked> Alisin sa wheel ang nanalo pagkatapos ng spin</label>
+
+      <div class="label-row"><h2>Mga nanalo</h2><button class="btn" id="copyBtn" type="button">Kopyahin</button></div>
+      <ol class="history" id="history"><li class="empty">Wala pang nanalo.</li></ol>
+
+      <div class="label-row"><h2>Fairness test</h2><button class="btn" id="simBtn" type="button">Subukan ang 1,000 spins</button></div>
+      <p class="hint" id="simHint">Gagamitin ang parehong random na pagpili ng wheel para makita kung pantay ang tsansa ng lahat. Hindi nito binabago ang listahan o ang mga nanalo.</p>
+      <div class="sim" id="sim" hidden></div>
+    </aside>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="winnerName">
+  <div class="card">
+    <div class="eyebrow">Ang nanalo ay</div>
+    <div class="winner" id="winnerName"></div>
+    <div class="row">
+      <button class="btn btn-spin" id="againBtn" type="button" style="font-size:16px;padding:10px 26px">Spin ulit</button>
+      <button class="btn" id="closeBtn" type="button">Isara</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const COLORS=["#E0352B","#F2A516","#1F9E6E","#2F6FDE","#8B45D6","#E0569A","#12A3B8","#F07A1F"];
+  const canvas=document.getElementById('wheel'), ctx=canvas.getContext('2d');
+  const namesEl=document.getElementById('names'), countEl=document.getElementById('count');
+  const spinBtn=document.getElementById('spinBtn'), overlay=document.getElementById('overlay');
+  const winnerEl=document.getElementById('winnerName'), historyEl=document.getElementById('history');
+  const sampleTag=document.getElementById('sampleTag');
+  const SAMPLE=namesEl.value;
+  let rotation=0, spinning=false, winners=[];
+
+  function getNames(){return namesEl.value.split('\n').map(s=>s.trim()).filter(Boolean);}
+  function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+
+  function draw(){
+    const names=getNames(), n=names.length, W=canvas.width, c=W/2, r=c-12;
+    ctx.clearRect(0,0,W,W);
+    countEl.textContent=n+(n===1?' pangalan':' pangalan');
+    sampleTag.hidden = namesEl.value!==SAMPLE;
+    if(!n){
+      ctx.beginPath();ctx.arc(c,c,r,0,Math.PI*2);ctx.fillStyle=css('--line');ctx.fill();
+      ctx.fillStyle=css('--muted');ctx.font='600 40px Figtree, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('Maglagay ng pangalan',c,c);return;
+    }
+    const seg=Math.PI*2/n;
+    for(let i=0;i<n;i++){
+      const a0=rotation+i*seg-Math.PI/2, a1=a0+seg;
+      ctx.beginPath();ctx.moveTo(c,c);ctx.arc(c,c,r,a0,a1);ctx.closePath();
+      let col=COLORS[i%COLORS.length];
+      if(n>1 && i===n-1 && n%COLORS.length===1) col=COLORS[3]; // iwas magkatabing parehong kulay
+      ctx.fillStyle=col;ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=n>60?1:3;ctx.stroke();
+      // text
+      ctx.save();ctx.translate(c,c);ctx.rotate(a0+seg/2);
+      const fs=Math.max(14,Math.min(46,(seg*r)*0.55, 900/Math.max(8,names[i].length)));
+      ctx.font='600 '+fs+'px Figtree, sans-serif';ctx.fillStyle='#FFFFFF';ctx.textAlign='right';ctx.textBaseline='middle';
+      let t=names[i], maxW=r-110;
+      while(ctx.measureText(t).width>maxW && t.length>2) t=t.slice(0,-2)+'…';
+      if(t!==names[i] && !t.endsWith('…')) t+='…';
+      ctx.shadowColor='rgba(0,0,0,.25)';ctx.shadowBlur=4;
+      ctx.fillText(t,r-28,0);ctx.restore();
+    }
+    // outer ring + hub
+    ctx.beginPath();ctx.arc(c,c,r,0,Math.PI*2);ctx.lineWidth=10;ctx.strokeStyle=css('--hub');ctx.stroke();
+    ctx.beginPath();ctx.arc(c,c,70,0,Math.PI*2);ctx.fillStyle=css('--hub');ctx.fill();
+    ctx.fillStyle=css('--hub-ink');ctx.font='800 34px "Bricolage Grotesque", sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(n,c,c);
+  }
+
+  function randomInt(max){ // patas na random gamit ang crypto
+    const buf=new Uint32Array(1), lim=Math.floor(0x100000000/max)*max;
+    do{crypto.getRandomValues(buf);}while(buf[0]>=lim);
+    return buf[0]%max;
+  }
+
+  function spin(){
+    if(spinning) return;
+    const names=getNames();
+    if(names.length<2){namesEl.focus();countEl.textContent='Kailangan ng 2+ pangalan';return;}
+    overlay.hidden=true;
+    const n=names.length, seg=Math.PI*2/n, idx=randomInt(n);
+    // anggulo para tumapat ang gitna ng segment idx sa pointer (itaas)
+    const jitter=(Math.random()-.5)*seg*0.7;
+    const target=-(idx*seg+seg/2)+jitter;
+    const base=rotation%(Math.PI*2);
+    let delta=((target-base)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
+    const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    delta+=Math.PI*2*(reduce?1:6);
+    const start=rotation, dur=reduce?600:5200, t0=performance.now();
+    spinning=true;spinBtn.disabled=true;namesEl.disabled=true;
+    function frame(now){
+      const p=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-p,4);
+      rotation=start+delta*e;draw();
+      if(p<1) requestAnimationFrame(frame); else done(names[idx]);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function done(name){
+    spinning=false;spinBtn.disabled=false;namesEl.disabled=false;
+    const time=new Date().toLocaleTimeString('en-PH',{hour:'numeric',minute:'2-digit'});
+    winners.unshift({name,time});renderHistory();
+    winnerEl.textContent=name;overlay.hidden=false;document.getElementById('closeBtn').focus();
+    if(document.getElementById('removeWinner').checked){
+      const list=namesEl.value.split('\n'); const i=list.findIndex(s=>s.trim()===name);
+      if(i>-1){list.splice(i,1);namesEl.value=list.join('\n');}
+      rotation=0;draw();
+    }
+  }
+
+  function renderHistory(){
+    historyEl.innerHTML='';
+    if(!winners.length){historyEl.innerHTML='<li class="empty">Wala pang nanalo.</li>';return;}
+    winners.forEach((w,i)=>{
+      const li=document.createElement('li');
+      const a=document.createElement('span');a.textContent=(winners.length-i)+'. '+w.name;
+      const b=document.createElement('span');b.textContent=w.time;
+      li.append(a,b);historyEl.append(li);
+    });
+  }
+
+  document.getElementById('shuffleBtn').onclick=()=>{
+    const a=getNames();for(let i=a.length-1;i>0;i--){const j=randomInt(i+1);[a[i],a[j]]=[a[j],a[i]];}
+    namesEl.value=a.join('\n');draw();
+  };
+  document.getElementById('dedupeBtn').onclick=()=>{
+    const seen=new Set();namesEl.value=getNames().filter(s=>{const k=s.toLowerCase();if(seen.has(k))return false;seen.add(k);return true;}).join('\n');draw();
+  };
+  const clearBtn=document.getElementById('clearBtn');let armed=false;
+  clearBtn.onclick=()=>{
+    if(!armed){armed=true;clearBtn.textContent='Sigurado? Pindutin ulit';setTimeout(()=>{armed=false;clearBtn.textContent='Burahin lahat';},3000);return;}
+    armed=false;clearBtn.textContent='Burahin lahat';namesEl.value='';draw();
+  };
+  document.getElementById('copyBtn').onclick=async(e)=>{
+    const text=winners.slice().reverse().map((w,i)=>(i+1)+'. '+w.name).join('\n')||'Wala pang nanalo';
+    try{await navigator.clipboard.writeText(text);e.target.textContent='Nakopya!';}
+    catch{e.target.textContent='Hindi nakopya';}
+    setTimeout(()=>e.target.textContent='Kopyahin',1500);
+  };
+  document.getElementById('simBtn').onclick=()=>{
+    const names=getNames(), simEl=document.getElementById('sim');
+    if(names.length<2){simEl.hidden=false;simEl.innerHTML='<p class="sim-summary">Kailangan ng 2+ pangalan para sa test.</p>';return;}
+    const N=1000, counts=new Array(names.length).fill(0);
+    for(let k=0;k<N;k++) counts[randomInt(names.length)]++;
+    const expected=N/names.length, max=Math.max(...counts);
+    const minC=Math.min(...counts);
+    simEl.innerHTML='';
+    const sum=document.createElement('p');sum.className='sim-summary';
+    sum.textContent=`${N.toLocaleString()} spins, ${names.length} pangalan. Inaasahan: mga ${expected.toFixed(1)} panalo bawat isa (${(100/names.length).toFixed(1)}%). Pinakamababa: ${minC}, pinakamataas: ${max}. Normal ang maliit na pagkakaiba dahil random ito.`;
+    simEl.append(sum);
+    names.forEach((nm,i)=>{
+      const row=document.createElement('div');row.className='sim-row';
+      const a=document.createElement('span');a.className='sim-name';a.textContent=nm;a.title=nm;
+      const tr=document.createElement('div');tr.className='sim-track';
+      const bar=document.createElement('div');bar.className='sim-bar';bar.style.width=(counts[i]/max*100)+'%';bar.style.background=COLORS[i%COLORS.length];
+      tr.append(bar);
+      const b=document.createElement('span');b.className='sim-num';b.textContent=`${counts[i]} · ${(counts[i]/N*100).toFixed(1)}%`;
+      row.append(a,tr,b);simEl.append(row);
+    });
+    simEl.hidden=false;
+  };
+  document.getElementById('closeBtn').onclick=()=>{overlay.hidden=true;spinBtn.focus();};
+  document.getElementById('againBtn').onclick=spin;
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.hidden=true;});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')overlay.hidden=true;});
+  spinBtn.onclick=spin;
+  namesEl.addEventListener('input',draw);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+  new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(draw);
+  draw();
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
+<title>Dice Roll Tester</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: perya game stall at night — brand/game pickers on top, the dice table as the hero, tier board + simulator below. Single dark look by choice. */
+:root{
+  --night:#15111c; --stall:#1f1929; --plank:#2a2236; --line:#3b3148;
+  --bulb:#ffd66b; --paper:#f4ecdf; --muted:#b3a8c2;
+  --accent:#ff5d8f; --accent-ink:#1a0f14;
+  --t1:#8f86a0; --t2:#5fb4ff; --t3:#5fe0a6; --t4:#ffb347; --t5:#ff5d8f;
+  --display:"Alfa Slab One", Rockwell, "Roboto Slab", Georgia, serif;
+  --body:"Barlow", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--night);color:var(--paper);font-family:var(--body);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:20px 48px}
+.wrap{max-width:980px;margin:0 auto;display:grid;gap:22px}
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,42px);line-height:1;margin:0;letter-spacing:.5px;text-wrap:balance}
+h1 span{color:var(--accent)}
+.sub{color:var(--muted);margin:6px 0 0;max-width:60ch}
+.badge{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--bulb);border:1px dashed var(--bulb);padding:6px 10px;border-radius:4px;white-space:nowrap}
+.label{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 8px}
+.pickers{display:grid;gap:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:600 14px var(--body);color:var(--paper);background:var(--stall);border:1px solid var(--line);padding:8px 14px;border-radius:999px;cursor:pointer}
+.chip:hover{border-color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--bulb);outline-offset:2px}
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.game{text-align:left;background:var(--stall);border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;color:var(--paper);font-family:var(--body)}
+.game b{display:block;font-size:15px}
+.game small{color:var(--muted);font-size:13px}
+.game[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+/* hero table */
+.table{position:relative;background:var(--plank);border-radius:16px;padding:22px 18px 20px;border-top:6px solid var(--accent);overflow:hidden}
+.bulbs{position:absolute;inset:0 0 auto 0;height:6px;display:flex;justify-content:space-around;pointer-events:none}
+.bulbs i{width:6px;height:6px;border-radius:50%;background:var(--bulb);box-shadow:0 0 10px 2px var(--bulb);margin-top:-3px;animation:twinkle 1.6s infinite alternate}
+.bulbs i:nth-child(2n){animation-delay:.8s}
+@keyframes twinkle{from{opacity:.35}to{opacity:1}}
+.offer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 16px;align-items:baseline}
+.offer h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,3.4vw,26px);margin:0}
+.offer p{margin:0;color:var(--muted);font-size:14px}
+.rolls{display:grid;gap:14px;margin-top:18px}
+.roll{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px;padding:14px;border-radius:12px;background:rgba(0,0,0,.18)}
+.roll.kept{box-shadow:inset 0 0 0 2px var(--bulb)}
+.roll.dim{opacity:.45}
+.dice{display:flex;gap:10px}
+.die{width:64px;height:64px;border-radius:12px;background:var(--paper);display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:9px;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18),0 6px 14px rgba(0,0,0,.35)}
+.die span{width:12px;height:12px;border-radius:50%;background:#1a1420;place-self:center;visibility:hidden}
+.die span.on{visibility:visible}
+.die.six-glow{background:var(--bulb)}
+.die.blank{background:transparent;border:2px dashed var(--line);box-shadow:none}
+.die.tumble{animation:tumble .12s linear infinite}
+@keyframes tumble{0%{transform:rotate(-9deg) translateY(-2px)}50%{transform:rotate(8deg) translateY(2px)}100%{transform:rotate(-9deg)}}
+.sum{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.sum b{display:block;font-size:30px;color:var(--paper);line-height:1}
+.tierpill{margin-left:auto;font:700 14px var(--body);padding:8px 14px;border-radius:999px;color:#15111c;white-space:nowrap}
+.rollnote{width:100%;font-size:13px;color:var(--bulb);margin:0}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;align-items:center}
+.btn{font:700 16px var(--body);letter-spacing:.3px;padding:12px 22px;border-radius:10px;border:0;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.5;cursor:wait}
+.btn.ghost{background:transparent;color:var(--paper);border:1px solid var(--line);font-weight:600;font-size:14px;padding:10px 16px}
+.result{font-size:15px;margin:0}
+.result b{color:var(--bulb)}
+.script{margin-top:14px;padding:12px 14px;border-left:3px solid var(--bulb);background:rgba(255,214,107,.06);font-size:14px;color:var(--paper);border-radius:0 8px 8px 0}
+.script em{color:var(--muted);font-style:normal;font-size:12px;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:2px}
+/* lower grid */
+.lower{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.panel{background:var(--stall);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+.panel h3{font-family:var(--display);font-weight:400;font-size:18px;margin:0 0 4px}
+.panel .hint{color:var(--muted);font-size:13px;margin:0 0 12px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);font-size:14px}
+th{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);font-weight:600}
+td.num,th.num{text-align:right;font-family:var(--mono)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:middle}
+.simrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+select{font:600 14px var(--body);background:var(--plank);color:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 10px}
+.bars{display:grid;gap:10px}
+.bar{display:grid;grid-template-columns:62px 1fr 96px;gap:10px;align-items:center;font-size:13px}
+.track{position:relative;height:16px;background:rgba(255,255,255,.05);border-radius:4px}
+.fill{position:absolute;inset:0 auto 0 0;border-radius:4px;transition:width .5s}
+.exp{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--paper)}
+.bar .v{font-family:var(--mono);text-align:right;color:var(--muted)}
+.bar .v b{color:var(--paper)}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--muted);margin-top:10px;flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:10px;border-radius:2px;background:var(--t2);margin-right:6px;vertical-align:middle}
+.legend i.l{width:2px;height:12px;background:var(--paper)}
+.history{list-style:none;margin:0;padding:0;display:grid;gap:6px;max-height:260px;overflow:auto}
+.history li{display:flex;gap:10px;align-items:center;font-size:13px;padding:6px 8px;background:rgba(0,0,0,.15);border-radius:6px}
+.history .f{font-family:var(--mono);color:var(--paper)}
+.history .g{color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{color:var(--muted);font-size:13px}
+footer{color:var(--muted);font-size:12px}
+@media (max-width:480px){.die{width:52px;height:52px;padding:7px}.die span{width:10px;height:10px}.tierpill{margin-left:0}}
+@media (prefers-reduced-motion:reduce){.die.tumble,.bulbs i{animation:none}.fill{transition:none}}
+
+.depo{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.depo input{font:700 16px var(--mono);width:130px;background:var(--plank);color:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.depo .peso{font-family:var(--mono);color:var(--muted)}
+.tiernow{font-size:14px;color:var(--muted);margin:8px 0 0}
+.tiernow b{color:var(--bulb)}
+.bonus{margin-left:auto;text-align:right}
+.bonus b{display:block;font-family:var(--display);font-weight:400;font-size:30px;color:var(--bulb);line-height:1}
+.bonus small{color:var(--muted);font-size:12px}
+tr.cur td{background:rgba(255,214,107,.08)}
+.hist{display:flex;align-items:flex-end;gap:3px;height:150px;border-bottom:1px solid var(--line);position:relative}
+.col{flex:1;min-width:0;height:100%;position:relative}
+.col .f{position:absolute;bottom:0;left:0;right:0;background:var(--accent);border-radius:3px 3px 0 0;transition:height .5s}
+.col .e{position:absolute;left:-1px;right:-1px;height:2px;background:var(--paper)}
+.xl{display:flex;gap:3px;font:500 10px var(--mono);color:var(--muted);margin-top:4px}
+.xl span{flex:1;min-width:0;text-align:center}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.stats div{background:rgba(0,0,0,.18);border-radius:8px;padding:8px 10px}
+.stats small{display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.stats b{font-family:var(--mono);font-size:16px}
+@media (prefers-reduced-motion:reduce){.col .f{transition:none}}
+.panel.wide{grid-column:1/-1}
+.verify{background:var(--stall);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:10px}
+.verify .hint{margin:0;color:var(--muted);font-size:13px}
+.vhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
+.btn.small{padding:7px 12px;font-size:13px}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 14px}
+.vgrid label{display:grid;gap:4px;font-size:12px;letter-spacing:.6px;color:var(--muted);font-weight:600}
+.vgrid input[type=text],.vgrid input[type=number],.vgrid input[type=datetime-local]{font:600 14px var(--body);background:var(--plank);color:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-width:0;width:100%}
+.vgrid label.chk{display:flex;align-items:center;gap:8px;font-size:14px;letter-spacing:0;color:var(--paper);grid-column:1/-1}
+.vgrid label.chk input{width:18px;height:18px;accent-color:var(--accent)}
+.vactions{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.vstatus{font:700 13px var(--mono);letter-spacing:1px;text-transform:uppercase;padding:6px 10px;border-radius:6px}
+.vstatus.ok{background:var(--t3);color:#15111c}
+.vstatus.bad{background:#ff6b6b;color:#15111c}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.checks li{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.checks .ic{font:700 13px var(--mono);width:22px;height:22px;border-radius:50%;display:grid;place-items:center;flex:none}
+.checks .pass .ic{background:var(--t3);color:#15111c}
+.checks .fail .ic{background:#ff6b6b;color:#15111c}
+.checks .fail{color:var(--paper)}
+.checks small{display:block;color:var(--muted);font-size:12px}
+#payout td,#payout th{text-align:right;font-family:var(--mono)}
+#payout td:first-child,#payout th:first-child{text-align:left}
+#payout td.curcol{background:rgba(255,214,107,.10);color:var(--bulb);font-weight:700}
+#payout th.curcol{color:var(--bulb)}
+#payout tr.hit td{background:var(--accent);color:var(--accent-ink)}
+#payout tr.hit td.curcol{background:var(--bulb);color:#15111c}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Dice Roll <span>Tester</span></h1>
+      <p class="sub">I-verify ang deposit, tapos ang na-verify na amount ang magde-decide ng tier. Ang total ng 3 dice ang magde-decide kung magkano ang bonus sa loob ng range ng tier.</p>
+    </div>
+    <div class="badge">Test mode · walang totoong reward</div>
+  </header>
+
+  <section class="pickers">
+    <div>
+      <p class="label">Brand</p>
+      <div class="chips" id="brands" role="group" aria-label="Brand"></div>
+    </div>
+    <div>
+      <p class="label">Offer</p>
+      <div class="chips" id="offers" role="group" aria-label="Offer"></div>
+    </div>
+    <div class="verify">
+      <div class="vhead">
+        <p class="label" style="margin:0">Deposit verification</p>
+        <button class="btn ghost small" id="sampleBtn" type="button">Load sample deposit</button>
+      </div>
+      <p class="hint">Kopyahin ang details mula sa backoffice. Mag-e-enable lang ang roll kapag pasado lahat ng checks, at ang tier ay naka-base sa na-verify na amount.</p>
+      <form id="vform" class="vgrid" novalidate>
+        <label>Player username<input id="vUser" type="text" autocomplete="off" required></label>
+        <label>Deposit reference no.<input id="vRef" type="text" autocomplete="off" required></label>
+        <label>Deposit amount (₱)<input id="vAmt" type="number" min="0" step="1" required></label>
+        <label id="callLbl">Tele call time<input id="vCall" type="datetime-local" required></label>
+        <label>Deposit time<input id="vDep" type="datetime-local" required></label>
+        <label class="chk"><input id="vOk" type="checkbox"> Deposit status is Successful/Approved in backoffice</label>
+        <div class="vactions"><button class="btn" id="verifyBtn" type="submit">Verify deposit</button><span class="vstatus" id="vStatus"></span></div>
+      </form>
+      <ul class="checks" id="checks"></ul>
+      <p class="tiernow" id="tierNow"></p>
+    </div>
+    <div>
+      <p class="label">Sample game</p>
+      <div class="games" id="games" role="group" aria-label="Sample game"></div>
+    </div>
+  </section>
+
+  <section class="table" aria-live="polite">
+    <div class="bulbs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="offer">
+      <h2 id="offerName">Balik Fiesta Bonus</h2>
+      <p id="offerTrigger"></p>
+    </div>
+    <div class="rolls" id="rolls"></div>
+    <div class="actions">
+      <button class="btn" id="rollBtn">Roll the dice</button>
+      <button class="btn ghost" id="resetBtn">Reset</button>
+      <p class="result" id="result"></p>
+    </div>
+    <div class="script" id="script"></div>
+  </section>
+
+  <section class="lower">
+    <div class="panel">
+      <h3 id="tierTitle">Reward tiers</h3>
+      <p class="hint">Formula: <code style="font-family:var(--mono);color:var(--bulb)">Bonus = Min + ROUND((Dice total − 3) × (Max − Min) ÷ 15)</code>. Dice 3 = minimum, dice 18 = maximum. Hindi lalampas sa max ng tier.</p>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Tier</th><th>Deposit</th><th class="num">Bonus</th><th class="num">Avg</th><th class="num">% of deposit</th></tr></thead>
+        <tbody id="tierBody"></tbody>
+      </table>
+      </div>
+    </div>
+
+    <div class="panel wide">
+      <h3>Payout chart</h3>
+      <p class="hint">Hanapin ang dice total sa kaliwa, tapos basahin pakanan sa deposit tier ng player. Naka-highlight ang tier ngayon at ang huling lumabas na total.</p>
+      <div style="overflow-x:auto"><table id="payout"></table></div>
+    </div>
+
+    <div class="panel">
+      <h3>Payout simulator</h3>
+      <p class="hint" id="simHint"></p>
+      <div class="simrow">
+        <label for="simN" class="label" style="margin:0">Players</label>
+        <select id="simN">
+          <option value="100">100</option>
+          <option value="1000" selected>1,000</option>
+          <option value="10000">10,000</option>
+        </select>
+        <button class="btn ghost" id="simBtn">Run simulation</button>
+      </div>
+      <div class="hist" id="hist"></div>
+      <div class="xl" id="xl"></div>
+      <div class="legend"><span><i style="background:var(--accent)"></i>Simulated share of players</span><span><i class="l"></i>Expected</span></div>
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Roll history</h3>
+      <p class="hint">Huling 30 test rolls sa session na ito.</p>
+      <ul class="history" id="history"><li class="empty">Wala pang roll. Pindutin ang Roll the dice.</li></ul>
+    </div>
+  </section>
+
+  <footer>Sample lang ito para sa internal testing. Regular tiers: ₱100–199 hanggang ₱500+. VIP tiers: ₱10,000–99,999. Sa live, gawin ang roll sa Telegram dice o recorded tool, at i-screenshot bilang proof.</footer>
+</div>
+<script>
+const TIERS_REG=[
+  {n:1,dep:100,depTo:199,min:10,max:15,color:"var(--t1)"},
+  {n:2,dep:200,depTo:299,min:40,max:45,color:"var(--t2)"},
+  {n:3,dep:300,depTo:399,min:70,max:75,color:"var(--t3)"},
+  {n:4,dep:400,depTo:499,min:80,max:85,color:"var(--t4)"},
+  {n:5,dep:500,depTo:null,min:90,max:100,color:"var(--t5)"}
+];
+// VIP: deposits 10,000–99,999. Ranges end in 88, avg ≈ 9% of each tier's mid deposit, max 8,888.
+const TIERS_VIP=[
+  {n:1,dep:10000,depTo:19999,min:888,max:1788,color:"var(--t1)"},
+  {n:2,dep:20000,depTo:39999,min:1888,max:3588,color:"var(--t2)"},
+  {n:3,dep:40000,depTo:59999,min:3688,max:5388,color:"var(--t3)"},
+  {n:4,dep:60000,depTo:79999,min:5488,max:7188,color:"var(--t4)"},
+  {n:5,dep:80000,depTo:99999,min:7288,max:8888,color:"var(--t5)"}
+];
+let TIERS=TIERS_REG;
+const WAYS={};for(let a=1;a<=6;a++)for(let b=1;b<=6;b++)for(let c=1;c<=6;c++){WAYS[a+b+c]=(WAYS[a+b+c]||0)+1}
+const SUMS=[];for(let s=3;s<=18;s++)SUMS.push(s);
+function bonusOf(sum,t){if(t.min==null)return null;return Math.round(t.min+(sum-3)*(t.max-t.min)/15)}
+function tierForDeposit(d){return TIERS.find(t=>d>=t.dep&&(t.depTo==null||d<=t.depTo))||null}
+function php(n){return n==null||isNaN(n)?"TBD":"₱"+n.toLocaleString()}
+function rangeLabel(t){return t.min==null?"TBD":php(t.min)+"–"+php(t.max)}
+function depLabel(t){return t.depTo?php(t.dep)+"–"+php(t.depTo):php(t.dep)+"+"}
+[...TIERS_REG,...TIERS_VIP].forEach(t=>{t.avg=t.min==null?null:SUMS.reduce((a,s)=>a+bonusOf(s,t)*WAYS[s],0)/216});
+function setTiers(){TIERS=state.offer==="VIP"?TIERS_VIP:TIERS_REG}
+function minDep(){return TIERS[0].dep}
+function maxDep(){return TIERS[TIERS.length-1].depTo}
+
+const BRANDS={
+  "Gopyesta":{accent:"#ff5d8f",offers:{
+    Reactivation:{name:"Balik Fiesta Bonus",trig:"first deposit after the Tele call",script:"Hi po! Na-miss ka namin sa Gopyesta. Mag-deposit ka lang within 3 days at makaka-roll ka ng 3 dice. Kung ano ang lumabas, yun ang reward mo."},
+    VIP:{name:"Fiesta VIP Circle",trig:"hitting the monthly VIP deposit target",script:"Naabot mo ang monthly target! Roll ka ng 3 dice para sa rebate tier mo ngayong buwan."},
+    Community:{name:"Barkada Fiesta Drop",trig:"claiming the TG code + deposit",script:"Barkada Fiesta Drop is LIVE! Claim ang code, mag-deposit, at i-roll ang 3 dice."}}},
+  "Panalo Play":{accent:"#ffc93c",offers:{
+    Reactivation:{name:"Panalo Comeback",trig:"first deposit after the call (2nd deposit = extra roll)",script:"Balik-panalo ka na! May roll ka sa first deposit, at isa pa sa second deposit mo."},
+    VIP:{name:"Panalo Elite",trig:"weekly VIP cashback check (Monday)",script:"Monday na! Roll ka ng 3 dice para sa cashback tier mo ngayong linggo."},
+    Community:{name:"Panalo Squad Challenge",trig:"group hits the weekly depositor goal",script:"Naabot natin ang goal! Lahat ng nag-deposit, roll na ng 3 dice."}}},
+  "Peryaplay":{accent:"#ff6a3d",offers:{
+    Reactivation:{name:"Balik-Perya Pass",trig:"first deposit after the Tele call",script:"May Balik-Perya Pass ka! Mag-deposit within 3 days, roll ng 3 dice, plus free spins pa."},
+    VIP:{name:"Perya Royal",trig:"each monthly deposit milestone",script:"Bagong milestone! Roll ka ng 3 dice para sa reward ng milestone na ito."},
+    Community:{name:"Perya Night Raffle",trig:"being drawn as a raffle winner",script:"Congrats, nabunot ka sa Perya Night Raffle! Roll na ng 3 dice para sa premyo mo."}}},
+  "GameSpot":{accent:"#4fb3ff",offers:{
+    Reactivation:{name:"Respawn Reward",trig:"first deposit after the Tele call",script:"Respawn time na sa GameSpot! Mag-deposit within 3 days at roll ng 3 dice."},
+    VIP:{name:"GameSpot Legends",trig:"weekly leaderboard rank (top rank = more rolls, best counts)",script:"Top rank ka sa leaderboard! May 3 rolls ka, at ang pinakamataas ang bibilangin."},
+    Community:{name:"Spot Quest",trig:"completing all weekly quests",script:"Quest complete! Roll ng 3 dice bago mag-Monday 9 PM."}}},
+  "Gobetplay":{accent:"#46d98b",offers:{
+    Reactivation:{name:"Game On Again",trig:"first deposit after the call (3-day streak = bonus roll)",script:"Game on ulit! Roll sa first deposit, at bonus roll pag nakabalik ka ng 3 araw ngayong linggo."},
+    VIP:{name:"Gobet Prime",trig:"taking up the monthly personalized offer",script:"Kinuha mo ang offer mo ngayong buwan! Roll ng 3 dice para sa reward tier mo."},
+    Community:{name:"Gobet Tambayan Drop",trig:"correct trivia answer + same-day deposit",script:"Tama ang sagot mo! Mag-deposit today at roll ng 3 dice."}}}
+};
+
+
+const GAMES={
+  classic:{title:"Classic Roll",desc:"1 roll ng 3 dice. Total = bonus sa loob ng tier range.",rolls:1,mode:"single"},
+  double:{title:"Bonus Roll",desc:"2 rolls (hal. 2nd deposit o 3-day streak). Parehong bonus ang makukuha.",rolls:2,mode:"all"},
+  best:{title:"Best of 3",desc:"3 rolls, ang pinakamataas lang ang bibilangin (hal. Rank 1 VIP).",rolls:3,mode:"best"}
+};
+
+let state={brand:"Gopyesta",offer:"Reactivation",game:"classic",deposit:100,history:[],hits:[],verified:null,usedRefs:new Set(),claimed:new Set()};
+const $=id=>document.getElementById(id);
+const PIPS={0:[],1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+function rand6(){const a=new Uint32Array(1);let v;do{crypto.getRandomValues(a);v=a[0]}while(v>=4294967292);return v%6+1}
+function curTier(){return tierForDeposit(state.deposit)}
+
+function dieEl(v){const d=document.createElement("div");d.className="die";d.setAttribute("role","img");for(let i=0;i<9;i++)d.appendChild(document.createElement("span"));setDie(d,v);return d}
+function setDie(d,v){d.classList.toggle("blank",v===0);d.setAttribute("aria-label",v?"die showing "+v:"die not rolled yet");[...d.children].forEach((s,i)=>s.classList.toggle("on",PIPS[v].includes(i)))}
+function chips(el,items,key,fmt,onpick){
+  el.innerHTML="";
+  items.forEach(it=>{const b=document.createElement("button");b.className="chip";b.textContent=fmt?fmt(it):it;b.setAttribute("aria-pressed",state[key]===it);
+    b.onclick=()=>{state[key]=it;if(onpick)onpick(it);if(key==="brand"||key==="offer"){state.verified=null;state.hits=[];$("vStatus").className="vstatus";$("vStatus").textContent="";$("checks").innerHTML=""}render();if(key==="offer")loadSample()};el.appendChild(b)});
+}
+function gamesUI(){
+  const el=$("games");el.innerHTML="";
+  Object.entries(GAMES).forEach(([k,g])=>{const b=document.createElement("button");b.className="game";b.setAttribute("aria-pressed",state.game===k);
+    b.innerHTML="<b>"+g.title+"</b><small>"+g.desc+"</small>";b.onclick=()=>{state.game=k;render()};el.appendChild(b)});
+}
+function emptyRolls(){
+  const g=GAMES[state.game],el=$("rolls");el.innerHTML="";
+  for(let r=0;r<g.rolls;r++){const row=document.createElement("div");row.className="roll";const dice=document.createElement("div");dice.className="dice";
+    [0,0,0].forEach(()=>dice.appendChild(dieEl(0)));row.appendChild(dice);
+    const s=document.createElement("div");s.className="sum";s.innerHTML="<b>–</b>Roll "+(r+1)+" total";row.appendChild(s);el.appendChild(row)}
+  $("result").innerHTML="";
+}
+function render(){
+  setTiers();
+  $("tierTitle").textContent=state.offer==="VIP"?"VIP reward tiers":"Reward tiers";
+  const b=BRANDS[state.brand],o=b.offers[state.offer],t=curTier();
+  document.documentElement.style.setProperty("--accent",b.accent);
+  chips($("brands"),Object.keys(BRANDS),"brand");
+  chips($("offers"),["Reactivation","VIP","Community"],"offer");
+  gamesUI();
+  $("offerName").textContent=o.name;
+  $("offerTrigger").textContent="Unlocked by: "+o.trig;
+  $("script").innerHTML="<em>Script</em>"+o.script;
+  $("callLbl").firstChild.textContent=state.offer==="Reactivation"?"Tele call time":"Qualifying time (claim/offer start)";
+  showVerify();
+  tierBoard();emptyRolls();simulate();payout();
+}
+function localStr(d){const z=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate())+"T"+z(d.getHours())+":"+z(d.getMinutes())}
+function readForm(){return{user:$("vUser").value.trim(),ref:$("vRef").value.trim(),amt:+$("vAmt").value||0,call:$("vCall").value?new Date($("vCall").value):null,dep:$("vDep").value?new Date($("vDep").value):null,ok:$("vOk").checked}}
+function runChecks(f){
+  const key=state.brand+"|"+state.offer+"|"+f.user.toLowerCase(),hrs=f.call&&f.dep?(f.dep-f.call)/36e5:null,t=tierForDeposit(f.amt);
+  return[
+    {pass:!!f.user&&!!f.ref,label:"Player username and reference no. entered",why:"Kailangan pareho para ma-trace ang claim."},
+    {pass:f.ok,label:"Deposit is Successful/Approved in backoffice",why:"Huwag i-count ang pending o failed na deposit."},
+    {pass:!!t,label:t?"Amount ₱"+f.amt.toLocaleString()+" qualifies for "+(state.offer==="VIP"?"VIP ":"")+"Tier "+t.n+" ("+depLabel(t)+")":"Amount is within the "+(state.offer==="VIP"?"VIP ":"")+"deposit range",why:f.amt<minDep()?"Minimum deposit ay "+php(minDep())+".":"Lampas sa "+php(maxDep())+"; i-escalate sa manager."},
+    {pass:hrs!==null&&hrs>=0,label:"Deposit was made after the "+(state.offer==="Reactivation"?"Tele call":"qualifying time"),why:"Hindi valid ang deposit bago ang tawag."},
+    {pass:hrs!==null&&hrs>=0&&hrs<=72,label:"Deposit is within 3 days (72 hrs)",why:hrs!==null&&hrs>72?"Lumampas na sa 3-day window ("+Math.floor(hrs)+" hrs).":"Kailangan within 72 hrs."},
+    {pass:!!f.ref&&!state.usedRefs.has(f.ref.toLowerCase()),label:"Reference no. not used in a previous claim",why:"Nagamit na ang reference na ito sa isang roll."},
+    {pass:!!f.user&&!state.claimed.has(key),label:"Player has no claim yet for this offer",why:"Isang claim lang bawat player bawat offer cycle."}
+  ];
+}
+function showVerify(){
+  const v=state.verified,st=$("vStatus");
+  if(v){st.className="vstatus ok";st.textContent="Verified";
+    $("tierNow").innerHTML="Verified: "+v.user+" · ref "+v.ref+" · "+php(v.amt)+" = <b>"+(state.offer==="VIP"?"VIP ":"")+"Tier "+v.tier.n+"</b>, bonus "+rangeLabel(v.tier)+" depende sa dice.";}
+  else{if(st.className!=="vstatus bad"){st.className="vstatus";st.textContent=""}
+    $("tierNow").innerHTML="<b>Not verified.</b> I-verify muna ang deposit bago mag-roll.";}
+  $("rollBtn").disabled=!v;
+}
+function verify(e){
+  e.preventDefault();
+  const f=readForm(),res=runChecks(f),all=res.every(r=>r.pass);
+  $("checks").innerHTML=res.map(r=>"<li class='"+(r.pass?"pass":"fail")+"'><span class='ic'>"+(r.pass?"✓":"✗")+"</span><span>"+r.label+(r.pass?"":"<small>"+r.why+"</small>")+"</span></li>").join("");
+  if(all){state.verified={...f,tier:tierForDeposit(f.amt)};state.deposit=f.amt;tierBoard();simulate();payout();}
+  else{state.verified=null;$("vStatus").className="vstatus bad";$("vStatus").textContent="Failed";}
+  showVerify();
+}
+function invalidate(){
+  setTiers();
+  // any change to the deposit details resets the whole claim: verification, dice, bonus and chart highlight
+  state.verified=null;state.hits=[];
+  $("vStatus").className="vstatus";$("vStatus").textContent="";$("checks").innerHTML="";
+  emptyRolls();
+  state.deposit=Math.max(0,+$("vAmt").value||0);
+  tierBoard();simulate();payout();showVerify();
+}
+let sampleN=0;
+function loadSample(){
+  sampleN++;const now=new Date(),call=new Date(now-3*36e5),dep=new Date(now-1*36e5),amts=state.offer==="VIP"?[15000,25000,45000,70000,90000]:[150,250,320,480,650];
+  $("vUser").value="sample_player"+sampleN;$("vRef").value="DEP-TEST-"+String(1000+sampleN);$("vAmt").value=amts[(sampleN-1)%5];
+  $("vCall").value=localStr(call);$("vDep").value=localStr(dep);$("vOk").checked=true;invalidate();
+}
+function payout(){
+  const t=curTier(),hits=state.hits;
+  let h="<thead><tr><th>Dice total</th><th>Chance</th>"+TIERS.map(x=>"<th class='"+(t&&t.n===x.n?"curcol":"")+"'>"+(state.offer==="VIP"?"VIP ":"")+"Tier "+x.n+"<br><span style='font-weight:500;letter-spacing:0;text-transform:none'>"+depLabel(x)+"</span></th>").join("")+"</tr></thead><tbody>";
+  SUMS.forEach(s=>{h+="<tr class='"+(hits.includes(s)?"hit":"")+"'><td>"+s+(s===3?" (1-1-1)":s===18?" (6-6-6)":"")+"</td><td>"+(WAYS[s]/216*100).toFixed(1)+"%</td>"+TIERS.map(x=>"<td class='"+(t&&t.n===x.n?"curcol":"")+"'>"+php(bonusOf(s,x))+"</td>").join("")+"</tr>"});
+  $("payout").innerHTML=h+"</tbody>";
+}
+function tierBoard(){
+  const t=curTier();
+  $("tierBody").innerHTML=TIERS.map(x=>"<tr class='"+(t&&t.n===x.n?"cur":"")+"'><td><span class='dot' style='background:"+x.color+"'></span>Tier "+x.n+"</td><td>"+depLabel(x)+"</td><td class='num'>"+(x.min==null?"TBD":x.min.toLocaleString()+"–"+x.max.toLocaleString())+"</td><td class='num'>"+(x.avg==null?"TBD":php(Math.round(x.avg)))+"</td><td class='num'>"+(x.avg==null?"TBD":(x.avg/x.dep*100).toFixed(1)+"%")+"</td></tr>").join("");
+}
+
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+async function roll(){
+  const g=GAMES[state.game],t=state.verified&&state.verified.tier;if(!t)return;$("rollBtn").disabled=true;emptyRolls();
+  const rows=[...$("rolls").children],results=[];
+  for(let r=0;r<g.rolls;r++){
+    const vals=[rand6(),rand6(),rand6()],dice=[...rows[r].querySelectorAll(".die")];
+    if(!reduce){dice.forEach(d=>d.classList.add("tumble"));
+      const end=Date.now()+650;while(Date.now()<end){dice.forEach(d=>setDie(d,rand6()));await new Promise(res=>setTimeout(res,70))}
+      dice.forEach(d=>d.classList.remove("tumble"))}
+    dice.forEach((d,i)=>{setDie(d,vals[i]);d.classList.toggle("six-glow",vals.every(v=>v===6))});
+    const sum=vals[0]+vals[1]+vals[2],bonus=bonusOf(sum,t);results.push({vals,sum,bonus});
+    rows[r].querySelector(".sum").innerHTML="<b>"+sum+"</b>Roll "+(r+1)+" total";
+    const bx=document.createElement("div");bx.className="bonus";bx.innerHTML="<b>"+php(bonus)+"</b><small>Tier "+t.n+" bonus</small>";rows[r].appendChild(bx);
+  }
+  let msg,log;
+  if(g.mode==="best"){const best=results.reduce((a,b)=>b.sum>a.sum?b:a);const bi=results.indexOf(best);
+    rows.forEach((row,i)=>row.classList.add(i===bi?"kept":"dim"));
+    msg="Best roll: <b>"+best.sum+" → "+php(best.bonus)+" bonus</b>.";log={text:results.map(r=>r.sum).join(", ")+" → "+best.sum,amt:best.bonus};}
+  else if(g.mode==="all"){const tot=results.reduce((a,r)=>a+r.bonus,0);
+    msg="Total bonus: <b>"+php(results.some(r=>r.bonus==null)?null:tot)+"</b> ("+results.map(r=>php(r.bonus)).join(" + ")+").";log={text:results.map(r=>r.sum).join(" + "),amt:tot};}
+  else{const r0=results[0];msg="Lumabas ang <b>"+r0.sum+"</b>, kaya <b>"+php(r0.bonus)+" bonus</b>"+(r0.sum===18?". Max bonus!":".");log={text:r0.vals.join("-")+" = "+r0.sum,amt:r0.bonus};}
+  $("result").innerHTML=msg;
+  const v=state.verified;state.usedRefs.add(v.ref.toLowerCase());state.claimed.add(state.brand+"|"+state.offer+"|"+v.user.toLowerCase());
+  state.verified=null;$("vStatus").className="vstatus";$("vStatus").textContent="Claimed";$("checks").innerHTML="";showVerify();
+  $("tierNow").innerHTML="<b>Claim recorded</b> para kay "+v.user+" (ref "+v.ref+"). Mag-verify ng bagong deposit para sa susunod na roll.";
+  state.hits=g.mode==="best"?[Math.max(...results.map(r=>r.sum))]:results.map(r=>r.sum);payout();
+  state.history.unshift({...log,t,where:v.user+" · "+state.brand+" · "+php(v.amt)+" · "+g.title});
+  state.history=state.history.slice(0,30);
+  $("history").innerHTML=state.history.map(h=>"<li><span class='dot' style='background:"+h.t.color+"'></span><span class='f'>"+h.text+"</span><span class='g'>"+h.where+"</span><b>"+php(h.amt)+"</b></li>").join("");
+}
+
+function playOnce(g,t){const sums=[];for(let r=0;r<g.rolls;r++)sums.push(rand6()+rand6()+rand6());
+  if(g.mode==="best")return[Math.max(...sums)];return sums}
+function expectedSums(g){ // P of each credited sum
+  const p=SUMS.map(s=>WAYS[s]/216);
+  if(g.mode!=="best")return p;
+  let cum=0;return p.map(x=>{const prev=cum;cum+=x;return Math.pow(cum,g.rolls)-Math.pow(prev,g.rolls)});
+}
+function simulate(){
+  setTiers();const g=GAMES[state.game],t=curTier()||TIERS[0],n=+$("simN").value,counts=SUMS.map(()=>0);let total=0,credits=0,lo=1e9,hi=0;
+  for(let i=0;i<n;i++){let pb=0;playOnce(g,t).forEach(s=>{counts[s-3]++;credits++;const b=bonusOf(s,t);pb+=b});total+=pb;lo=Math.min(lo,pb);hi=Math.max(hi,pb)}
+  const obs=counts.map(c=>c/credits),exp=expectedSums(g),max=Math.max(...obs,...exp)*1.12;
+  $("simHint").textContent=n.toLocaleString()+" players na nag-deposit ng "+php(curTier()?state.deposit:t.dep)+" ("+(state.offer==="VIP"?"VIP ":"")+"Tier "+t.n+"), laro: "+g.title+". Bawat column = bonus amount.";
+  $("hist").innerHTML=SUMS.map((s,i)=>"<div class='col' title='Dice "+s+" → "+php(bonusOf(s,t))+": "+counts[i]+" rolls'><div class='f' style='height:"+(obs[i]/max*100)+"%'></div><div class='e' style='bottom:"+(exp[i]/max*100)+"%'></div></div>").join("");
+  $("xl").innerHTML=SUMS.map(s=>"<span>"+(t.min==null?s:bonusOf(s,t))+"</span>").join("");
+  const dep=curTier()?state.deposit:t.dep;if(t.min==null){$("stats").innerHTML="<div style='grid-column:1/-1'><small>Bonus</small><b>TBD</b> · ilagay ang VIP bonus per tier para makita ang cost.</div>";return}
+  $("stats").innerHTML="<div><small>Total bonus</small><b>"+php(total)+"</b></div><div><small>Avg / player</small><b>"+php(Math.round(total/n))+"</b></div><div><small>% of deposit</small><b>"+(total/n/dep*100).toFixed(1)+"%</b></div>";
+}
+
+$("vform").addEventListener("submit",verify);
+["vUser","vRef","vAmt","vCall","vDep","vOk"].forEach(id=>{$(id).addEventListener("input",invalidate);$(id).addEventListener("change",invalidate)});
+$("sampleBtn").onclick=loadSample;
+$("rollBtn").onclick=roll;
+$("resetBtn").onclick=()=>{
+  // clears the dice table and the test claim locks so the same deposit can be verified and rolled again
+  emptyRolls();state.hits=[];state.usedRefs.clear();state.claimed.clear();state.verified=null;
+  $("vStatus").className="vstatus";$("vStatus").textContent="";$("checks").innerHTML="";
+  payout();showVerify();
+  $("tierNow").innerHTML="<b>Na-reset ang dice.</b> Pindutin ang Verify deposit para mag-roll ulit.";
+};
+$("simBtn").onclick=simulate;
+loadSample();render();verify({preventDefault(){}});
+</script>
+
+</body>
+</html>
