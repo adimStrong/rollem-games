@@ -1,7 +1,12 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Win For Life Tree of Life</title>
+<!doctype html>
+<html lang="tl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Win For Life Sabong ng Swerte</title>
+
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<style>
+<style>[hidden]{display:none!important}
 /* Layout: brand logo on the brand's own ground, one centered game booth. Player view = the brand's game; admin view (#admin) = link maker above a live preview. Single dark look by choice. */
 :root{
   --night:#03120d;
@@ -125,44 +130,106 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 .mech th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:600}
 .mech tr.cur td{color:var(--gold);font-weight:700}
 /* game */
-.grove{--g:0;position:relative;width:min(300px,100%);border-radius:18px;background:radial-gradient(80% 70% at 50% 30%,rgba(255,207,74,.14),transparent 70%),linear-gradient(180deg,#0f3a2a,#0a241b);box-shadow:inset 0 0 0 2px var(--line);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden}
-.grove svg{display:block;width:100%;height:auto}
-.grove .tree{transform-origin:120px 204px;transform:scale(calc(.12 + .88 * var(--g)));opacity:calc(var(--g) * 6);transition:transform .12s linear}
-.grove .sprout{transform-origin:120px 204px;opacity:calc(1 - var(--g) * 8)}
-.grove.wet{box-shadow:inset 0 0 0 2px var(--accent),0 0 24px rgba(47,227,154,.35)}
-.grove .drop{position:absolute;top:0;width:6px;height:10px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:#8fdcff;opacity:.85;pointer-events:none;animation:rain .7s linear forwards}
-@keyframes rain{to{transform:translateY(190px);opacity:0}}
-.grove .fr{transform-box:fill-box;transform-origin:center;animation:fpop .4s cubic-bezier(.2,1.6,.4,1) both;animation-delay:var(--d)}
-@keyframes fpop{from{transform:scale(0)}to{transform:scale(1)}}
-.grove .fr.prize{animation:fpop .4s cubic-bezier(.2,1.6,.4,1) both,fglow 1s ease-in-out .9s infinite alternate}
-@keyframes fglow{to{filter:drop-shadow(0 0 6px #fff)}}
-.grove.still .fr{animation:none}
-.fruitcard{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:grid;justify-items:center;padding:10px 18px;border-radius:14px;background:var(--fc);color:#062014;box-shadow:0 0 0 3px rgba(255,255,255,.7),0 0 34px var(--fc);line-height:1.1;min-width:130px}
-.fruitcard b{font:400 clamp(24px,7vw,30px) var(--display)}
-.fruitcard small{font-size:11.5px;font-weight:700}
-.fruitcard.fall{animation:fdrop .6s cubic-bezier(.3,1.5,.5,1)}
-@keyframes fdrop{0%{transform:translate(-50%,-110px) scale(.3);opacity:0}100%{transform:translate(-50%,0) scale(1);opacity:1}}
-.meter{--g:0;width:min(300px,100%);height:10px;border-radius:999px;background:rgba(0,0,0,.35);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden}
-.meter i{display:block;height:100%;width:calc(var(--g) * 100%);background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:999px}
-#goBtn{touch-action:none;user-select:none;-webkit-user-select:none}
-@media (prefers-reduced-motion:reduce){.grove .fr,.grove .fr.prize,.fruitcard.fall,.grove .drop{animation:none}.grove .tree{transition:none}}
+.breeds{width:100%;display:grid;gap:8px;text-align:left}
+.breeds-h{margin:0;font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.bgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.breed{display:grid;justify-items:center;gap:2px;padding:7px 4px 6px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--paper);cursor:pointer;min-width:0;line-height:1.15}
+.breed i{width:26px;height:26px;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(0,0,0,.35)}
+.breed b{font-size:12px;font-weight:700}
+.breed small{font-size:9.5px;color:var(--muted);text-align:center}
+.breed.on{border-color:var(--gold);background:rgba(255,207,74,.14);box-shadow:inset 0 0 0 1px var(--gold)}
+.breed:disabled{cursor:default;opacity:.55}
+.breed.on:disabled{opacity:1}
+.blabel{position:absolute;top:80px;z-index:4;font:700 11px var(--mono);letter-spacing:.5px;color:#fff;background:rgba(0,0,0,.55);padding:2px 7px;border-radius:6px;pointer-events:none}
+.blabel.meron{left:6%}
+.blabel.wala{right:6%}
+.blabel:empty{display:none}
+.pit{position:relative;will-change:transform;width:100%;height:250px;border-radius:18px;overflow:hidden;background:#1a1208;box-shadow:inset 0 0 0 3px var(--gold),0 12px 26px rgba(0,0,0,.45)}
+.pit .crowd{position:absolute;left:0;right:0;top:0;height:92px;background:radial-gradient(circle at 10px 14px,#2a2118 8px,transparent 9px) 0 0/22px 22px,radial-gradient(circle at 21px 26px,#33281c 9px,transparent 10px) 0 0/22px 26px,linear-gradient(180deg,#0d0905,#241a10);opacity:.95}
+.pit .floor{position:absolute;left:-10%;right:-10%;bottom:-40px;height:190px;border-radius:50% 50% 0 0/40% 40% 0 0;background:radial-gradient(55% 45% at 50% 40%,#e2c08a 0%,#c49a5e 55%,#8a6436 100%);box-shadow:0 -6px 0 #5a3a1a,0 -9px 0 #3a2410}
+.pit::before{content:attr(data-result);position:absolute;left:0;right:0;top:12px;z-index:5;text-align:center;font:400 17px var(--display);letter-spacing:1.5px;color:var(--gold);text-shadow:0 2px 0 rgba(0,0,0,.6)}
+.cock{position:absolute;bottom:20px;width:112px;height:112px;padding:0;border:0;background:none;cursor:pointer;line-height:0;z-index:2}
+.cock .body{display:block;width:100%;height:100%;filter:drop-shadow(0 7px 5px rgba(0,0,0,.45))}
+.cock svg{width:100%;height:100%;display:block;overflow:visible}
+.cock.meron{left:2%}
+.cock.wala{right:2%}
+.cock.wala svg{transform:scaleX(-1)}
+.cock.meron.turn svg{transform:scaleX(-1)}
+.cock.wala.turn svg{transform:none}
+.cock .tail,.cock .legB,.cock .legF,.cock .torso,.cock .wing,.cock .head,.cock .hackle,.cock .comb,.cock .lid,.cock .beakL,.cock .brow{transform-box:fill-box}
+.cock .torso{transform-origin:50% 100%;animation:breathe 1.8s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.015,1.035)}}
+.cock .head{transform-origin:15% 90%;animation:bob 1.3s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:rotate(0)}30%{transform:rotate(-6deg) translateX(-1px)}60%{transform:rotate(5deg) translateX(1px)}}
+.cock.wala .head{animation-delay:-.6s}
+.cock .tail{transform-origin:95% 90%;animation:sway 2.6s ease-in-out infinite}
+@keyframes sway{50%{transform:rotate(-5deg)}}
+.cock .comb{transform-origin:30% 100%;animation:jig 1.3s ease-in-out infinite}
+@keyframes jig{50%{transform:rotate(5deg)}}
+.cock .lid{transform-origin:50% 0;transform:scaleY(0);animation:blink 3.6s infinite}
+.cock.wala .lid{animation-delay:-1.7s}
+@keyframes blink{0%,90%,100%{transform:scaleY(0)}94%{transform:scaleY(1)}}
+.cock .brow{opacity:0;transition:opacity .2s}
+.cock.fight .brow{opacity:1}
+.cock.fight .head{animation:bobFight .45s ease-in-out infinite;transform-origin:15% 90%}
+@keyframes bobFight{0%,100%{transform:rotate(10deg)}50%{transform:rotate(16deg) translateX(1px)}}
+.cock .legB,.cock .legF{transform-origin:50% 15%;transition:transform .15s}
+.cock.walk .legB{animation:stepA .26s ease-in-out infinite alternate}
+.cock.walk .legF{animation:stepB .26s ease-in-out infinite alternate}
+@keyframes stepA{from{transform:rotate(20deg)}to{transform:rotate(-20deg)}}
+@keyframes stepB{from{transform:rotate(-20deg)}to{transform:rotate(20deg)}}
+.cock.kick .legB,.cock.kick .legF{animation:none;transform:rotate(-50deg)}
+.cock .hackle{transform-origin:20% 90%;transition:transform .2s ease-out}
+.cock.flare .hackle{transform:scale(1.35) rotate(-10deg)}
+.cock .wing{transform-origin:15% 40%}
+.cock.flap .wing{animation:flap .11s linear infinite alternate}
+@keyframes flap{from{transform:rotate(0)}to{transform:rotate(-60deg) scaleY(1.25)}}
+.cock.peck .head{animation:peckH .3s ease-in-out 3}
+@keyframes peckH{50%{transform:rotate(30deg) translateX(3px)}}
+.cock .beakL{transform-origin:0 0;transition:transform .15s}
+.cock.crow .head{animation:none;transform:rotate(-28deg)}
+.cock.crow .beakL{transform:rotate(28deg)}
+.cock.mine .body{filter:drop-shadow(0 0 10px var(--gold)) drop-shadow(0 7px 5px rgba(0,0,0,.45))}
+.cock:disabled{cursor:default}
+.cock.winner{left:50%;right:auto;margin-left:-56px}
+.cock.winner .body{animation:crowhop .55s ease-out 3;filter:drop-shadow(0 0 14px var(--gold)) drop-shadow(0 7px 5px rgba(0,0,0,.45))}
+@keyframes crowhop{50%{transform:translateY(-14px) rotate(-6deg)}}
+.cock.fled{opacity:.35}
+.cock.meron.fled{left:-6%}
+.cock.wala.fled{right:-6%}
+.cock.meron.fled svg{transform:scaleX(-1)}
+.cock.wala.fled svg{transform:none}
+.tag{position:absolute;top:46px;z-index:4;border:0;cursor:pointer;font:400 14px var(--display);letter-spacing:1px;padding:5px 12px;border-radius:8px;color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.tag.meron{left:6%;background:#c8341f}
+.tag.wala{right:6%;background:#2f5fb8}
+.tag.mine{outline:3px solid var(--gold);outline-offset:2px}
+.tag:disabled{cursor:default}
+.feather{position:absolute;left:50%;bottom:95px;z-index:3;width:5px;height:14px;border-radius:50% 50% 50% 50%/80% 80% 20% 20%;pointer-events:none;animation:feath 1.25s ease-out forwards}
+@keyframes feath{40%{opacity:1}to{transform:translate(var(--dx),calc(var(--dy) + 120px)) rotate(var(--r));opacity:0}}
+.dust{position:absolute;left:50%;bottom:22px;z-index:1;width:22px;height:12px;margin-left:-11px;border-radius:50%;background:rgba(230,205,160,.7);pointer-events:none;animation:dust .85s ease-out forwards}
+@keyframes dust{to{transform:translate(var(--dx),-14px) scale(2.6);opacity:0}}
+.cock .tari{transform-box:fill-box}
+.cock.glint .tari{animation:glint .35s ease-out}
+@keyframes glint{40%{filter:brightness(2.2) drop-shadow(0 0 3px #fff)}}
+.blood{position:absolute;left:50%;bottom:92px;z-index:4;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:#b3121f;box-shadow:inset -1px -1px 0 rgba(0,0,0,.25);pointer-events:none;animation:bleed .85s cubic-bezier(.3,.5,.6,1) forwards}
+@keyframes bleed{60%{opacity:1}to{transform:translate(var(--dx),calc(var(--dy) + 110px));opacity:.85}}
+.stains{position:absolute;inset:0;z-index:1;pointer-events:none}
+.stain{position:absolute;border-radius:50%;background:radial-gradient(circle at 40% 40%,#9e1520,#6b0c14 70%);opacity:.75}
+@media (prefers-reduced-motion:reduce){.cock *,.cock .body,.feather,.dust,.blood{animation:none!important;transition:none!important}}
 
 @media (prefers-reduced-motion:reduce){.cheer.pop,.jp-card,.jp.big .jp-title,.agree.nudge{animation:none}}
 </style>
 
+</head>
+<body>
 <div class="stack">
   <section class="panel" id="admin" hidden>
     <h2>Link maker</h2>
     <p class="hint" id="adminGate">Sinusuri ang access…</p>
-    <div class="field" id="adminAuth" hidden>
-      <span>Admin password</span>
-      <input class="inp" id="adminPass" type="password" autocomplete="off" spellcheck="false">
-      <button class="btn small" id="adminUnlock" type="button">Unlock</button>
-      <p class="hint" id="adminErr" hidden style="color:var(--bad)">Maling password.</p>
-    </div>
     <div id="adminBody" hidden style="display:grid;gap:14px">
-      <p class="hint">Gumawa ng link para sa isang player. Nasa link na mismo ang deposit, kaya gumagana ito kahit walang login ang player. Hindi ito gagana kapag binago ng player ang link.</p>
-      <label class="field"><span>Pangalan ng Player</span><input class="inp" id="name" type="text" autocomplete="off" spellcheck="false"></label>
+      <p class="hint">Gumawa ng link para sa isang player. Nasa link na mismo ang offer at deposit, kaya gumagana ito kahit walang login ang player. Hindi ito gagana kapag binago ng player ang link.</p>
+      <label class="field"><span>Pangalan ng Player</span><input class="inp" id="code" type="text" autocomplete="off" spellcheck="false" placeholder="hal. Juan Dela Cruz"></label>
+      <div class="offerbox" id="offerBox"></div>
       <label class="field"><span>Verified deposit</span><div class="money"><span>₱</span><input class="inp" id="deposit" type="number" min="0" step="1" inputmode="numeric"></div></label>
       <div class="tierbox" id="aTier"></div>
       <div class="field"><span>Player link</span>
@@ -191,7 +258,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <p class="cheer" id="cheer"></p>
     <div class="play" id="play"></div>
     <ul class="ladder" id="ladder" aria-label="Mga premyo" hidden></ul>
-    <label class="agree" id="agreeLbl"><input type="checkbox" id="agree"><span>Nabasa ko at sang-ayon ako sa <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button> ng Tree of Life.</span></label>
+    <label class="agree" id="agreeLbl"><input type="checkbox" id="agree"><span>Nabasa ko at sang-ayon ako sa <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button> ng Sabong ng Swerte.</span></label>
     <div class="acts"><button class="btn" id="goBtn" type="button"></button><button class="btn ghost" id="resetBtn" type="button">Reset</button></div>
     <div class="win" id="win" hidden>
       <small>Bonus mo</small>
@@ -206,7 +273,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <p class="mech-sub" id="mechOffer"></p>
     <ol id="mechSteps"></ol>
     <h3 hidden>Prize pool</h3>
-    <div class="tblwrap" hidden><table><thead><tr><th>Premyo</th><th>Chance</th></tr></thead><tbody id="mechTiers"></tbody></table></div>
+    <div class="tblwrap" hidden><table><thead><tr><th>Premyo</th><th>Halaga</th><th>Tsansa</th></tr></thead><tbody id="mechTiers"></tbody></table></div>
   </section>
 
   <div class="jp" id="jp" role="dialog" aria-modal="true" aria-labelledby="jpTitle" hidden>
@@ -222,18 +289,13 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
   </div>
 
   <details class="tnc" id="tnc">
-    <summary>Tree of Life Terms &amp; Conditions</summary>
+    <summary>Sabong ng Swerte Terms &amp; Conditions</summary>
     <h3>Terms &amp; Conditions</h3>
     <ol>
       <li>Open to verified Win For Life players aged 21 and above. Self-excluded, restricted or unverified accounts are not eligible.</li>
-      <li>A game is unlocked by a qualifying deposit of at least ₱200, verified by a Win For Life agent, made within the validity period given to you. Pending, failed or reversed deposits do not qualify.</li>
-      <li>A ₱200 minimum verified qualifying deposit unlocks one game; hindi kasama ang combined deposits. Flat ang prize pool para sa lahat, anuman ang laki ng deposit mo basta qualified ka:
-        <div class="tblwrap"><table>
-          <thead><tr><th>Premyo</th><th>Chance</th></tr></thead>
-          <tbody id="tncRows"></tbody>
-        </table></div>
-      </li>
-      <li>May tatlong posibleng premyo — ₱10, ₱27, o ₱57 — shown on the game page. The game draws one of them at random; ₱57 is the jackpot and is the rarest result. In Tree of Life, you water the seedling until the tree is grown, and the fruit it drops sets your prize, from Leaf (lowest) to Golden Fruit (jackpot). How fast or slow you water does not change your chances. Select promos run up to ₱777 in total prizes.</li>
+      <li>A game is unlocked by a qualifying deposit of at least ₱200, verified by a Win For Life agent, made within the validity window announced by your agent. Pending, failed or reversed deposits do not qualify.</li>
+      <li>Qualification is based on one verified deposit of at least ₱200, not on combined deposits. The prize pool is flat — ₱10, ₱27 or ₱57 — drawn at random (see the chances on the game page).</li>
+      <li>There are three prize amounts, shown on the game page. The game draws one of them at random; the highest amount (₱57) is the jackpot and is the rarest result. In Sabong ng Swerte, you pick Meron or Wala before the bout, and the result of the bout sets your prize, from Talo (lowest) to Kampeon (jackpot). You get a prize whether your rooster wins or loses, and the breed or side you pick does not change your chances; the breed only changes how your rooster looks. If a round ends in a Tabla (draw), it carries no prize and the game resets automatically for another round. This is an animated promo game only, not a live cockfight or a bet.</li>
       <li>One game per qualifying deposit and per player link. Results are random and final once the game starts. Refreshing the page, reopening the link or using another device does not give another turn. Only the first result confirmed by your agent counts.</li>
       <li>Send a screenshot of your result to your agent. The bonus is credited after the agent verifies your deposit and result, within the time your agent announces.</li>
       <li>The bonus is subject to the turnover requirement set by Win For Life before it can be withdrawn.</li>
@@ -246,42 +308,36 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 </div>
 
 <script>
-const BRAND={"key": "winforlife", "name": "Win For Life", "labels": ["Leaf", "Green Fruit", "Golden Fruit"], "confetti": ["#2fe39a", "#ffcf4a", "#a8f5d2", "#ffffff"], "confettiBig": ["#ffcf4a", "#fff1b8", "#e0a800", "#2fe39a"]};
+const BRAND={"key": "winforlife", "name": "Win For Life", "labels": ["Talo", "Panalo, dikit", "Kampeon"], "promo": {"name": "Sabong ng Swerte Bonus", "target": "Lahat ng verified Win For Life players", "trig": "Isang verified deposit na ₱200 pataas, bebe-verify-hin ng agent mo", "valid": "Depende sa anunsyo ng iyong agent", "script": "Hi po! Verified na ang deposit mo kaya may Sabong ng Swerte ka na. Pumili ka: Meron o Wala! Ang resulta ng laban ang reward mo, hanggang Kampeon!"}, "confetti": ["#2fe39a", "#ffcf4a", "#a8f5d2", "#ffffff"], "confettiBig": ["#ffcf4a", "#fff1b8", "#e0a800", "#2fe39a"]};
 // ---------- shared helpers ----------
 const $=id=>document.getElementById(id);
 const MIN_DEPOSIT=200;
 const PRIZES=[10,27,57]; // peso amounts, ascending
 const WEIGHTS=[4,95,1]; // % chance matching PRIZES index-for-index, sums to 100
-function qualifies(d){return d>=MIN_DEPOSIT}
 function php(n){return "₱"+Number(n).toLocaleString()}
+function qualifies(d){return d>=MIN_DEPOSIT}
 function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296}
 function drawStep(){let r=rnd()*100;for(let i=0;i<WEIGHTS.length;i++){r-=WEIGHTS[i];if(r<0)return i}return 0}
 function shuffle(a){for(let k=a.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
 const reduce=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
 function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
-$("tncRows").innerHTML=PRIZES.map((p,i)=>"<tr><td>"+php(p)+"</td><td>"+WEIGHTS[i]+"%</td></tr>").join("");
 
 // ---------- player links ----------
-// link = #code.<deposit>.<nonce>.<check>; the check stops casual edits to the deposit
+// link = #code.deposit.nonce.name.check; the check stops casual edits to the deposit
 const SALT="cg~"+BRAND.key+"~26q4";
-function h36(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}let g=h;for(let i=s.length-1;i>=0;i--){g^=s.charCodeAt(i)*31;g=Math.imul(g,2246822519)>>>0}return (h.toString(36)+g.toString(36)).slice(0,6)}
 const ADMIN_PASS_CHECK="1s6zm7"; // h36(ADMIN_PASSWORD+SALT)
+function h36(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}let g=h;for(let i=s.length-1;i>=0;i--){g^=s.charCodeAt(i)*31;g=Math.imul(g,2246822519)>>>0}return (h.toString(36)+g.toString(36)).slice(0,6)}
 function cleanCode(c){return (c||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,32)}
 function cleanName(n){return (n||"").toLowerCase().replace(/[^a-z0-9 ]/g,"").trim().replace(/\s+/g,"_").slice(0,60)}
 function displayName(n){return (n||"").replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase())}
 function makeToken(c){const body=c.code+"."+c.deposit+"."+c.nonce+"."+cleanName(c.name);return body+"."+h36(body+SALT)}
-function parseToken(t){const p=t.split(".");
-  if(p.length===5){const [code,dep,nonce,nameEnc,chk]=p;
-    if(!/^[a-z0-9-]{1,40}$/.test(code)||!/^\d{1,6}$/.test(dep)||!/^[a-z0-9]{1,12}$/.test(nonce)||!/^[a-z0-9_]{0,60}$/.test(nameEnc))return null;
-    if(h36(code+"."+dep+"."+nonce+"."+nameEnc+SALT)!==chk)return null;return {code,deposit:+dep,nonce,name:displayName(nameEnc)}}
-  if(p.length===4){const [code,dep,nonce,chk]=p;
-    if(!/^[a-z0-9-]{1,40}$/.test(code)||!/^\d{1,6}$/.test(dep)||!/^[a-z0-9]{1,12}$/.test(nonce))return null;
-    if(h36(code+"."+dep+"."+nonce+SALT)!==chk)return null;return {code,deposit:+dep,nonce,name:""}}
-  return null}
+function parseToken(t){const p=t.split(".");if(p.length!==5)return null;const [code,dep,nonce,nameEnc,chk]=p;
+  if(!/^[a-z0-9-]{1,40}$/.test(code)||!/^\d{1,6}$/.test(dep)||!/^[a-z0-9]{1,12}$/.test(nonce)||!/^[a-z0-9_]{0,60}$/.test(nameEnc))return null;
+  if(h36(code+"."+dep+"."+nonce+"."+nameEnc+SALT)!==chk)return null;return {code,deposit:+dep,nonce,name:displayName(nameEnc)}}
 const raw=decodeURIComponent(location.hash.slice(1)).toLowerCase();
 const tok=parseToken(raw);
 let mode=raw==="admin"?"admin":tok?"player":"demo";
-let cfg=mode==="player"?tok:{code:"juan-demo",name:"Juan",deposit:500,nonce:mode==="admin"?Date.now().toString(36):"demo"};
+let cfg=mode==="player"?tok:{code:"juan123",name:"Juan",deposit:500,nonce:mode==="admin"?Date.now().toString(36):"demo"};
 function storeKey(){return BRAND.key+":"+mode+":"+makeToken(cfg)}
 
 // ---------- sound ----------
@@ -299,73 +355,173 @@ function cheer(text){const c=$("cheer");c.textContent=text;c.classList.remove("p
 function needAgree(){if($("agree").checked)return false;const l=$("agreeLbl");l.classList.remove("nudge");void l.offsetWidth;l.classList.add("nudge");cheer("I-check muna ang T&C.");return true}
 
 // ---------- game ----------
-// Tree of Life: press and hold to water the seedling until the tree is grown; the fruit it bears sets the prize
+// Sabong ng Swerte: pick Meron or Wala, watch the bout (ulutan, bitaw, sultada); how the bout ends sets the prize
 const GAME=(()=>{
-  const NEED=3000; // ms of watering to grow the tree
-  const FRUIT=["#5fbf6a","#9be15d","#ffcf4a"];
-  const SPOTS=[[78,92],[118,70],[160,90],[96,122],[142,124],[120,100]];
-  let scene,meter,grown=0,holding=false,raf=null,last=0,dropT=0,lastUp=0,wired=false,ctxRef=null;
-  const SVG="<svg viewBox='0 0 240 220' aria-hidden='true'>"+
-    "<ellipse cx='120' cy='206' rx='92' ry='12' fill='#3b2a14'/><ellipse cx='120' cy='202' rx='70' ry='7' fill='#2f8f4e'/>"+
-    "<g class='tree'><path d='M112 204 C114 170 108 150 100 132 L110 130 C116 144 118 150 120 150 C122 146 126 138 132 128 L140 132 C130 152 128 170 128 204 Z' fill='#7a4b26'/>"+
-    "<g class='canopy'><circle cx='120' cy='96' r='52' fill='#1f8a4c'/><circle cx='80' cy='108' r='34' fill='#249a55'/><circle cx='160' cy='108' r='34' fill='#249a55'/><circle cx='100' cy='72' r='30' fill='#2fae60'/><circle cx='142' cy='72' r='30' fill='#2fae60'/><circle cx='120' cy='60' r='24' fill='#3cc56f'/></g>"+
-    "<g class='fruits'></g></g>"+
-    "<g class='sprout'><path d='M120 202 L120 186' stroke='#2fae60' stroke-width='4' stroke-linecap='round'/><ellipse cx='112' cy='184' rx='9' ry='5' fill='#3cc56f' transform='rotate(-25 112 184)'/><ellipse cx='128' cy='184' rx='9' ry='5' fill='#3cc56f' transform='rotate(25 128 184)'/></g>"+
-    "</svg>";
-  function paint(){const g=Math.min(1,grown/NEED);scene.style.setProperty("--g",g.toFixed(3));meter.style.setProperty("--g",g.toFixed(3));scene.classList.toggle("big",g>0.08)}
-  function drop(){const d=el("span","drop");d.style.left=(30+rnd()*40)+"%";scene.appendChild(d);setTimeout(()=>d.remove(),700)}
-  function loop(now){
-    if(!holding)return;
-    grown+=Math.min(50,now-last);last=now;paint();
-    if(now-dropT>90&&!reduce()){dropT=now;drop()}
-    if(now-dropT>0&&Math.random()<.05)noise(.08,.12,4000);
-    if(grown>=NEED){holding=false;G.bloom(ctxRef,true);return}
-    raf=requestAnimationFrame(loop);
+  const SIDES=[
+    {k:"meron",n:"MERON",b1:"#7a1f12",b2:"#c8461f",hk:"#f09a32",hk2:"#c4621a",wing:"#5e1a10",tail:"#111111",sheen:"#1f7a4e",feather:"#d8662a"},
+    {k:"wala",n:"WALA",b1:"#d9d3c4",b2:"#ffffff",hk:"#fbf5e4",hk2:"#e2d7bb",wing:"#cfc7b4",tail:"#2a2f3c",sheen:"#5a6ea8",feather:"#f4efe2"}];
+  const BREEDS=[
+    {n:"Sweater",d:"Pula, dilaw ang paa",b1:"#7a2a12",b2:"#c55a22",hk:"#f2b33d",hk2:"#d07a1e",wing:"#6a2410",tail:"#111111",sheen:"#1f7a4e",feather:"#d0702a"},
+    {n:"Kelso",d:"Light red",b1:"#8a3a18",b2:"#d77a3a",hk:"#f0a85a",hk2:"#c8692a",wing:"#7a3214",tail:"#1a1a1a",sheen:"#2a6a4a",feather:"#e08a4a"},
+    {n:"Hatch",d:"Dark red, matipuno",b1:"#4e120e",b2:"#962818",hk:"#c94a22",hk2:"#8a2a12",wing:"#3e0e0a",tail:"#0d0d0d",sheen:"#1e5a3e",feather:"#a83a22"},
+    {n:"Roundhead",d:"Talisayin",b1:"#a85a20",b2:"#e8a24a",hk:"#ffd27a",hk2:"#e8a24a",wing:"#8a4a1a",tail:"#222222",sheen:"#3a7a5a",feather:"#f0b860"},
+    {n:"Lemon",d:"Dilaw ang balahibo",b1:"#9a6a1a",b2:"#e6b84a",hk:"#fff0a0",hk2:"#e8c860",wing:"#8a5a14",tail:"#1a1a1a",sheen:"#3a5a3a",feather:"#f2d36a"},
+    {n:"Brown Red",d:"Halos itim",b1:"#2e140c",b2:"#5e2a16",hk:"#b8502a",hk2:"#7a3214",wing:"#22100a",tail:"#0b0b0b",sheen:"#2a3a5a",feather:"#7a3a20"},
+    {n:"Grey",d:"Abuhin",b1:"#7e848c",b2:"#d4d8de",hk:"#f2f2f2",hk2:"#c4c8ce",wing:"#62676e",tail:"#2a2d33",sheen:"#4a5a7a",feather:"#c9cdd3"},
+    {n:"Puti",d:"White",b1:"#d9d3c4",b2:"#ffffff",hk:"#fbf5e4",hk2:"#e2d7bb",wing:"#cfc7b4",tail:"#3b4250",sheen:"#6b7fb8",feather:"#f4efe2"}];
+  const CLASHES=[2,5,2]; // bout length per prize step
+  const TIE=0.15,MAXTIES=2; // chance a round ends Tabla (no prize, replay); at most 2 in a row
+  let pit,cocks=[],tags=[],sel=null,anims=[],timers=[],round=1,ties=0,br=null,obr=6,look=[0,7],picker=null;
+  const COCK=(s,i)=>{const g="g"+i,O="stroke='#2a1508' stroke-width='1.3' stroke-linejoin='round'";return "<svg viewBox='0 0 120 120' aria-hidden='true'><defs>"+
+    "<linearGradient id='"+g+"b' x1='0' y1='0' x2='.8' y2='1'><stop offset='0' stop-color='"+s.b2+"'/><stop offset='1' stop-color='"+s.b1+"'/></linearGradient>"+
+    "<linearGradient id='"+g+"t' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='"+s.sheen+"'/><stop offset='.6' stop-color='"+s.tail+"'/></linearGradient>"+
+    "<linearGradient id='"+g+"h' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='"+s.hk+"'/><stop offset='1' stop-color='"+s.hk2+"'/></linearGradient><linearGradient id='"+g+"s' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#ffffff'/><stop offset='.5' stop-color='#b9c2cc'/><stop offset='1' stop-color='#6d7783'/></linearGradient></defs>"+
+    "<g class='tail' "+O+"><path fill='url(#"+g+"t)' d='M38 70 C20 78 6 70 2 56 C12 66 24 68 38 66 Z'/><path fill='url(#"+g+"t)' d='M38 66 C16 64 2 46 4 24 C12 42 24 54 40 60 Z'/><path fill='"+s.tail+"' d='M40 62 C22 54 10 36 14 12 C20 30 30 44 44 54 Z'/><path fill='url(#"+g+"t)' d='M42 58 C30 40 30 18 40 4 C40 24 44 38 48 50 Z'/></g>"+
+    "<g class='legB'><g stroke='#c98f2a' stroke-linecap='round'><path d='M56 92 L54 108' stroke-width='5'/><path d='M54 108 L46 112 M54 108 L58 113 M54 108 L62 111' stroke-width='3'/><path d='M55 100 L50 99' stroke-width='2.5'/></g><ellipse cx='56' cy='88' rx='8' ry='8' fill='"+s.b1+"'/></g>"+
+    "<g class='torso'><path "+O+" fill='url(#"+g+"b)' d='M30 66 C30 48 48 40 66 44 C80 47 86 60 80 74 C74 88 56 94 42 88 C34 84 30 76 30 66 Z'/><path fill='"+s.b1+"' opacity='.55' d='M66 46 C80 50 84 64 78 76 C74 82 68 84 64 82 C70 70 70 56 66 46 Z'/>"+
+    "<g class='wing' "+O+"><path fill='"+s.wing+"' d='M38 62 C44 52 62 52 70 60 C68 72 54 78 42 72 Z'/><path fill='"+s.wing+"' d='M42 72 L32 79 L44 76 L38 84 L50 78 L48 86 L58 76 Z'/><path fill='none' stroke='rgba(255,255,255,.35)' d='M44 66 q4 4 8 0 q4 4 8 0 q3 3 6 0'/></g></g>"+
+    "<g class='legF'><g stroke='#e8b04a' stroke-linecap='round'><path d='M68 92 L70 108' stroke-width='5'/><path d='M70 108 L62 112 M70 108 L74 113 M70 108 L78 111' stroke-width='3'/><path d='M69 100 L64 99' stroke-width='2.5'/></g>"+
+    "<g class='tari'><path d='M70 101.5 C60 101 46 96 34 84 C47 92 60 96.5 70 97.5 Z' fill='url(#"+g+"s)' stroke='#2b3038' stroke-width='1'/><path d='M68 99.6 C58 98.6 47 94 38 87' stroke='#ffffff' stroke-width='.9' fill='none' opacity='.9'/><path d='M34 84 L31 81.5' stroke='#e9eef3' stroke-width='1.4' stroke-linecap='round'/><rect x='66' y='95.5' width='8' height='7.5' rx='1.6' fill='#c8102e' stroke='#5a0a12' stroke-width='.8'/><path d='M66.5 98 L73.5 98 M66.5 100.5 L73.5 100.5' stroke='#ff6b6b' stroke-width='.7'/></g>"+
+    "<ellipse cx='68' cy='88' rx='8.5' ry='8' fill='url(#"+g+"b)'/></g>"+
+    "<g class='head'><g class='hackle' "+O+"><path fill='url(#"+g+"h)' d='M62 62 L54 46 L64 50 L60 34 L70 44 L70 28 L77 40 L82 32 L82 46 L90 46 L80 60 Z'/></g>"+
+    "<path "+O+" fill='url(#"+g+"h)' d='M66 58 C64 44 70 32 80 30 C88 30 92 36 90 44 C88 52 82 56 78 62 Z'/>"+
+    "<path class='comb' fill='#e0202a' stroke='#8a0f14' stroke-width='1.2' stroke-linejoin='round' d='M76 25 L76 15 L80 20 L83 11 L86 19 L90 13 L91 21 L95 19 L92 26 Q86 28 78 27 Z'/>"+
+    "<circle cx='84' cy='32' r='10' fill='url(#"+g+"h)'/><path class='wattle' fill='#e0202a' stroke='#8a0f14' stroke-width='1' d='M90 39 Q96 47 91 52 Q85 48 88 39 Z'/><ellipse cx='81' cy='38' rx='2.4' ry='3' fill='#f5ead8'/>"+
+    "<path class='beakL' fill='#c98f2a' stroke='#6b4a10' stroke-width='.8' d='M92 34.5 L101 35.5 Q97 39 92 38 Z'/><path class='beakU' fill='#f0bf55' stroke='#6b4a10' stroke-width='.8' d='M92 29 Q100 30 104 35 L92 35 Z'/>"+
+    "<circle cx='88' cy='30' r='4.3' fill='#fff' stroke='#2a1508' stroke-width='.8'/><circle cx='89' cy='30' r='2.8' fill='#e08a1a'/><circle cx='89.6' cy='30' r='1.5' fill='#111'/><circle cx='88.5' cy='28.8' r='.8' fill='#fff'/>"+
+    "<ellipse class='lid' cx='88' cy='30' rx='4.6' ry='4.6' fill='"+s.hk2+"'/><path class='brow' d='M83 24.5 L93 27.5' stroke='#2a1508' stroke-width='2.2' stroke-linecap='round'/></g></svg>"};
+  function T(fn,ms){const t=setTimeout(fn,ms);timers.push(t);return t}
+  function feathers(n){if(reduce())return;for(let k=0;k<n;k++){const f=el("span","feather");f.style.background=BREEDS[look[k%2]].feather;f.style.setProperty("--dx",((rnd()-.5)*160).toFixed(0)+"px");f.style.setProperty("--dy",(-30-rnd()*70).toFixed(0)+"px");f.style.setProperty("--r",((rnd()-.5)*720).toFixed(0)+"deg");pit.appendChild(f);setTimeout(()=>f.remove(),1300)}}
+  function blood(n){if(reduce())return;for(let k=0;k<n;k++){const b=el("span","blood");const sz=3+rnd()*5;b.style.width=b.style.height=sz.toFixed(1)+"px";b.style.setProperty("--dx",((rnd()-.5)*170).toFixed(0)+"px");b.style.setProperty("--dy",(-20-rnd()*60).toFixed(0)+"px");pit.appendChild(b);setTimeout(()=>{b.remove();stain(1)},900)}}
+  function stain(n){const fl=pit.querySelector(".stains");if(!fl)return;for(let k=0;k<n;k++){if(fl.children.length>28)return;const st=el("span","stain");const w=4+rnd()*9;st.style.width=w.toFixed(1)+"px";st.style.height=(w*.55).toFixed(1)+"px";st.style.left=(50+(rnd()-.5)*46).toFixed(1)+"%";st.style.bottom=(14+rnd()*30).toFixed(0)+"px";fl.appendChild(st)}}
+  function glint(i){const c=cocks[i];if(!c||reduce())return;c.classList.remove("glint");void c.offsetWidth;c.classList.add("glint")}
+  function dust(){if(reduce())return;for(let k=0;k<5;k++){const p=el("span","dust");p.style.setProperty("--dx",((rnd()-.5)*120).toFixed(0)+"px");pit.appendChild(p);setTimeout(()=>p.remove(),900)}}
+  function flapSound(){for(let k=0;k<4;k++)setTimeout(()=>noise(.06,.35,500+rnd()*300),k*55)}
+  function crow(){[392,523,587,659,784].forEach((f,k)=>beep(f,k===4?.6:.15,.1,"sawtooth",k*.17))}
+  function crowd(dur){const a=audio();if(!a)return;const n=Math.floor(a.sampleRate*dur),b=a.createBuffer(1,n,a.sampleRate),ch=b.getChannelData(0);for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*(0.5+0.5*Math.sin(i/a.sampleRate*3));const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type="lowpass";f.frequency.value=700;const g=a.createGain();g.gain.setValueAtTime(0,a.currentTime);g.gain.linearRampToValueAtTime(.08,a.currentTime+.5);g.gain.linearRampToValueAtTime(0,a.currentTime+dur);s.connect(f).connect(g).connect(a.destination);s.start()}
+  function paint(){cocks.forEach((c,i)=>{c.querySelector(".body").innerHTML=COCK(BREEDS[look[i]],i);const lb=pit.querySelector(".blabel."+SIDES[i].k);if(lb)lb.textContent=BREEDS[look[i]].n})}
+  function assign(){ // the player's side wears the chosen breed; the other side gets a different, random one
+    if(br===null)return;const me=sel===null?0:sel;
+    if(obr===br||obr==null){const o=BREEDS.map((_,k)=>k).filter(k=>k!==br);obr=o[Math.floor(rnd()*o.length)]}
+    look[me]=br;look[1-me]=obr;paint();
   }
-  function startHold(e){
-    const ctx=ctxRef;if(!ctx||ctx.isBusy()||(ctx.state&&ctx.state.done))return;
-    if(!ctx.agreed())return;
-    if(!ctx.state||ctx.state.step==null)ctx.start();
-    if(e&&e.preventDefault)e.preventDefault();
-    holding=true;last=performance.now();cheer("Dinidiligan…");scene.classList.add("wet");raf=requestAnimationFrame(loop);
+  function lockPicker(v){if(picker)picker.querySelectorAll("button").forEach(b=>b.disabled=v)}
+  function ready(){const ok=br!==null&&sel!==null;$("goBtn").disabled=!ok;
+    $("goBtn").textContent=ok?(round>1?"Simulan ang round "+round:"Simulan ang sultada"):br===null&&sel===null?"Pumili ng lahi at Meron o Wala":br===null?"Pumili muna ng lahi":"Pumili muna: Meron o Wala"}
+  function outcome(step){return step>=1?"win":"lose"}
+  function banner(t){pit.dataset.result=t}
+  function pose(step,side){
+    const o=outcome(step),other=1-side;
+    cocks.forEach(c=>c.classList.remove("winner","fled","tie","flare","flap","walk","fight","kick"));
+    if(o==="draw"){cocks.forEach(c=>c.classList.add("tie"));banner("TABLA")}
+    else{const w=o==="win"?side:other;cocks[w].classList.add("winner","flare","crow");setTimeout(()=>cocks[w]&&cocks[w].classList.remove("crow"),1600);cocks[1-w].classList.add("fled");banner(SIDES[w].n+" ANG PANALO")}
+    tags.forEach((t,i)=>t.classList.toggle("mine",i===side));
   }
-  function stopHold(){if(!holding)return;holding=false;lastUp=performance.now();cancelAnimationFrame(raf);scene.classList.remove("wet");if(grown<NEED)cheer("Diligan pa! "+Math.round(grown/NEED*100)+"%")}
-  const G={label:"Tree of Life",title:"TREE OF LIFE",btn:"Pindutin at i-hold para diligan",
-    how:["I-check ang T&C box.","Pindutin at i-hold ang button o ang puno para diligan ang punla.","Lalaki ang puno habang dinidiligan. Kapag puno na ang meter, mamumunga ito.","Ang kulay ng prutas na mahuhulog ang premyo mo. Golden Fruit ang jackpot."],
-    note:"Pindutin at i-hold para diligan ang punla hanggang lumaki ito. Ang prutas na mahuhulog ang premyo mo. Golden Fruit ang jackpot.",
+  const G={label:"Sabong ng Swerte",title:"SABONG NG SWERTE",btn:"Pumili ng lahi at Meron o Wala",
+    how:["I-check ang T&C box.","Pumili ng lahi ng manok mo: Sweater, Kelso, Hatch, Roundhead, Lemon, Brown Red, Grey o Puti. Random na lahi ang makakalaban mo.","Pumili ng panig: Meron o Wala, sa pag-tap sa manok o sa tag niya.","Pindutin ang Simulan ang sultada. Dadaan ang laban sa ulutan, bitaw, at sultada.","Ang resulta ng laban ang premyo mo: Talo, Panalo, hanggang Kampeon (jackpot). May premyo ka kahit matalo ang manok mo.","Kapag Tabla ang laban, walang premyo sa round na iyon at kusang magre-reset ang laro para sa isa pang round. Pwede kang pumili ulit ng Meron o Wala.","Hindi nakakaapekto sa tsansa ang lahi o panig na pipiliin mo; itsura lang ng manok ang binabago ng lahi. Animated na laro lang ito; walang totoong manok o totoong laban."],
+    note:"Pumili ng lahi ng manok mo at ng Meron o Wala, tapos simulan ang sultada. Ang resulta ng laban ang premyo mo. May premyo kahit matalo ang manok mo, at kapag Tabla, may isa ka pang round.",
     build(play,ctx){
-      ctxRef=ctx;grown=0;holding=false;
-      scene=el("div","grove",SVG+"<div class='fruitcard' hidden></div>");
-      meter=el("div","meter","<i></i>");meter.setAttribute("aria-hidden","true");
-      play.append(scene,meter);paint();
-      scene.addEventListener("pointerdown",startHold);
-      ["pointerup","pointerleave","pointercancel"].forEach(t=>scene.addEventListener(t,stopHold));
-      if(!wired){wired=true;const b=$("goBtn");
-        b.addEventListener("pointerdown",e=>{if(GAME===G&&!b.disabled)startHold(e)});
-        ["pointerup","pointerleave","pointercancel"].forEach(t=>b.addEventListener(t,stopHold));
-        b.addEventListener("contextmenu",e=>e.preventDefault());}
+      sel=null;cocks=[];tags=[];round=1;ties=0;br=null;look=[0,7];obr=null;
+      picker=el("div","breeds");picker.setAttribute("role","group");picker.setAttribute("aria-label","Lahi ng manok");
+      picker.appendChild(el("p","breeds-h","Pumili ng lahi ng manok mo"));
+      const grid=el("div","bgrid");
+      BREEDS.forEach((b,k)=>{const x=el("button","breed","<i style='background:linear-gradient(135deg,"+b.hk+" 0 40%,"+b.b2+" 40% 70%,"+b.tail+" 70%)'></i><b>"+b.n+"</b><small>"+b.d+"</small>");x.type="button";x.onclick=()=>G.breed(k,ctx);grid.appendChild(x)});
+      picker.appendChild(grid);
+      pit=el("div","pit");pit.innerHTML="<div class='crowd'></div><div class='floor'></div><div class='stains'></div>";
+      SIDES.forEach((s,i)=>{
+        const c=el("button","cock "+s.k,"<span class='body'></span>");c.type="button";c.setAttribute("aria-label",s.n);c.onclick=()=>G.pick(i,ctx);
+        const t=el("button","tag "+s.k,s.n);t.type="button";t.onclick=()=>G.pick(i,ctx);
+        pit.append(c,t,el("span","blabel "+s.k,""));cocks.push(c);tags.push(t);
+      });
+      banner("");play.append(picker,pit);paint();$("goBtn").disabled=true;
     },
-    go(ctx){ // keyboard press: water in short bursts
-      if(performance.now()-lastUp<400)return;
-      if(ctx.isBusy()||(ctx.state&&ctx.state.done))return;if(!ctx.agreed())return;
-      if(!ctx.state||ctx.state.step==null)ctx.start();
-      grown=Math.min(NEED,grown+NEED/5);paint();if(!reduce())for(let k=0;k<5;k++)setTimeout(drop,k*60);
-      if(grown>=NEED)G.bloom(ctx,true);else cheer("Diligan pa! "+Math.round(grown/NEED*100)+"%");
+    pick(i,ctx){
+      if(ctx.isBusy()||(ctx.state&&ctx.state.step!=null))return;if(!ctx.agreed())return;
+      sel=i;tags.forEach((t,k)=>t.classList.toggle("mine",k===i));cocks.forEach((c,k)=>c.classList.toggle("mine",k===i));
+      assign();ready();
+      cheer("Pusta mo: "+SIDES[i].n+(br!==null?" · "+BREEDS[br].n:""));beep(i?520:420,.12,.12);
     },
-    bloom(ctx,anim){
-      grown=NEED;paint();scene.classList.remove("wet");
-      if(anim){ctx.update({done:true});ctx.setBusy(true);$("goBtn").disabled=true;cheer("Namumunga na!")}
-      const step=ctx.state.step,fg=scene.querySelector(".fruits");
-      fg.innerHTML=SPOTS.map(([x,y],k)=>{const prize=k===5,c=prize?FRUIT[step]:FRUIT[(step+1+k)%FRUIT.length];
-        return "<g class='fr"+(prize?" prize":"")+"' style='--d:"+(k*0.12).toFixed(2)+"s'><circle cx='"+x+"' cy='"+y+"' r='"+(prize?11:8)+"' fill='"+c+"' stroke='rgba(0,0,0,.25)' stroke-width='1.5'/><circle cx='"+(x-3)+"' cy='"+(y-3)+"' r='"+(prize?3:2)+"' fill='rgba(255,255,255,.6)'/></g>"}).join("");
-      scene.classList.add("bloom");if(!anim)scene.classList.add("still");
-      const card=scene.querySelector(".fruitcard");card.innerHTML="<b>"+php(ladder[step])+"</b><small>"+BRAND.labels[step]+"</small>";card.style.setProperty("--fc",FRUIT[step]);
-      const show=()=>{card.hidden=false;card.classList.toggle("fall",anim&&!reduce())};
-      if(anim&&!reduce()){[784,988,1175].forEach((f,k)=>beep(f,.2,.1,"triangle",k*.12));setTimeout(()=>{show();setTimeout(()=>ctx.done(),600)},900)}
-      else{show();if(anim)ctx.done()}
+    breed(k,ctx){
+      if(ctx.isBusy()||(ctx.state&&ctx.state.step!=null))return;if(!ctx.agreed())return;
+      br=k;picker.querySelectorAll(".breed").forEach((b,j)=>b.classList.toggle("on",j===k));
+      assign();ready();cheer("Lahi mo: "+BREEDS[k].n+(sel===null?" · pumili ng Meron o Wala":""));beep(600,.08,.1);
     },
-    stop(){holding=false;cancelAnimationFrame(raf)},
-    finish(ctx){G.bloom(ctx,false)}
+    go(ctx){
+      if(ctx.isBusy()||(ctx.state&&ctx.state.step!=null))return;
+      if(br===null){cheer("Pumili muna ng lahi");return}
+      if(sel===null){cheer("Pumili muna: Meron o Wala");return}
+      if(!ctx.agreed())return;
+      const tie=ties<MAXTIES&&rnd()<TIE;let step=-1,o="draw";
+      if(!tie){ctx.start({side:sel,round,br,obr});step=ctx.state.step;o=outcome(step)}
+      const n=tie?4:CLASHES[step];
+      ctx.setBusy(true);$("goBtn").disabled=true;cocks.concat(tags).forEach(b=>b.disabled=true);lockPicker(true);
+      if(reduce()){if(tie){banner("TABLA");G.tieReset(ctx)}else{pose(step,sel);ctx.done()}return}
+      const W=pit.clientWidth,C=W/2,half=cocks[0].offsetWidth/2;
+      const base=[cocks[0].offsetLeft+half,cocks[1].offsetLeft+half];
+      // tf(i, gap, y, r): cock i sits `gap` px from the centre line, lifted y px, leaning r deg (positive = leaning in)
+      const tf=(i,gap,y,r)=>"translateX("+((i?C+gap:C-gap)-base[i]).toFixed(1)+"px) translateY("+(-(y||0))+"px) rotate("+((i?-1:1)*(r||0))+"deg)";
+      const mv=(i,frames,ms,delay,ease)=>{const a=cocks[i].animate(frames,{duration:ms,delay:delay||0,fill:"forwards",easing:ease||"ease-in-out"});anims.push(a);return a};
+      const both=(fn,ms,ease)=>[0,1].forEach(i=>mv(i,fn(i),ms,0,ease));
+      const shake=()=>{const a=pit.animate([{transform:"translate(0,0)"},{transform:"translate(-3px,1px)"},{transform:"translate(3px,-1px)"},{transform:"translate(0,0)"}],{duration:180});anims.push(a)};
+      const hit=()=>{feathers(10);blood(7);glint(0);glint(1);noise(.12,.7,900);noise(.08,.5,2600);beep(2400,.05,.05,"square");shake()};
+      crowd(5+n*0.9);
+      // 1. ulutan: handlers hold the cocks head to head and let them peck
+      cheer("Ulutan…");banner("ULUTAN");cocks.forEach(c=>c.classList.add("walk"));T(()=>cocks.forEach(c=>c.classList.remove("walk")),800);
+      both(i=>[{transform:tf(i,C-base[0])},{transform:tf(i,40,0,8)}],800);
+      T(()=>{cocks.forEach(c=>c.classList.add("peck"));noise(.05,.3,2500);T(()=>noise(.05,.3,2500),300);T(()=>noise(.05,.3,2500),600)},850);
+      T(()=>{cocks.forEach(c=>c.classList.remove("peck"));both(i=>[{transform:tf(i,40,0,8)},{transform:tf(i,85,0,0)}],450)},1800);
+      // 2. bitaw: released, hackles up, low stance, edging in
+      T(()=>{cheer("Bitaw!");banner("BITAW");beep(330,.3,.12,"square");cocks.forEach(c=>c.classList.add("flare","fight","walk"));T(()=>cocks.forEach(c=>c.classList.remove("walk")),650);
+        both(i=>[{transform:tf(i,85,0,0)},{transform:tf(i,70,0,12)},{transform:tf(i,60,0,6)}],650)},2350);
+      // 3. sultada: chest-to-chest leaps with feet forward, and shoving on the ground in between
+      let t=3100;
+      for(let k=0;k<n;k++){
+        const air=k%3!==1;
+        T(()=>{
+          banner("SULTADA");cheer(["Lipad!","Salpukan!","Dikit na dikit!","Sige pa!","Grabe ang laban!"][k%5]);
+          cocks[0].style.zIndex=k%2?2:3;cocks[1].style.zIndex=k%2?3:2;
+          if(air){
+            cocks.forEach(c=>c.classList.add("flap","kick"));flapSound();
+            both(i=>[{transform:tf(i,60,0,6)},{transform:tf(i,44,30,-12),offset:.3},{transform:tf(i,22,62,-24),offset:.5},{transform:tf(i,28,40,-14),offset:.7},{transform:tf(i,48,0,4)}],780,"cubic-bezier(.3,.6,.4,1)");
+            T(hit,370);
+            T(()=>cocks.forEach(c=>c.classList.remove("flap","kick")),700);
+          }else{
+            both(i=>[{transform:tf(i,48,0,4)},{transform:tf(i,26,0,18),offset:.25},{transform:tf(i,22,2,16),offset:.4},{transform:tf(i,27,0,20),offset:.55},{transform:tf(i,23,3,15),offset:.7},{transform:tf(i,55,0,6)}],780);
+            T(()=>{noise(.08,.4,1800);feathers(4);blood(3)},250);T(()=>noise(.08,.4,1600),480);
+          }
+        },t);
+        t+=820;
+      }
+      // 4. result: the loser breaks off and runs (takbo); a draw is when neither attacks again
+      T(()=>{
+        if(o==="draw"){cocks.forEach(c=>c.classList.remove("flare"));both(i=>[{transform:tf(i,55,0,6)},{transform:tf(i,95,0,0)}],800);cheer("Walang umatake… Tabla!");banner("TABLA");beep(440,.2,.1,"triangle");beep(440,.2,.1,"triangle",.25)}
+        else{
+          const w=o==="win"?sel:1-sel,l=1-w;
+          mv(l,[{transform:tf(l,55,0,6)},{transform:tf(l,70,0,-18),offset:.3},{transform:tf(l,62,0,0)}],420);
+          T(()=>{cocks[l].classList.add("turn","walk");cocks[l].classList.remove("flare","fight");mv(l,[{transform:tf(l,62,0,0)},{transform:tf(l,W*0.8,0,0)}],850,0,"ease-in")},430);
+          mv(w,[{transform:tf(w,55,0,6)},{transform:tf(w,10,0,8)}],900,350);T(()=>cocks[w].classList.add("walk"),350);T(()=>cocks[w].classList.remove("walk"),1250);
+          cheer(SIDES[l].n+" tumakbo!");banner(SIDES[w].n+" ANG PANALO");
+        }
+        T(()=>{if(o==="draw"){G.tieReset(ctx);return}
+          anims.forEach(a=>a.cancel());anims=[];cocks.forEach(c=>{c.classList.remove("turn");c.style.zIndex=""});pose(step,sel);
+          if(o!=="lose")crow();else beep(220,.4,.12,"triangle");
+          cheer(o==="draw"?"Tabla!":o==="win"?"Panalo ang manok mo!":"Talo, pero may premyo ka pa rin!");
+          T(()=>ctx.done(),800)},1400);
+      },t+150);
+    },
+    tieReset(ctx){
+      T(()=>{
+        anims.forEach(a=>a.cancel());anims=[];ties++;round++;
+        cocks.forEach(c=>{c.classList.remove("winner","fled","tie","flare","flap","walk","fight","kick","turn","crow");c.style.zIndex="";c.disabled=false});
+        tags.forEach(t=>t.disabled=false);
+        const fl=pit.querySelector(".stains");if(fl)fl.innerHTML="";
+        banner("ROUND "+round);cheer("Tabla! May isa ka pang round.");
+        [523,659,784].forEach((f,k)=>beep(f,.15,.1,"triangle",k*.1));
+        ctx.setBusy(false);lockPicker(false);ready();
+      },reduce()?0:1600);
+    },
+    stop(){timers.forEach(clearTimeout);timers=[];anims.forEach(a=>a.cancel());anims=[]},
+    finish(ctx){sel=ctx.state.side??0;br=ctx.state.br??null;obr=ctx.state.obr??null;if(br!==null){assign();picker.querySelectorAll(".breed").forEach((b,j)=>b.classList.toggle("on",j===br))}lockPicker(true);stain(10);cocks.concat(tags).forEach(b=>b.disabled=true);pose(ctx.state.step,sel)}
   };
   return G;
 })();
@@ -384,28 +540,30 @@ const ctx={
   done(){busy=false;$("resetBtn").disabled=false;finishView(true)}
 };
 function renderMech(){
-  $("mechOffer").textContent="Paano gumana ang "+GAME.label;
-  const steps=["<b>Sino ang pwede:</b> Kahit sinong verified na Win For Life player na may qualifying deposit na ₱200 pataas.","<b>Paano ma-unlock:</b> Ive-verify ng agent ang deposit mo at ibibigay niya ang personal mong game link."]
+  const off=BRAND.promo;
+  $("mechOffer").textContent=off.name;
+  const steps=["<b>Sino ang pwede:</b> "+off.target+".","<b>Paano ma-unlock:</b> "+off.trig+". Ive-verify ng agent ang deposit mo at ibibigay niya ang personal mong game link.","<b>Validity:</b> "+off.valid+"."]
     .concat(GAME.how.map(s=>"<b>"+GAME.label+":</b> "+s))
-    .concat(["<b>Premyo:</b> Flat na prize pool para sa lahat (tingnan sa ibaba) — ₱10, ₱27, o ₱57, random ang lalabas, pinakamadalang ang ₱57.",
+    .concat(["<b>Premyo:</b> Flat na prize pool — minimum deposit na "+php(MIN_DEPOSIT)+" para maka-qualify. Random ang lalabas na premyo, at pinakamadalang ang pinakamalaking halaga.",
       "<b>Pag-claim:</b> I-screenshot ang resulta at i-send sa agent mo. Ike-credit ang bonus pagkatapos ma-verify, at may turnover requirement bago ma-withdraw.",
       "<b>Isang laro lang bawat link.</b> Kahit mag-refresh o mag-reset, ang unang resultang na-confirm ng agent ang bibilangin."]);
   $("mechSteps").innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
-  $("mechTiers").innerHTML=PRIZES.map((p,i)=>"<tr><td>"+php(p)+"</td><td>"+WEIGHTS[i]+"%</td></tr>").join("");
+  $("mechTiers").innerHTML=PRIZES.map((p,i)=>"<tr><td>"+BRAND.labels[i]+"</td><td>"+php(p)+"</td><td>"+WEIGHTS[i]+"%</td></tr>").join("");
 }
 function buildView(){
   renderMech();
-  $("eyebrow").textContent=BRAND.name+" · Hanggang ₱777";
+  const q=qualifies(cfg.deposit),off=BRAND.promo;
+  $("eyebrow").textContent=BRAND.name+" · "+off.name;
   $("greeting").hidden=!cfg.name;if(cfg.name)$("greeting").textContent="Para kay "+cfg.name+"! 🎉";
   $("gameTitle").textContent=GAME.title;
   $("demoTag").hidden=mode!=="demo";
   $("play").innerHTML="";$("win").hidden=true;$("cheer").textContent="";
   busy=false;$("resetBtn").disabled=false;
   $("goBtn").hidden=!GAME.btn;$("goBtn").textContent=GAME.btn||"";
-  if(!qualifies(cfg.deposit)){$("range").textContent="Hinihintay pa ang qualified na deposit.";$("ladder").innerHTML="";$("goBtn").disabled=true;$("note").textContent="";return}
+  if(!q){$("range").textContent="Hinihintay pa ang qualified na deposit (minimum ₱200).";$("ladder").innerHTML="";$("goBtn").disabled=true;$("note").textContent="";return}
   ladder=PRIZES;
-  $("range").innerHTML="Minimum deposit <b>₱200</b> para maglaro · may mga promo kaming umaabot hanggang <b>₱777</b>";
-  $("ladder").innerHTML=ladder.map((v,i)=>"<li"+(i===ladder.length-1?" class='top'":"")+(GAME.chip?" style='"+GAME.chip(i)+"'":"")+">"+BRAND.labels[i]+"<b>"+php(v)+"</b></li>").join("");
+  $("range").innerHTML="Mga premyo namin, hanggang <b>₱777</b> ang halaga!";
+  $("ladder").innerHTML=ladder.map((v,i)=>"<li"+(i===PRIZES.length-1?" class='top'":"")+(GAME.chip?" style='"+GAME.chip(i)+"'":"")+">"+BRAND.labels[i]+"<b>"+php(v)+"</b></li>").join("");
   $("note").textContent=GAME.note;
   $("goBtn").disabled=false;$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));
   state=load();
@@ -413,15 +571,15 @@ function buildView(){
   if(state&&state.step!=null){GAME.finish(ctx);finishView(false)}
 }
 function finishView(celebrate){
-  const amt=ladder[state.step],big=state.step===ladder.length-1;
+  const amt=ladder[state.step],big=state.step===PRIZES.length-1;
   [...$("ladder").children].forEach((li,i)=>li.classList.toggle("on",i===state.step));
   $("amt").textContent=php(amt);$("winNote").textContent=BRAND.labels[state.step]+(big?" · Jackpot!":"");
   $("win").hidden=false;$("goBtn").disabled=true;$("goBtn").textContent="Nalaro mo na";
+  if(mode==="player")$("resetBtn").disabled=true;
   cheer(big?"JACKPOT!":"You Won!");
   if(celebrate){postWin(amt);setTimeout(()=>openWin(amt,big),reduce()?50:450)}
-  if(mode==="player")$("resetBtn").disabled=true; // block replay after a result is shown to a real player
 }
-function postWin(amt){try{fetch("https://wins-ledger-production.up.railway.app/api/win",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({brand:"winforlife",game:"Tree of Life",name:cfg.name||"",code:cfg.code,amount:amt,link:location.href})}).catch(()=>{})}catch(e){}}
+function postWin(amt){try{fetch("https://wins-ledger-production.up.railway.app/api/win",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({brand:"winforlife",game:"Sabong ng Swerte",name:cfg.name||"",code:cfg.code,amount:amt,link:location.href})}).catch(()=>{})}catch(e){}}
 $("goBtn").onclick=()=>{if(GAME.go)GAME.go(ctx)};
 $("resetBtn").onclick=()=>{if(busy)return;if(mode==="player"&&state&&state.step!=null)return;try{localStorage.removeItem(storeKey())}catch(e){}state=null;if(GAME.stop)GAME.stop();buildView();$("goBtn").focus()};
 
@@ -455,11 +613,14 @@ $("tncLink").onclick=e=>{e.preventDefault();$("tnc").open=true;$("tnc").scrollIn
 // ---------- link maker (owner and editors only) ----------
 function playerLink(){return location.href.split("#")[0]+"#"+makeToken(cfg)}
 function adminUI(){
+  const off=BRAND.promo;
+  $("offerBox").innerHTML="<strong></strong><p><b>Para kanino:</b> <span class='o1'></span></p><p><b>Paano ma-unlock:</b> <span class='o2'></span></p><p><b>Validity:</b> <span class='o3'></span></p>";
+  $("offerBox").querySelector("strong").textContent=off.name;$("offerBox").querySelector(".o1").textContent=off.target;$("offerBox").querySelector(".o2").textContent=off.trig;$("offerBox").querySelector(".o3").textContent=off.valid;
   if(document.activeElement!==$("deposit"))$("deposit").value=cfg.deposit||"";
-  if(document.activeElement!==$("name"))$("name").value=cfg.name||"";
-  const tb=$("aTier");
-  if(qualifies(cfg.deposit)){tb.className="tierbox";tb.innerHTML="<b>Qualified</b> — prize pool: ₱10 (4%), ₱27 (95%), ₱57 (1%)"}
-  else{tb.className="tierbox bad";tb.innerHTML="<b>Hindi qualified</b> — minimum deposit ay ₱200."}
+  if(document.activeElement!==$("code"))$("code").value=cfg.name||"";
+  const q=qualifies(cfg.deposit),tb=$("aTier");
+  if(q){tb.className="tierbox";tb.innerHTML="<b>Qualified</b> — prize pool: "+PRIZES.map((p,i)=>php(p)+" ("+WEIGHTS[i]+"%)").join(", ")}
+  else{tb.className="tierbox bad";tb.innerHTML="<b>Hindi qualified</b> — minimum deposit ay "+php(MIN_DEPOSIT)+"."}
   $("plink").textContent=playerLink();
 }
 function changed(){adminUI();buildView()}
@@ -467,29 +628,31 @@ function flash(btn,txt){const o=btn.textContent;btn.textContent=txt;setTimeout((
 async function copyText(t,btn){try{await navigator.clipboard.writeText(t);flash(btn,"Copied")}catch(e){const r=document.createRange();r.selectNodeContents($("plink"));const s=getSelection();s.removeAllRanges();s.addRange(r);flash(btn,"Selected")}}
 if(mode==="admin"){
   $("admin").hidden=false;$("previewLabel").hidden=false;
-  function showAdminPanel(){
-    $("adminGate").hidden=true;$("adminAuth").hidden=true;$("adminBody").hidden=false;
-    $("name").addEventListener("input",e=>{cfg.name=e.target.value;cfg.code=cleanCode(cfg.name)+"-"+Math.random().toString(36).slice(2,6);$("plink").textContent=playerLink()});
-    $("deposit").addEventListener("input",e=>{const v=e.target.value,n=Math.floor(+v);cfg.deposit=(v===""||!Number.isFinite(n))?0:Math.max(0,Math.min(999999,n));changed()});
+  function unlockAdmin(){
+    $("adminGate").hidden=true;$("adminBody").hidden=false;
+    $("code").addEventListener("input",e=>{cfg.name=e.target.value;cfg.code=(cleanCode(cfg.name)||"player")+"-"+Math.random().toString(36).slice(2,6);$("plink").textContent=playerLink()});
+    $("deposit").addEventListener("input",e=>{const v=e.target.value;cfg.deposit=v===""?0:Math.max(0,Math.min(999999,Math.floor(+v)));changed()});
     $("newLink").onclick=()=>{cfg.nonce=Date.now().toString(36);changed();$("aMsg").textContent="Bagong link na ito. Makakapaglaro ulit ang player gamit ito; huwag nang gamitin ang luma."};
     $("copyLink").onclick=()=>copyText(playerLink(),$("copyLink"));
-    $("copyMsg").onclick=()=>{if(!qualifies(cfg.deposit)){$("aMsg").textContent="Ilagay muna ang qualified na deposit.";return}copyText("Verified na ang deposit mo sa Win For Life, kaya may Tree of Life ka! Diligan mo ang puno — ₱10 hanggang ₱57 ang premyo, may mga promo kaming umaabot hanggang ₱777.\n\nI-play dito: "+playerLink(),$("copyMsg"))};
+    $("copyMsg").onclick=()=>{if(!qualifies(cfg.deposit)){$("aMsg").textContent="Ilagay muna ang qualified na deposit.";return}copyText(BRAND.promo.script+"\n\nI-play dito: "+playerLink(),$("copyMsg"))};
     adminUI();
   }
-  let unlocked=false;try{unlocked=sessionStorage.getItem("admin-unlocked")==="1"}catch(e){}
-  if(unlocked){showAdminPanel()}
+  let unlocked=false;
+  try{unlocked=sessionStorage.getItem("admin-unlocked")==="1"}catch(e){}
+  if(unlocked){unlockAdmin()}
   else{
-    $("adminGate").textContent="Kailangan ng password para makagawa ng player links.";
-    $("adminAuth").hidden=false;
-    $("adminUnlock").onclick=()=>{
+    $("adminGate").innerHTML="<span>Kailangan ng password para dito. Tanungin ang supervisor para sa password.</span><div style='display:flex;gap:8px;margin-top:8px'><input class='inp' type='password' id='adminPass' placeholder='Password' autocomplete='off' style='max-width:200px'><button class='btn small' id='adminPassGo' type='button'>Unlock</button></div><p id='adminPassErr' style='color:var(--bad);margin:6px 0 0'></p>";
+    const tryUnlock=()=>{
       const v=$("adminPass").value;
-      if(h36(v+SALT)===ADMIN_PASS_CHECK){try{sessionStorage.setItem("admin-unlocked","1")}catch(e){}showAdminPanel()}
-      else{$("adminErr").hidden=false;$("adminPass").value="";$("adminPass").focus()}
+      if(h36(v+SALT)===ADMIN_PASS_CHECK){try{sessionStorage.setItem("admin-unlocked","1")}catch(e){}unlockAdmin()}
+      else{$("adminPassErr").textContent="Mali ang password."}
     };
-    $("adminPass").addEventListener("keydown",e=>{if(e.key==="Enter")$("adminUnlock").click()});
+    $("adminPassGo").onclick=tryUnlock;
+    $("adminPass").addEventListener("keydown",e=>{if(e.key==="Enter")tryUnlock()});
   }
 }
 buildView();
 </script>
 
-</body></html>
+</body>
+</html>
