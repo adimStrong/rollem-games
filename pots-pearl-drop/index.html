@@ -165,7 +165,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <p class="demo" id="demoTag" hidden>DEMO · kailangan ng link mula sa agent mo para sa totoong premyo</p>
     <p class="cheer" id="cheer"></p>
     <div class="play" id="play"></div>
-    <ul class="ladder" id="ladder" aria-label="Mga premyo"></ul>
+    <ul class="ladder" id="ladder" aria-label="Mga premyo" hidden></ul>
     <label class="agree" id="agreeLbl"><input type="checkbox" id="agree"><span>Nabasa ko at sang-ayon ako sa <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button> ng Pearl Drop.</span></label>
     <div class="acts"><button class="btn" id="goBtn" type="button"></button><button class="btn ghost" id="resetBtn" type="button">Reset</button></div>
     <div class="win" id="win" hidden>
@@ -180,8 +180,8 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <h2 id="mechTitle">Mechanics</h2>
     <p class="mech-sub" id="mechOffer"></p>
     <ol id="mechSteps"></ol>
-    <h3>Prize pool</h3>
-    <div class="tblwrap"><table><thead><tr><th>Premyo</th><th>Tsansa</th></tr></thead><tbody id="mechTiers"></tbody></table></div>
+    <h3 hidden>Prize pool</h3>
+    <div class="tblwrap" hidden><table><thead><tr><th>Premyo</th><th>Tsansa</th></tr></thead><tbody id="mechTiers"></tbody></table></div>
   </section>
 
   <div class="jp" id="jp" role="dialog" aria-modal="true" aria-labelledby="jpTitle" hidden>
@@ -362,7 +362,7 @@ function buildView(){
   busy=false;$("resetBtn").disabled=false;
   $("goBtn").hidden=!GAME.btn;$("goBtn").textContent=GAME.btn||"";
   if(!q){$("range").textContent="Hinihintay pa ang qualified na deposit.";$("ladder").innerHTML="";$("goBtn").disabled=true;$("note").textContent="";return}
-  $("range").innerHTML="Minimum deposit na <b>"+php(MIN_DEPOSIT)+"</b> · pwede kang manalo ng <b>"+php(PRIZES[0])+"</b>–<b>"+php(PRIZES[PRIZES.length-1])+"</b>";
+  $("range").innerHTML="Minimum deposit na <b>"+php(MIN_DEPOSIT)+"</b> · mga premyo hanggang <b>₱777</b>!";
   $("ladder").innerHTML=PRIZES.map((v,i)=>"<li"+(i===PRIZES.length-1?" class='top'":"")+(GAME.chip?" style='"+GAME.chip(i)+"'":"")+">"+BRAND.labels[i]+"<b>"+php(v)+"</b></li>").join("");
   $("note").textContent=GAME.note;
   $("goBtn").disabled=false;$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));
