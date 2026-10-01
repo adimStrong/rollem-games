@@ -342,7 +342,7 @@ function buildView(){
     const l=document.createElement("div");l.className="line";l.innerHTML=game.rolls>1?"Roll "+(r+1):"&nbsp;";row.appendChild(l);$("rolls").appendChild(row);rows.push(row)}
   $("win").hidden=true;stopCheers();$("cheer").textContent="";$("stall").classList.remove("rolling","won");
   if(!q){$("range").innerHTML="<span class='wait'>Hinihintay pa ang qualified na deposit.</span>";$("rollBtn").disabled=true;$("rollBtn").textContent="Roll the dice";$("note").textContent="";return}
-  $("range").innerHTML="Pwede kang manalo ng <b>₱10</b>, <b>₱27</b>, o <b>₱57</b>.";
+  $("range").innerHTML="Mga premyo hanggang <b>₱777</b>!";
   $("note").textContent="Isang roll lang. I-screenshot ang resulta at i-send sa agent mo.";
   $("rollBtn").disabled=false;$("rollBtn").textContent="Roll the dice";$("rollBtn").setAttribute("aria-disabled",String(!$("agree").checked));
   let saved=null;try{saved=JSON.parse(localStorage.getItem(storeKey())||"null")}catch(e){}
