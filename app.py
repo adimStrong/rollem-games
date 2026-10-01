@@ -18,6 +18,19 @@ VALID_AMOUNTS = {10, 27, 57}
 VALID_BRANDS = {"gopyesta", "pots", "rollem", "winforlife", "cow", "tamasa", "gspot", "t2b"}
 
 
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Admin-Token"
+    return response
+
+
+@app.route("/api/win", methods=["OPTIONS"])
+def win_options():
+    return "", 204
+
+
 def db():
     conn = psycopg2.connect(DATABASE_URL)
     conn.autocommit = True
