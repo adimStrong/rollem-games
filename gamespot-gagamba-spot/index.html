@@ -324,6 +324,7 @@ const $=id=>document.getElementById(id);
 const MIN_DEPOSIT=200;
 const PRIZES=[10,27,57]; // peso amounts, ascending
 const WEIGHTS=[4,95,1]; // % chance matching PRIZES index-for-index, sums to 100
+function qualifies(d){return d>=MIN_DEPOSIT}
 function php(n){return "₱"+Number(n).toLocaleString()}
 function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296}
 function drawStep(){let r=rnd()*100;for(let i=0;i<WEIGHTS.length;i++){r-=WEIGHTS[i];if(r<0)return i}return 0}
