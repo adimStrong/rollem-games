@@ -35,25 +35,63 @@ h2.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,36
 @keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
 .play{display:grid;justify-items:center;gap:10px}
 
-/* Triple Tama slot */
-.machine{width:min(330px,100%);background:linear-gradient(180deg,#5a0f16,#3a070c);border-radius:18px;padding:14px;box-shadow:inset 0 0 0 3px var(--gold),0 12px 30px rgba(0,0,0,.5);display:grid;gap:10px}
-.reels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;position:relative}
-.reels::after{content:"";position:absolute;left:-6px;right:-6px;top:50%;height:2px;margin-top:-1px;background:var(--gold);opacity:.7;pointer-events:none}
-.reel{height:210px;overflow:hidden;border-radius:10px;background:var(--paper);position:relative;box-shadow:inset 0 10px 14px rgba(0,0,0,.35),inset 0 -10px 14px rgba(0,0,0,.35)}
-.strip{position:absolute;left:0;right:0;top:0;will-change:transform}
-.sym{height:70px;display:grid;place-items:center;font:700 44px/1 var(--display)}
-.reel.hit{box-shadow:inset 0 0 0 3px var(--gold),inset 0 10px 14px rgba(0,0,0,.35)}
-.lights{display:flex;justify-content:space-around}
-.lights i{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);animation:blink 1.2s infinite alternate}
-.lights i:nth-child(2n){animation-delay:.6s}
-.machine.running .lights i{animation-duration:.15s}
-@keyframes blink{from{opacity:.3}to{opacity:1}}
-.paytable{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0;padding:0;list-style:none;width:min(330px,100%)}
-.paytable li{display:flex;justify-content:space-between;align-items:center;gap:4px;padding:5px 8px;border-radius:8px;border:1px solid var(--line);font:700 12px var(--mono);font-variant-numeric:tabular-nums;min-width:0}
-.paytable li span{font:400 14px var(--display);letter-spacing:1px}
-.paytable li.top{border-color:var(--gold);color:var(--gold)}
-@media (max-width:380px){.reel{height:180px}.sym{height:60px;font-size:38px}.paytable{grid-template-columns:repeat(2,1fr)}}
-@media (prefers-reduced-motion:reduce){.lights i{animation:none}}
+/* Triple Tama: coin toss */
+.toss{position:relative;width:100%;height:300px;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#3b2f24 0%,#5a4632 45%,#6e5a42 100%);box-shadow:inset 0 0 0 2px var(--line)}
+.toss .legs{position:absolute;left:0;right:0;top:-6px;width:100%;height:150px;opacity:.95}
+.toss .ground{position:absolute;left:0;right:0;bottom:0;height:175px;background:
+ radial-gradient(ellipse at 50% 75%,rgba(235,225,205,.45),transparent 60%),
+ radial-gradient(circle at 20% 30%,rgba(0,0,0,.12) 1px,transparent 1.5px) 0 0/9px 9px,
+ radial-gradient(circle at 70% 60%,rgba(255,255,255,.08) 1px,transparent 1.5px) 0 0/13px 11px,
+ linear-gradient(180deg,#6b5640,#8a7458 40%,#b8a888);box-shadow:0 -8px 14px rgba(0,0,0,.25)}
+.toss .stand{position:absolute;left:4%;bottom:60px;width:52px;height:110px;opacity:.9}
+.stone{position:absolute;left:12%;right:12%;bottom:16px;height:116px}
+.stone .side{position:absolute;left:0;right:0;bottom:0;height:80px;border-radius:0 0 50% 50%/0 0 30% 30%;background:
+ radial-gradient(ellipse at 30% 60%,rgba(255,255,255,.18),transparent 40%),
+ radial-gradient(circle at 70% 40%,rgba(0,0,0,.25) 2px,transparent 3px) 0 0/23px 19px,
+ linear-gradient(90deg,#1e4f8f,#3a78c4 35%,#2f66ad 65%,#163e72);box-shadow:0 10px 14px rgba(0,0,0,.45)}
+.stone .side::after{content:"";position:absolute;left:58%;top:40%;width:30px;height:14px;border-radius:40%;background:#7d7f84;opacity:.8}
+.stone .top{position:absolute;left:0;right:0;top:0;height:76px;border-radius:50%;background:#8a8e94 center/cover;box-shadow:inset 0 -4px 8px rgba(0,0,0,.35),inset 0 3px 4px rgba(255,255,255,.25),0 0 0 2px #6f737a}
+.toss .shadow{position:absolute;bottom:72px;width:52px;height:10px;margin-left:-26px;border-radius:50%;background:rgba(20,20,24,.6);filter:blur(2px);opacity:.55;z-index:2}
+.coinwrap{position:absolute;bottom:78px;width:58px;height:58px;margin-left:-29px;perspective:400px;z-index:3}
+.coin{position:relative;width:100%;height:100%;transform-style:preserve-3d}
+.coin .face{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;box-shadow:0 0 0 2px #a8780e,0 0 0 3.5px #6b4a08}
+.coin .face svg{width:100%;height:100%;display:block}
+.coin .face.kara{transform:translateZ(1.5px)}
+.coin .face.krus{transform:rotateX(180deg) translateZ(1.5px)}
+.hand{position:absolute;left:-46px;bottom:146px;width:224px;z-index:4;line-height:0;transform-origin:10% 80%;filter:drop-shadow(0 8px 8px rgba(0,0,0,.35))}
+.hand svg *{transform-box:fill-box}
+.hand .fingers{transform-origin:0% 50%}
+.hand .thumb{transform-origin:0% 100%}
+.hand svg{width:100%;height:auto;display:block}
+.toss::after{content:"SLOW-MO";position:absolute;inset:0;z-index:5;display:grid;place-items:end center;padding-bottom:12px;font:400 15px var(--display);letter-spacing:4px;color:rgba(255,255,255,.85);background:radial-gradient(ellipse at 50% 60%,transparent 35%,rgba(0,0,0,.65) 100%);opacity:0;transition:opacity .35s;pointer-events:none}
+.toss.slowmo::after{opacity:1}
+.toss.slowmo .table{filter:saturate(.5) brightness(.75);transition:filter .35s}
+.coinwrap.hero{z-index:6}
+.coinwrap.hero .coin{filter:drop-shadow(0 0 10px rgba(255,220,120,.85))}
+.ulit{position:absolute;left:50%;top:50%;z-index:6;transform:translate(-50%,-50%);padding:8px 16px;border-radius:12px;font:400 20px var(--display);letter-spacing:1px;white-space:nowrap;opacity:0;pointer-events:none;color:#fff;background:rgba(0,0,0,.7);box-shadow:0 0 0 2px rgba(255,255,255,.4)}
+.ulit.pop{opacity:1;animation:upop .4s cubic-bezier(.2,1.6,.4,1)}
+@keyframes upop{from{transform:translate(-50%,-50%) scale(.4);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+.ulit.mix{background:rgba(120,90,10,.85);color:#fff3c4}
+.ulit.win{background:rgba(20,110,50,.9);box-shadow:0 0 0 2px #7ef0a2,0 0 24px rgba(62,207,106,.6)}
+.ulit.lose{background:rgba(140,20,30,.9);box-shadow:0 0 0 2px #ffb0b0}
+.tally{position:absolute;left:10px;right:10px;top:10px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;z-index:4}
+.slot{display:grid;justify-items:center;gap:1px;padding:5px 4px;border-radius:10px;background:rgba(0,0,0,.35);border:1px solid var(--line);line-height:1.15;min-width:0}
+.slot b{font:400 15px var(--display);color:var(--paper)}
+.slot small{font:700 11px var(--mono);color:var(--muted)}
+.slot em{font-size:9.5px;font-style:normal;color:var(--muted)}
+.slot.ok{border-color:#3ecf6a;background:rgba(62,207,106,.16)}
+.slot.ok small{color:#7ef0a2}
+.slot.no{border-color:#ff6b6b;background:rgba(255,107,107,.12)}
+.slot.no small{color:#ffb0b0}
+.slot.ok,.slot.no{animation:pop .35s ease-out}
+.calls{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.call{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 10px;border-radius:14px;border:2px solid var(--line);background:linear-gradient(180deg,#3a0f15,#26090d);color:var(--gold);font:400 24px var(--display);letter-spacing:1px;cursor:pointer}
+.call .mini{width:38px;height:38px;border-radius:50%;line-height:0;box-shadow:0 0 0 2px #a8780e}
+.call .mini svg{width:100%;height:100%}
+.call.on{border-color:var(--gold);box-shadow:0 0 16px rgba(255,197,61,.5);background:linear-gradient(180deg,#5a1820,#3a0f15)}
+.call:disabled{opacity:.45;cursor:default}
+.call.on:disabled{opacity:1}
+@media (prefers-reduced-motion:reduce){.slot.ok,.slot.no,.ulit.pop{animation:none}}
 .btn{font:700 18px var(--body);letter-spacing:.3px;padding:15px 22px;border-radius:12px;border:0;cursor:pointer;background:var(--accent);color:var(--accent-ink);width:100%}
 .btn:disabled,.btn[aria-disabled="true"]{opacity:.5;cursor:default}
 .btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
@@ -166,7 +204,7 @@ h2.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,36
         <p class="cheer" id="cheer"></p>
     <div class="play" id="play"></div>
     <label class="agree" id="agreeLbl"><input type="checkbox" id="agree"><span>Nabasa ko at sang-ayon ako sa <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button> ng Triple Tama.</span></label>
-    <div class="acts" id="acts"><button class="btn" id="goBtn" type="button">I-spin ang slot</button><button class="btn ghost" id="resetBtn" type="button">Reset</button></div>
+    <div class="acts" id="acts"><button class="btn" id="goBtn" type="button">Pumili muna: Kara o Krus</button><button class="btn ghost" id="resetBtn" type="button">Reset</button></div>
     <div class="win" id="win" hidden>
       <small>Bonus mo</small>
       <strong id="amt"></strong>
@@ -193,9 +231,9 @@ h2.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,36
     <ol>
       <li>Open to verified Tamasa players aged 21 and above. Self-excluded, restricted or unverified accounts are not eligible.</li>
       <li>A game is unlocked by a qualifying deposit of at least ₱200, made after you are contacted by a Tamasa agent, and within 72 hours of that contact. Pending, failed or reversed deposits do not qualify.</li>
-      <li>The prize pool is fixed: ₱10, ₱27, or ₱57, shown in the paytable on the game page. Every spin lands three matching symbols drawn at random, and you win that symbol’s amount. Triple 7 is the jackpot and is the rarest result.</li>
-      <li>One spin per qualifying deposit.</li>
-      <li>Results are random and final once the reels start spinning. Refreshing the page, reopening the link or using another device does not give another turn. Only the result confirmed by your agent counts.</li>
+      <li>The prize pool is fixed: ₱10, ₱27, or ₱57, shown on the game page. You call Kara or Krus and three coins are tossed; if the three coins do not all match, they are tossed again automatically. When all three match, you win ₱27 if they show your call or the ₱10 consolation if they do not — matching on the very first toss is the ₱57 Triple Tama jackpot, the rarest result.</li>
+      <li>One toss sequence per qualifying deposit.</li>
+      <li>Results are random and final once the coins are tossed. Refreshing the page, reopening the link or using another device does not give another turn. Only the result confirmed by your agent counts.</li>
       <li>Send a screenshot of your result to your agent. The bonus is credited after the agent verifies your deposit and result, within the time your agent announces.</li>
       <li>The bonus is subject to the turnover requirement set by Tamasa before it can be withdrawn.</li>
       <li>One claim per player per promo cycle. Multiple or linked accounts, or any attempt to abuse this promo, void the bonus and may lead to action on the account.</li>
@@ -217,12 +255,9 @@ function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/
 function drawStep(){let r=rnd()*100;for(let i=0;i<WEIGHTS.length;i++){r-=WEIGHTS[i];if(r<0)return i}return 0}
 function shuffle(a){for(let k=a.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
 
-const GAMES={
-  slot:{title:"TRIPLE TAMA",label:"Triple Tama",btn:"I-spin ang slot",note:"Isang spin lang. Tatlong magkaparehong simbolo ang premyo mo. I-screenshot ang resulta at i-send sa agent mo."}
-};
-// one symbol per prize step, lowest to jackpot (kept from the old 6-step set: indices 0, 2, 5)
-const SYMS=[{g:"♣",c:"#1f6b3a"},{g:"♥",c:"#c8102e"},{g:"7",c:"#c8102e"}];
+const LABELS=["Talo","Panalo","Triple Tama"];
 const $=id=>document.getElementById(id);
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
 
 // ---------- link parsing ----------
 // #admin / #admin-<code> = control panel; #<code> = player view (default "demo")
@@ -243,7 +278,8 @@ try{soundOn=localStorage.getItem("tamasa-sound")!=="off"}catch(e){}
 function audio(){if(!soundOn)return null;if(!actx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;actx=new AC()}if(actx.state==="suspended")actx.resume();return actx}
 function beep(f,dur,vol,type,delay){const a=audio();if(!a)return;const t=a.currentTime+(delay||0),o=a.createOscillator(),g=a.createGain();o.type=type||"triangle";o.frequency.value=f;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);o.connect(g).connect(a.destination);o.start(t);o.stop(t+dur+.02)}
 function tick(){beep(1800+rnd()*300,.04,.08,"square")}
-function scratchSound(){const a=audio();if(!a)return;const n=Math.floor(a.sampleRate*.05),b=a.createBuffer(1,n,a.sampleRate),ch=b.getChannelData(0);for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*(1-i/n);const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type="highpass";f.frequency.value=2500;const g=a.createGain();g.gain.value=.06;s.connect(f).connect(g).connect(a.destination);s.start()}
+function noise(dur,vol,freq){const a=audio();if(!a)return;const n=Math.floor(a.sampleRate*dur),b=a.createBuffer(1,n,a.sampleRate),ch=b.getChannelData(0);for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type="bandpass";f.frequency.value=freq||1200;const g=a.createGain();g.gain.value=vol;s.connect(f).connect(g).connect(a.destination);s.start()}
+function whoosh(sec){const a=audio();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type="sine";o.frequency.setValueAtTime(320,a.currentTime);o.frequency.linearRampToValueAtTime(120,a.currentTime+sec);g.gain.setValueAtTime(0,a.currentTime);g.gain.linearRampToValueAtTime(.08,a.currentTime+.3);g.gain.linearRampToValueAtTime(0,a.currentTime+sec);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+sec+.05)}
 function fanfare(big){(big?[523.25,659.25,783.99,1046.5,1318.5,1568]:[659.25,783.99,1046.5]).forEach((f,i)=>beep(f,.5,big?.07:.12,big?"square":"triangle",i*.11))}
 function paintSound(){$("soundBtn").textContent=soundOn?"Sound on":"Sound off";$("soundBtn").setAttribute("aria-pressed",soundOn)}
 $("soundBtn").onclick=()=>{soundOn=!soundOn;try{localStorage.setItem("tamasa-sound",soundOn?"on":"off")}catch(e){}if(!soundOn&&actx)actx.suspend();paintSound()};
@@ -254,79 +290,217 @@ const reduce=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
 function needAgree(){if($("agree").checked)return false;const l=$("agreeLbl");l.classList.remove("nudge");void l.offsetWidth;l.classList.add("nudge");cheer("I-check muna ang T&C.");return true}
 
 // ---------- game state ----------
-let busy=false,viewKey="",state=null,game=null;
+let busy=false,viewKey="",state=null;
+const ctx={
+  get state(){return state},
+  start(extra){state=Object.assign({step:drawStep()},extra||{});persist(state);return state},
+  setBusy(v){busy=v;$("resetBtn").disabled=v},isBusy(){return busy},
+  agreed(){return !needAgree()},
+  done(){busy=false;$("resetBtn").disabled=false;finishView(true)}
+};
 
 function buildView(){
-  const g=GAMES.slot,q=qualifies(cfg.deposit);game="slot";
+  const q=qualifies(cfg.deposit);
   $("brand").textContent=cfg.name?cfg.name+" · Tamasa":"Tamasa";
-  $("gameTitle").textContent=g.title;
+  $("gameTitle").textContent=GAME.title;
   $("play").innerHTML="";$("win").hidden=true;$("cheer").textContent="";$("note").textContent="";
-  $("goBtn").textContent=g.btn;$("resetBtn").disabled=false;
+  $("goBtn").textContent=GAME.btn;$("resetBtn").disabled=false;
   if(!q){$("range").innerHTML="<span class='wait'>Hinihintay pa ang qualified na deposit.</span>";$("goBtn").disabled=true;return}
   $("range").innerHTML="Mga premyo hanggang <b>₱777</b>!";
-  $("note").textContent=g.note;
+  $("note").textContent=GAME.note;
   $("goBtn").disabled=false;$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));
   state=loadSaved();
-  buildSlot();
-  if(state&&state.step!=null){finishView(false)}
+  GAME.build($("play"),ctx);
+  if(state&&state.step!=null){GAME.finish(ctx);finishView(false)}
 }
 function refreshView(){const k=storeKey();if(k===viewKey||busy)return;viewKey=k;buildView()}
 
 function finishView(celebrate){
   const amt=PRIZES[state.step],big=state.step===PRIZES.length-1;
-  showSlotFinal();
-  $("amt").textContent=php(amt);$("winNote").textContent=(big?"Triple 7! Jackpot · ":"")+SYMS[state.step].g.repeat(3);
+  $("amt").textContent=php(amt);$("winNote").textContent=LABELS[state.step]+(big?" · Jackpot!":"");
   $("win").hidden=false;$("goBtn").disabled=true;$("goBtn").textContent="Nalaro mo na";
   if(!isAdmin)$("resetBtn").disabled=true;
-  cheer(big?"JACKPOT!":"You Won!");
   if(celebrate){postWin(amt);setTimeout(()=>openWin(amt,big),450)}
 }
 function postWin(amt){try{fetch("https://wins-ledger-production.up.railway.app/api/win",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({brand:"tamasa",game:"Triple Tama",name:cfg.name||"",code:code,amount:amt,link:location.href})}).catch(()=>{})}catch(e){}}
 function startRound(extra){state=Object.assign({step:drawStep()},extra||{});persist(state);return state}
 
-// ---------- Triple Tama slot ----------
-const LOOPS=[18,24,30];
-function symHTML(k){return "<div class='sym' style='color:"+SYMS[k].c+"'>"+SYMS[k].g+"</div>"}
-function finalWindow(k){return symHTML((k+SYMS.length-1)%SYMS.length)+symHTML(k)+symHTML((k+1)%SYMS.length)}
-function buildSlot(){
-  const m=document.createElement("div");m.className="machine";
-  m.innerHTML="<div class='lights' aria-hidden='true'>"+"<i></i>".repeat(9)+"</div><div class='reels'>"+[0,1,2].map(r=>"<div class='reel' aria-label='Reel "+(r+1)+"'><div class='strip'></div></div>").join("")+"</div><div class='lights' aria-hidden='true'>"+"<i></i>".repeat(9)+"</div>";
-  $("play").appendChild(m);
-  const pt=document.createElement("ul");pt.className="paytable";pt.setAttribute("aria-label","Paytable");pt.hidden=true;
-  pt.innerHTML=PRIZES.map((v,k)=>"<li"+(k===PRIZES.length-1?" class='top'":"")+"><span style='color:"+(k===PRIZES.length-1?"var(--gold)":"var(--paper)")+"'>"+SYMS[k].g.repeat(3)+"</span>"+php(v)+"</li>").join("");
-  $("play").appendChild(pt);
-  m.querySelectorAll(".strip").forEach((st,r)=>{st.innerHTML=[(r+1)%SYMS.length,(r+3)%SYMS.length,(r+5)%SYMS.length].map(symHTML).join("")});
-}
-function showSlotFinal(){
-  document.querySelectorAll(".strip").forEach(st=>{st.style.transition="none";st.innerHTML=finalWindow(state.step);st.style.transform="translateY(0)"});
-  document.querySelectorAll(".reel").forEach(r=>r.classList.add("hit"));
-}
-function spinSlot(){
-  if(busy||state&&state.step!=null)return;if(needAgree())return;
-  startRound();const k=state.step;
-  busy=true;$("goBtn").disabled=true;$("resetBtn").disabled=true;
-  const m=document.querySelector(".machine");m.classList.add("running");cheer("Umiikot…");
-  const h=document.querySelector(".sym").offsetHeight||70,fast=reduce();
-  const done=[...document.querySelectorAll(".strip")].map((st,r)=>new Promise(res=>{
-    const n=fast?3:LOOPS[r],seq=[];for(let q=0;q<n;q++)seq.push(Math.floor(rnd()*SYMS.length));
-    seq.push((k+SYMS.length-1)%SYMS.length,k,(k+1)%SYMS.length);
-    st.style.transition="none";st.innerHTML=seq.map(symHTML).join("");st.style.transform="translateY(0)";void st.offsetWidth;
-    const dur=fast?.3:1.6+r*.7,dist=(seq.length-3)*h;
-    st.style.transition="transform "+dur+"s cubic-bezier(.15,.6,.25,1.04)";st.style.transform="translateY(-"+dist+"px)";
-    if(!fast){let last=0;const t0=performance.now();(function tk(now){const p=Math.min(1,(now-t0)/(dur*1000)),cur=Math.floor((1-Math.pow(1-p,3))*(seq.length-3));if(cur!==last){last=cur;if(cur%2===0)tick()}if(p<1)requestAnimationFrame(tk)})(t0)}
-    setTimeout(()=>{beep(220,.15,.18,"square");st.parentNode.classList.add("hit");res()},dur*1000+30);
-  }));
-  Promise.all(done).then(()=>{m.classList.remove("running");busy=false;$("resetBtn").disabled=false;finishView(true)});
-}
+// ---------- Triple Tama: coin toss ----------
+const GAME=(()=>{
+  const N=3,FACE={kara:"KARA",krus:"KRUS"},XS=[0.34,0.5,0.66],DUR=2400,SLOW=3200;
+  let box,coins=[],wraps=[],shadows=[],slots=[],btns=[],hand,call=null,anims=[];
+  const KARA="<svg viewBox='0 0 100 100' aria-hidden='true'><circle cx='50' cy='50' r='47' fill='url(#kg)'/><circle cx='50' cy='50' r='40' fill='none' stroke='#9a6a10' stroke-width='2' stroke-dasharray='2 3'/>"+
+    "<path d='M45 24 C56 20 66 27 66 38 C66 42 68 45 70 47 L66 49 C66 53 64 57 60 59 L60 66 C60 70 54 73 46 73 L38 73 C38 64 36 58 34 52 C30 42 35 29 45 24 Z' fill='#b07a16' stroke='#7a520a' stroke-width='1.5'/>"+
+    "<path d='M48 30 C54 29 58 33 58 38' stroke='#ffe9a0' stroke-width='2' fill='none' opacity='.7'/><text x='50' y='88' text-anchor='middle' font-size='9' font-weight='700' fill='#7a520a' font-family='JetBrains Mono,monospace'>KARA</text></svg>";
+  const KRUS="<svg viewBox='0 0 100 100' aria-hidden='true'><circle cx='50' cy='50' r='47' fill='url(#kg)'/><circle cx='50' cy='50' r='40' fill='none' stroke='#9a6a10' stroke-width='2' stroke-dasharray='2 3'/>"+
+    "<path d='M44 20 L56 20 L54 40 L74 38 L74 50 L54 48 L56 70 L44 70 L46 48 L26 50 L26 38 L46 40 Z' fill='#b07a16' stroke='#7a520a' stroke-width='1.5' stroke-linejoin='round'/>"+
+    "<circle cx='50' cy='44' r='5' fill='#ffe08a' stroke='#7a520a' stroke-width='1.2'/><text x='50' y='88' text-anchor='middle' font-size='9' font-weight='700' fill='#7a520a' font-family='JetBrains Mono,monospace'>KRUS</text></svg>";
+  const DEFS="<svg width='0' height='0' style='position:absolute' aria-hidden='true'><defs><radialGradient id='kg' cx='35%' cy='30%' r='75%'><stop offset='0' stop-color='#fff3b8'/><stop offset='.45' stop-color='#f2c24a'/><stop offset='1' stop-color='#b8860b'/></radialGradient></defs></svg>";
+  const HAND=(()=>{const O="#7a4a2a",sk="url(#skn)";
+    const fing=(y,len,bend,w)=>{const x0=184,x1=x0+len*.55,x2=x0+len;
+      const d="M"+x0+" "+y+" C"+x1+" "+(y-bend*.3)+" "+(x2-6)+" "+(y-bend)+" "+x2+" "+(y-bend-2);
+      return "<path d='"+d+"' stroke='"+O+"' stroke-width='"+(w+2.4)+"' fill='none' stroke-linecap='round'/><path d='"+d+"' stroke='"+sk+"' stroke-width='"+w+"' fill='none' stroke-linecap='round'/>"+
+        "<ellipse cx='"+(x2-2)+"' cy='"+(y-bend-2.6)+"' rx='3.6' ry='2.2' fill='#f3d2bd' stroke='#c99a80' stroke-width='.6'/>"+
+        "<path d='M"+(x0+len*.45)+" "+(y-bend*.25-3)+" q2 3 0 6' stroke='#b98463' stroke-width='.9' fill='none'/>"};
+    return "<svg viewBox='0 0 240 140' aria-hidden='true'><defs>"+
+      "<linearGradient id='skn' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#f2c7a2'/><stop offset='.55' stop-color='#dca27a'/><stop offset='1' stop-color='#b97c56'/></linearGradient>"+
+      "<radialGradient id='plm' cx='55%' cy='35%' r='70%'><stop offset='0' stop-color='#f6d2b4'/><stop offset='.6' stop-color='#e2ab84'/><stop offset='1' stop-color='#c08460'/></radialGradient>"+
+      "<linearGradient id='slv' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#e0283a'/><stop offset='1' stop-color='#8e0f1d'/></linearGradient></defs>"+
+      "<path d='M60 70 Q86 64 110 68 L114 106 Q88 112 62 106 Z' fill='url(#skn)' stroke='"+O+"' stroke-width='1.4'/>"+
+      "<path d='M74 76 Q88 74 100 76' stroke='#c08460' stroke-width='1' fill='none' opacity='.7'/>"+
+      "<g class='palmg'><path d='M100 70 C122 58 160 56 182 62 C194 66 199 78 194 90 C188 102 160 108 130 106 L104 106 Z' fill='url(#plm)' stroke='"+O+"' stroke-width='1.6' stroke-linejoin='round'/>"+
+      "<path d='M118 84 C136 78 158 78 176 74 M122 94 C140 90 160 92 180 86 M140 68 C146 78 150 90 150 102' stroke='#b9805c' stroke-width='1.1' fill='none' opacity='.75'/>"+
+      "<g class='fingers'>"+fing(66,40,8,9.5)+fing(75,44,7,10)+fing(84,42,6,10)+fing(93,36,5,9)+"</g>"+
+      "<g class='thumb'><path d='M118 72 C122 56 138 46 154 46' stroke='"+O+"' stroke-width='14.5' fill='none' stroke-linecap='round'/><path d='M118 72 C122 56 138 46 154 46' stroke='url(#skn)' stroke-width='12' fill='none' stroke-linecap='round'/>"+
+      "<ellipse cx='154' cy='45.6' rx='4.4' ry='2.8' fill='#f3d2bd' stroke='#c99a80' stroke-width='.6'/><path d='M136 50 q3 3 1 7' stroke='#b98463' stroke-width='.9' fill='none'/></g></g>"+
+      "<path d='M0 140 L0 64 Q30 52 72 62 L80 140 Z' fill='url(#slv)' stroke='#5a0a12' stroke-width='1.6'/>"+
+      "<path d='M14 70 Q30 92 22 120 M44 66 Q56 90 50 128' stroke='rgba(0,0,0,.25)' stroke-width='2' fill='none'/><path d='M66 63 L74 140' stroke='#fff' stroke-width='5'/><path d='M72 62 L80 140' stroke='#8e0f1d' stroke-width='3'/></svg>"})();
+  let CONC=null;
+  function concrete(w,h){
+    if(CONC)return CONC;
+    const cv=document.createElement("canvas");cv.width=w;cv.height=h;const g=cv.getContext("2d"),img=g.createImageData(w,h),d=img.data;
+    const N=64,grid=new Float32Array((N+1)*(N+1));for(let i=0;i<grid.length;i++)grid[i]=Math.random();
+    for(let i=0;i<=N;i++){grid[i*(N+1)+N]=grid[i*(N+1)];grid[N*(N+1)+i]=grid[i]}
+    const sm=t=>t*t*(3-2*t);
+    const vn=(x,y)=>{const X=Math.floor(x),Y=Math.floor(y),xi=((X%N)+N)%N,yi=((Y%N)+N)%N,u=sm(x-X),v=sm(y-Y),a=grid[yi*(N+1)+xi],b=grid[yi*(N+1)+xi+1],c=grid[(yi+1)*(N+1)+xi],e=grid[(yi+1)*(N+1)+xi+1];return a+(b-a)*u+(c-a)*v+(a-b-c+e)*u*v};
+    const turb=(x,y)=>{let t=0,f=1,a=1;for(let o=0;o<4;o++){t+=vn(x*f,y*f)*a;f*=2;a/=2}return t};
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+      const cloud=turb(x/60,y/30),grain=(Math.random()-.5)*26,pit=Math.random()<.006?-45:0,worn=Math.pow(Math.max(0,1-Math.hypot((x-w/2)/(w*.32),(y-h/2)/(h*.36))),2)*22;
+      const v=128+cloud*32+grain+pit+worn,k=(y*w+x)*4;d[k]=v+2;d[k+1]=v+3;d[k+2]=v+6;d[k+3]=255}
+    g.putImageData(img,0,0);CONC=cv.toDataURL("image/jpeg",.85);return CONC;
+  }
+  const LEGS=(()=>{const P=[[18,"#5c6066","#c58b62","#2f6fd1"],[78,"#1e2228","#8a5a3a","#d23b3b"],[140,"#6b5e48","#b97e56","#2f6fd1"],[262,"#3a4f78","#9a6544","#222222"],[322,"#7a7f86","#c58b62","#2f9e5a"],[380,"#2a2a2e","#a8704a","#d23b3b"]];
+    return "<svg class='legs' viewBox='0 0 420 170' preserveAspectRatio='xMidYMax slice' aria-hidden='true'>"+P.map(([x,sh,sk,sl],k)=>{const y=k%2?6:0;return "<g transform='translate("+x+","+y+")'>"+
+      "<path d='M0 0 L50 0 L52 70 L28 74 L25 40 L22 74 L-2 70 Z' fill='"+sh+"' stroke='rgba(0,0,0,.35)'/><path d='M6 30 L18 30 L18 44 L6 44 Z' fill='rgba(0,0,0,.18)'/>"+
+      "<path d='M3 70 L19 72 L18 140 L6 140 Z' fill='"+sk+"'/><path d='M30 72 L47 70 L46 140 L33 140 Z' fill='"+sk+"'/>"+
+      "<path d='M0 140 L22 140 L24 150 L-4 150 Z' fill='"+sl+"'/><path d='M30 140 L52 140 L56 150 L28 150 Z' fill='"+sl+"'/></g>"}).join("")+"</svg>"})();
+  const STAND="<svg class='stand' viewBox='0 0 80 160' aria-hidden='true'><path d='M8 158 L40 6 L72 158 M20 100 L60 100 M40 6 L40 158' stroke='#8fa3b8' stroke-width='3.5' fill='none' stroke-linecap='round'/><path d='M14 130 L66 130' stroke='#8fa3b8' stroke-width='3'/></svg>";
+  function other(f){return f==="kara"?"krus":"kara"}
+  function face(i,f){coins[i].style.transform="rotateX("+(f==="krus"?180:0)+"deg)"}
+  function showFace(i,r){const s=slots[i];s.className="slot";s.innerHTML="<b>"+FACE[r]+"</b><small>Barya "+(i+1)+"</small>"}
+  function mark(i,c,r){const s=slots[i],ok=c===r;s.className="slot "+(ok?"ok":"no");s.innerHTML="<b>"+FACE[r]+"</b><small>"+(ok?"TAMA":"MALI")+"</small><em>Barya "+(i+1)+"</em>"}
+  function lock(v){btns.forEach(b=>b.disabled=v)}
+  function A(elm,frames,opt){const a=elm.animate(frames,opt);anims.push(a);return a}
+  function palm(i){const W=box.clientWidth;return {dx:100-W*XS[i]+(i-1)*15,dy:-126+Math.abs(i-1)*3}}
+  function rest(){wraps.forEach((w,i)=>{const p=palm(i);w.style.transform="translate("+p.dx+"px,"+p.dy+"px) scale(.62)"});shadows.forEach(sh=>{sh.style.opacity=0})}
+  function plan(p,slow,nb,spin){
+    const tf=(x,y,sc)=>"translate("+x.toFixed(1)+"px,"+y.toFixed(1)+"px) scale("+sc+")";
+    const path=[{transform:tf(p.dx,p.dy,.62),offset:0},{transform:tf(p.dx,p.dy+10,.62),offset:slow?.04:.08}];
+    const rot=[{transform:"rotateX(0deg)",offset:0},{transform:"rotateX(0deg)",offset:slow?.04:.1}];
+    let tL;
+    if(slow){path.push({transform:tf(p.dx*.4,-200,1.15),offset:.18,easing:"ease-in"},{transform:tf(p.dx*.1,-110,1.25),offset:.36,easing:"linear"},{transform:tf(0,-40,1.2),offset:.68,easing:"ease-in"});tL=.74;
+      rot.push({transform:"rotateX("+(spin*.55)+"deg)",offset:.36,easing:"ease-out"})}
+    else{path.push({transform:tf(p.dx*.5,-150-rnd()*30,1.05),offset:.3,easing:"ease-in"});tL=.52}
+    path.push({transform:tf(0,0,1),offset:tL,easing:"ease-out"});rot.push({transform:"rotateX("+spin+"deg)",offset:tL});
+    const H=[34,16,6].slice(0,nb),lands=[tL];let t=tL,x=0,ang=spin;const left=1-tL-.04,wsum=H.reduce((a,h)=>a+Math.sqrt(h),0);
+    H.forEach((h,k)=>{const span=left*Math.sqrt(h)/wsum,dxb=(rnd()-.5)*12;x+=dxb;
+      path.push({transform:tf(x-dxb/2,-h,1),offset:t+span/2,easing:"ease-in"},{transform:tf(x,0,1),offset:t+span,easing:"ease-out"});
+      ang+=k<nb-1?360:0;rot.push({transform:"rotateX("+(k<nb-1?ang-180:ang+10)+"deg)"+(k===nb-1?" rotateY(12deg)":""),offset:t+span/2},{transform:"rotateX("+ang+"deg)",offset:t+span});
+      t+=span;lands.push(t)});
+    path.push({transform:tf(x,0,1),offset:1});rot.push({transform:"rotateX("+(ang-5)+"deg) rotateY(-7deg)",offset:Math.min(.99,t+.02)},{transform:"rotateX("+ang+"deg)",offset:1});
+    return {path,rot,lands,x};
+  }
+  function tossAll(res,hero,ctx){
+    return new Promise(done=>{
+      hand.classList.add("show");hand.style.transform="";
+      A(hand,[{transform:"translate(0,0) rotate(0)"},{transform:"translate(-6px,10px) rotate(6deg)",offset:.1},{transform:"translate(22px,-40px) rotate(-22deg)",offset:.2},{transform:"translate(14px,-26px) rotate(-14deg)",offset:.3},{transform:"translate(-240px,30px) rotate(10deg)",offset:.55},{transform:"translate(-240px,30px) rotate(10deg)"}],{duration:DUR,easing:"ease-in-out",fill:"forwards"});
+      setTimeout(()=>noise(.12,.4,1600),DUR*.18);
+      const fg=hand.querySelector('.fingers'),th=hand.querySelector('.thumb');if(fg){A(fg,[{transform:'rotate(0)'},{transform:'rotate(8deg)',offset:.12},{transform:'rotate(-24deg)',offset:.2},{transform:'rotate(-6deg)',offset:.32},{transform:'rotate(0)'}],{duration:DUR,easing:'ease-in-out'});A(th,[{transform:'rotate(0)'},{transform:'rotate(6deg)',offset:.12},{transform:'rotate(-14deg)',offset:.2},{transform:'rotate(0)',offset:.34},{transform:'rotate(0)'}],{duration:DUR,easing:'ease-in-out'})}
+      let landed=0;
+      res.forEach((r,i)=>{
+        const slow=i===hero,d=i*80,dur=slow?SLOW:DUR,nb=2+Math.floor(rnd()*2);
+        const spin=(slow?9:5+i+Math.floor(rnd()*2))*360+(r==="krus"?180:0);
+        const pl=plan(palm(i),slow,nb,spin);
+        A(wraps[i],pl.path,{duration:dur,delay:d,easing:"linear",fill:"forwards"});
+        A(coins[i],pl.rot,{duration:dur,delay:d,easing:"linear",fill:"forwards"});
+        const sh=[{transform:"translateX(0) scale(.2)",opacity:0,offset:0},{transform:"translateX(0) scale(.2)",opacity:0,offset:slow?.5:.3},{transform:"translateX(0) scale(1)",opacity:.55,offset:pl.lands[0]}];
+        for(let k=1;k<pl.lands.length;k++){const a=pl.lands[k-1],b=pl.lands[k];sh.push({transform:"scale(.75)",opacity:.38,offset:(a+b)/2},{transform:"scale(1)",opacity:.55,offset:b})}
+        sh.push({transform:"translateX("+pl.x.toFixed(1)+"px) scale(1)",opacity:.55,offset:1});
+        A(shadows[i],sh,{duration:dur,delay:d,fill:"forwards"});
+        pl.lands.forEach((o,k)=>setTimeout(()=>{const v=Math.max(.15,.6-k*.17);noise(.04,v,6000+i*400);beep(2900+i*240,.1,.05*v/.6,"sine")},d+dur*o));
+        if(slow){
+          setTimeout(()=>{box.classList.add("slowmo");cheer("Slow-mo…");whoosh(dur*0.4/1000)},d+dur*0.34);
+          setTimeout(()=>box.classList.remove("slowmo"),d+dur*pl.lands[0]);
+          wraps[i].classList.add("hero");
+        }
+        setTimeout(()=>{face(i,r);showFace(i,r);
+          if(++landed===N){anims.forEach(a=>a.cancel());anims=[];hand.style.transform="translate(-240px,30px)";wraps.forEach(w=>{w.style.transform="";w.classList.remove("hero")});shadows.forEach(sh=>{sh.style.opacity=.55;sh.style.transform=""});done()}},d+dur+30);
+      });
+    });
+  }
+  function banner(t,cls){const b=box.querySelector(".ulit");b.textContent=t;b.className="ulit "+(cls||"");void b.offsetWidth;b.classList.add("pop")}
+  function hideBanner(){const b=box.querySelector(".ulit");if(b)b.className="ulit"}
+  function mixed(){let r;do{r=[0,1,2].map(()=>rnd()<.5?"kara":"krus")}while(r[0]===r[1]&&r[1]===r[2]);return r}
+  const G={label:"Triple Tama",title:"TRIPLE TAMA",btn:"Pumili muna: Kara o Krus",
+    how:["I-check ang T&C box.","Pumili ng KARA o KRUS.","Pindutin ang Ihagis. Ihahagis ang tatlong barya sa bato.","Kapag hindi pare-pareho ang tatlong barya, walang panalo at kusang ihahagis ulit.","Kapag pare-pareho ang tatlo: PANALO kung tugma sa hula mo, TALO kung hindi (may consolation pa rin). TRIPLE TAMA ang jackpot kapag pare-parehong tugma sa unang hagis pa lang.","Hindi pantay ang tsansa: pinakamadalang ang Triple Tama, at hindi nakakaapekto kung Kara o Krus ang pipiliin mo."],
+    note:"Pumili ng KARA o KRUS at ihagis ang tatlong barya. Kailangang pare-pareho ang tatlo; kapag hindi, kusang ihahagis ulit.",
+    build(play,ctx){
+      coins=[];wraps=[];shadows=[];slots=[];btns=[];call=null;anims=[];
+      box=el("div","toss",DEFS+LEGS+"<div class='ground'></div>"+STAND+"<div class='stone'><div class='side'></div><div class='top'></div></div><div class='tally'></div><div class='ulit'></div>");
+      try{box.querySelector('.stone .top').style.backgroundImage="radial-gradient(ellipse at 50% 35%,rgba(255,255,255,.18),transparent 60%),url("+concrete(420,120)+")"}catch(e){}
+      const tally=box.querySelector(".tally");
+      for(let i=0;i<N;i++){
+        const s=el("div","slot","<b>Barya "+(i+1)+"</b><small>?</small>");tally.appendChild(s);slots.push(s);
+        const sh=el("div","shadow");sh.style.left=(XS[i]*100)+"%";box.appendChild(sh);shadows.push(sh);
+        const w=el("div","coinwrap","<div class='coin'><div class='face kara'>"+KARA+"</div><div class='face krus'>"+KRUS+"</div></div>");w.style.left=(XS[i]*100)+"%";box.appendChild(w);wraps.push(w);coins.push(w.firstChild);
+      }
+      hand=el("div","hand",HAND);box.appendChild(hand);
+      const calls=el("div","calls");
+      ["kara","krus"].forEach(f=>{const b=el("button","call "+f,"<span class='mini'>"+(f==="kara"?KARA:KRUS)+"</span>"+FACE[f]);b.type="button";b.onclick=()=>G.pick(f,ctx);calls.appendChild(b);btns.push(b)});
+      play.append(box,calls);
+      $("goBtn").disabled=true;requestAnimationFrame(rest);
+    },
+    pick(f,ctx){
+      if(ctx.isBusy()||(ctx.state&&ctx.state.step!=null))return;if(!ctx.agreed())return;
+      call=f;btns.forEach(b=>b.classList.toggle("on",b.classList.contains(f)));
+      $("goBtn").disabled=false;$("goBtn").textContent="Ihagis ang 3 barya";cheer("Hula mo: "+FACE[f]);beep(f==="kara"?600:500,.1,.1);
+    },
+    go(ctx){
+      if(ctx.isBusy()||(ctx.state&&ctx.state.step!=null))return;
+      if(!call){cheer("Pumili muna: Kara o Krus");return}
+      if(!ctx.agreed())return;
+      // step 0 = Talo (all three show the other face), 1 = Panalo after a re-toss, 2 = Triple Tama on the first toss
+      const step=drawStep();
+      const m=step===2?0:step===1?1+(rnd()<.35?1:0):(rnd()<.35?0:1+(rnd()<.3?1:0));
+      const fin=step===0?other(call):call,tosses=[];
+      for(let k=0;k<m;k++)tosses.push(mixed());
+      tosses.push([fin,fin,fin]);
+      ctx.start({step,call,tosses});
+      ctx.setBusy(true);lock(true);$("goBtn").disabled=true;
+      if(reduce()){wraps.forEach(w=>w.style.transform="");shadows.forEach(sh=>sh.style.opacity=.55);hand.style.transform="translate(-240px,30px)";tosses[tosses.length-1].forEach((r,i)=>face(i,r));G.reveal(ctx);ctx.done();return}
+      G.run(0,ctx);
+    },
+    run(k,ctx){
+      const st=ctx.state,last=k===st.tosses.length-1;
+      hideBanner();slots.forEach((sl,i)=>{sl.className="slot";sl.innerHTML="<b>Barya "+(i+1)+"</b><small>?</small>"});
+      rest();cheer(k?"Hagis "+(k+1)+"…":"Ihahagis na…");
+      const go=()=>tossAll(st.tosses[k],last?Math.floor(rnd()*N):-1,ctx).then(()=>{
+        if(!last){banner("HINDI PARE-PAREHO · ULIT!","mix");cheer("Hindi pare-pareho, ulit ang hagis!");beep(330,.25,.1,"square");beep(262,.3,.1,"square",.25);setTimeout(()=>G.run(k+1,ctx),1700)}
+        else{G.reveal(ctx);setTimeout(()=>ctx.done(),600)}
+      });
+      if(k){hand.style.transform="translate(-240px,30px)";const a=hand.animate([{transform:"translate(-240px,30px)"},{transform:"translate(0,0)"}],{duration:450,easing:"ease-out"});anims.push(a);setTimeout(go,480)}else go();
+    },
+    reveal(ctx){
+      const st=ctx.state,fin=st.tosses[st.tosses.length-1],win=st.step>=1;
+      fin.forEach((r,i)=>{mark(i,st.call,r);if(win)setTimeout(()=>beep(880+i*110,.14,.1,"triangle"),i*160)});
+      banner(st.step===2?"TRIPLE TAMA!":win?"PANALO · "+FACE[fin[0]]+" LAHAT":"TALO · "+FACE[fin[0]]+" LAHAT",win?"win":"lose");
+      cheer(st.step===2?"TRIPLE TAMA! Sa unang hagis pa lang!":win?"Panalo! Pare-parehong "+FACE[fin[0]]+".":"Talo, pare-parehong "+FACE[fin[0]]+". May consolation ka pa rin.");
+      btns.forEach(b=>b.classList.toggle("on",b.classList.contains(st.call)));
+    },
+    stop(){anims.forEach(a=>a.cancel());anims=[]},
+    finish(ctx){const st=ctx.state;if(!st.tosses)return;wraps.forEach(w=>w.style.transform="");shadows.forEach(sh=>sh.style.opacity=.55);hand.style.transform="translate(-240px,30px)";st.tosses[st.tosses.length-1].forEach((r,i)=>face(i,r));G.reveal(ctx);lock(true)}
+  };
+  return G;
+})();
 
-$("goBtn").onclick=spinSlot;
-$("resetBtn").onclick=()=>{if(busy)return;if(!isAdmin&&state&&state.step!=null)return;try{localStorage.removeItem(storeKey())}catch(e){}state=null;viewKey="";refreshView();$("goBtn").focus()};
+$("goBtn").onclick=()=>{if(GAME.go)GAME.go(ctx)};
+$("resetBtn").onclick=()=>{if(busy)return;if(!isAdmin&&state&&state.step!=null)return;try{localStorage.removeItem(storeKey())}catch(e){}state=null;if(GAME.stop)GAME.stop();viewKey="";refreshView();$("goBtn").focus()};
 
 // ---------- win pop-up ----------
 let confettiRAF=null;
 function openWin(amt,big){
   const jp=$("jp"),el=$("jpAmt");jp.classList.toggle("big",big);
-  $("jpTitle").textContent=big?"JACKPOT!":"YOU WON!";$("jpSub").textContent=SYMS[state.step].g.repeat(3);
+  $("jpTitle").textContent=big?"JACKPOT!":"YOU WON!";$("jpSub").textContent=LABELS[state.step];
   jp.hidden=false;$("jpClose").focus();fanfare(big);
   if(reduce()){el.textContent=php(amt);return}
   const s=performance.now(),dur=big?1600:1100;
