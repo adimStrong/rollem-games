@@ -373,10 +373,12 @@ async function save(){
 function revealAdmin(){
   $("adminGate").hidden=true;$("adminBody").hidden=false;
   $("pname").addEventListener("input",()=>{cfg.name=$("pname").value;changed()});
-  $("aGenerate").onclick=()=>{
+  $("aGenerate").onclick=async()=>{
     const n=$("pname").value.trim();
     if(!n){$("aMsg").textContent="Ilagay muna ang pangalan ng player.";return}
-    location.hash="admin-"+cleanCode(n+Math.random().toString(36).slice(2,6));location.reload();
+    const newCode=cleanCode(n+Math.random().toString(36).slice(2,6));
+    try{await fetch("/api/session/"+encodeURIComponent(newCode),{method:"PUT",headers:{"Content-Type":"application/json","X-Admin-Token":adminToken||""},body:JSON.stringify({deposit:cfg.deposit??0,name:n,resetAt:0})})}catch(e){}
+    location.hash="admin-"+newCode;location.reload();
   };
   $("deposit").addEventListener("input",e=>{const v=e.target.value;cfg.deposit=v===""?0:Math.max(0,Math.floor(+v));changed()});
   $("aReset").onclick=()=>{cfg.resetAt=Date.now();changed();$("aMsg").textContent="Na-reset ang laro ng player. Pwede na siyang maglaro ulit."};
