@@ -435,7 +435,7 @@ const GAME=(()=>{
     how:["I-check ang T&C box.","Pumili ng KARA o KRUS.","Pindutin ang Ihagis. Ihahagis ang tatlong barya sa bato.","Kapag hindi pare-pareho ang tatlong barya, walang panalo at kusang ihahagis ulit.","Kapag pare-pareho ang tatlo: PANALO kung tugma sa hula mo, TALO kung hindi (may consolation pa rin). TRIPLE TAMA ang jackpot kapag pare-parehong tugma sa unang hagis pa lang.","Hindi pantay ang tsansa: pinakamadalang ang Triple Tama, at hindi nakakaapekto kung Kara o Krus ang pipiliin mo."],
     note:"Pumili ng KARA o KRUS at ihagis ang tatlong barya. Kailangang pare-pareho ang tatlo; kapag hindi, kusang ihahagis ulit.",
     build(play,ctx){
-      coins=[];wraps=[];shadows=[];slots=[];btns=[];call=null;anims=[];
+      coins=[];wraps=[];shadows=[];slots=[];btns=[];anims=[];
       box=el("div","toss",DEFS+LEGS+"<div class='ground'></div>"+STAND+"<div class='stone'><div class='side'></div><div class='top'></div></div><div class='tally'></div><div class='ulit'></div>");
       try{box.querySelector('.stone .top').style.backgroundImage="radial-gradient(ellipse at 50% 35%,rgba(255,255,255,.18),transparent 60%),url("+concrete(420,120)+")"}catch(e){}
       const tally=box.querySelector(".tally");
@@ -448,7 +448,9 @@ const GAME=(()=>{
       const calls=el("div","calls");
       ["kara","krus"].forEach(f=>{const b=el("button","call "+f,"<span class='mini'>"+(f==="kara"?KARA:KRUS)+"</span>"+FACE[f]);b.type="button";b.onclick=()=>G.pick(f,ctx);calls.appendChild(b);btns.push(b)});
       play.append(box,calls);
-      $("goBtn").disabled=true;requestAnimationFrame(rest);
+      $("goBtn").disabled=!call;
+      if(call){btns.forEach(b=>b.classList.toggle("on",b.classList.contains(call)));$("goBtn").textContent="Ihagis ang 3 barya"}
+      requestAnimationFrame(rest);
     },
     pick(f,ctx){
       if(ctx.isBusy()||(ctx.state&&ctx.state.step!=null))return;if(!ctx.agreed())return;
