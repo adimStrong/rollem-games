@@ -170,16 +170,23 @@ body{align-content:start}
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap">
       <h2>Dice control</h2><span class="sync" id="sync">Not saved</span>
     </div>
-    <p class="hint">Bawat pagbabago dito ay makikita agad sa player link. Ang tier ay galing sa deposit amount.</p>
-    <label class="field code"><span>Player name</span><input id="pname" type="text" autocomplete="off" spellcheck="false"></label>
-    <label class="field"><span>Deposit amount</span><div class="money"><span>₱</span><input id="deposit" type="number" min="0" step="1" inputmode="numeric"></div></label>
-    <div class="tierbox" id="aTier"></div>
-    <button class="btn ghost" id="aGenerate" type="button" style="width:100%">Generate link for this name</button>
-    <div class="field"><span>Player link</span>
-      <div class="linkrow"><code id="plink"></code><button class="btn small" id="copyBtn" type="button">Copy</button></div>
+    <div id="adminGate">
+      <p class="hint">Kailangan ng password para dito. Tanungin ang supervisor para sa password.</p>
+      <div class="linkrow"><input id="adminPass" type="password" autocomplete="off" style="font:700 16px var(--mono);background:var(--plank);color:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px;flex:1;min-width:0"><button class="btn small" id="adminUnlockBtn" type="button">Unlock</button></div>
+      <p class="hint" id="adminGateErr"></p>
     </div>
-    <button class="btn ghost" id="aReset" type="button" style="width:100%">Reset player's dice</button>
-    <p class="hint" id="aMsg"></p>
+    <div id="adminBody" hidden>
+      <p class="hint">Bawat pagbabago dito ay makikita agad sa player link. Ang tier ay galing sa deposit amount.</p>
+      <label class="field code"><span>Player name</span><input id="pname" type="text" autocomplete="off" spellcheck="false"></label>
+      <label class="field"><span>Deposit amount</span><div class="money"><span>₱</span><input id="deposit" type="number" min="0" step="1" inputmode="numeric"></div></label>
+      <div class="tierbox" id="aTier"></div>
+      <button class="btn ghost" id="aGenerate" type="button" style="width:100%">Generate link for this name</button>
+      <div class="field"><span>Player link</span>
+        <div class="linkrow"><code id="plink"></code><button class="btn small" id="copyBtn" type="button">Copy</button></div>
+      </div>
+      <button class="btn ghost" id="aReset" type="button" style="width:100%">Reset player's dice</button>
+      <p class="hint" id="aMsg"></p>
+    </div>
   </section>
   <p class="preview-label" id="previewLabel" hidden>Live preview ng player view</p>
 
@@ -449,18 +456,7 @@ $("agree").addEventListener("change",()=>{try{localStorage.setItem("dice-tnc",$(
 $("tncLink").onclick=e=>{e.preventDefault();$("tnc").open=true;$("tnc").scrollIntoView({behavior:"smooth",block:"start"})};$("resetBtn").onclick=localReset;
 
 // ---------- admin panel ----------
-let db=null,saveTimer=null,saving=false,pending=false,adminToken=null;
-async function unlockAdmin(){
-  adminToken=sessionStorage.getItem("admin-token");
-  if(adminToken)return true;
-  const pass=prompt("Admin password:");
-  if(pass==null)return false;
-  try{
-    const r=await fetch("/api/admin-login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pass})});
-    if(!r.ok)return false;
-    const d=await r.json();adminToken=d.token;sessionStorage.setItem("admin-token",adminToken);return true;
-  }catch(e){return false}
-}
+let db=null,saveTimer=null,saving=false,pending=false,adminToken=sessionStorage.getItem("admin-token")||null;
 async function apiGet(){try{const r=await fetch("/api/session/"+encodeURIComponent(code));if(!r.ok)return null;return await r.json()}catch(e){return null}}
 async function apiPut(data){const r=await fetch("/api/session/"+encodeURIComponent(code),{method:"PUT",headers:{"Content-Type":"application/json","X-Admin-Token":adminToken||""},body:JSON.stringify(data)});if(!r.ok)throw new Error("save failed");return r.json()}
 function playerLink(){const base=location.href.split("#")[0];return base+"#"+code}
@@ -482,21 +478,33 @@ async function save(){
   catch(e){$("sync").className="sync";$("sync").textContent="Not saved";$("aMsg").textContent="Hindi na-save. Subukan ulit.";}
   saving=false;if(pending){pending=false;save()}
 }
+function revealAdmin(){
+  $("adminGate").hidden=true;$("adminBody").hidden=false;
+  $("pname").addEventListener("input",()=>{cfg.name=$("pname").value;changed()});
+  $("aGenerate").onclick=()=>{
+    const n=$("pname").value.trim();
+    if(!n){$("aMsg").textContent="Ilagay muna ang pangalan ng player.";return}
+    location.hash="admin-"+cleanCode(n+Math.random().toString(36).slice(2,6));location.reload();
+  };
+  $("deposit").addEventListener("input",e=>{const v=e.target.value,n=Math.floor(+v);cfg.deposit=(v===""||!Number.isFinite(n))?0:Math.max(0,Math.min(999999,n));changed()});
+  $("aReset").onclick=()=>{cfg.resetAt=Date.now();changed();$("aMsg").textContent="Na-reset ang dice ng player. Pwede na siyang mag-roll ulit."};
+  $("copyBtn").onclick=async()=>{const t=playerLink();try{await navigator.clipboard.writeText(t);$("copyBtn").textContent="Copied"}catch(e){const r=document.createRange();r.selectNodeContents($("plink"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("copyBtn").textContent="Selected"}setTimeout(()=>$("copyBtn").textContent="Copy",1500)};
+  adminUI();
+}
 if(isAdmin){
-  unlockAdmin().then(ok=>{
-    if(!ok){alert("Mali ang password.");return}
-    $("admin").hidden=false;$("previewLabel").hidden=false;
-    $("pname").addEventListener("input",()=>{cfg.name=$("pname").value;changed()});
-    $("aGenerate").onclick=()=>{
-      const n=$("pname").value.trim();
-      if(!n){$("aMsg").textContent="Ilagay muna ang pangalan ng player.";return}
-      location.hash="admin-"+cleanCode(n+Math.random().toString(36).slice(2,6));location.reload();
-    };
-    $("deposit").addEventListener("input",e=>{const v=e.target.value,n=Math.floor(+v);cfg.deposit=(v===""||!Number.isFinite(n))?0:Math.max(0,Math.min(999999,n));changed()});
-    $("aReset").onclick=()=>{cfg.resetAt=Date.now();changed();$("aMsg").textContent="Na-reset ang dice ng player. Pwede na siyang mag-roll ulit."};
-    $("copyBtn").onclick=async()=>{const t=playerLink();try{await navigator.clipboard.writeText(t);$("copyBtn").textContent="Copied"}catch(e){const r=document.createRange();r.selectNodeContents($("plink"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("copyBtn").textContent="Selected"}setTimeout(()=>$("copyBtn").textContent="Copy",1500)};
-    adminUI();
-  });
+  $("admin").hidden=false;$("previewLabel").hidden=false;
+  if(adminToken)revealAdmin();
+  $("adminUnlockBtn").onclick=async()=>{
+    const pass=$("adminPass").value;
+    $("adminGateErr").textContent="";
+    try{
+      const r=await fetch("/api/admin-login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pass})});
+      if(!r.ok){$("adminGateErr").textContent="Maling password.";return}
+      const d=await r.json();adminToken=d.token;sessionStorage.setItem("admin-token",adminToken);
+      revealAdmin();
+    }catch(e){$("adminGateErr").textContent="Hindi ma-verify. Subukan ulit."}
+  };
+  $("adminPass").addEventListener("keydown",e=>{if(e.key==="Enter")$("adminUnlockBtn").click()});
 }
 refreshView();
 
