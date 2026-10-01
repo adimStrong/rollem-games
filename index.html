@@ -247,7 +247,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
   </header>
 
   <main class="booth" id="booth" aria-live="polite">
-    <button class="soundbtn" id="soundBtn" type="button" aria-pressed="true">Sound on</button>
+    <button class="soundbtn" id="soundBtn" type="button" aria-pressed="true">Tunog bukas</button>
     <div>
       <p class="eyebrow" id="eyebrow">Win For Life</p>
       <p id="greeting" hidden style="font-weight:700;color:var(--accent);margin:2px 0 0"></p>
@@ -348,7 +348,7 @@ function beep(f,dur,vol,type,delay){const a=audio();if(!a)return;const t=a.curre
 function noise(dur,vol,freq){const a=audio();if(!a)return;const n=Math.floor(a.sampleRate*dur),b=a.createBuffer(1,n,a.sampleRate),ch=b.getChannelData(0);for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type="bandpass";f.frequency.value=freq||1200;const g=a.createGain();g.gain.value=vol;s.connect(f).connect(g).connect(a.destination);s.start()}
 function tick(){beep(1700+rnd()*400,.04,.07,"square")}
 function fanfare(big){(big?[523.25,659.25,783.99,1046.5,1318.5,1568]:[659.25,783.99,1046.5]).forEach((f,i)=>beep(f,.5,big?.07:.12,big?"square":"triangle",i*.11))}
-function paintSound(){$("soundBtn").textContent=soundOn?"Sound on":"Sound off";$("soundBtn").setAttribute("aria-pressed",soundOn)}
+function paintSound(){$("soundBtn").textContent=soundOn?"Tunog bukas":"Tunog sarado";$("soundBtn").setAttribute("aria-pressed",soundOn)}
 $("soundBtn").onclick=()=>{soundOn=!soundOn;try{localStorage.setItem(BRAND.key+"-sound",soundOn?"on":"off")}catch(e){}if(!soundOn&&actx)actx.suspend();paintSound()};
 paintSound();
 function cheer(text){const c=$("cheer");c.textContent=text;c.classList.remove("pop");void c.offsetWidth;c.classList.add("pop")}
@@ -362,13 +362,13 @@ const GAME=(()=>{
     {k:"wala",n:"WALA",b1:"#d9d3c4",b2:"#ffffff",hk:"#fbf5e4",hk2:"#e2d7bb",wing:"#cfc7b4",tail:"#2a2f3c",sheen:"#5a6ea8",feather:"#f4efe2"}];
   const BREEDS=[
     {n:"Sweater",d:"Pula, dilaw ang paa",b1:"#7a2a12",b2:"#c55a22",hk:"#f2b33d",hk2:"#d07a1e",wing:"#6a2410",tail:"#111111",sheen:"#1f7a4e",feather:"#d0702a"},
-    {n:"Kelso",d:"Light red",b1:"#8a3a18",b2:"#d77a3a",hk:"#f0a85a",hk2:"#c8692a",wing:"#7a3214",tail:"#1a1a1a",sheen:"#2a6a4a",feather:"#e08a4a"},
-    {n:"Hatch",d:"Dark red, matipuno",b1:"#4e120e",b2:"#962818",hk:"#c94a22",hk2:"#8a2a12",wing:"#3e0e0a",tail:"#0d0d0d",sheen:"#1e5a3e",feather:"#a83a22"},
+    {n:"Kelso",d:"Mapusyaw na pula",b1:"#8a3a18",b2:"#d77a3a",hk:"#f0a85a",hk2:"#c8692a",wing:"#7a3214",tail:"#1a1a1a",sheen:"#2a6a4a",feather:"#e08a4a"},
+    {n:"Hatch",d:"Pulang-pula, matipuno",b1:"#4e120e",b2:"#962818",hk:"#c94a22",hk2:"#8a2a12",wing:"#3e0e0a",tail:"#0d0d0d",sheen:"#1e5a3e",feather:"#a83a22"},
     {n:"Roundhead",d:"Talisayin",b1:"#a85a20",b2:"#e8a24a",hk:"#ffd27a",hk2:"#e8a24a",wing:"#8a4a1a",tail:"#222222",sheen:"#3a7a5a",feather:"#f0b860"},
     {n:"Lemon",d:"Dilaw ang balahibo",b1:"#9a6a1a",b2:"#e6b84a",hk:"#fff0a0",hk2:"#e8c860",wing:"#8a5a14",tail:"#1a1a1a",sheen:"#3a5a3a",feather:"#f2d36a"},
     {n:"Brown Red",d:"Halos itim",b1:"#2e140c",b2:"#5e2a16",hk:"#b8502a",hk2:"#7a3214",wing:"#22100a",tail:"#0b0b0b",sheen:"#2a3a5a",feather:"#7a3a20"},
     {n:"Grey",d:"Abuhin",b1:"#7e848c",b2:"#d4d8de",hk:"#f2f2f2",hk2:"#c4c8ce",wing:"#62676e",tail:"#2a2d33",sheen:"#4a5a7a",feather:"#c9cdd3"},
-    {n:"Puti",d:"White",b1:"#d9d3c4",b2:"#ffffff",hk:"#fbf5e4",hk2:"#e2d7bb",wing:"#cfc7b4",tail:"#3b4250",sheen:"#6b7fb8",feather:"#f4efe2"}];
+    {n:"Puti",d:"Puting balahibo",b1:"#d9d3c4",b2:"#ffffff",hk:"#fbf5e4",hk2:"#e2d7bb",wing:"#cfc7b4",tail:"#3b4250",sheen:"#6b7fb8",feather:"#f4efe2"}];
   const CLASHES=[2,5,2]; // bout length per prize step
   const TIE=0.15,MAXTIES=2; // chance a round ends Tabla (no prize, replay); at most 2 in a row
   let pit,cocks=[],tags=[],sel=null,anims=[],timers=[],round=1,ties=0,br=null,obr=6,look=[0,7],picker=null;
