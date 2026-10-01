@@ -49,12 +49,17 @@ def init_db():
                 code TEXT NOT NULL,
                 amount INTEGER NOT NULL,
                 link TEXT NOT NULL DEFAULT '',
-                created_at BIGINT NOT NULL
+                created_at BIGINT NOT NULL,
+                claimed BOOLEAN NOT NULL DEFAULT FALSE,
+                claimed_at BIGINT
             )
             """
         )
+        cur.execute("ALTER TABLE wins ADD COLUMN IF NOT EXISTS claimed BOOLEAN NOT NULL DEFAULT FALSE")
+        cur.execute("ALTER TABLE wins ADD COLUMN IF NOT EXISTS claimed_at BIGINT")
         cur.execute("CREATE INDEX IF NOT EXISTS wins_created_at_idx ON wins (created_at DESC)")
         cur.execute("CREATE INDEX IF NOT EXISTS wins_brand_idx ON wins (brand)")
+        cur.execute("CREATE INDEX IF NOT EXISTS wins_claimed_idx ON wins (claimed)")
 
 
 def admin_token() -> str:
@@ -103,17 +108,47 @@ def list_wins():
     if not require_admin():
         return jsonify({"error": "forbidden"}), 403
     brand = request.args.get("brand", "")
+    status = request.args.get("status", "")  # "", "pending", "claimed"
     limit = min(int(request.args.get("limit", 200)), 1000)
+    clauses, params = [], []
+    if brand:
+        clauses.append("brand=%s")
+        params.append(brand)
+    if status == "pending":
+        clauses.append("claimed=FALSE")
+    elif status == "claimed":
+        clauses.append("claimed=TRUE")
+    where = ("WHERE " + " AND ".join(clauses)) if clauses else ""
+    params.append(limit)
     with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        if brand:
-            cur.execute(
-                "SELECT * FROM wins WHERE brand=%s ORDER BY created_at DESC LIMIT %s",
-                (brand, limit),
-            )
-        else:
-            cur.execute("SELECT * FROM wins ORDER BY created_at DESC LIMIT %s", (limit,))
+        cur.execute(f"SELECT * FROM wins {where} ORDER BY created_at DESC LIMIT %s", params)
         rows = cur.fetchall()
     return jsonify({"wins": rows})
+
+
+@app.route("/api/wins/<int:win_id>/claim", methods=["POST"])
+def claim_win(win_id):
+    if not require_admin():
+        return jsonify({"error": "forbidden"}), 403
+    with db() as conn, conn.cursor() as cur:
+        cur.execute(
+            "UPDATE wins SET claimed=TRUE, claimed_at=%s WHERE id=%s",
+            (int(time.time() * 1000), win_id),
+        )
+        if cur.rowcount == 0:
+            return jsonify({"error": "not found"}), 404
+    return jsonify({"ok": True})
+
+
+@app.route("/api/wins/<int:win_id>/unclaim", methods=["POST"])
+def unclaim_win(win_id):
+    if not require_admin():
+        return jsonify({"error": "forbidden"}), 403
+    with db() as conn, conn.cursor() as cur:
+        cur.execute("UPDATE wins SET claimed=FALSE, claimed_at=NULL WHERE id=%s", (win_id,))
+        if cur.rowcount == 0:
+            return jsonify({"error": "not found"}), 404
+    return jsonify({"ok": True})
 
 
 @app.route("/")
