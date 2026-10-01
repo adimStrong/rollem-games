@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wins Ledger</title>
+<style>[hidden]{display:none!important}
+:root{--bg:#0f1115;--panel:#171a21;--line:#2a2f3a;--text:#e8eaed;--muted:#9aa3b2;--accent:#6ea8fe;--gold:#ffd66b;--bad:#ff8a8a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:20px}
+.wrap{max-width:1100px;margin:0 auto}
+h1{font-size:20px;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 20px;font-size:13px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+.gate input{font:600 15px ui-monospace,monospace;background:#0b0d12;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 12px;width:200px}
+.gate button{font:700 13px inherit;background:var(--accent);color:#06101f;border:0;border-radius:8px;padding:9px 16px;cursor:pointer;margin-left:8px}
+.err{color:var(--bad);margin:8px 0 0;font-size:13px}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.controls select,.controls button{font:600 13px inherit;background:#0b0d12;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.controls button{cursor:pointer}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:120px}
+.stat b{display:block;font-size:22px;color:var(--gold)}
+.stat span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.5px}
+tr:hover td{background:#1c2029}
+.amt{color:var(--gold);font-weight:700;font-variant-numeric:tabular-nums}
+.brand-tag{display:inline-block;padding:2px 8px;border-radius:999px;background:#242938;font-size:11px;font-weight:600}
+.link{color:var(--accent);text-decoration:none;font-size:12px}
+.link:hover{text-decoration:underline}
+.empty{color:var(--muted);text-align:center;padding:30px}
+.loading{color:var(--muted);text-align:center;padding:30px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Wins Ledger</h1>
+  <p class="sub">Every recorded win across all rollem-games community minigames.</p>
+
+  <div class="panel gate" id="gate">
+    <p style="margin:0 0 10px">Kailangan ng password para dito.</p>
+    <input type="password" id="pass" placeholder="Password" autocomplete="off">
+    <button id="unlockBtn" type="button">Unlock</button>
+    <p class="err" id="err"></p>
+  </div>
+
+  <div id="body" hidden>
+    <div class="stats" id="stats"></div>
+    <div class="controls">
+      <select id="brandFilter">
+        <option value="">All brands</option>
+        <option value="gopyesta">Gopyesta</option>
+        <option value="pots">POTS</option>
+        <option value="rollem">Roll'em</option>
+        <option value="winforlife">Win For Life</option>
+        <option value="cow">COW88</option>
+        <option value="tamasa">Tamasa</option>
+        <option value="gspot">GameSpot</option>
+        <option value="t2b">Time2Bet</option>
+      </select>
+      <button id="refreshBtn" type="button">Refresh</button>
+      <span class="sub" id="lastUpdated" style="margin:0"></span>
+    </div>
+    <div class="panel" style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Noong</th><th>Brand</th><th>Player</th><th>Premyo</th><th>Link</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <p class="empty" id="emptyMsg" hidden>Wala pang recorded wins.</p>
+      <p class="loading" id="loadingMsg">Loading…</p>
+    </div>
+  </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let adminToken=sessionStorage.getItem("wins-admin-token")||null;
+const BRAND_LABEL={gopyesta:"Gopyesta",pots:"POTS",rollem:"Roll'em",winforlife:"Win For Life",cow:"COW88",tamasa:"Tamasa",gspot:"GameSpot",t2b:"Time2Bet"};
+
+function fmtDate(ms){
+  const d=new Date(ms);
+  return d.toLocaleString("en-PH",{year:"numeric",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+}
+
+async function loadWins(){
+  $("loadingMsg").hidden=false;$("emptyMsg").hidden=true;
+  const brand=$("brandFilter").value;
+  const url="/api/wins"+(brand?"?brand="+encodeURIComponent(brand):"");
+  try{
+    const r=await fetch(url,{headers:{"X-Admin-Token":adminToken||""}});
+    if(!r.ok){$("loadingMsg").textContent="Hindi ma-load (session expired?). I-refresh ang page.";return}
+    const d=await r.json();
+    render(d.wins||[]);
+  }catch(e){$("loadingMsg").textContent="Hindi ma-load. Subukan ulit.";}
+}
+
+function render(wins){
+  $("loadingMsg").hidden=true;
+  $("rows").innerHTML=wins.map(w=>
+    "<tr><td>"+fmtDate(w.created_at)+"</td>"+
+    "<td><span class='brand-tag'>"+(BRAND_LABEL[w.brand]||w.brand)+"</span></td>"+
+    "<td>"+(w.player_name||"—")+"</td>"+
+    "<td class='amt'>₱"+w.amount+"</td>"+
+    "<td>"+(w.link?"<a class='link' href='"+w.link+"' target='_blank' rel='noopener'>"+w.code+"</a>":w.code)+"</td></tr>"
+  ).join("");
+  $("emptyMsg").hidden=wins.length>0;
+  const total=wins.reduce((a,w)=>a+w.amount,0);
+  const byBrand={};
+  wins.forEach(w=>byBrand[w.brand]=(byBrand[w.brand]||0)+1);
+  const topBrand=Object.entries(byBrand).sort((a,b)=>b[1]-a[1])[0];
+  $("stats").innerHTML=
+    "<div class='stat'><b>"+wins.length+"</b><span>Total wins shown</span></div>"+
+    "<div class='stat'><b>₱"+total.toLocaleString()+"</b><span>Total payout shown</span></div>"+
+    (topBrand?"<div class='stat'><b>"+(BRAND_LABEL[topBrand[0]]||topBrand[0])+"</b><span>Most active brand</span></div>":"");
+  $("lastUpdated").textContent="Huling update: "+new Date().toLocaleTimeString("en-PH");
+}
+
+function reveal(){
+  $("gate").hidden=true;$("body").hidden=false;
+  $("brandFilter").addEventListener("change",loadWins);
+  $("refreshBtn").addEventListener("click",loadWins);
+  loadWins();
+  setInterval(loadWins,15000);
+}
+
+async function tryUnlock(){
+  const pass=$("pass").value;
+  $("err").textContent="";
+  try{
+    const r=await fetch("/api/admin-login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pass})});
+    if(!r.ok){$("err").textContent="Mali ang password.";return}
+    const d=await r.json();adminToken=d.token;sessionStorage.setItem("wins-admin-token",adminToken);
+    reveal();
+  }catch(e){$("err").textContent="Hindi ma-verify. Subukan ulit.";}
+}
+if(adminToken){reveal()}
+$("unlockBtn").onclick=tryUnlock;
+$("pass").addEventListener("keydown",e=>{if(e.key==="Enter")tryUnlock()});
+</script>
+</body>
+</html>
