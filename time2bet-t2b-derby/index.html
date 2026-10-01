@@ -455,16 +455,18 @@ if(mode==="admin"){
     $("copyMsg").onclick=()=>{if(!qualifies(cfg.deposit)){$("aMsg").textContent="Ilagay muna ang qualified na deposit.";return}copyText(BRAND.script+"\n\nI-play dito: "+playerLink(),$("copyMsg"))};
     adminUI();
   }
-  if(sessionStorage.getItem("admin-unlocked")==="1"){
-    unlockAdmin();
-  }else{
-    const pass=prompt("Admin password:");
-    if(pass!=null&&h36(pass+SALT)===ADMIN_PASS_CHECK){
-      try{sessionStorage.setItem("admin-unlocked","1")}catch(e){}
-      unlockAdmin();
-    }else{
-      $("adminGate").textContent="Maling password. I-refresh ang page para subukan ulit.";
-    }
+  let unlocked=false;
+  try{unlocked=sessionStorage.getItem("admin-unlocked")==="1"}catch(e){}
+  if(unlocked){unlockAdmin()}
+  else{
+    $("adminGate").innerHTML="<span>Kailangan ng password para dito. Tanungin ang supervisor para sa password.</span><div style='display:flex;gap:8px;margin-top:8px'><input class='inp' type='password' id='adminPass' placeholder='Password' autocomplete='off' style='max-width:200px'><button class='btn small' id='adminPassGo' type='button'>Unlock</button></div><p id='adminPassErr' style='color:var(--bad);margin:6px 0 0'></p>";
+    const tryUnlock=()=>{
+      const v=$("adminPass").value;
+      if(h36(v+SALT)===ADMIN_PASS_CHECK){try{sessionStorage.setItem("admin-unlocked","1")}catch(e){}unlockAdmin()}
+      else{$("adminPassErr").textContent="Mali ang password."}
+    };
+    $("adminPassGo").onclick=tryUnlock;
+    $("adminPass").addEventListener("keydown",e=>{if(e.key==="Enter")tryUnlock()});
   }
 }
 buildView();
