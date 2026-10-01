@@ -263,7 +263,7 @@ function buildView(){
   $("play").innerHTML="";$("win").hidden=true;$("cheer").textContent="";$("note").textContent="";
   $("goBtn").textContent=g.btn;$("resetBtn").disabled=false;
   if(!q){$("range").innerHTML="<span class='wait'>Hinihintay pa ang qualified na deposit.</span>";$("goBtn").disabled=true;return}
-  $("range").innerHTML="Pwede kang manalo ng <b>₱10</b>, <b>₱27</b>, o <b>₱57</b>.";
+  $("range").innerHTML="Mga premyo hanggang <b>₱777</b>!";
   $("note").textContent=g.note;
   $("goBtn").disabled=false;$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));
   state=loadSaved();
@@ -291,7 +291,7 @@ function buildSlot(){
   const m=document.createElement("div");m.className="machine";
   m.innerHTML="<div class='lights' aria-hidden='true'>"+"<i></i>".repeat(9)+"</div><div class='reels'>"+[0,1,2].map(r=>"<div class='reel' aria-label='Reel "+(r+1)+"'><div class='strip'></div></div>").join("")+"</div><div class='lights' aria-hidden='true'>"+"<i></i>".repeat(9)+"</div>";
   $("play").appendChild(m);
-  const pt=document.createElement("ul");pt.className="paytable";pt.setAttribute("aria-label","Paytable");
+  const pt=document.createElement("ul");pt.className="paytable";pt.setAttribute("aria-label","Paytable");pt.hidden=true;
   pt.innerHTML=PRIZES.map((v,k)=>"<li"+(k===PRIZES.length-1?" class='top'":"")+"><span style='color:"+(k===PRIZES.length-1?"var(--gold)":"var(--paper)")+"'>"+SYMS[k].g.repeat(3)+"</span>"+php(v)+"</li>").join("");
   $("play").appendChild(pt);
   m.querySelectorAll(".strip").forEach((st,r)=>{st.innerHTML=[(r+1)%SYMS.length,(r+3)%SYMS.length,(r+5)%SYMS.length].map(symHTML).join("")});
