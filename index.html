@@ -186,6 +186,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <button class="soundbtn" id="soundBtn" type="button" aria-pressed="true">Sound on</button>
     <div>
       <p class="eyebrow" id="eyebrow">Gopyesta</p>
+      <p id="greeting" hidden style="font-weight:700;color:var(--accent);margin:2px 0 0"></p>
       <h1 class="game" id="gameTitle"></h1>
       <p class="range" id="range"></p>
     </div>
@@ -263,10 +264,17 @@ const SALT="cg~"+BRAND.key+"~26q4";
 function h36(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}let g=h;for(let i=s.length-1;i>=0;i--){g^=s.charCodeAt(i)*31;g=Math.imul(g,2246822519)>>>0}return (h.toString(36)+g.toString(36)).slice(0,6)}
 const ADMIN_PASS_CHECK="63r1ak"; // h36(ADMIN_PASSWORD+SALT)
 function cleanCode(c){return (c||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,32)}
-function makeToken(c){const body=c.code+"."+c.deposit+"."+c.nonce;return body+"."+h36(body+SALT)}
-function parseToken(t){const p=t.split(".");if(p.length!==4)return null;const [code,dep,nonce,chk]=p;
-  if(!/^[a-z0-9-]{1,40}$/.test(code)||!/^\d{1,6}$/.test(dep)||!/^[a-z0-9]{1,12}$/.test(nonce))return null;
-  if(h36(code+"."+dep+"."+nonce+SALT)!==chk)return null;return {code,deposit:+dep,nonce}}
+function cleanName(n){return (n||"").toLowerCase().replace(/[^a-z0-9 ]/g,"").trim().replace(/\s+/g,"_").slice(0,60)}
+function displayName(n){return (n||"").replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase())}
+function makeToken(c){const body=c.code+"."+c.deposit+"."+c.nonce+"."+cleanName(c.name);return body+"."+h36(body+SALT)}
+function parseToken(t){const p=t.split(".");
+  if(p.length===5){const [code,dep,nonce,nameEnc,chk]=p;
+    if(!/^[a-z0-9-]{1,40}$/.test(code)||!/^\d{1,6}$/.test(dep)||!/^[a-z0-9]{1,12}$/.test(nonce)||!/^[a-z0-9_]{0,60}$/.test(nameEnc))return null;
+    if(h36(code+"."+dep+"."+nonce+"."+nameEnc+SALT)!==chk)return null;return {code,deposit:+dep,nonce,name:displayName(nameEnc)}}
+  if(p.length===4){const [code,dep,nonce,chk]=p;
+    if(!/^[a-z0-9-]{1,40}$/.test(code)||!/^\d{1,6}$/.test(dep)||!/^[a-z0-9]{1,12}$/.test(nonce))return null;
+    if(h36(code+"."+dep+"."+nonce+SALT)!==chk)return null;return {code,deposit:+dep,nonce,name:""}}
+  return null}
 const raw=decodeURIComponent(location.hash.slice(1)).toLowerCase();
 const tok=parseToken(raw);
 let mode=raw==="admin"?"admin":tok?"player":"demo";
@@ -371,6 +379,7 @@ function buildView(){
   renderMech();
   const q=qualifies(cfg.deposit),off=BRAND.promo;
   $("eyebrow").textContent=BRAND.name+" · "+off.name;
+  $("greeting").hidden=!cfg.name;if(cfg.name)$("greeting").textContent="Para kay "+cfg.name+"! 🎉";
   $("gameTitle").textContent=GAME.title;
   $("demoTag").hidden=mode!=="demo";
   $("play").innerHTML="";$("win").hidden=true;$("cheer").textContent="";
