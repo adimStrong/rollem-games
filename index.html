@@ -1,7 +1,12 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>GameSpot Loot Drop</title>
+<!doctype html>
+<html lang="tl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GameSpot Gagamba Spot</title>
+
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<style>
+<style>[hidden]{display:none!important}
 /* Layout: brand logo on the brand's own ground, one centered game booth. Player view = the brand's game; admin view (#admin) = link maker above a live preview. Single dark look by choice. */
 :root{
   --night:#070605;
@@ -125,30 +130,99 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 .mech th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:600}
 .mech tr.cur td{color:var(--gold);font-weight:700}
 /* game */
-.vault{position:relative;width:min(320px,100%);height:250px;display:grid;place-items:end center;padding-bottom:18px}
-.beam{position:absolute;left:50%;bottom:40px;width:260px;height:260px;margin-left:-130px;border-radius:50%;background:radial-gradient(circle,var(--rar) 0%,transparent 62%);opacity:.35;transition:background .3s,opacity .3s}
-.vault.shake .beam,.vault.open .beam{opacity:.75}
-.vault.open .beam{background:radial-gradient(circle,var(--rar) 0%,transparent 66%),repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--rar) 40%,transparent) 0 8deg,transparent 8deg 22deg);animation:spin 9s linear infinite;-webkit-mask:radial-gradient(circle,#000 30%,transparent 70%);mask:radial-gradient(circle,#000 30%,transparent 70%)}
-@keyframes spin{to{transform:rotate(360deg)}}
-.chest{position:relative;width:170px;height:130px;filter:drop-shadow(0 14px 16px rgba(0,0,0,.55))}
-.base{position:absolute;left:0;right:0;bottom:0;height:78px;border-radius:6px 6px 12px 12px;background:linear-gradient(180deg,#5b3a1c,#3a230f);box-shadow:inset 0 0 0 4px var(--gold),inset 0 -10px 0 rgba(0,0,0,.25),0 0 22px var(--rar)}
-.lid{position:absolute;left:-4px;right:-4px;top:0;height:58px;border-radius:40px 40px 6px 6px;background:linear-gradient(180deg,#77502a,#4a2d13);box-shadow:inset 0 0 0 4px var(--gold);transform-origin:50% 100%;transition:transform .5s cubic-bezier(.3,1.4,.5,1);z-index:2}
-.strap{position:absolute;top:0;bottom:0;left:50%;width:22px;margin-left:-11px;background:var(--gold);opacity:.9}
-.lock{position:absolute;left:50%;top:-6px;width:28px;height:32px;margin-left:-14px;border-radius:6px;background:linear-gradient(180deg,#fff2c0,var(--gold));box-shadow:0 0 12px var(--rar);z-index:3}
-.vault.shake .chest{animation:jolt .14s linear infinite}
-@keyframes jolt{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(-3px,1px) rotate(-2deg)}50%{transform:translate(2px,-2px) rotate(1.5deg)}75%{transform:translate(-1px,2px) rotate(-1deg)}100%{transform:translate(0,0)}}
-.vault.open .lid{transform:perspective(400px) rotateX(-120deg) translateY(-6px)}
-.vault.open .lock{opacity:0}
-.item{position:absolute;left:50%;bottom:110px;transform:translateX(-50%);z-index:4;display:grid;justify-items:center;gap:2px;padding:10px 18px;border-radius:12px;background:#0f0c08;border:2px solid var(--rar);box-shadow:0 0 30px var(--rar);min-width:150px;line-height:1.1}
-.item small{font:700 12px var(--display);letter-spacing:2px;text-transform:uppercase;color:var(--rar)}
-.item b{font:700 clamp(26px,8vw,34px) var(--display);color:#fff}
-.item.rise{animation:rise .6s cubic-bezier(.2,1.4,.4,1)}
-@keyframes rise{0%{transform:translate(-50%,60px) scale(.4);opacity:0}100%{transform:translate(-50%,0) scale(1);opacity:1}}
-@media (prefers-reduced-motion:reduce){.vault.shake .chest,.vault.open .beam,.item.rise{animation:none}.lid{transition:none}}
+.web{position:relative;width:100%;height:240px;border-radius:18px;overflow:hidden;background:radial-gradient(70% 60% at 50% 40%,#1d2a1a,#0b120a 70%,#050805);box-shadow:inset 0 0 0 3px var(--gold),0 12px 26px rgba(0,0,0,.5)}
+.web .leaves{position:absolute;inset:0;background:
+ radial-gradient(40px 18px at 8% 92%,#1f4a24 60%,transparent 62%),radial-gradient(52px 20px at 92% 84%,#1a3f1f 60%,transparent 62%),
+ radial-gradient(46px 18px at 70% 96%,#18381c 60%,transparent 62%),radial-gradient(34px 13px at 28% 98%,#24532a 60%,transparent 62%);opacity:.9}
+.web .webs{position:absolute;right:-30px;bottom:-40px;width:160px;height:160px;border-radius:50%;background:
+ repeating-radial-gradient(circle at 100% 100%,transparent 0 13px,rgba(220,230,220,.14) 13px 14px),
+ repeating-conic-gradient(from 270deg at 100% 100%,rgba(220,230,220,.14) 0 1deg,transparent 1deg 15deg);opacity:.8}
+.web::before{content:attr(data-result);position:absolute;left:0;right:0;bottom:12px;z-index:6;text-align:center;font:700 15px var(--display);letter-spacing:2px;color:var(--gold);text-shadow:0 2px 0 rgba(0,0,0,.7)}
+.stick{position:absolute;left:4%;right:4%;top:64px;height:9px;border-radius:5px;background:linear-gradient(180deg,#d6aa6c,#9a6e3e 55%,#5e3f1e);box-shadow:0 3px 4px rgba(0,0,0,.6);z-index:3}
+.hl,.hr{position:absolute;top:40px;width:70px;height:60px;z-index:4;line-height:0}
+.hl{left:-14px}
+.hr{right:-14px;transform:scaleX(-1)}
+.hnd{width:100%;height:100%}
+.spider{position:absolute;top:70px;width:86px;height:60px;padding:0;border:0;background:none;cursor:pointer;line-height:0;z-index:2}
+.spider .bod{display:block;width:100%;height:100%;filter:drop-shadow(0 4px 3px rgba(0,0,0,.6))}
+.spider svg{width:100%;height:100%;display:block;overflow:visible}
+.spider.me{left:12%}
+.spider.foe{right:12%}
+.spider.foe svg{transform:scaleX(-1)}
+.spider svg *{transform-box:fill-box}
+.spider .cocoon ellipse{transform-box:view-box}
+.spider .leg{transform-origin:100% 100%}
+.spider .leg.l2,.spider .leg.l3{transform-origin:0% 100%}
+.spider .abd{transform-origin:85% 20%;animation:sway 2.4s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(0)}50%{transform:rotate(-5deg) scale(1.02)}}
+.spider .ceph{transform-origin:30% 30%}
+.spider .fang,.spider .palp{transform-origin:0 0}
+.spider:not(:disabled) .leg.near.l3{animation:feel 2.2s ease-in-out infinite}
+@keyframes feel{0%,70%,100%{transform:rotate(0)}80%{transform:rotate(10deg)}90%{transform:rotate(-4deg)}}
+.spider.walk .leg.l0,.spider.walk .leg.l2{animation:stepA .18s ease-in-out infinite alternate}
+.spider.walk .leg.l1,.spider.walk .leg.l3{animation:stepB .18s ease-in-out infinite alternate}
+@keyframes stepA{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
+@keyframes stepB{from{transform:rotate(6deg)}to{transform:rotate(-6deg)}}
+.spider.rear .leg.l3{transform:rotate(34deg);transition:transform .2s}
+.spider.rear .leg.l2{transform:rotate(14deg);transition:transform .2s}
+.spider.bite .leg.near.l3,.spider.bite .leg.near.l2{animation:grap .1s linear infinite alternate}
+@keyframes grap{from{transform:rotate(40deg)}to{transform:rotate(12deg)}}
+.spider.bite .fang,.spider.bite .palp{animation:chomp .09s linear infinite alternate}
+@keyframes chomp{to{transform:rotate(22deg)}}
+.spider.spin .abd{animation:spinret .12s linear infinite alternate}
+@keyframes spinret{from{transform:rotate(-14deg)}to{transform:rotate(10deg)}}
+.spider.spin .leg.l0,.spider.spin .leg.l1{animation:wrapleg .12s linear infinite alternate}
+@keyframes wrapleg{from{transform:rotate(-24deg)}to{transform:rotate(14deg)}}
+.spider.spin .bod::after{content:"";position:absolute}
+.spider .cocoon ellipse{fill:none;stroke:rgba(245,245,238,.9);stroke-width:1.3;stroke-dasharray:130;stroke-dashoffset:130;opacity:0;transition:stroke-dashoffset .6s ease-out}
+.spider.s1 .cocoon ellipse:nth-child(-n+1){opacity:1;stroke-dashoffset:0}
+.spider.s2 .cocoon ellipse:nth-child(-n+2){opacity:1;stroke-dashoffset:0}
+.spider.s3 .cocoon ellipse:nth-child(-n+3){opacity:1;stroke-dashoffset:0}
+.spider.s4 .cocoon ellipse:nth-child(-n+4){opacity:1;stroke-dashoffset:0}
+.spider.s5 .cocoon ellipse:nth-child(-n+5){opacity:1;stroke-dashoffset:0}
+.spider.s6 .cocoon ellipse:nth-child(-n+6){opacity:1;stroke-dashoffset:0}
+.spider.s7 .cocoon ellipse:nth-child(-n+7){opacity:1;stroke-dashoffset:0}
+.spider.s8 .cocoon ellipse:nth-child(-n+8){opacity:1;stroke-dashoffset:0}
+.spider.s1 .cocoon,.spider.s2 .cocoon,.spider.s3 .cocoon,.spider.s4 .cocoon,.spider.s5 .cocoon,.spider.s6 .cocoon,.spider.s7 .cocoon{filter:drop-shadow(0 0 1.5px rgba(255,255,255,.6))}
+.spider.wrapped .cocoon ellipse{opacity:1;animation:silk .5s ease-out forwards;animation-delay:var(--d)}
+@keyframes silk{to{stroke-dashoffset:0}}
+.spider.wrapped .cocoon{filter:drop-shadow(0 0 2px rgba(255,255,255,.6))}
+.spider.wrapped .leg{transform:scale(.55) rotate(18deg);transition:transform 1.4s ease-in}
+.spider.wrapped .abd,.spider.wrapped .ceph{filter:saturate(.3) brightness(1.3);transition:filter 1.4s}
+.spider.wrapped .cocoon::after{content:""}
+.spider.wrapped.still .cocoon ellipse{animation:none;stroke-dashoffset:0}
+.spider.wrapped.still .cocoon ellipse:first-child{fill:rgba(240,240,232,.55)}
+.spider.mine .bod{filter:drop-shadow(0 0 7px var(--gold)) drop-shadow(0 4px 3px rgba(0,0,0,.6))}
+.spider:disabled{cursor:default}
+.spider.me.close{left:calc(50% - 86px)}
+.spider.foe.close{right:calc(50% - 86px)}
+.spider.winner .bod{filter:drop-shadow(0 0 10px var(--gold)) drop-shadow(0 4px 3px rgba(0,0,0,.6))}
+.spider.winner .leg.near.l3{animation:cheerleg .4s ease-in-out 4 alternate}
+@keyframes cheerleg{from{transform:rotate(0)}to{transform:rotate(36deg)}}
+.tag{position:absolute;top:12px;z-index:5;font:700 12px var(--display);letter-spacing:1px;padding:5px 10px;border-radius:8px;color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.4);pointer-events:none}
+.tag i{font-style:normal;color:var(--gold)}
+.tag.me{left:5%;background:#1d3a1f;box-shadow:0 3px 0 rgba(0,0,0,.4),inset 0 0 0 1px var(--gold)}
+.tag.foe{right:5%;background:#3a1a1a}
+.spider{cursor:default}
+.breeds{width:100%;display:grid;gap:8px;text-align:left}
+.breeds-h{margin:0;font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.bgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.breed{display:grid;justify-items:center;gap:1px;padding:5px 3px 6px;border-radius:10px;border:1px solid var(--line);background:radial-gradient(80% 70% at 50% 30%,#1d2a1a,#0b120a);color:var(--paper);cursor:pointer;min-width:0;line-height:1.15}
+.breed .sw{display:block;width:100%;max-width:70px;line-height:0}
+.breed .sw svg{width:100%;height:auto}
+.breed .sw .cocoon{display:none}
+.breed b{font-size:10.5px;font-weight:700;text-align:center;line-height:1.1}
+.breed small{font-size:8.5px;color:var(--muted);text-align:center}
+.breed.on{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold),0 0 12px var(--glow)}
+.breed:disabled{cursor:default;opacity:.5}
+.breed.on:disabled{opacity:1}
+@media (prefers-reduced-motion:reduce){.spider *,.spider .bod{animation:none!important;transition:none!important}.spider.wrapped .cocoon ellipse{stroke-dashoffset:0}}
 
 @media (prefers-reduced-motion:reduce){.cheer.pop,.jp-card,.jp.big .jp-title,.agree.nudge{animation:none}}
 </style>
 
+</head>
+<body>
 <div class="stack">
   <section class="panel" id="admin" hidden>
     <h2>Link maker</h2>
@@ -189,7 +263,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <p class="cheer" id="cheer"></p>
     <div class="play" id="play"></div>
     <ul class="ladder" id="ladder" aria-label="Mga premyo" hidden></ul>
-    <label class="agree" id="agreeLbl"><input type="checkbox" id="agree"><span>Nabasa ko at sang-ayon ako sa <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button> ng Loot Drop.</span></label>
+    <label class="agree" id="agreeLbl"><input type="checkbox" id="agree"><span>Nabasa ko at sang-ayon ako sa <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button> ng Gagamba Spot.</span></label>
     <div class="acts"><button class="btn" id="goBtn" type="button"></button><button class="btn ghost" id="resetBtn" type="button">Reset</button></div>
     <div class="win" id="win" hidden>
       <small>Bonus mo</small>
@@ -220,7 +294,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
   </div>
 
   <details class="tnc" id="tnc">
-    <summary>Loot Drop Terms &amp; Conditions</summary>
+    <summary>Gagamba Spot Terms &amp; Conditions</summary>
     <h3>Terms &amp; Conditions</h3>
     <ol>
       <li>Open to verified GameSpot players aged 21 and above. Self-excluded, restricted or unverified accounts are not eligible.</li>
@@ -231,7 +305,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
           <tbody id="tncRows"></tbody>
         </table></div>
       </li>
-      <li>The game draws one of three prize amounts at random; the highest amount is the jackpot and is the rarest result. In Loot Drop, the rarity of the item in the chest sets your prize: Common, Rare, or Mythic (jackpot).</li>
+      <li>The game draws one of three prize amounts at random; the highest amount is the jackpot and is the rarest result. In Gagamba Spot, you pick your spider breed and it fights a randomly chosen rival under the stick; the spider that gets wrapped in silk loses. The result of the fight sets your prize, from Nabalot (lowest) to Kampeon (jackpot). You get a prize whether your spider wins or loses, and the breed you pick changes only how your spider looks, not your chances. This is an animated promo game only.</li>
       <li>One game per qualifying deposit and per player link. Results are random and final once the game starts. Refreshing the page, reopening the link or using another device does not give another turn. Only the first result confirmed by your agent counts.</li>
       <li>Send a screenshot of your result to your agent. The bonus is credited after the agent verifies your deposit and result, within the time your agent announces.</li>
       <li>The bonus is subject to the turnover requirement set by GameSpot before it can be withdrawn.</li>
@@ -244,13 +318,12 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 </div>
 
 <script>
-const BRAND={"key": "gamespot", "name": "GameSpot", "labels": ["Common", "Rare", "Mythic"], "offers": {"Reactivation": {"name": "Respawn Reward", "target": "Walang deposit sa loob ng 30+ araw", "trig": "Unang verified deposit pagkatapos ng tawag ng Tele (Voiso call + SMS) (Tele: Rox)", "valid": "3 araw mula sa tawag", "script": "Hi po! Respawn time na sa GameSpot. Verified na ang deposit mo, kaya may Loot Drop ka. Buksan mo ang chest at tingnan kung anong rarity ang makukuha mo!"}, "VIP": {"name": "GameSpot Legends", "target": "Top depositors / VIP-tagged players", "trig": "Top rank sa weekly VIP leaderboard (by turnover)", "valid": "Mon–Sun, laro sa sumunod na Monday", "script": "Welcome sa GameSpot Legends! Pasok ka sa weekly leaderboard, kaya may Loot Drop ka ngayong Monday."}, "Community": {"name": "Spot Quest", "target": "Active members ng GameSpot TG group", "trig": "Natapos lahat ng weekly quests sa TG (hal. deposit, featured game, invite a friend)", "valid": "Mon–Sun; laro bago mag-Monday 9 PM", "script": "Quest complete! Ito ang Loot Drop mo para sa Spot Quest ngayong linggo. Buksan bago mag-Monday 9 PM."}}, "confetti": ["#3d8bff", "#a55bff", "#3ecf6a", "#e6b54a"], "confettiBig": ["#ff3d5a", "#e6b54a", "#ff9a1f", "#ffffff"]};
+const BRAND={"key": "gamespot", "name": "GameSpot", "labels": ["Nabalot", "Panalo, dikit", "Kampeon"], "confetti": ["#3d8bff", "#a55bff", "#3ecf6a", "#e6b54a"], "confettiBig": ["#ff3d5a", "#e6b54a", "#ff9a1f", "#ffffff"]};
 // ---------- shared helpers ----------
 const $=id=>document.getElementById(id);
 const MIN_DEPOSIT=200;
 const PRIZES=[10,27,57]; // peso amounts, ascending
 const WEIGHTS=[4,95,1]; // % chance matching PRIZES index-for-index, sums to 100
-function qualifies(d){return d>=MIN_DEPOSIT}
 function php(n){return "₱"+Number(n).toLocaleString()}
 function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296}
 function drawStep(){let r=rnd()*100;for(let i=0;i<WEIGHTS.length;i++){r-=WEIGHTS[i];if(r<0)return i}return 0}
@@ -260,7 +333,7 @@ function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className
 $("tncRows").innerHTML=PRIZES.map((p,i)=>"<tr><td>"+php(p)+"</td><td>"+WEIGHTS[i]+"%</td></tr>").join("");
 
 // ---------- player links ----------
-// link = #code.<deposit>.<nonce>.<check>; the check stops casual edits to the deposit
+// link = #code.<deposit>.<nonce>.<name>.<check>; the check stops casual edits to the deposit
 const SALT="cg~"+BRAND.key+"~26q4";
 function h36(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}let g=h;for(let i=s.length-1;i>=0;i--){g^=s.charCodeAt(i)*31;g=Math.imul(g,2246822519)>>>0}return (h.toString(36)+g.toString(36)).slice(0,6)}
 const ADMIN_PASS_CHECK="86l4uo"; // h36(ADMIN_PASSWORD+SALT)
@@ -297,45 +370,166 @@ function cheer(text){const c=$("cheer");c.textContent=text;c.classList.remove("p
 function needAgree(){if($("agree").checked)return false;const l=$("agreeLbl");l.classList.remove("nudge");void l.offsetWidth;l.classList.add("nudge");cheer("I-check muna ang T&C.");return true}
 
 // ---------- game ----------
-// Loot Drop: open a loot chest; the light climbs through rarities and lands on the prize rarity
+// Gagamba Spot: pick a spider breed; your spider (left) fights a random rival hanging under the stick, and the winner wraps the loser in silk
 const GAME=(()=>{
-  const RAR=["#9aa3ad","#3d8bff","#ff3d5a"];
-  let chest,card,timer=null;
-  const G={label:"Loot Drop",how:["I-check ang T&C box.","Pindutin ang Open Loot.","Aakyat ang ilaw ng chest mula Common pataas at hihinto sa isang rarity.","Ang rarity ng lumabas na item ang premyo mo. Mythic ang jackpot."],title:"LOOT DROP",btn:"Open Loot",
-    note:"Buksan ang loot chest. Common hanggang Mythic ang pwedeng lumabas, at bawat rarity ay may katumbas na premyo.",
-    chip(i){return "border-color:"+RAR[i]+";box-shadow:inset 3px 0 0 "+RAR[i]},
+  const BREEDS=[
+    {n:"Kuryente",d:"Ginto, pinakamalaki",pat:"spots",ab:"#a8841a",ab2:"#ffd84a",mark:"#f4f4e8",mark2:"#5a4410",ce:"#3a3020",ce2:"#7a6a3a",leg:"#2a2010",band:"#f2c24a"},
+    {n:"Ekis",d:"Puting ekis",pat:"cross",ab:"#26262a",ab2:"#8a8a92",mark:"#ffffff",mark2:"#f2d040",ce:"#2a2622",ce2:"#6a625a",leg:"#3a2e22",band:"#d8b040"},
+    {n:"Bahay",d:"Kayumanggi, mabilis",pat:"bands",ab:"#5a3a22",ab2:"#9a6a42",mark:"#3a2414",mark2:"#c89a6a",ce:"#4a301c",ce2:"#8a5e3a",leg:"#3a2414",band:"#a07850"},
+    {n:"Talon",d:"Malalaking mata",pat:"spots",ab:"#16161a",ab2:"#4a4a56",mark:"#f4f4f8",mark2:"#e0a020",ce:"#16161a",ce2:"#44444e",leg:"#121216",band:"#c8c8d0"},
+    {n:"Pari",d:"Makulay na talukap",pat:"spiny",ab:"#e8e2d0",ab2:"#ffffff",mark:"#141414",mark2:"#e0202a",ce:"#141414",ce2:"#3a3a3a",leg:"#141414",band:"#5a5a5a"},
+    {n:"Palay",d:"Mahabang katawan",pat:"bands",ab:"#5e6e2e",ab2:"#c8d68a",mark:"#f0f4e0",mark2:"#3a4a18",ce:"#4a5a24",ce2:"#8a9a4a",leg:"#4a5220",band:"#c8d080"},
+    {n:"Abuhin",d:"Abuhin, pang-derby",pat:"bands",ab:"#50545a",ab2:"#a8adb4",mark:"#eef0f4",mark2:"#2a2c30",ce:"#3a3c42",ce2:"#7a7e86",leg:"#2a2c30",band:"#b8bcc4"},
+    {n:"Tigre",d:"Guhit-tigre",pat:"tiger",ab:"#c45a10",ab2:"#ff9a3a",mark:"#1a0e06",mark2:"#ffd29a",ce:"#3a1e0e",ce2:"#7a3e1a",leg:"#2a1408",band:"#e07a2a"},
+    {n:"Samon",d:"Kulay-samon",pat:"bands",ab:"#b8503a",ab2:"#f4a48c",mark:"#fff0e8",mark2:"#6a2418",ce:"#5a2a1e",ce2:"#a85a44",leg:"#4a2018",band:"#f0a08a"},
+    {n:"Black Panther",d:"Itim, mabilis",pat:"plain",ab:"#0a0a0e",ab2:"#3e3450",mark:"#8a7aa8",mark2:"#000000",ce:"#0a0a0e",ce2:"#2e2a3a",leg:"#08080a",band:"#3e3a4a"}];
+  const SIDES=[{k:"me",n:"IKAW"},{k:"foe",n:"KALABAN"}];
+  const CLASHES=[12,15,12]; // number of exchanges per prize step, kept from the old 6-step set: indices 0, 2, 5
+  const MOVES=["lunge","grapple","web","lunge","break","grapple","web","lunge","grapple","web","break","lunge","grapple","web","lunge"];
+  let arena,spiders=[],tags=[],labels=[],anims=[],timers=[],br=null,obr=null,picker=null;
+  // legs: hip, femur end, tibia end, foot on the underside of the stick (y=4)
+  const LEGS=[[56,38,36,22,24,10,14,4],[59,37,46,17,41,7,36,4],[63,37,72,17,78,7,82,4],[66,38,84,22,93,11,99,5]];
+  function pattern(s){
+    switch(s.pat){
+      case "cross":return "<path d='M30 40 L54 56 M54 40 L30 56' stroke='"+s.mark+"' stroke-width='3' stroke-linecap='round'/><path d='M28 48 L56 48' stroke='"+s.mark2+"' stroke-width='2' stroke-linecap='round' opacity='.9'/><path d='M32 43 Q42 39 52 43 M32 53 Q42 57 52 53' stroke='"+s.mark2+"' stroke-width='1.2' fill='none' opacity='.8'/>";
+      case "spots":return [[34,44,2.2],[42,41,2],[50,44,2.2],[31,50,1.8],[38,49,2.4],[46,49,2.4],[53,50,1.8],[36,55,1.6],[44,55,1.8],[50,55,1.4]].map(([x,y,r])=>"<circle cx='"+x+"' cy='"+y+"' r='"+r+"' fill='"+s.mark+"'/>").join("")+"<path d='M42 38 L42 58' stroke='"+s.mark2+"' stroke-width='1' opacity='.5'/>";
+      case "tiger":return "<path d='M30 42 Q34 48 30 54 M36 39 Q41 48 36 58 M43 37 Q48 48 43 59 M50 39 Q54 48 50 57' stroke='"+s.mark+"' stroke-width='2.4' fill='none' stroke-linecap='round'/>";
+      case "stripe":return "<path d='M28 48 Q42 44 56 48' stroke='"+s.mark+"' stroke-width='4' fill='none' stroke-linecap='round'/><path d='M40 52 L44 52 L42 56 Z' fill='"+s.mark+"'/>";
+      case "spiny":return "<path d='M25 44 l-5 -4 M59 44 l5 -4 M27 55 l-5 4 M57 55 l5 4 M42 36 l0 -5 M42 60 l0 5' stroke='"+s.mark2+"' stroke-width='2.8' stroke-linecap='round'/>"+[[34,44],[42,42],[50,44],[36,51],[48,51],[42,55]].map(([x,y])=>"<circle cx='"+x+"' cy='"+y+"' r='1.8' fill='"+s.mark+"'/>").join("");
+      case "plain":return "<path d='M30 45 Q42 41 54 45' stroke='"+s.mark+"' stroke-width='.9' fill='none' opacity='.5'/>";
+      default:return "<path d='M30 46 Q42 40 54 46 M31 51 Q42 46 53 51 M34 56 Q42 52 50 56' stroke='"+s.mark+"' stroke-width='1.8' fill='none' stroke-linecap='round'/><path d='M38 42 L42 38 L46 42 Z' fill='"+s.mark+"'/>";
+    }
+  }
+  const SPIDER=(s,id)=>{
+    const leg=(p,far)=>{const [hx,hy,ax,ay,bx,by,fx,fy]=p,o=far?(p[0]<62?5:-5):0;
+      const P=[[hx,hy],[ax+o,ay+2],[bx+o,by+1],[fx+o,fy]],W=far?[1.9,1.5,1.0]:[2.8,2.1,1.4];let out="";
+      for(let k=0;k<3;k++){const [x0,y0]=P[k],[x1,y1]=P[k+1],dx=x1-x0,dy=y1-y0,L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L;
+        out+="<path d='M"+x0.toFixed(1)+" "+y0.toFixed(1)+" L"+x1.toFixed(1)+" "+y1.toFixed(1)+"' stroke='"+s.leg+"' stroke-width='"+W[k]+"' stroke-linecap='round'"+(far?" opacity='.55'":"")+"/>";
+        if(!far){
+          out+="<path d='M"+(x0+dx*.15).toFixed(1)+" "+(y0+dy*.15).toFixed(1)+" L"+(x0+dx*.7).toFixed(1)+" "+(y0+dy*.7).toFixed(1)+"' stroke='"+s.band+"' stroke-width='"+(W[k]*.55).toFixed(2)+"' stroke-linecap='round' opacity='.8'/>";
+          for(let h=1;h<=4;h++){const t=h/5,cx=x0+dx*t,cy=y0+dy*t,side=h%2?1:-1,len=1.6+W[k]*.5;
+            out+="<path d='M"+cx.toFixed(1)+" "+cy.toFixed(1)+" l"+(nx*side*len+dx/L*.9).toFixed(2)+" "+(ny*side*len+dy/L*.9).toFixed(2)+"' stroke='"+s.leg+"' stroke-width='.45' opacity='.85'/>"}
+          out+="<circle cx='"+x1.toFixed(1)+"' cy='"+y1.toFixed(1)+"' r='"+(W[k]*.55).toFixed(2)+"' fill='"+(k<2?s.band:s.leg)+"'/>";
+        }}
+      if(!far)out+="<path d='M"+(fx+o)+" "+fy+" l-1.2 -1.6 M"+(fx+o)+" "+fy+" l1.2 -1.6' stroke='"+s.leg+"' stroke-width='.6'/>";
+      return out};
+    return "<svg viewBox='0 0 104 72' aria-hidden='true'><defs>"+
+      "<radialGradient id='ab"+id+"' cx='35%' cy='30%' r='75%'><stop offset='0' stop-color='"+s.ab2+"'/><stop offset='1' stop-color='"+s.ab+"'/></radialGradient>"+
+      "<radialGradient id='ce"+id+"' cx='40%' cy='30%' r='75%'><stop offset='0' stop-color='"+s.ce2+"'/><stop offset='1' stop-color='"+s.ce+"'/></radialGradient>"+
+      "<pattern id='tx' width='3' height='3' patternUnits='userSpaceOnUse'><circle cx='1' cy='1' r='.45' fill='#000'/><circle cx='2.4' cy='2.2' r='.3' fill='#fff' opacity='.5'/></pattern></defs>"+
+      LEGS.map((p,i)=>"<g class='leg far l"+i+"'>"+leg(p,true)+"</g>").join("")+
+      "<g class='abd'><ellipse cx='42' cy='48' rx='16' ry='12' fill='url(#ab"+id+")' stroke='#000' stroke-width='.8'/>"+pattern(s)+
+      "<ellipse cx='37' cy='43' rx='5' ry='2.6' fill='rgba(255,255,255,.25)'/><ellipse cx='42' cy='48' rx='16' ry='12' fill='url(#tx)' opacity='.35'/><path d='M26.5 50 l-3.4 1.2 M26.4 48 l-3.6 -.2 M26.8 46 l-3.2 -1.4' stroke='"+s.leg+"' stroke-width='1' stroke-linecap='round'/><path d='M30 40 l-1 -1.6 M36 37 l-.4 -1.8 M48 37 l.4 -1.8 M54 40 l1 -1.6 M30 56 l-1 1.6 M54 56 l1 1.6' stroke='"+s.leg+"' stroke-width='.5' opacity='.8'/></g>"+
+      "<g class='ceph'><ellipse cx='63' cy='41' rx='9.5' ry='7.2' fill='url(#ce"+id+")' stroke='#000' stroke-width='.8'/>"+
+      "<path d='M57 39 Q63 36 69 39' stroke='rgba(255,255,255,.2)' stroke-width='1' fill='none'/><path d='M63 41 l-5 -2 M63 41 l-5 2 M63 41 l-2 -5 M63 41 l-2 5' stroke='rgba(0,0,0,.35)' stroke-width='.7'/><circle cx='63' cy='41' r='1.1' fill='rgba(0,0,0,.4)'/>"+
+      "<g class='eyes'><circle cx='70.2' cy='37.6' r='1.35' fill='#050505'/><circle cx='69.795' cy='37.195' r='0.405' fill='rgba(255,255,255,.75)'/><circle cx='71.9' cy='39.5' r='1.15' fill='#050505'/><circle cx='71.555' cy='39.155' r='0.345' fill='rgba(255,255,255,.75)'/><circle cx='68.5' cy='36.4' r='0.85' fill='#050505'/><circle cx='68.245' cy='36.144999999999996' r='0.255' fill='rgba(255,255,255,.75)'/><circle cx='70.6' cy='40.6' r='0.8' fill='#050505'/><circle cx='70.36' cy='40.36' r='0.24' fill='rgba(255,255,255,.75)'/><circle cx='67.6' cy='38.2' r='0.6' fill='#050505'/><circle cx='67.41999999999999' cy='38.02' r='0.18' fill='rgba(255,255,255,.75)'/><circle cx='69.2' cy='41.6' r='0.6' fill='#050505'/><circle cx='69.02' cy='41.42' r='0.18' fill='rgba(255,255,255,.75)'/><circle cx='72.4' cy='37.2' r='0.55' fill='#050505'/><circle cx='72.235' cy='37.035000000000004' r='0.165' fill='rgba(255,255,255,.75)'/><circle cx='66.9' cy='36.6' r='0.5' fill='#050505'/><circle cx='66.75' cy='36.45' r='0.15' fill='rgba(255,255,255,.75)'/></g>"+
+      "<path class='palp' d='M70 43 Q76 44 78 48' stroke='"+s.leg+"' stroke-width='1.8' fill='none' stroke-linecap='round'/><circle cx='78' cy='48' r='1.3' fill='"+s.leg+"'/>"+
+      "<path class='fang' d='M70 46 Q73 49 71 52' stroke='#1a0d08' stroke-width='1.7' fill='none' stroke-linecap='round'/></g>"+
+      LEGS.map((p,i)=>"<g class='leg near l"+i+"'>"+leg(p,false)+"</g>").join("")+
+      "<g class='cocoon'>"+[0,25,55,90,120,150,170,200,235].map((a,k)=>"<ellipse cx='52' cy='44' rx='"+(24-k%3*3)+"' ry='"+(11+k%2*2)+"' transform='rotate("+a+" 52 44)' style='--d:"+(k*0.16).toFixed(2)+"s'/>").join("")+"</g>"+
+      "</svg>"};
+  const HAND="<svg class='hnd' viewBox='0 0 70 60' aria-hidden='true'><path d='M0 60 L0 34 Q8 28 20 30 L46 26 Q56 24 60 30 Q62 36 56 38 L40 40 Q30 50 18 50 L14 60 Z' fill='#d9a07a' stroke='#7a4a2a' stroke-width='1.5'/><path d='M44 30 Q52 32 54 36 M40 36 Q48 38 50 42' stroke='#a8704a' stroke-width='1.2' fill='none'/></svg>";
+  function T(fn,ms){const t=setTimeout(fn,ms);timers.push(t);return t}
+  function outcome(step){return step>=1?"win":"lose"}
+  function banner(t){arena.dataset.result=t}
+  function paint(){const look=[br??0,obr??9];spiders.forEach((c,i)=>{c.querySelector(".bod").innerHTML=SPIDER(BREEDS[look[i]],SIDES[i].k);labels[i].textContent=BREEDS[look[i]].n})}
+  function rival(){const o=BREEDS.map((_,k)=>k).filter(k=>k!==br);obr=o[Math.floor(rnd()*o.length)]}
+  function pose(step){
+    const o=outcome(step),w=o==="win"?0:1;
+    spiders.forEach(c=>c.classList.remove("winner","wrapped","walk","rear","bite","spin"));
+    for(let q=1;q<=8;q++)spiders[w].classList.remove("s"+q);
+    spiders[w].classList.add("winner","close","s3");spiders[1-w].classList.add("wrapped","close","still");
+    banner(w===0?"PANALO ANG GAGAMBA MO":"PANALO ANG KALABAN");
+  }
+  const G={label:"Gagamba Spot",title:"GAGAMBA SPOT",btn:"Pumili muna ng gagamba",
+    how:["I-check ang T&C box.","Pumili ng lahi ng gagamba mo: Kuryente, Ekis, Bahay, Talon, Pari, Palay, Abuhin, Tigre, Samon o Black Panther. Random na lahi ang makakalaban mo.","Pindutin ang Simulan ang laban. Maglalaban ang dalawang gagamba sa ilalim ng tingting.","Ang mababalot ng sapot ang talo. Ang resulta ng laban ang premyo mo: Nabalot (pinakamababa) hanggang Kampeon (jackpot). May premyo ka kahit matalo ang gagamba mo.","Itsura lang ang binabago ng lahi; hindi nito binabago ang tsansa. Animated na laro lang ito."],
+    note:"Pumili ng lahi ng gagamba mo, tapos simulan ang laban sa ilalim ng tingting. Ang mababalot ng sapot ang talo. May premyo kahit matalo ang gagamba mo.",
     build(play,ctx){
-      const stage=el("div","vault");
-      stage.innerHTML="<div class='beam'></div><div class='chest'><div class='lid'><span class='strap'></span></div><div class='base'><span class='strap'></span><span class='lock'></span></div></div><div class='item' hidden></div>";
-      play.appendChild(stage);chest=stage;card=stage.querySelector(".item");
-      stage.style.setProperty("--rar",RAR[0]);
+      spiders=[];tags=[];labels=[];anims=[];timers=[];br=null;obr=null;
+      picker=el("div","breeds");picker.appendChild(el("p","breeds-h","Pumili ng lahi ng gagamba mo"));
+      const grid=el("div","bgrid");
+      BREEDS.forEach((b,k)=>{const x=el("button","breed","<span class='sw'>"+SPIDER(b,"sw"+k)+"</span><b>"+b.n+"</b><small>"+b.d+"</small>");x.type="button";x.onclick=()=>G.breed(k,ctx);grid.appendChild(x)});
+      picker.appendChild(grid);
+      arena=el("div","web","<div class='leaves'></div><div class='webs'></div><div class='stick'></div><div class='hl'>"+HAND+"</div><div class='hr'>"+HAND+"</div>");
+      SIDES.forEach((s,i)=>{
+        const c=el("button","spider "+s.k,"<span class='bod'></span>");c.type="button";c.setAttribute("aria-label",s.n);c.tabIndex=-1;
+        const t=el("span","tag "+s.k,s.n+" · <i></i>");
+        arena.append(c,t);spiders.push(c);tags.push(t);labels.push(t.querySelector("i"));
+      });
+      banner("");play.append(picker,arena);paint();$("goBtn").disabled=true;
+    },
+    breed(k,ctx){
+      if(ctx.isBusy()||(ctx.state&&ctx.state.step!=null))return;if(!ctx.agreed())return;
+      br=k;if(obr===null||obr===br)rival();
+      picker.querySelectorAll(".breed").forEach((b,j)=>b.classList.toggle("on",j===k));paint();
+      $("goBtn").disabled=false;$("goBtn").textContent="Simulan ang laban";cheer("Gagamba mo: "+BREEDS[k].n+" vs "+BREEDS[obr].n);beep(600,.08,.1);
     },
     go(ctx){
-      if(ctx.isBusy()||(ctx.state&&ctx.state.step!=null))return;if(!ctx.agreed())return;
-      ctx.start();const step=ctx.state.step;
-      ctx.setBusy(true);$("goBtn").disabled=true;cheer("Binubuksan…");
-      if(reduce()){G.open(step,false);ctx.done();return}
-      chest.classList.add("shake");
-      // climb the rarity ladder: each level lights up in turn until the drawn one
-      let lv=0;const seq=[];for(let i=0;i<=step;i++)seq.push(i);
-      while(seq.length<4)seq.unshift(0);
-      let k=0;
-      (function next(){
-        lv=seq[k];chest.style.setProperty("--rar",RAR[lv]);chest.dataset.lv=lv;
-        beep(440*Math.pow(1.26,lv),.18,.12,"square");
-        if(k>0&&lv>seq[k-1])cheer(BRAND.labels[lv]+"!");
-        k++;
-        if(k<seq.length){timer=setTimeout(next,700)}
-        else timer=setTimeout(()=>{chest.classList.remove("shake");G.open(step,true);setTimeout(()=>ctx.done(),650)},800);
-      })();
+      if(ctx.isBusy()||(ctx.state&&ctx.state.step!=null))return;
+      if(br===null){cheer("Pumili muna ng gagamba");return}
+      if(!ctx.agreed())return;
+      ctx.start({br,obr});const step=ctx.state.step,o=outcome(step),n=CLASHES[step];
+      ctx.setBusy(true);$("goBtn").disabled=true;picker.querySelectorAll("button").forEach(b=>b.disabled=true);
+      if(reduce()){pose(step);ctx.done();return}
+      const W=arena.clientWidth,C=W/2,half=spiders[0].offsetWidth/2,base=[spiders[0].offsetLeft+half,spiders[1].offsetLeft+half];
+      const tf=(i,gap,y,r)=>"translateX("+((i?C+gap:C-gap)-base[i]).toFixed(1)+"px) translateY("+(y||0)+"px) rotate("+((i?-1:1)*(r||0))+"deg)";
+      const mv=(i,frames,ms,delay,ease)=>{const a=spiders[i].animate(frames,{duration:ms,delay:delay||0,fill:"forwards",easing:ease||"ease-in-out"});anims.push(a);return a};
+      const both=(fn,ms,ease)=>[0,1].forEach(i=>mv(i,fn(i),ms,0,ease));
+      // 1. they creep along the underside of the stick toward each other
+      cheer("Lumalapit…");banner("HANDA");spiders.forEach(c=>c.classList.add("walk"));
+      both(i=>[{transform:tf(i,C-base[0])},{transform:tf(i,62)}],1500);
+      // 2. standoff: front legs up, sizing each other up
+      T(()=>{spiders.forEach(c=>{c.classList.remove("walk");c.classList.add("rear")});cheer("Nagsusukatan…");banner("SUKATAN");
+        both(i=>[{transform:tf(i,62)},{transform:tf(i,56,2,6),offset:.3},{transform:tf(i,60,0,-3),offset:.6},{transform:tf(i,52,1,4)}],1300)},1550);
+      T(()=>{cheer("Laban!");banner("LABAN");beep(330,.25,.12,"square")},2900);
+      // 3. exchanges: lunges, locked grapples and breaks
+      let t=3000,cur=52;
+      const DUR={lunge:700,grapple:1150,break:950,web:1000};let lv=[0,0];const wIdx=o==="win"?0:1;
+      const silkUp=(i,n)=>{lv[i]=Math.min(i===wIdx?3:7,lv[i]+n);for(let q=1;q<=8;q++)spiders[i].classList.toggle("s"+q,q===lv[i])};
+      for(let k=0;k<n;k++){
+        const m=MOVES[k%MOVES.length],from=cur;
+        T(()=>{
+          spiders[0].style.zIndex=k%2?2:3;spiders[1].style.zIndex=k%2?3:2;
+          if(m==="lunge"){
+            cheer(["Sugod!","Kagat!","Ayan na!","Grabe!"][k%4]);spiders.forEach(c=>c.classList.add("bite"));
+            both(i=>[{transform:tf(i,from,0,0)},{transform:tf(i,24,5,10),offset:.35},{transform:tf(i,18,7,-6),offset:.55},{transform:tf(i,22,3,6),offset:.75},{transform:tf(i,40,0,0)}],DUR.lunge,"cubic-bezier(.3,.6,.4,1)");
+            T(()=>{noise(.04,.35,3600);noise(.03,.25,5600)},240);T(()=>spiders.forEach(c=>c.classList.remove("bite")),640);
+          }else if(m==="grapple"){
+            cheer(["Magkahawak!","Tulakan!","Hindi bumibitaw!"][k%3]);spiders.forEach(c=>c.classList.add("bite","rear"));
+            both(i=>[{transform:tf(i,from,0,0)},{transform:tf(i,18,4,8),offset:.15},{transform:tf(i,15,7,-5),offset:.3},{transform:tf(i,19,3,9),offset:.45},{transform:tf(i,14,8,-7),offset:.6},{transform:tf(i,18,5,6),offset:.75},{transform:tf(i,16,6,-4),offset:.88},{transform:tf(i,34,0,0)}],DUR.grapple);
+            for(let q=0;q<5;q++)T(()=>noise(.04,.3,3000+q*500),150+q*180);T(()=>spiders.forEach(c=>c.classList.remove("bite")),1050);
+          }else if(m==="web"){
+            cheer(["Nagsasaputan!","Binabato ng sapot!","Sapot laban sa sapot!"][k%3]);spiders.forEach(c=>c.classList.add("spin"));
+            both(i=>[{transform:tf(i,from,0,0)},{transform:tf(i,from+6,2,-8),offset:.3},{transform:tf(i,from-4,3,6),offset:.7},{transform:tf(i,from,0,0)}],DUR.web);
+            for(let q=0;q<6;q++)T(()=>noise(.06,.18,7000+q*200),q*140);
+            T(()=>{silkUp(wIdx,1);silkUp(1-wIdx,2)},450);
+            T(()=>spiders.forEach(c=>c.classList.remove("spin")),850);
+          }else{
+            cheer("Naghiwalay… sugod ulit!");spiders.forEach(c=>c.classList.add("walk"));
+            both(i=>[{transform:tf(i,from,0,0)},{transform:tf(i,70,0,-4),offset:.5},{transform:tf(i,64,0,0),offset:.75},{transform:tf(i,50,0,0)}],DUR.break);
+            T(()=>spiders.forEach(c=>c.classList.remove("walk")),880);
+          }
+        },t);
+        cur=m==="lunge"?40:m==="grapple"?34:m==="web"?from:50;t+=DUR[m]+60;
+      }
+      const endGap=cur;
+      // 3. the loser is pinned and wrapped in silk
+      T(()=>{
+        anims.forEach(a=>a.cancel());anims=[];
+        const w=o==="win"?0:1,l=1-w;
+        spiders.forEach(c=>c.classList.remove("rear"));
+        mv(w,[{transform:tf(w,endGap)},{transform:tf(w,24,2,10)}],400);mv(l,[{transform:tf(l,endGap)},{transform:tf(l,30,6,-12)}],400);
+        cheer(w===0?"Binabalot ng gagamba mo ang kalaban!":"Binabalot ng kalaban ang gagamba mo!");banner("BINABALOT");
+        T(()=>{spiders[w].classList.add("spin");spiders[l].classList.add("wrapped");
+          for(let k=0;k<9;k++)T(()=>noise(.06,.18,7000),k*160)},420);
+        T(()=>{anims.forEach(a=>a.cancel());anims=[];spiders.forEach(c=>c.style.zIndex="");pose(step);
+          if(o==="win"){[523,659,784,1047].forEach((f,k)=>beep(f,.15,.1,"triangle",k*.1))}else beep(220,.4,.12,"triangle");
+          cheer(o==="win"?"Panalo ang gagamba mo!":"Nabalot ang gagamba mo, pero may premyo ka pa rin!");
+          T(()=>ctx.done(),700)},2300);
+      },t+100);
     },
-    open(step,anim){
-      chest.style.setProperty("--rar",RAR[step]);chest.dataset.lv=step;chest.classList.add("open");
-      card.innerHTML="<small>"+BRAND.labels[step]+"</small><b>"+php(PRIZES[step])+"</b>";card.hidden=false;
-      card.classList.toggle("rise",anim);if(anim)noise(.3,.5,3000);
-    },
-    stop(){clearTimeout(timer)},
-    finish(ctx){G.open(ctx.state.step,false)}
+    stop(){timers.forEach(clearTimeout);timers=[];anims.forEach(a=>a.cancel());anims=[]},
+    finish(ctx){br=ctx.state.br??0;obr=ctx.state.obr??9;paint();picker.querySelectorAll(".breed").forEach((b,j)=>{b.disabled=true;b.classList.toggle("on",j===br)});pose(ctx.state.step)}
   };
   return G;
 })();
@@ -354,10 +548,10 @@ const ctx={
   done(){busy=false;$("resetBtn").disabled=false;finishView(true)}
 };
 function renderMech(){
-  $("mechOffer").textContent="Loot Drop · minimum deposit ₱"+MIN_DEPOSIT;
+  $("mechOffer").textContent="Gagamba Spot · minimum deposit ₱"+MIN_DEPOSIT;
   const steps=["<b>Sino ang pwede:</b> Verified GameSpot players na may qualifying deposit.","<b>Paano ma-unlock:</b> Gumawa ng verified deposit na hindi bababa sa ₱"+MIN_DEPOSIT+". Ive-verify ng agent ang deposit mo at ibibigay niya ang personal mong game link."]
     .concat(GAME.how.map(s=>"<b>"+GAME.label+":</b> "+s))
-    .concat(["<b>Premyo:</b> Flat na prize pool ang Loot Drop — "+PRIZES.map((p,i)=>php(p)+" ("+WEIGHTS[i]+"%)").join(", ")+". Random ang lalabas, at pinakamadalang ang jackpot.",
+    .concat(["<b>Premyo:</b> Flat na prize pool ang Gagamba Spot — "+PRIZES.map((p,i)=>php(p)+" ("+WEIGHTS[i]+"%)").join(", ")+". Random ang lalabas, at pinakamadalang ang jackpot.",
       "<b>Pag-claim:</b> I-screenshot ang resulta at i-send sa agent mo. Ike-credit ang bonus pagkatapos ma-verify, at may turnover requirement bago ma-withdraw.",
       "<b>Isang laro lang bawat link.</b> Kahit mag-refresh o mag-reset, ang unang resultang na-confirm ng agent ang bibilangin."]);
   $("mechSteps").innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
@@ -365,7 +559,7 @@ function renderMech(){
 }
 function buildView(){
   renderMech();
-  $("eyebrow").textContent=BRAND.name+" · Loot Drop";
+  $("eyebrow").textContent=BRAND.name+" · Gagamba Spot";
   $("greeting").hidden=!cfg.name;if(cfg.name)$("greeting").textContent="Para kay "+cfg.name+"! 🎉";
   $("gameTitle").textContent=GAME.title;
   $("demoTag").hidden=mode!=="demo";
@@ -374,7 +568,7 @@ function buildView(){
   $("goBtn").hidden=!GAME.btn;$("goBtn").textContent=GAME.btn||"";
   if(!qualifies(cfg.deposit)){$("range").textContent="Hinihintay pa ang qualified na deposit.";$("ladder").innerHTML="";$("goBtn").disabled=true;$("note").textContent="";return}
   $("range").innerHTML="Mga premyo hanggang <b>₱777</b>!";
-  $("ladder").innerHTML=PRIZES.map((v,i)=>"<li"+(i===PRIZES.length-1?" class='top'":"")+(GAME.chip?" style='"+GAME.chip(i)+"'":"")+">"+BRAND.labels[i]+"<b>"+php(v)+"</b></li>").join("");
+  $("ladder").innerHTML=PRIZES.map((v,i)=>"<li"+(i===PRIZES.length-1?" class='top'":"")+">"+BRAND.labels[i]+"<b>"+php(v)+"</b></li>").join("");
   $("note").textContent=GAME.note;
   $("goBtn").disabled=false;$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));
   state=load();
@@ -390,7 +584,7 @@ function finishView(celebrate){
   if(mode==="player"){$("resetBtn").disabled=true}
   if(celebrate){postWin(amt);setTimeout(()=>openWin(amt,big),reduce()?50:450)}
 }
-function postWin(amt){try{fetch("https://wins-ledger-production.up.railway.app/api/win",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({brand:"gspot",game:"Loot Drop",name:cfg.name||"",code:cfg.code,amount:amt,link:location.href})}).catch(()=>{})}catch(e){}}
+function postWin(amt){try{fetch("https://wins-ledger-production.up.railway.app/api/win",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({brand:"gspot",game:"Gagamba Spot",name:cfg.name||"",code:cfg.code,amount:amt,link:location.href})}).catch(()=>{})}catch(e){}}
 $("goBtn").onclick=()=>{if(GAME.go)GAME.go(ctx)};
 $("resetBtn").onclick=()=>{if(busy)return;if(mode==="player"&&state&&state.step!=null)return;try{localStorage.removeItem(storeKey())}catch(e){}state=null;if(GAME.stop)GAME.stop();buildView();$("goBtn").focus()};
 
@@ -441,7 +635,7 @@ function unlockAdmin(){
   $("deposit").addEventListener("input",e=>{const v=e.target.value;cfg.deposit=v===""?0:Math.max(0,Math.min(999999,Math.floor(+v)));changed()});
   $("newLink").onclick=()=>{cfg.nonce=Date.now().toString(36);changed();$("aMsg").textContent="Bagong link na ito. Makakapaglaro ulit ang player gamit ito; huwag nang gamitin ang luma."};
   $("copyLink").onclick=()=>copyText(playerLink(),$("copyLink"));
-  $("copyMsg").onclick=()=>{if(!qualifies(cfg.deposit)){$("aMsg").textContent="Ilagay muna ang qualified na deposit.";return}copyText("Verified na ang deposit mo, kaya may Loot Drop ka. Buksan ang chest at tingnan kung anong premyo ang makukuha mo!\n\nI-play dito: "+playerLink(),$("copyMsg"))};
+  $("copyMsg").onclick=()=>{if(!qualifies(cfg.deposit)){$("aMsg").textContent="Ilagay muna ang qualified na deposit.";return}copyText("Verified na ang deposit mo, kaya may Gagamba Spot ka. Pumili ka ng lahi ng gagamba mo! Ang mababalot ng sapot ang talo.\n\nI-play dito: "+playerLink(),$("copyMsg"))};
   adminUI();
 }
 if(mode==="admin"){
@@ -461,4 +655,5 @@ if(mode==="admin"){
 buildView();
 </script>
 
-</body></html>
+</body>
+</html>
