@@ -44,6 +44,8 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 .ladder li.top b{color:var(--gold)}
 .ladder li.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .ladder li.on b{color:var(--accent-ink)}
+.ladder li.dream{border-style:dashed;border-color:var(--gold);opacity:.7}
+.ladder li.dream b{color:var(--gold)}
 .btn{font:700 18px var(--body);letter-spacing:.3px;padding:15px 22px;border-radius:12px;border:0;cursor:pointer;background:var(--accent);color:var(--accent-ink);width:100%}
 .btn:disabled,.btn[aria-disabled="true"]{opacity:.5;cursor:default}
 .btn:focus-visible,.linkbtn:focus-visible,.chip:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
@@ -165,7 +167,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <p class="demo" id="demoTag" hidden>DEMO · kailangan ng link mula sa agent mo para sa totoong premyo</p>
     <p class="cheer" id="cheer"></p>
     <div class="play" id="play"></div>
-    <ul class="ladder" id="ladder" aria-label="Mga premyo" hidden></ul>
+    <ul class="ladder" id="ladder" aria-label="Mga premyo"></ul>
     <label class="agree" id="agreeLbl"><input type="checkbox" id="agree"><span>Nabasa ko at sang-ayon ako sa <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button> ng Pearl Drop.</span></label>
     <div class="acts"><button class="btn" id="goBtn" type="button"></button><button class="btn ghost" id="resetBtn" type="button">Reset</button></div>
     <div class="win" id="win" hidden>
@@ -371,7 +373,7 @@ function buildView(){
   $("goBtn").hidden=!GAME.btn;$("goBtn").textContent=GAME.btn||"";
   if(!q){$("range").textContent="Hinihintay pa ang qualified na deposit.";$("ladder").innerHTML="";$("goBtn").disabled=true;$("note").textContent="";return}
   $("range").innerHTML="Minimum deposit na <b>"+php(MIN_DEPOSIT)+"</b> · mga premyo hanggang <b>₱777</b>!";
-  $("ladder").innerHTML=PRIZES.map((v,i)=>"<li"+(i===PRIZES.length-1?" class='top'":"")+(GAME.chip?" style='"+GAME.chip(i)+"'":"")+">"+BRAND.labels[i]+"<b>"+php(v)+"</b></li>").join("");
+  $("ladder").innerHTML=PRIZES.map((v,i)=>"<li"+(i===PRIZES.length-1?" class='top'":"")+(GAME.chip?" style='"+GAME.chip(i)+"'":"")+">"+BRAND.labels[i]+"<b>"+php(v)+"</b></li>").join("")+"<li class='dream'>Grand Prize<b>₱777</b></li>";
   $("note").textContent=GAME.note;
   $("goBtn").disabled=false;$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));
   state=load();
