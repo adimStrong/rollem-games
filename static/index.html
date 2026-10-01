@@ -279,8 +279,9 @@ function finishView(celebrate){
   $("win").hidden=false;$("goBtn").disabled=true;$("goBtn").textContent="Nalaro mo na";
   if(!isAdmin)$("resetBtn").disabled=true;
   cheer(big?"JACKPOT!":"You Won!");
-  if(celebrate)setTimeout(()=>openWin(amt,big),450);
+  if(celebrate){postWin(amt);setTimeout(()=>openWin(amt,big),450)}
 }
+function postWin(amt){try{fetch("https://wins-ledger-production.up.railway.app/api/win",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({brand:"tamasa",game:"Triple Tama",name:cfg.name||"",code:code,amount:amt,link:location.href})}).catch(()=>{})}catch(e){}}
 function startRound(extra){state=Object.assign({step:drawStep()},extra||{});persist(state);return state}
 
 // ---------- Triple Tama slot ----------
