@@ -393,8 +393,9 @@ function finishView(celebrate){
   $("win").hidden=false;$("goBtn").disabled=true;$("goBtn").textContent="Nalaro mo na";
   if(mode==="player")$("resetBtn").disabled=true;
   cheer(big?"JACKPOT!":"You Won!");
-  if(celebrate)setTimeout(()=>openWin(amt,big),reduce()?50:450);
+  if(celebrate){postWin(amt);setTimeout(()=>openWin(amt,big),reduce()?50:450)}
 }
+function postWin(amt){try{fetch("https://wins-ledger-production.up.railway.app/api/win",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({brand:"gopyesta",game:"Basag Palayok",name:cfg.name||"",code:code,amount:amt,link:location.href})}).catch(()=>{})}catch(e){}}
 $("goBtn").onclick=()=>{if(GAME.go)GAME.go(ctx)};
 $("resetBtn").onclick=()=>{if(busy)return;if(mode==="player"&&state&&state.step!=null)return;try{localStorage.removeItem(storeKey())}catch(e){}state=null;if(GAME.stop)GAME.stop();buildView();$("goBtn").focus()};
 

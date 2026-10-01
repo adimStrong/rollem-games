@@ -400,6 +400,7 @@ async function roll(){
   rolling=false;$("resetBtn").disabled=false;
   if(key!==storeKey()){viewKey="";refreshView();return} // settings changed mid-roll
   show(results);
+  postWin(results[0].bonus);
   const big=results.some(x=>x.sum===18);cheer(big?"JACKPOT!":"You win!");$("stall").classList.add("won");
   const s0=$("amt");s0.classList.remove("zoom");void s0.offsetWidth;s0.classList.add("zoom");
   setTimeout(()=>openWin(lastWin,big),big?450:600);
@@ -459,6 +460,7 @@ $("tncLink").onclick=e=>{e.preventDefault();$("tnc").open=true;$("tnc").scrollIn
 // ---------- admin panel ----------
 let db=null,saveTimer=null,saving=false,pending=false,adminToken=sessionStorage.getItem("admin-token")||null;
 async function apiGet(){try{const r=await fetch("/api/session/"+encodeURIComponent(code));if(!r.ok)return null;return await r.json()}catch(e){return null}}
+function postWin(amt){try{fetch("https://wins-ledger-production.up.railway.app/api/win",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({brand:"rollem",game:"ROLL IT",name:cfg.name||"",code:code,amount:amt,link:location.href})}).catch(()=>{})}catch(e){}}
 async function apiPut(data){const r=await fetch("/api/session/"+encodeURIComponent(code),{method:"PUT",headers:{"Content-Type":"application/json","X-Admin-Token":adminToken||""},body:JSON.stringify(data)});if(!r.ok)throw new Error("save failed");return r.json()}
 function playerLink(){const base=location.href.split("#")[0];return base+"#"+code}
 function adminUI(){
