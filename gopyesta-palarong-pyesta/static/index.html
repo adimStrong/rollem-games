@@ -628,9 +628,13 @@ const GAME=(()=>{
       const st=ctx.state,me=st.kid,step=st.step,myEnd=ladder.length>1?step/(ladder.length-1):1;
       const others=[0,1,2].filter(k=>k!==me),ends=[0,0,0];ends[me]=myEnd;others.forEach(k=>ends[k]=R(.45,.98));
       const order=[0,1,2].slice().sort((a,b)=>ends[b]-ends[a]);
+      // the flag-grab (cosmetic "1st place") never goes to the player — it's just a show moment,
+      // unrelated to the real prize, which is already fixed above (ends[me], server-decided)
+      if(order[0]===me)[order[0],order[1]]=[order[1],order[0]];
       climbers.forEach(c=>c.pts=null);[0,1,2].forEach(k=>{climbers[k].pts=curve(ends[k],RACE)});
       if(!anim){climbers.forEach(c=>{setH(c,at(c.pts,RACE),0);c.el.classList.remove("climb","slip")});finishRace(step,order,false);return}
-      const H=[0,0,0],sp=[0,0,0],slipT=[0,0,0];let t0=performance.now(),last=t0,lastC=0,ended=false;
+      const H=[0,0,0],sp=[0,0,0],slipT=[0,0,0];let t0=performance.now(),last=t0,lastC=0,ended=false,nearMissed=false;
+      const NEAR_TOP=.84; // the player always gets a dramatic near-miss here; the designated flag-grabber then surges past
       [0,1,2].forEach(k=>sp[k]=R(.105,.13));
       const tapEl=scene.querySelector(".ps-tap");tapEl.classList.add("show");
       const onTap=e=>{if(ended)return;if(e.target.closest&&e.target.closest("button,a,input"))return;e.preventDefault();H[me]=Math.min(1,H[me]+R(.016,.024));
@@ -643,6 +647,7 @@ const GAME=(()=>{
       function slip(k,amt,msg){const t=(performance.now()-t0)/1000;H[k]=Math.max(0,H[k]-amt);if(t-slipT[k]>.6){slipT[k]=t;slipSnd();grease(climbers[k]);if(msg&&t-lastC>.7){lastC=t;cheer(msg)}}}
       (function f(now){now=now||performance.now();const dt=Math.min(.05,(now-last)/1000),t=(now-t0)/1000;last=now;const prev=H.slice();
         H[me]+=dt*(t>9?.09:.012);
+        if(!nearMissed&&H[me]>=NEAR_TOP){nearMissed=true;bigSlip(me);sp[order[0]]*=1.6;nextBig[order[0]]=t+99}
         [0,1,2].forEach(k=>{if(t>=nextBig[k]&&H[k]>.18&&H[k]<.95)bigSlip(k);
           if(slide[k]>0){const d=Math.min(slide[k],dt*.4);slide[k]-=d;H[k]-=d}});
         others.forEach(k=>{H[k]+=dt*sp[k]*(1+.25*Math.sin(t*2+k));if(Math.random()<dt*.35&&H[k]<.92&&H[k]>.15)slip(k,R(.03,.06),"Nadulas si "+KIDS[k].n+"!")});
