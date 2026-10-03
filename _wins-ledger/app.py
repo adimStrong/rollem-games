@@ -14,7 +14,7 @@ ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
 SECRET_KEY = os.environ["SECRET_KEY"]
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 
-VALID_AMOUNTS = {10, 27, 57}
+VALID_AMOUNTS = {10, 27, 57, 17, 37, 77}  # 17/37/77 = Gopyesta Palarong Pyesta tiers
 VALID_BRANDS = {"gopyesta", "pots", "rollem", "winforlife", "cow", "tamasa", "gspot", "t2b"}
 
 
