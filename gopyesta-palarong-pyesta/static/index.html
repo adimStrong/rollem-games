@@ -443,7 +443,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 </div>
 
 <script>
-const BRAND={"key":"gopyesta","name":"Gopyesta","labels":["Kendi","Barya","Pyesta Prize","Fiesta Jackpot"],"promo":{"name":"Palarong Pyesta","target":"Lahat ng verified Gopyesta players","trig":"Isang deposit na ₱100 pataas mula 1 PM hanggang 9 PM = 1 palo; mabubuksan ang palo kapag umabot na sa 3× ng deposit ang laro mo sa slots o casino","valid":"Araw-araw, 1 PM–9 PM; may daily budget ang bonus","script":"Hi po! Pasok na ang deposit mo kaya may Palarong Pyesta ka na. Isang deposit na ₱100 pataas = 1 akyat sa palosebo — maglaro muna ng slots/casino na 3× ng deposit mo para ma-unlock, tapos umakyat! Hanggang ₱77 ang maaaring halaga ng mga premyo namin."},"confetti":["#ff5d8f","#ffd23f","#3fd0c9","#7d6bff","#ffffff"],"confettiBig":["#ffd23f","#fff1b8","#ff5d8f","#ffffff"]};
+const BRAND={"key":"gopyesta","name":"Gopyesta","labels":["Kendi","Barya","Pyesta Prize","Fiesta Jackpot"],"promo":{"name":"Palarong Pyesta","target":"Lahat ng verified Gopyesta players","trig":"Isang deposit na ₱100 pataas mula 1 PM hanggang 9 PM = 1 palo; mabubuksan ang palo kapag umabot na sa 3× ng deposit ang laro mo sa slots o casino","valid":"Araw-araw, 1 PM–9 PM; may daily budget ang bonus","script":"Hi po! Pasok na ang deposit mo kaya may Palarong Pyesta ka na. Isang deposit na ₱100 pataas = 1 akyat sa palosebo — maglaro muna ng slots/casino na 3× ng deposit mo para ma-unlock, tapos umakyat! Hanggang ₱777 ang maaaring halaga ng mga premyo namin."},"confetti":["#ff5d8f","#ffd23f","#3fd0c9","#7d6bff","#ffffff"],"confettiBig":["#ffd23f","#fff1b8","#ff5d8f","#ffffff"]};
 // ---------- shared helpers ----------
 const $=id=>document.getElementById(id);
 // mechanics come from the server (/api/config); these are the fallback defaults
@@ -648,7 +648,7 @@ const GAME=(()=>{
         others.forEach(k=>{H[k]+=dt*sp[k]*(1+.25*Math.sin(t*2+k));if(Math.random()<dt*.35&&H[k]<.92&&H[k]>.15)slip(k,R(.03,.06),"Nadulas si "+KIDS[k].n+"!")});
         [0,1,2].forEach(k=>{H[k]=Math.max(0,Math.min(ends[k],H[k]));setH(climbers[k],H[k],prev[k])});
         if(t-lastC>1.8){lastC=t;const lead=[0,1,2].sort((a,b)=>H[b]-H[a])[0];cheer(lead===me?"Nangunguna si "+KIDS[me].n+"! Tap pa!":"Nangunguna si "+KIDS[lead].n+"! Bilisan ang tap!");cheerSnd(.05)}
-        if(H[me]>=ends[me]-.001||t>=RACE+2){
+        if((ends[me]>0&&H[me]>=ends[me]-.001)||t>=RACE+2){
           ended=true;scene.removeEventListener("pointerdown",onTap);tapEl.classList.remove("show");
           [0,1,2].forEach(k=>setH(climbers[k],ends[k],H[k]));
           ctx.update({done:true});
@@ -743,7 +743,7 @@ function buildView(){
   $("play").innerHTML="";$("win").hidden=true;$("cheer").textContent="";
   busy=false;pendingDraw=null;$("resetBtn").disabled=false;$("resetBtn").hidden=mode==="player";
   $("goBtn").hidden=!GAME.btn;$("goBtn").textContent=GAME.btn||"";delete $("goBtn").dataset.next;delete $("goBtn").dataset.refresh;
-  $("range").innerHTML="Mga premyo namin, hanggang <b>"+php(PRIZES[PRIZES.length-1])+"</b> ang halaga!";
+  $("range").innerHTML="Mga premyo namin, hanggang <b>₱777</b> ang halaga!"; // headline only — visual tagline, not a real outcome; real ladder is PRIZES above
   renderEntries();
   if(!qualifies()||(mode==="player"&&!session.playOpen)){$("ladder").innerHTML="";$("goBtn").disabled=true;$("note").textContent="";return}
   ladder=PRIZES;
