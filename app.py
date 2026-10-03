@@ -1,17 +1,21 @@
 """Gopyesta · Palarong Pyesta (Basag Palayok) — backend-verified community game.
 
 Reads the Gopyesta platform Postgres (deposits / users / bets_daily_category, filled by the
-gopyesta-retention pullers) to turn today's real deposits into game entries, draws every prize
-SERVER-SIDE, enforces the daily bonus cap, and records every win in the shared wins-ledger.
+gopyesta-retention pullers), turns today's real deposits into game entries, gates each entry
+behind the player's real slots+casino turnover, draws every prize SERVER-SIDE, enforces the
+daily bonus budget, and records every win in the shared wins-ledger.
 
-Mechanics (whiteboard "GPT2027 — Community Game Mechanics", Gopyesta column):
-  * every ₱100 of Success deposits made 1 PM–9 PM today = 1 entry (palo)
-  * prizes ₱17 (85%) · ₱27 (10%) · ₱37 (5%) · ₱77 (display only, 0%)
-  * only slots (egame) & casino bets count toward the 3× (of deposit) wagering requirement —
-    reported to the agent, not enforced before play (bets sync every ~2 h)
-  * max ₱10,000 bonus awarded per day across all players
+Mechanics (whiteboard "GPT2027 — Community Game Mechanics", Gopyesta column, as confirmed 2026-10-03):
+  * ONE Success deposit of >= ₱100 made 1 PM–9 PM today = ONE entry (palo), whatever the amount
+  * an entry is LOCKED until the player's slots (egame) + casino valid bet today reaches
+    3× the cumulative qualifying deposits up to that entry (deposits unlock in time order)
+  * prizes ₱17 (85%) · ₱27 (10%) · ₱37 (5%) · ₱77 (display only, 0%), drawn server-side
+  * ₱10,000 bonus budget per day across all players; when reached, no new links and no plays —
+    the admin can raise today's budget (stored per day in cg_settings)
+  * unplayed / still-locked entries expire at the end of the day (PLAY_UNTIL)
+  * payout is a manual GCash send tracked in wins-ledger (Paid / Revoke)
 
-Tables it OWNS in that database (created on boot, prefixed cg_): cg_sessions, cg_plays.
+Tables it OWNS in that database (created on boot, prefixed cg_): cg_sessions, cg_plays, cg_settings.
 """
 import hashlib
 import hmac
@@ -40,19 +44,20 @@ TZ = ZoneInfo(os.environ.get("TZ", "Asia/Manila"))
 # ---- mechanics (env-overridable so the numbers can be tuned without a code change) ----
 BRAND = "gopyesta"
 GAME_NAME = "Palarong Pyesta"
-ENTRY_PESO = int(os.environ.get("ENTRY_PESO", "100"))
+MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", os.environ.get("ENTRY_PESO", "100")))  # one deposit >= this = one entry
 PRIZES = [int(x) for x in os.environ.get("PRIZES", "17,27,37,77").split(",")]
 WEIGHTS = [int(x) for x in os.environ.get("WEIGHTS", "85,10,5,0").split(",")]
 DAILY_CAP = int(os.environ.get("DAILY_CAP", "10000"))
-WAGER_MULT = int(os.environ.get("WAGER_MULT", "3"))
+WAGER_MULT = float(os.environ.get("WAGER_MULT", "3"))   # 0 = no turnover gate
 WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame,casino").split(",") if c.strip()]
 DEP_FROM = os.environ.get("DEP_FROM", "13:00")   # deposits counted from (inclusive, HH:MM)
 DEP_TO = os.environ.get("DEP_TO", "21:00")       # deposits counted until (exclusive)
 PLAY_UNTIL = os.environ.get("PLAY_UNTIL", "23:59")  # entries playable until this time, same day
 assert len(PRIZES) == len(WEIGHTS) and sum(WEIGHTS) == 100
+MIN_PRIZE = min(p for p, w in zip(PRIZES, WEIGHTS) if w > 0)
 
 CONFIG = {
-    "brand": BRAND, "game": GAME_NAME, "entryPeso": ENTRY_PESO, "prizes": PRIZES, "weights": WEIGHTS,
+    "brand": BRAND, "game": GAME_NAME, "minDeposit": MIN_DEPOSIT, "prizes": PRIZES, "weights": WEIGHTS,
     "dailyCap": DAILY_CAP, "wagerMult": WAGER_MULT, "wagerCats": WAGER_CATS,
     "depFrom": DEP_FROM, "depTo": DEP_TO, "playUntil": PLAY_UNTIL,
 }
@@ -113,6 +118,15 @@ def init_db():
             """
         )
         cur.execute("CREATE INDEX IF NOT EXISTS cg_plays_date_idx ON cg_plays (biz_date)")
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS cg_settings (
+                biz_date TEXT PRIMARY KEY,
+                daily_cap INTEGER NOT NULL,
+                updated_at BIGINT NOT NULL
+            )
+            """
+        )
 
 
 def clean_code(s: str) -> str:
@@ -145,11 +159,12 @@ def window_deposits(cur, user_id: int, date: str):
         "ORDER BY created_at",
         (user_id, date, DEP_FROM, DEP_TO),
     )
-    return [{"amount": float(r["amount"]), "at": r["created_at"][11:16]} for r in cur.fetchall()]
+    return [{"amount": float(r["amount"]), "at": r["created_at"][11:16],
+             "qualifies": float(r["amount"]) >= MIN_DEPOSIT} for r in cur.fetchall()]
 
 
 def wagering(cur, user_id: int, date: str):
-    """Valid bet in the allowed categories today. None if the category table isn't there yet."""
+    """Valid bet in the allowed categories today. None if the category table isn't there."""
     try:
         cur.execute(
             "SELECT COALESCE(SUM(valid_bet),0) AS valid_bet, MAX(updated_at) AS synced_at "
@@ -171,20 +186,45 @@ def plays_for(cur, user_id: int, date: str):
     return [dict(r) for r in cur.fetchall()]
 
 
+def daily_cap_for(cur, date: str) -> int:
+    cur.execute("SELECT daily_cap FROM cg_settings WHERE biz_date=%s", (date,))
+    r = cur.fetchone()
+    return int(r["daily_cap"]) if r else DAILY_CAP
+
+
 def cap_used(cur, date: str) -> int:
     cur.execute("SELECT COALESCE(SUM(prize),0) AS used FROM cg_plays WHERE biz_date=%s", (date,))
     return int(cur.fetchone()["used"])
 
 
+def cap_info(cur, date: str):
+    cap = daily_cap_for(cur, date)
+    used = cap_used(cur, date)
+    left = max(0, cap - used)
+    return {"dailyCap": cap, "capUsed": used, "capLeft": left, "capped": left < MIN_PRIZE}
+
+
 def summary(cur, user, date: str):
     deps = window_deposits(cur, user["user_id"], date)
-    dep_total = sum(d["amount"] for d in deps)
-    earned = int(dep_total // ENTRY_PESO)
+    qual = [d for d in deps if d["qualifies"]]
     plays = plays_for(cur, user["user_id"], date)
     used = len(plays)
     wag = wagering(cur, user["user_id"], date)
-    required = dep_total * WAGER_MULT
-    cap = cap_used(cur, date)
+    valid = None if wag is None else wag["validBet"]
+    # cumulative gate: entry i needs WAGER_MULT × (sum of qualifying deposits 1..i)
+    entries, cum, unlocked = [], 0.0, 0
+    for i, d in enumerate(qual, 1):
+        cum += d["amount"]
+        req = cum * WAGER_MULT
+        ok = WAGER_MULT <= 0 or (valid is not None and valid >= req)
+        if ok and unlocked == i - 1:
+            unlocked = i
+        entries.append({"no": i, "amount": d["amount"], "at": d["at"], "required": req,
+                        "unlocked": ok, "played": i <= used})
+    earned = len(qual)
+    playable = max(0, unlocked - used)
+    locked = max(0, earned - unlocked)
+    next_req = entries[unlocked]["required"] if unlocked < earned else None
     t = now()
     hm = t.strftime("%H:%M")
     return {
@@ -192,18 +232,18 @@ def summary(cur, user, date: str):
         "name": user["real_name"] or user["account"],
         "date": date,
         "deposits": deps,
-        "depositTotal": dep_total,
+        "depositTotal": sum(d["amount"] for d in qual),
+        "entries": entries,
         "entriesEarned": earned,
+        "entriesUnlocked": unlocked,
         "entriesUsed": used,
-        "entriesLeft": max(0, earned - used),
+        "entriesPlayable": playable,
+        "entriesLocked": locked,
         "plays": plays,
         "wagering": None if wag is None else {
-            "validBet": wag["validBet"], "required": required,
-            "met": wag["validBet"] >= required and required > 0,
-            "syncedAt": wag["syncedAt"],
+            "validBet": valid, "nextRequired": next_req, "syncedAt": wag["syncedAt"],
         },
-        "capUsed": cap,
-        "capLeft": max(0, DAILY_CAP - cap),
+        **cap_info(cur, date),
         "windowOpen": DEP_FROM <= hm < DEP_TO,
         "playOpen": hm <= PLAY_UNTIL,
         "serverTime": t.strftime("%Y-%m-%d %H:%M"),
@@ -243,8 +283,7 @@ def lookup():
     with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
         user = find_user(cur, account)
         if not user:
-            return jsonify({"found": False, "account": account, "capUsed": cap_used(cur, date),
-                            "capLeft": max(0, DAILY_CAP - cap_used(cur, date))})
+            return jsonify({"found": False, "account": account, **cap_info(cur, date)})
         s = summary(cur, user, date)
         cur.execute(
             "SELECT code FROM cg_sessions WHERE user_id=%s AND biz_date=%s ORDER BY created_at DESC LIMIT 1",
@@ -258,7 +297,8 @@ def lookup():
 
 @app.route("/api/link", methods=["POST"])
 def make_link():
-    """Create (or reuse) today's player link for an account. `fresh: true` forces a new code."""
+    """Create (or reuse) today's player link for an account. `fresh: true` forces a new code.
+    Refused while today's budget is used up (admin can raise it with /api/cap)."""
     if not require_admin():
         return jsonify({"error": "forbidden"}), 403
     payload = request.get_json(force=True, silent=True) or {}
@@ -269,6 +309,10 @@ def make_link():
         user = find_user(cur, account)
         if not user:
             return jsonify({"error": "account not found"}), 404
+        ci = cap_info(cur, date)
+        if ci["capped"]:
+            return jsonify({"error": "cap", "msg": "Naabot na ang daily budget — hindi makakagawa ng link. "
+                            "Taasan ang budget kung kailangan.", **ci}), 409
         code = None
         if not fresh:
             cur.execute(
@@ -285,14 +329,47 @@ def make_link():
                 (code, user["user_id"], user["account"], user["real_name"] or "", date, int(time.time() * 1000)),
             )
         s = summary(cur, user, date)
+    s["found"] = True
     s["code"] = code
     return jsonify(s)
+
+
+@app.route("/api/cap", methods=["GET", "POST"])
+def cap():
+    """GET: today's budget. POST {dailyCap}: set today's budget (>= what's already awarded)."""
+    if not require_admin():
+        return jsonify({"error": "forbidden"}), 403
+    date = today()
+    with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        if request.method == "POST":
+            payload = request.get_json(force=True, silent=True) or {}
+            try:
+                new_cap = int(payload.get("dailyCap"))
+            except (TypeError, ValueError):
+                return jsonify({"error": "dailyCap must be a whole number"}), 400
+            used = cap_used(cur, date)
+            if new_cap < used:
+                return jsonify({"error": "below used", "msg": "Hindi pwedeng mas mababa sa nagamit na (₱%d)." % used}), 400
+            if new_cap > 1_000_000:
+                return jsonify({"error": "too high"}), 400
+            cur.execute(
+                "INSERT INTO cg_settings (biz_date, daily_cap, updated_at) VALUES (%s,%s,%s) "
+                "ON CONFLICT (biz_date) DO UPDATE SET daily_cap=EXCLUDED.daily_cap, updated_at=EXCLUDED.updated_at",
+                (date, new_cap, int(time.time() * 1000)),
+            )
+        return jsonify({"ok": True, "date": date, "defaultCap": DAILY_CAP, **cap_info(cur, date)})
 
 
 # ---------------------------------------------------------------- player API
 @app.route("/api/config", methods=["GET"])
 def config():
     return jsonify(CONFIG)
+
+
+def _pub(s):
+    return {k: s[k] for k in ("entriesEarned", "entriesUnlocked", "entriesUsed", "entriesPlayable",
+                              "entriesLocked", "plays", "wagering", "capLeft", "capped", "windowOpen",
+                              "playOpen", "serverTime")}
 
 
 @app.route("/api/session/<code>", methods=["GET"])
@@ -306,18 +383,16 @@ def get_session(code):
         user = {"user_id": sess["user_id"], "account": sess["account"], "real_name": sess["name"]}
         s = summary(cur, user, sess["biz_date"])
     expired = sess["biz_date"] != date
-    return jsonify({
-        "exists": True, "code": code, "name": sess["name"] or sess["account"], "account": sess["account"],
-        "expired": expired, "entriesEarned": s["entriesEarned"], "entriesUsed": s["entriesUsed"],
-        "entriesLeft": 0 if expired else s["entriesLeft"], "plays": s["plays"],
-        "capLeft": s["capLeft"], "playOpen": s["playOpen"] and not expired,
-        "windowOpen": s["windowOpen"], "serverTime": s["serverTime"], "config": CONFIG,
-    })
+    out = {"exists": True, "code": code, "name": sess["name"] or sess["account"], "account": sess["account"],
+           "expired": expired, "config": CONFIG, **_pub(s)}
+    if expired:
+        out.update({"entriesPlayable": 0, "entriesLocked": 0, "playOpen": False})
+    return jsonify(out)
 
 
 @app.route("/api/play/<code>", methods=["POST"])
 def play(code):
-    """Consume one entry: server draws the prize. Row-locked so double taps can't double-award."""
+    """Consume one unlocked entry: server draws the prize. Row-locked so double taps can't double-award."""
     conn = db(autocommit=False)
     try:
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -337,15 +412,24 @@ def play(code):
         # the session row lock serialises plays per link; UNIQUE(user_id,biz_date,entry_no)
         # catches a race between two links issued for the same account
         s = summary(cur, user, date)
-        if s["entriesLeft"] <= 0:
+        if s["entriesEarned"] == 0:
             conn.rollback()
-            return jsonify({"error": "no_entries", "msg": "Wala ka nang entry. Bawat ₱%d na deposit (%s–%s) = 1 palo."
-                            % (ENTRY_PESO, DEP_FROM, DEP_TO), **_pub(s)}), 409
+            return jsonify({"error": "no_entries", "msg": "Wala ka pang entry. Isang deposit na ₱%d pataas (%s–%s) = 1 palo."
+                            % (MIN_DEPOSIT, DEP_FROM, DEP_TO), **_pub(s)}), 409
+        if s["entriesUsed"] >= s["entriesEarned"]:
+            conn.rollback()
+            return jsonify({"error": "no_entries", "msg": "Ubos na ang entries mo ngayon.", **_pub(s)}), 409
+        if s["entriesPlayable"] <= 0:
+            conn.rollback()
+            w = s["wagering"] or {}
+            return jsonify({"error": "locked", "msg": "Naka-lock pa ang susunod na palo: kailangan ng ₱%s turnover sa slots/casino "
+                            "(meron ka pang ₱%s)." % (f"{(w.get('nextRequired') or 0):,.0f}", f"{(w.get('validBet') or 0):,.0f}"),
+                            **_pub(s)}), 409
         step = draw_step()
         prize = PRIZES[step]
-        if s["capUsed"] + prize > DAILY_CAP:
+        if s["capUsed"] + prize > s["dailyCap"]:
             conn.rollback()
-            return jsonify({"error": "cap", "msg": "Naabot na ang daily bonus cap. Subukan ulit bukas.", **_pub(s)}), 409
+            return jsonify({"error": "cap", "msg": "Naabot na ang daily bonus budget. Subukan ulit bukas.", **_pub(s)}), 409
         entry_no = s["entriesUsed"] + 1
         cur.execute(
             "INSERT INTO cg_plays (code, user_id, account, biz_date, entry_no, step, prize, played_at) "
@@ -361,12 +445,9 @@ def play(code):
     post_ledger({"brand": BRAND, "game": GAME_NAME, "name": sess["account"], "code": code,
                  "amount": prize, "link": request.headers.get("Referer", "")})
     return jsonify({"ok": True, "step": step, "prize": prize, "entryNo": entry_no,
-                    "entriesLeft": s["entriesLeft"] - 1, "capLeft": max(0, DAILY_CAP - s["capUsed"] - prize)})
-
-
-def _pub(s):
-    return {"entriesEarned": s["entriesEarned"], "entriesUsed": s["entriesUsed"], "entriesLeft": s["entriesLeft"],
-            "capLeft": s["capLeft"]}
+                    "entriesPlayable": s["entriesPlayable"] - 1, "entriesLocked": s["entriesLocked"],
+                    "entriesEarned": s["entriesEarned"], "entriesUsed": entry_no,
+                    "capLeft": max(0, s["dailyCap"] - s["capUsed"] - prize)})
 
 
 # ---------------------------------------------------------------- static

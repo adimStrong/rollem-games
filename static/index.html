@@ -163,7 +163,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <h2>Link maker</h2>
     <p class="hint" id="adminGate">Sinusuri ang access…</p>
     <div id="adminBody" hidden style="display:grid;gap:14px">
-      <p class="hint">I-type ang <b>username</b> ng player. Kukunin ng system mula sa database ang Success deposits niya ngayong araw (1 PM–9 PM) — bawat ₱100 = 1 palo. Server ang nagde-decide ng premyo at naitatala agad sa wins ledger.</p>
+      <p class="hint">I-type ang <b>username</b> ng player. Kukunin ng system mula sa database ang Success deposits niya ngayong araw (1 PM–9 PM) — <b>isang deposit na ₱100 pataas = 1 palo</b>. Naka-lock ang palo hangga't hindi naaabot ang 3× turnover sa slots/casino. Server ang nagde-decide ng premyo at naitatala agad sa wins ledger.</p>
       <label class="field"><span>Player username</span><div class="btnrow"><input class="inp" id="acct" type="text" autocomplete="off" spellcheck="false" placeholder="hal. juan123" style="flex:1;min-width:0"><button class="btn small" id="lookupBtn" type="button">Check</button></div></label>
       <div class="tierbox" id="aTier"></div>
       <div class="offerbox" id="offerBox" hidden></div>
@@ -173,6 +173,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
         <div class="btnrow"><button class="btn small" id="copyLink" type="button">Copy link</button><button class="btn small" id="copyMsg" type="button">Copy message + link</button><button class="btn small ghost" id="newLink" type="button">Bagong link</button></div>
       </div>
       <p class="hint" id="aMsg"></p>
+      <div class="offerbox" id="capBox"><strong>Daily budget</strong><p id="capText">…</p><div class="btnrow"><div class="money" style="flex:1;min-width:0"><span>₱</span><input class="inp" id="capInput" type="number" min="0" step="100" inputmode="numeric" placeholder="bagong budget ngayong araw"></div><button class="btn small ghost" id="capBtn" type="button">Dagdag budget</button></div><p class="hint" id="capMsg"></p></div>
     </div>
   </section>
   <p class="preview-label" id="previewLabel" hidden>Preview ng player view</p>
@@ -221,7 +222,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
       <p class="jp-sub" id="jpSub"></p>
       <p class="jp-label">Reward mo</p>
       <p class="jp-amt" id="jpAmt"></p>
-      <p class="jp-note">I-screenshot ito at i-send sa agent mo para ma-credit ang reward.</p>
+      <p class="jp-note">Naitala na ang panalo mo. Ipapadala ng agent mo ang reward sa GCash pagkatapos ma-verify.</p>
       <button class="btn" id="jpClose" type="button">Claim reward</button>
     </div>
   </div>
@@ -231,14 +232,14 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <h3>Terms &amp; Conditions</h3>
     <ol>
       <li>Open to verified Gopyesta players aged 21 and above. Self-excluded, restricted, test or unverified accounts are not eligible.</li>
-      <li>Every ₱100 of successful deposits made between 1:00 PM and 9:00 PM (Philippine time) on the same day earns one entry (one "palo"). Entries are computed from the platform's deposit records; pending, failed or reversed deposits, and deposits made outside the window, do not count.</li>
-      <li>Only slots and casino games are covered by this promo. The bonus is subject to a turnover requirement of 3× the qualifying deposit on slots and casino games before it can be withdrawn.</li>
+      <li>Each successful deposit of at least ₱100 made between 1:00 PM and 9:00 PM (Philippine time) earns one entry (one "palo"), regardless of the deposit amount. Entries are computed from the platform's deposit records; pending, failed or reversed deposits, and deposits made outside the window, do not count.</li>
+      <li>An entry is locked until your valid bets on slots and casino games for the day reach 3× the deposit behind it (deposits unlock in the order they were made, cumulatively). Other game types do not count toward this requirement. Bet records refresh periodically, so an entry may unlock up to about 30 minutes after the requirement is met.</li>
       <li>Prizes are ₱17, ₱27, ₱37 or ₱77, drawn at random by the system for each entry; the larger the amount, the rarer the result. In Basag Palayok you pick a pot and break it; the amount inside is your prize. Which pot you pick does not change your chances.</li>
-      <li>Entries are valid only on the day the deposit was made and must be played before the end of that day. Unplayed entries expire.</li>
-      <li>Total bonus awarded under this promo is capped at ₱10,000 per day across all players. Once the cap is reached, no further entries can be played that day.</li>
+      <li>Entries are valid only on the day the deposit was made and must be unlocked and played before the end of that day. Unplayed or still-locked entries expire.</li>
+      <li>Total bonus awarded under this promo is limited to a daily budget (₱10,000 unless announced otherwise) across all players. Once the budget is used up, no further links or plays are issued that day.</li>
       <li>Each result is recorded by the system the moment it is drawn and is final. Refreshing the page, reopening the link or using another device does not give another turn.</li>
-      <li>The bonus is credited to your account after verification, within the time your agent announces.</li>
-      <li>Multiple or linked accounts, or any attempt to abuse this promo, void the bonus and may lead to action on the account.</li>
+      <li>Rewards are sent manually by your agent (e.g. via GCash) after verification, within the time your agent announces. Gopyesta may withhold or revoke a reward where the deposit is reversed or the promo is abused.</li>
+      <li>Multiple or linked accounts, or any attempt to abuse this promo, void the reward and may lead to action on the account.</li>
       <li>Gopyesta may change, suspend or end this promo at any time. Gopyesta management's decision on any dispute is final.</li>
       <li>Play responsibly. Set limits on your deposits and time, and ask for help if gambling stops being fun.</li>
     </ol>
@@ -247,20 +248,21 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 </div>
 
 <script>
-const BRAND={"key":"gopyesta","name":"Gopyesta","labels":["Kendi","Barya","Pyesta Prize","Fiesta Jackpot"],"promo":{"name":"Palarong Pyesta","target":"Lahat ng verified Gopyesta players","trig":"Bawat ₱100 na deposit mula 1 PM hanggang 9 PM = 1 palo (slots at casino lang ang laro)","valid":"Araw-araw, 1 PM–9 PM; hanggang ₱10,000 na kabuuang bonus kada araw","script":"Hi po! Na-verify na ang deposit mo kaya may Palarong Pyesta ka na. Bawat ₱100 na deposit = 1 palo sa palayok — ang laman nito ang premyo mo, hanggang ₱77 ang maaaring halaga ng mga premyo namin!"},"confetti":["#ff5d8f","#ffd23f","#3fd0c9","#7d6bff","#ffffff"],"confettiBig":["#ffd23f","#fff1b8","#ff5d8f","#ffffff"]};
+const BRAND={"key":"gopyesta","name":"Gopyesta","labels":["Kendi","Barya","Pyesta Prize","Fiesta Jackpot"],"promo":{"name":"Palarong Pyesta","target":"Lahat ng verified Gopyesta players","trig":"Isang deposit na ₱100 pataas mula 1 PM hanggang 9 PM = 1 palo; mabubuksan ang palo kapag umabot na sa 3× ng deposit ang laro mo sa slots o casino","valid":"Araw-araw, 1 PM–9 PM; may daily budget ang bonus","script":"Hi po! Pasok na ang deposit mo kaya may Palarong Pyesta ka na. Isang deposit na ₱100 pataas = 1 palo sa palayok — maglaro muna ng slots/casino na 3× ng deposit mo para ma-unlock, tapos paluin! Hanggang ₱77 ang maaaring halaga ng mga premyo namin."},"confetti":["#ff5d8f","#ffd23f","#3fd0c9","#7d6bff","#ffffff"],"confettiBig":["#ffd23f","#fff1b8","#ff5d8f","#ffffff"]};
 // ---------- shared helpers ----------
 const $=id=>document.getElementById(id);
 // mechanics come from the server (/api/config); these are the fallback defaults
-let CONF={entryPeso:100,prizes:[17,27,37,77],weights:[85,10,5,0],dailyCap:10000,wagerMult:3,depFrom:"13:00",depTo:"21:00",playUntil:"23:59"};
+let CONF={minDeposit:100,prizes:[17,27,37,77],weights:[85,10,5,0],dailyCap:10000,wagerMult:3,depFrom:"13:00",depTo:"21:00",playUntil:"23:59"};
 let PRIZES=CONF.prizes,WEIGHTS=CONF.weights;
 const POTS=3; // pots on screen; the pick never changes the odds
-function php(n){return "₱"+Number(n).toLocaleString()}
+function php(n){return "₱"+Number(n).toLocaleString(undefined,{maximumFractionDigits:0})}
 function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296}
 function drawStep(){let r=rnd()*100;for(let i=0;i<WEIGHTS.length;i++){r-=WEIGHTS[i];if(r<0)return i}return 0} // DEMO only — real draws happen server-side
 function shuffle(a){for(let k=a.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
 const reduce=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
 function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
 function fmtTime(h){const [H,M]=String(h).split(":");const n=+H;return (n%12||12)+(M&&M!=="00"?":"+M:"")+(n<12?" AM":" PM")}
+function syncHM(t){return t?String(t).slice(11,16):""}
 
 // ---------- player links ----------
 // #admin = link maker; #<account>-<hex> = a server-side session for one account/day; anything else = demo
@@ -351,10 +353,11 @@ const GAME=(()=>{
 let state=null,ladder=[],busy=false,pendingDraw=null;
 function save(){if(mode!=="demo")return;try{localStorage.setItem(storeKey(),JSON.stringify(state))}catch(e){}}
 function load(){if(mode!=="demo")return null;try{return JSON.parse(localStorage.getItem(storeKey())||"null")}catch(e){return null}}
+function applyPub(j){if(!session)return;["entriesEarned","entriesUnlocked","entriesUsed","entriesPlayable","entriesLocked","plays","wagering","capLeft","capped","playOpen"].forEach(k=>{if(j[k]!==undefined)session[k]=j[k]})}
 async function apiPlay(){
   const r=await fetch("/api/play/"+encodeURIComponent(cfg.code),{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
   const j=await r.json().catch(()=>({}));
-  if(!r.ok){if(j.entriesLeft!=null&&session){session.entriesEarned=j.entriesEarned;session.entriesUsed=j.entriesUsed;session.entriesLeft=j.entriesLeft;session.capLeft=j.capLeft}throw new Error(j.msg||"Hindi natuloy ang laro. Subukan ulit.")}
+  if(!r.ok){applyPub(j);throw new Error(j.msg||"Hindi natuloy ang laro. Subukan ulit.")}
   return j;
 }
 const ctx={
@@ -362,8 +365,8 @@ const ctx={
   start(extra){
     if(mode==="player"){
       state=Object.assign({step:null,pending:true},extra||{});
-      pendingDraw=apiPlay().then(j=>{state.step=j.step;state.pending=false;state.entryNo=j.entryNo;session.entriesUsed++;session.entriesLeft=j.entriesLeft;session.capLeft=j.capLeft;session.plays.push({entry_no:j.entryNo,step:j.step,prize:j.prize});return true})
-        .catch(e=>{state=null;pendingDraw=null;cheer("Hindi natuloy");$("note").textContent=e.message||"";renderEntries();return false});
+      pendingDraw=apiPlay().then(j=>{state.step=j.step;state.pending=false;state.entryNo=j.entryNo;session.plays.push({entry_no:j.entryNo,step:j.step,prize:j.prize});applyPub(j);return true})
+        .catch(e=>{state=null;pendingDraw=null;cheer("Hindi natuloy");$("note").textContent=e.message||"";renderEntries();lockUI();return false});
     }else{state=Object.assign({step:drawStep()},extra||{});save()}
     return state},
   resolve(){return pendingDraw||Promise.resolve(!!(state&&state.step!=null))},
@@ -378,20 +381,38 @@ function renderMech(){
   const steps=["<b>Sino ang pwede:</b> "+off.target+".","<b>Paano ma-unlock:</b> "+off.trig+". Bibigyan ka ng agent mo ng personal na game link.","<b>Validity:</b> "+off.valid+"."]
     .concat(GAME.how.map(s=>"<b>"+GAME.label+":</b> "+s))
     .concat(["<b>Premyo:</b> Random ang lalabas na premyo, at pinakamadalang ang pinakamalaking halaga.",
-      "<b>Pag-claim:</b> Awtomatikong naitatala ang panalo mo. Ike-credit ang bonus pagkatapos ma-verify, at kailangan ng "+CONF.wagerMult+"× turnover ng deposit (slots at casino) bago ma-withdraw.",
+      "<b>Pag-claim:</b> Awtomatikong naitatala ang panalo mo; ipapadala ng agent mo ang reward sa GCash pagkatapos ma-verify.",
       "<b>Isang palo bawat entry.</b> Ang server ang nagde-decide ng resulta; kahit mag-refresh, hindi na mauulit ang nalarong entry."]);
   $("mechSteps").innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
   $("mechTiers").innerHTML=PRIZES.map((p,i)=>"<tr><td>"+BRAND.labels[i]+"</td><td>"+php(p)+"</td><td>"+WEIGHTS[i]+"%</td></tr>").join("");
 }
+function lockedText(){
+  const w=session.wagering||{};
+  return "Naka-lock pa ang susunod na palo: kailangan ng <b>"+php(w.nextRequired||0)+"</b> na laro sa slots/casino ngayon (meron ka nang <b>"+php(w.validBet||0)+"</b>"+(w.syncedAt?", sync "+syncHM(w.syncedAt):"")+"). Mag-laro muna, tapos i-refresh pagkalipas ng ~30 min.";
+}
 function renderEntries(){
   const e=$("entries"),r=$("results");e.hidden=false;r.hidden=true;
-  if(mode!=="player"){e.innerHTML="Bawat <b>"+php(CONF.entryPeso)+"</b> na deposit ("+fmtTime(CONF.depFrom)+"–"+fmtTime(CONF.depTo)+") = 1 palo";return}
+  if(mode!=="player"){e.innerHTML="Isang deposit na <b>"+php(CONF.minDeposit)+"</b> pataas ("+fmtTime(CONF.depFrom)+"–"+fmtTime(CONF.depTo)+") = 1 palo";return}
   if(!session||!session.exists){e.textContent="Hindi valid ang link na ito. Humingi ng bagong link sa agent mo.";return}
   if(session.expired)e.textContent="Expired na ang link na ito — ibang araw na. Humingi ng bagong link sa agent mo.";
-  else if(session.entriesEarned===0)e.innerHTML="Wala ka pang entry ngayon. Bawat <b>"+php(CONF.entryPeso)+"</b> na deposit mula <b>"+fmtTime(CONF.depFrom)+"–"+fmtTime(CONF.depTo)+"</b> = 1 palo. I-refresh pagkatapos mag-deposit (mga 5 minuto).";
+  else if(session.entriesEarned===0)e.innerHTML="Wala ka pang entry ngayon. Isang deposit na <b>"+php(CONF.minDeposit)+"</b> pataas mula <b>"+fmtTime(CONF.depFrom)+"–"+fmtTime(CONF.depTo)+"</b> = 1 palo. I-refresh pagkatapos mag-deposit (mga 5 minuto).";
   else if(!session.playOpen)e.textContent="Sarado na ang laro para ngayong araw.";
-  else e.innerHTML="Entries ngayon: <b>"+session.entriesUsed+"/"+session.entriesEarned+"</b> na nagamit · <b>"+session.entriesLeft+"</b> pa";
+  else{
+    let t="Entries ngayon: <b>"+session.entriesUsed+"/"+session.entriesEarned+"</b> na nagamit";
+    if(session.entriesPlayable>0)t+=" · <b>"+session.entriesPlayable+"</b> pwedeng laruin";
+    if(session.entriesLocked>0)t+=" · <b>"+session.entriesLocked+"</b> naka-lock 🔒";
+    e.innerHTML=t;
+  }
   if(session.plays&&session.plays.length){r.hidden=false;r.innerHTML="Mga napanalunan ngayon: "+session.plays.map(p=>"<b>"+php(p.prize)+"</b>").join(" · ")+" — kabuuan <b>"+php(session.plays.reduce((a,p)=>a+p.prize,0))+"</b>"}
+}
+// after a refused/finished play: decide what the big button does next
+function lockUI(){
+  if(mode!=="player")return;
+  const b=$("goBtn");delete b.dataset.next;delete b.dataset.refresh;
+  if(session.entriesPlayable>0){b.disabled=false;b.textContent="Laro ulit ("+session.entriesPlayable+" pa)";b.dataset.next="1";$("note").textContent=""}
+  else if(session.entriesLocked>0){b.disabled=false;b.textContent="I-refresh (naka-lock pa)";b.dataset.refresh="1";$("note").innerHTML=lockedText()}
+  else if(session.capped){b.disabled=true;b.textContent="Ubos na ang daily budget";$("note").textContent="Naabot na ang daily bonus budget. Subukan ulit bukas."}
+  else{b.disabled=true;b.textContent="Ubos na ang entries ngayon";$("note").textContent=""}
 }
 function buildView(){
   renderMech();
@@ -402,7 +423,7 @@ function buildView(){
   $("demoTag").hidden=mode==="player";
   $("play").innerHTML="";$("win").hidden=true;$("cheer").textContent="";
   busy=false;pendingDraw=null;$("resetBtn").disabled=false;$("resetBtn").hidden=mode==="player";
-  $("goBtn").hidden=!GAME.btn;$("goBtn").textContent=GAME.btn||"";delete $("goBtn").dataset.next;
+  $("goBtn").hidden=!GAME.btn;$("goBtn").textContent=GAME.btn||"";delete $("goBtn").dataset.next;delete $("goBtn").dataset.refresh;
   $("range").innerHTML="Mga premyo namin, hanggang <b>"+php(PRIZES[PRIZES.length-1])+"</b> ang halaga!";
   renderEntries();
   if(!qualifies()||(mode==="player"&&!session.playOpen)){$("ladder").innerHTML="";$("goBtn").disabled=true;$("note").textContent="";return}
@@ -412,9 +433,10 @@ function buildView(){
   $("goBtn").disabled=false;$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));
   state=load();
   GAME.build($("play"),ctx);
-  if(mode==="player"&&session.entriesLeft<=0){
+  if(mode==="player"&&session.entriesPlayable<=0){
     const last=session.plays[session.plays.length-1];
-    if(last){state={step:last.step,pot:0,done:true};GAME.finish(ctx);finishView(false)}else{$("goBtn").disabled=true}
+    if(last){state={step:last.step,pot:0,done:true};GAME.finish(ctx);finishView(false)}
+    else{[...document.querySelectorAll(".pot")].forEach(p=>{p.disabled=true;p.classList.add("dim")});lockUI()}
     return}
   if(state&&state.step!=null){GAME.finish(ctx);finishView(false)}
 }
@@ -423,13 +445,11 @@ function finishView(celebrate){
   [...$("ladder").children].forEach((li,i)=>li.classList.toggle("on",i===state.step));
   $("amt").textContent=php(amt);$("winNote").textContent=BRAND.labels[state.step]+(big?" · Jackpot!":"");
   $("win").hidden=false;$("goBtn").disabled=true;$("goBtn").textContent="Nalaro mo na";
-  if(mode==="player"){renderEntries();
-    if(session.entriesLeft>0){$("goBtn").disabled=false;$("goBtn").textContent="Laro ulit ("+session.entriesLeft+" pa)";$("goBtn").dataset.next="1"}
-    else $("goBtn").textContent="Ubos na ang entries ngayon"}
+  if(mode==="player"){renderEntries();lockUI()}
   cheer(big?"JACKPOT!":"You Won!");
   if(celebrate)setTimeout(()=>openWin(amt,big),reduce()?50:450)
 }
-$("goBtn").onclick=()=>{if($("goBtn").dataset.next){state=null;if(GAME.stop)GAME.stop();buildView();return}if(GAME.go)GAME.go(ctx)};
+$("goBtn").onclick=()=>{const b=$("goBtn");if(b.dataset.refresh){location.reload();return}if(b.dataset.next){state=null;if(GAME.stop)GAME.stop();buildView();return}if(GAME.go)GAME.go(ctx)};
 $("resetBtn").onclick=()=>{if(busy||mode==="player")return;try{localStorage.removeItem(storeKey())}catch(e){}state=null;if(GAME.stop)GAME.stop();buildView();$("goBtn").focus()};
 
 // ---------- win pop-up ----------
@@ -462,7 +482,7 @@ $("tncLink").onclick=e=>{e.preventDefault();$("tnc").open=true;$("tnc").scrollIn
 // ---------- link maker (agents) ----------
 let adminToken="";
 try{adminToken=sessionStorage.getItem("cg-admin-token")||""}catch(e){}
-let look=null; // last /api/lookup or /api/link result
+let look=null,capState=null;
 function playerLink(){return look&&look.code?location.href.split("#")[0]+"#"+look.code:""}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function peso(n){return "₱"+Number(n||0).toLocaleString(undefined,{maximumFractionDigits:0})}
@@ -472,33 +492,44 @@ async function api(path,opts){
   if(r.status===403){adminToken="";try{sessionStorage.removeItem("cg-admin-token")}catch(e){}location.reload()}
   return {ok:r.ok,status:r.status,j};
 }
+function renderCap(){
+  const c=capState;if(!c)return;
+  $("capText").innerHTML="Ngayong araw: <b>"+peso(c.capUsed)+"</b> nagamit · <b>"+peso(c.capLeft)+"</b> natitira sa <b>"+peso(c.dailyCap)+"</b>"+(c.dailyCap!==c.defaultCap?" <small>(default "+peso(c.defaultCap)+")</small>":"")+(c.capped?" — <span style='color:var(--bad)'>NAABOT NA ang budget: walang bagong link o palo</span>":"");
+  $("capInput").placeholder="hal. "+(c.dailyCap+5000);
+}
 function renderLookup(){
   const tb=$("aTier"),ob=$("offerBox"),l=look;
   $("linkField").hidden=!(l&&l.code);$("makeRow").hidden=!(l&&l.found&&!l.code);ob.hidden=!(l&&l.found);
   if(!l){tb.className="tierbox";tb.innerHTML="I-type ang username at pindutin ang Check.";return}
-  if(!l.found){tb.className="tierbox bad";tb.innerHTML="<b>Hindi nakita</b> ang account <code>"+esc(l.account)+"</code>. I-check ang spelling — username ito, hindi real name. Daily cap: "+peso(l.capLeft)+" pa ang natitira.";return}
+  if(!l.found){tb.className="tierbox bad";tb.innerHTML="<b>Hindi nakita</b> ang account <code>"+esc(l.account)+"</code>. I-check ang spelling — username ito, hindi real name.";return}
   const ok=l.entriesEarned>0;
   tb.className="tierbox"+(ok?"":" bad");
-  tb.innerHTML=(ok?"<b>Qualified</b>":"<b>Wala pang entry</b>")+" — "+esc(l.account)+(l.name&&l.name!==l.account?" ("+esc(l.name)+")":"")+"<br>Deposits "+fmtTime(CONF.depFrom)+"–"+fmtTime(CONF.depTo)+" ngayon: <b>"+peso(l.depositTotal)+"</b> ("+l.deposits.length+") → <b>"+l.entriesEarned+" entries</b> · nagamit "+l.entriesUsed+" · <b>"+l.entriesLeft+" pa</b>";
+  tb.innerHTML=(ok?"<b>Qualified</b>":"<b>Wala pang entry</b>")+" — "+esc(l.account)+(l.name&&l.name!==l.account?" ("+esc(l.name)+")":"")+"<br>Deposits "+fmtTime(CONF.depFrom)+"–"+fmtTime(CONF.depTo)+" ngayon: <b>"+l.entriesEarned+" entries</b> · nagamit "+l.entriesUsed+" · <b>"+l.entriesPlayable+" pwede nang laruin</b>"+(l.entriesLocked?" · "+l.entriesLocked+" naka-lock 🔒":"");
   const w=l.wagering;
-  const wtxt=!w?"Wagering: wala pang data.":("Wagering (slots + casino, "+CONF.wagerMult+"× ng deposit): <b>"+peso(w.validBet)+"</b> / "+peso(w.required)+" "+(w.met?"<span style='color:#3fd0c9'>✔ met</span>":"<span style='color:var(--bad)'>✖ kulang pa</span>")+(w.syncedAt?" <small>(bets sync "+esc(String(w.syncedAt).slice(11,16))+", tuwing ~2 oras)</small>":""));
-  ob.innerHTML="<strong>Detalye</strong><p>"+(l.deposits.length?l.deposits.map(d=>d.at+" · "+peso(d.amount)).join("<br>"):"Walang Success deposit sa window ngayon. (Deposits sync tuwing ~5 min.)")+"</p><p>"+wtxt+"</p><p>Daily cap: <b>"+peso(l.capUsed)+"</b> nagamit · <b>"+peso(l.capLeft)+"</b> natitira sa "+peso(CONF.dailyCap)+"</p><p>Napanalunan ngayon: "+(l.plays.length?l.plays.map(p=>peso(p.prize)).join(", "):"wala pa")+"</p><p class='small'>Server time "+esc(l.serverTime)+" · prize pool: "+PRIZES.map((p,i)=>peso(p)+" ("+WEIGHTS[i]+"%)").join(", ")+"</p>";
+  const wtxt=!w?"Turnover: wala pang data.":("Turnover sa slots + casino ngayon: <b>"+peso(w.validBet)+"</b>"+(w.nextRequired!=null?" / kailangan <b>"+peso(w.nextRequired)+"</b> para sa susunod na palo":" — lahat ng entry unlocked")+(w.syncedAt?" <small>(bets sync "+esc(syncHM(w.syncedAt))+", tuwing ~30 min)</small>":""));
+  const rows=l.entries.map(e=>"<tr><td>#"+e.no+"</td><td>"+esc(e.at)+" · "+peso(e.amount)+"</td><td>"+peso(e.required)+"</td><td>"+(e.played?"✅ nalaro":e.unlocked?"🔓 pwede na":"🔒 naka-lock")+"</td></tr>").join("");
+  const skipped=l.deposits.filter(d=>!d.qualifies);
+  ob.innerHTML="<strong>Detalye</strong>"+(rows?"<table style='width:100%;border-collapse:collapse;font-size:12px'><thead><tr><th style='text-align:left'>Entry</th><th style='text-align:left'>Deposit</th><th style='text-align:left'>3× cum.</th><th style='text-align:left'>Status</th></tr></thead><tbody>"+rows+"</tbody></table>":"<p>Walang qualified na deposit sa window ngayon. (Deposits sync tuwing ~5 min.)</p>")+(skipped.length?"<p class='small'>Hindi kasama (mas mababa sa "+peso(CONF.minDeposit)+"): "+skipped.map(d=>d.at+" · "+peso(d.amount)).join(", ")+"</p>":"")+"<p>"+wtxt+"</p><p>Napanalunan ngayon: "+(l.plays.length?l.plays.map(p=>peso(p.prize)).join(", "):"wala pa")+"</p><p class='small'>Server time "+esc(l.serverTime)+" · prize pool: "+PRIZES.map((p,i)=>peso(p)+" ("+WEIGHTS[i]+"%)").join(", ")+"</p>";
+  $("makeLink").disabled=!!l.capped;
   $("plink").textContent=playerLink();
 }
 function flash(btn,txt){const o=btn.textContent;btn.textContent=txt;setTimeout(()=>btn.textContent=o,1500)}
 async function copyText(t,btn){try{await navigator.clipboard.writeText(t);flash(btn,"Copied")}catch(e){const r=document.createRange();r.selectNodeContents($("plink"));const s=getSelection();s.removeAllRanges();s.addRange(r);flash(btn,"Selected")}}
 if(mode==="admin"){
   $("admin").hidden=false;$("previewLabel").hidden=false;
-  async function doLookup(){const a=$("acct").value.trim();if(!a)return;$("aMsg").textContent="Hinahanap…";const r=await api("/api/lookup?account="+encodeURIComponent(a));$("aMsg").textContent=r.ok?"":(r.j.error||"Error");look=r.ok?r.j:null;renderLookup()}
-  async function makeLink(fresh){if(!look||!look.found)return;$("aMsg").textContent="Gumagawa ng link…";const r=await api("/api/link",{method:"POST",body:JSON.stringify({account:look.account,fresh:!!fresh})});if(!r.ok){$("aMsg").textContent=r.j.error||"Error";return}look=Object.assign({found:true},r.j);renderLookup();$("aMsg").textContent=fresh?"Bagong link. Pareho pa rin ang entries — nakatali ito sa account, hindi sa link.":"Handa na ang link."}
+  async function loadCap(){const r=await api("/api/cap");if(r.ok){capState=r.j;renderCap()}}
+  async function doLookup(){const a=$("acct").value.trim();if(!a)return;$("aMsg").textContent="Hinahanap…";const r=await api("/api/lookup?account="+encodeURIComponent(a));$("aMsg").textContent=r.ok?"":(r.j.error||"Error");look=r.ok?r.j:null;renderLookup();loadCap()}
+  async function makeLink(fresh){if(!look||!look.found)return;$("aMsg").textContent="Gumagawa ng link…";const r=await api("/api/link",{method:"POST",body:JSON.stringify({account:look.account,fresh:!!fresh})});if(!r.ok){$("aMsg").textContent=r.j.msg||r.j.error||"Error";loadCap();return}look=Object.assign({found:true},r.j);renderLookup();$("aMsg").textContent=fresh?"Bagong link. Pareho pa rin ang entries — nakatali ito sa account, hindi sa link.":"Handa na ang link."}
+  async function setCap(){const v=parseInt($("capInput").value,10);if(!(v>=0)){$("capMsg").textContent="Ilagay ang bagong budget (whole number).";return}if(!confirm("Gawing "+peso(v)+" ang daily budget ngayong araw?"))return;const r=await api("/api/cap",{method:"POST",body:JSON.stringify({dailyCap:v})});$("capMsg").textContent=r.ok?"Na-update ang budget ngayong araw.":(r.j.msg||r.j.error||"Error");if(r.ok){capState=r.j;renderCap();$("capInput").value="";if(look&&look.found)doLookup()}}
   function unlockAdmin(){
     $("adminGate").hidden=true;$("adminBody").hidden=false;
     $("lookupBtn").onclick=doLookup;$("acct").addEventListener("keydown",e=>{if(e.key==="Enter")doLookup()});
     $("makeLink").onclick=()=>makeLink(false);
     $("newLink").onclick=()=>makeLink(true);
+    $("capBtn").onclick=setCap;
     $("copyLink").onclick=()=>copyText(playerLink(),$("copyLink"));
     $("copyMsg").onclick=()=>{if(!playerLink()){$("aMsg").textContent="Gumawa muna ng link.";return}copyText(BRAND.promo.script+"\n\nI-play dito: "+playerLink(),$("copyMsg"))};
-    renderLookup();
+    renderLookup();loadCap();
   }
   if(adminToken){unlockAdmin()}
   else{
