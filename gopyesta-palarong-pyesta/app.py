@@ -9,7 +9,7 @@ Mechanics (whiteboard "GPT2027 — Community Game Mechanics", Gopyesta column, a
   * ONE Success deposit of >= ₱100 made 1 PM–9 PM today = ONE entry (palo), whatever the amount
   * an entry is LOCKED until the player's slots (egame) + casino valid bet today reaches
     3× the cumulative qualifying deposits up to that entry (deposits unlock in time order)
-  * prizes ₱17 (85%) · ₱27 (10%) · ₱37 (5%) · ₱77 (display only, 0%), drawn server-side
+  * prize is the climbing race's finishing place, drawn server-side: 1st ₱37 (5%) · 2nd ₱27 (85%) · 3rd ₱17 (10%)
   * ₱10,000 bonus budget per day across all players; when reached, no new links and no plays —
     the admin can raise today's budget (stored per day in cg_settings)
   * unplayed / still-locked entries expire at the end of the day (PLAY_UNTIL)
@@ -45,8 +45,8 @@ TZ = ZoneInfo(os.environ.get("TZ", "Asia/Manila"))
 BRAND = "gopyesta"
 GAME_NAME = "Palarong Pyesta"
 MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", os.environ.get("ENTRY_PESO", "100")))  # one deposit >= this = one entry
-PRIZES = [int(x) for x in os.environ.get("PRIZES", "17,27,37,77").split(",")]
-WEIGHTS = [int(x) for x in os.environ.get("WEIGHTS", "85,10,5,0").split(",")]
+PRIZES = [int(x) for x in os.environ.get("PRIZES", "37,27,17").split(",")]  # [1st, 2nd, 3rd] place prize
+WEIGHTS = [int(x) for x in os.environ.get("WEIGHTS", "5,85,10").split(",")]  # win rate per placement
 DAILY_CAP = int(os.environ.get("DAILY_CAP", "10000"))
 WAGER_MULT = float(os.environ.get("WAGER_MULT", "3"))   # 0 = no turnover gate
 WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame,casino").split(",") if c.strip()]
