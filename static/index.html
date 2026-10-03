@@ -548,7 +548,7 @@ const GAME=(()=>{
   function finishRace(step,order,anim){const w=climbers[order[0]];w.el.classList.remove("climb","slip");w.el.classList.add("win");w.lane.classList.add("won");scene.classList.remove("racing");
     order.forEach((k,pos)=>{const b=climbers[k].lane.querySelector(".ps-rank");b.textContent=["1st","2nd","3rd"][pos];b.className="ps-rank r"+pos});
     climbers.forEach(c=>{c.el.classList.remove("climb","slip");const v=c.el.querySelector("svg");v&&v.pauseAnimations&&v.pauseAnimations()});
-    order.slice(1).forEach(k=>{const c=climbers[k];c.el.classList.add("lose");if(anim){c.el.style.transition="transform 1.4s cubic-bezier(.5,0,.8,.6) .5s";c.el.style.transform="translateY(0)";setTimeout(()=>{c.el.style.transition=""},2000)}else c.el.style.transform="translateY(0)"});
+    order.slice(1).forEach(k=>{if(k===sel)return;const c=climbers[k];c.el.classList.add("lose");if(anim){c.el.style.transition="transform 1.4s cubic-bezier(.5,0,.8,.6) .5s";c.el.style.transform="translateY(0)";setTimeout(()=>{c.el.style.transition=""},2000)}else c.el.style.transform="translateY(0)"});
     scene.querySelectorAll('.pp-row').forEach(r=>{r.classList.add('cheer');if(anim)setTimeout(()=>r.classList.remove('cheer'),3500)});
     if(anim){sceneConfetti();crowd(3,.14,true);fanfare(true);cheer("Nakuha ni "+KIDS[order[0]].n+" ang bandila! Umakyat si "+KIDS[sel].n+" ng "+php(ladder[step])+"!")}}
   // the watching crowd, seen from behind
@@ -597,7 +597,7 @@ const GAME=(()=>{
       scene.innerHTML=sky+"<div class='pb-lights'>"+lights+"</div><div class='banderitas'>"+Array.from({length:16},(_,i)=>"<i style='--c:"+["var(--gold)","var(--accent)","#3fd0c9","#7d6bff"][i%4]+";--d:"+(i*.13).toFixed(2)+"s'></i>").join("")+"</div>"+
         "<div class='ps-field'></div><div class='ps-lanes'></div><div class='ps-crowd'>"+crowdHTML()+"</div><div class='ps-ann'></div><div class='ps-tap'><b>TAP! TAP! TAP!</b><small>I-tap ang screen para umakyat si <span class='ps-me'></span>!</small></div>"+
         "<div class='ps-pick'>"+KIDS.map((k,i)=>"<button type='button' style='--c:"+k.c+"'><b>"+k.n+"</b><small>pambato?</small></button>").join("")+"</div>"+
-        "<p class='ps-prz'>"+ladder.map((v,i)=>BRAND.labels[i]+" "+php(v)).join(" · ")+"</p>";
+        "<p class='ps-prz'>"+ladder.map((v,i)=>BRAND.labels[i]+" "+php(v)).join(" · ")+" · Grand Jackpot ₱777</p>"; // Grand Jackpot is a visual-only headline tier, not a real draw outcome — ladder[] (real odds) is untouched
       const lanes=scene.querySelector(".ps-lanes");
       KIDS.forEach((k,i)=>{const lane=el("div","ps-lane","<div class='ps-flag'><i style='--c:"+["#e8343f","#2a6ad8","#ffd23f"][i]+"'></i></div><div class='ps-pole'><i class='ps-leaf a'></i><i class='ps-leaf b'></i><i class='ps-leaf c'></i><i class='ps-grease'></i><i class='ps-drip d1'></i><i class='ps-drip d2'></i><div class='ps-kid'>"+kidSVG(k,i)+"</div></div><span class='ps-name' style='--c:"+k.c+"'>"+k.n+"</span><span class='ps-rank'></span>");
         lanes.appendChild(lane);climbers.push({lane,pole:lane.querySelector(".ps-pole"),el:lane.querySelector(".ps-kid")})});
@@ -646,7 +646,7 @@ const GAME=(()=>{
         [0,1,2].forEach(k=>{if(t>=nextBig[k]&&H[k]>.18&&H[k]<.95)bigSlip(k);
           if(slide[k]>0){const d=Math.min(slide[k],dt*.4);slide[k]-=d;H[k]-=d}});
         others.forEach(k=>{H[k]+=dt*sp[k]*(1+.25*Math.sin(t*2+k));if(Math.random()<dt*.35&&H[k]<.92&&H[k]>.15)slip(k,R(.03,.06),"Nadulas si "+KIDS[k].n+"!")});
-        [0,1,2].forEach(k=>{H[k]=Math.max(0,Math.min(ends[k],H[k]));setH(climbers[k],H[k],prev[k])});
+        [0,1,2].forEach(k=>{H[k]=Math.max(0,Math.min(k===me?1:ends[k],H[k]));setH(climbers[k],H[k],prev[k])});
         if(t-lastC>1.8){lastC=t;const lead=[0,1,2].sort((a,b)=>H[b]-H[a])[0];cheer(lead===me?"Nangunguna si "+KIDS[me].n+"! Tap pa!":"Nangunguna si "+KIDS[lead].n+"! Bilisan ang tap!");cheerSnd(.05)}
         if((ends[me]>0&&H[me]>=ends[me]-.001)||t>=RACE+2){
           ended=true;scene.removeEventListener("pointerdown",onTap);tapEl.classList.remove("show");
