@@ -57,6 +57,9 @@ def init_db():
         )
         cur.execute("ALTER TABLE wins ADD COLUMN IF NOT EXISTS claimed BOOLEAN NOT NULL DEFAULT FALSE")
         cur.execute("ALTER TABLE wins ADD COLUMN IF NOT EXISTS claimed_at BIGINT")
+        cur.execute("ALTER TABLE wins ADD COLUMN IF NOT EXISTS revoked BOOLEAN NOT NULL DEFAULT FALSE")
+        cur.execute("ALTER TABLE wins ADD COLUMN IF NOT EXISTS revoked_at BIGINT")
+        cur.execute("ALTER TABLE wins ADD COLUMN IF NOT EXISTS note TEXT NOT NULL DEFAULT ''")
         cur.execute("CREATE INDEX IF NOT EXISTS wins_created_at_idx ON wins (created_at DESC)")
         cur.execute("CREATE INDEX IF NOT EXISTS wins_brand_idx ON wins (brand)")
         cur.execute("CREATE INDEX IF NOT EXISTS wins_claimed_idx ON wins (claimed)")
@@ -115,9 +118,11 @@ def list_wins():
         clauses.append("brand=%s")
         params.append(brand)
     if status == "pending":
-        clauses.append("claimed=FALSE")
+        clauses.append("claimed=FALSE AND revoked=FALSE")
     elif status == "claimed":
         clauses.append("claimed=TRUE")
+    elif status == "revoked":
+        clauses.append("revoked=TRUE")
     where = ("WHERE " + " AND ".join(clauses)) if clauses else ""
     params.append(limit)
     with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
@@ -128,12 +133,16 @@ def list_wins():
 
 @app.route("/api/wins/<int:win_id>/claim", methods=["POST"])
 def claim_win(win_id):
+    """Mark paid (e.g. GCash sent). Optional JSON {note}: reference no. / remarks."""
     if not require_admin():
         return jsonify({"error": "forbidden"}), 403
+    payload = request.get_json(force=True, silent=True) or {}
+    note = str(payload.get("note", ""))[:200]
     with db() as conn, conn.cursor() as cur:
         cur.execute(
-            "UPDATE wins SET claimed=TRUE, claimed_at=%s WHERE id=%s",
-            (int(time.time() * 1000), win_id),
+            "UPDATE wins SET claimed=TRUE, claimed_at=%s, revoked=FALSE, revoked_at=NULL, "
+            "note=CASE WHEN %s<>'' THEN %s ELSE note END WHERE id=%s",
+            (int(time.time() * 1000), note, note, win_id),
         )
         if cur.rowcount == 0:
             return jsonify({"error": "not found"}), 404
@@ -142,10 +151,28 @@ def claim_win(win_id):
 
 @app.route("/api/wins/<int:win_id>/unclaim", methods=["POST"])
 def unclaim_win(win_id):
+    """Undo: back to pending (clears paid AND revoked)."""
     if not require_admin():
         return jsonify({"error": "forbidden"}), 403
     with db() as conn, conn.cursor() as cur:
-        cur.execute("UPDATE wins SET claimed=FALSE, claimed_at=NULL WHERE id=%s", (win_id,))
+        cur.execute("UPDATE wins SET claimed=FALSE, claimed_at=NULL, revoked=FALSE, revoked_at=NULL WHERE id=%s", (win_id,))
+        if cur.rowcount == 0:
+            return jsonify({"error": "not found"}), 404
+    return jsonify({"ok": True})
+
+
+@app.route("/api/wins/<int:win_id>/revoke", methods=["POST"])
+def revoke_win(win_id):
+    """Void a win (JSON {note} = reason, e.g. 'turnover not met', 'duplicate account')."""
+    if not require_admin():
+        return jsonify({"error": "forbidden"}), 403
+    payload = request.get_json(force=True, silent=True) or {}
+    note = str(payload.get("note", ""))[:200]
+    with db() as conn, conn.cursor() as cur:
+        cur.execute(
+            "UPDATE wins SET revoked=TRUE, revoked_at=%s, claimed=FALSE, claimed_at=NULL, note=%s WHERE id=%s",
+            (int(time.time() * 1000), note, win_id),
+        )
         if cur.rowcount == 0:
             return jsonify({"error": "not found"}), 404
     return jsonify({"ok": True})

@@ -35,6 +35,10 @@ tr:hover td{background:#1c2029}
 .badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.3px}
 .badge.pending{background:#3a2e12;color:#ffc857}
 .badge.claimed{background:#163a24;color:#4ade80}
+.badge.revoked{background:#3a1620;color:#f87171}
+.revokeBtn{font:600 11px inherit;background:transparent;color:#f87171;border:1px solid #5c1f2b;border-radius:7px;padding:5px 10px;cursor:pointer;white-space:nowrap;margin-left:4px}
+.revokeBtn:hover{background:#2a1017}
+.note{display:block;font-size:10px;color:var(--muted);margin-top:2px}
 .claimBtn{font:700 11px inherit;background:#163a24;color:#4ade80;border:1px solid #1f5c38;border-radius:7px;padding:5px 10px;cursor:pointer;white-space:nowrap}
 .claimBtn:hover{background:#1c4a2e}
 .unclaimBtn{font:600 11px inherit;background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:7px;padding:5px 10px;cursor:pointer;white-space:nowrap}
@@ -71,7 +75,8 @@ tr:hover td{background:#1c2029}
       <select id="statusFilter">
         <option value="">All statuses</option>
         <option value="pending">Pending lang</option>
-        <option value="claimed">Claimed lang</option>
+        <option value="claimed">Paid lang</option>
+        <option value="revoked">Revoked lang</option>
       </select>
       <button id="refreshBtn" type="button">Refresh</button>
       <span class="sub" id="lastUpdated" style="margin:0"></span>
@@ -112,12 +117,16 @@ async function loadWins(){
   }catch(e){$("loadingMsg").textContent="Hindi ma-load. Subukan ulit.";}
 }
 
-async function setClaimed(id,claimed){
+async function act(id,action){
+  let note="";
+  if(action==="claim"){note=prompt("Paid via GCash — reference no. / remarks (optional):","");if(note===null)return}
+  if(action==="revoke"){note=prompt("Revoke — dahilan (hal. turnover not met, duplicate account):","");if(note===null)return;if(!note.trim()){alert("Kailangan ng dahilan.");return}}
   try{
-    const r=await fetch("/api/wins/"+id+"/"+(claimed?"claim":"unclaim"),{method:"POST",headers:{"X-Admin-Token":adminToken||""}});
+    const r=await fetch("/api/wins/"+id+"/"+action,{method:"POST",headers:{"X-Admin-Token":adminToken||"","Content-Type":"application/json"},body:JSON.stringify({note:note||""})});
     if(r.ok)loadWins();
   }catch(e){}
 }
+function escQ(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
 function render(wins){
   $("loadingMsg").hidden=true;
@@ -127,18 +136,20 @@ function render(wins){
     "<td>"+(w.player_name||"—")+"</td>"+
     "<td class='amt'>₱"+w.amount+"</td>"+
     "<td>"+(w.link?"<a class='link' href='"+w.link+"' target='_blank' rel='noopener'>"+w.code+"</a>":w.code)+"</td>"+
-    "<td>"+(w.claimed?"<span class='badge claimed'>Claimed</span>":"<span class='badge pending'>Pending</span>")+"</td>"+
-    "<td>"+(w.claimed?"<button class='unclaimBtn' data-id='"+w.id+"' data-claimed='0'>Undo</button>":"<button class='claimBtn' data-id='"+w.id+"' data-claimed='1'>Mark Claimed</button>")+"</td></tr>"
+    "<td>"+(w.revoked?"<span class='badge revoked'>Revoked</span>":w.claimed?"<span class='badge claimed'>Paid</span>":"<span class='badge pending'>Pending</span>")+(w.note?"<span class='note'>"+escQ(w.note)+"</span>":"")+"</td>"+
+    "<td>"+((w.claimed||w.revoked)?"<button class='unclaimBtn' data-id='"+w.id+"' data-act='unclaim'>Undo</button>":"<button class='claimBtn' data-id='"+w.id+"' data-act='claim'>Paid (GCash)</button><button class='revokeBtn' data-id='"+w.id+"' data-act='revoke'>Revoke</button>")+"</td></tr>"
   ).join("");
   $("emptyMsg").hidden=wins.length>0;
-  const total=wins.reduce((a,w)=>a+w.amount,0);
-  const pending=wins.filter(w=>!w.claimed).length;
+  const total=wins.filter(w=>!w.revoked).reduce((a,w)=>a+w.amount,0);
+  const pending=wins.filter(w=>!w.claimed&&!w.revoked).length;
+  const revoked=wins.filter(w=>w.revoked).length;
   const byBrand={};
   wins.forEach(w=>byBrand[w.brand]=(byBrand[w.brand]||0)+1);
   const topBrand=Object.entries(byBrand).sort((a,b)=>b[1]-a[1])[0];
   $("stats").innerHTML=
     "<div class='stat'><b>"+wins.length+"</b><span>Total wins shown</span></div>"+
-    "<div class='stat pending-stat'><b>"+pending+"</b><span>Pending claim</span></div>"+
+    "<div class='stat pending-stat'><b>"+pending+"</b><span>Pending payout</span></div>"+
+    (revoked?"<div class='stat'><b>"+revoked+"</b><span>Revoked</span></div>":"")+
     "<div class='stat'><b>₱"+total.toLocaleString()+"</b><span>Total payout shown</span></div>"+
     (topBrand?"<div class='stat'><b>"+(BRAND_LABEL[topBrand[0]]||topBrand[0])+"</b><span>Most active brand</span></div>":"");
   $("lastUpdated").textContent="Huling update: "+new Date().toLocaleTimeString("en-PH");
@@ -146,7 +157,7 @@ function render(wins){
 $("rows").addEventListener("click",e=>{
   const btn=e.target.closest("button[data-id]");
   if(!btn)return;
-  setClaimed(btn.dataset.id,btn.dataset.claimed==="1");
+  act(btn.dataset.id,btn.dataset.act);
 });
 
 function reveal(){
