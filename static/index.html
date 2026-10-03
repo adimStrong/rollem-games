@@ -429,7 +429,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
       <li>Open to verified Gopyesta players aged 21 and above. Self-excluded, restricted, test or unverified accounts are not eligible.</li>
       <li>Each successful deposit of at least ₱100 made between 1:00 PM and 9:00 PM (Philippine time) earns one entry (one "palo"), regardless of the deposit amount. Entries are computed from the platform's deposit records; pending, failed or reversed deposits, and deposits made outside the window, do not count.</li>
       <li>An entry is locked until your valid bets on slots and casino games for the day reach 3× the deposit behind it (deposits unlock in the order they were made, cumulatively). Other game types do not count toward this requirement. Bet records refresh periodically, so an entry may unlock up to about 30 minutes after the requirement is met.</li>
-      <li>Prizes are ₱17, ₱27, ₱37 or ₱77, drawn at random by the system for each entry; the larger the amount, the rarer the result. In Palosebo you pick a climber (Juan, Pedro or Tonyo) and tap to climb a greased bamboo pole; how high you land decides your prize. Which climber you pick does not change your chances.</li>
+      <li>In Palosebo you pick a climber (Juan, Pedro or Tonyo) and tap to climb a greased bamboo pole; your finishing place decides your prize: 1st ₱37, 2nd ₱27, 3rd ₱17, drawn at random by the system for each entry. Which climber you pick does not change your chances.</li>
       <li>Entries are valid only on the day the deposit was made and must be unlocked and played before the end of that day. Unplayed or still-locked entries expire.</li>
       <li>Total bonus awarded under this promo is limited to a daily budget (₱10,000 unless announced otherwise) across all players. Once the budget is used up, no further links or plays are issued that day.</li>
       <li>Each result is recorded by the system the moment it is drawn and is final. Refreshing the page, reopening the link or using another device does not give another turn.</li>
@@ -443,11 +443,11 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 </div>
 
 <script>
-const BRAND={"key":"gopyesta","name":"Gopyesta","labels":["Kendi","Barya","Pyesta Prize","Fiesta Jackpot"],"promo":{"name":"Palarong Pyesta","target":"Lahat ng verified Gopyesta players","trig":"Isang deposit na ₱100 pataas mula 1 PM hanggang 9 PM = 1 palo; mabubuksan ang palo kapag umabot na sa 3× ng deposit ang laro mo sa slots o casino","valid":"Araw-araw, 1 PM–9 PM; may daily budget ang bonus","script":"Hi po! Pasok na ang deposit mo kaya may Palarong Pyesta ka na. Isang deposit na ₱100 pataas = 1 akyat sa palosebo — maglaro muna ng slots/casino na 3× ng deposit mo para ma-unlock, tapos umakyat! Hanggang ₱777 ang maaaring halaga ng mga premyo namin."},"confetti":["#ff5d8f","#ffd23f","#3fd0c9","#7d6bff","#ffffff"],"confettiBig":["#ffd23f","#fff1b8","#ff5d8f","#ffffff"]};
+const BRAND={"key":"gopyesta","name":"Gopyesta","labels":["1st","2nd","3rd"],"promo":{"name":"Palarong Pyesta","target":"Lahat ng verified Gopyesta players","trig":"Isang deposit na ₱100 pataas mula 1 PM hanggang 9 PM = 1 palo; mabubuksan ang palo kapag umabot na sa 3× ng deposit ang laro mo sa slots o casino","valid":"Araw-araw, 1 PM–9 PM; may daily budget ang bonus","script":"Hi po! Pasok na ang deposit mo kaya may Palarong Pyesta ka na. Isang deposit na ₱100 pataas = 1 akyat sa palosebo — maglaro muna ng slots/casino na 3× ng deposit mo para ma-unlock, tapos umakyat! Hanggang ₱777 ang maaaring halaga ng mga premyo namin."},"confetti":["#ff5d8f","#ffd23f","#3fd0c9","#7d6bff","#ffffff"],"confettiBig":["#ffd23f","#fff1b8","#ff5d8f","#ffffff"]};
 // ---------- shared helpers ----------
 const $=id=>document.getElementById(id);
 // mechanics come from the server (/api/config); these are the fallback defaults
-let CONF={minDeposit:100,prizes:[17,27,37,77],weights:[85,10,5,0],dailyCap:10000,wagerMult:3,depFrom:"13:00",depTo:"21:00",playUntil:"23:59"};
+let CONF={minDeposit:100,prizes:[37,27,17],weights:[5,85,10],dailyCap:10000,wagerMult:3,depFrom:"13:00",depTo:"21:00",playUntil:"23:59"};
 let PRIZES=CONF.prizes,WEIGHTS=CONF.weights;
 function php(n){return "₱"+Number(n).toLocaleString(undefined,{maximumFractionDigits:0})}
 function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296}
@@ -545,12 +545,12 @@ const GAME=(()=>{
   // this page's own canvas confetti(count,big) used by the shared win popup
   function sceneConfetti(){for(let i=0;i<40;i++){const d=el("i","ps-cf");d.style.cssText="left:"+R(5,95).toFixed(0)+"%;--c:"+["#ffd23f","#ff5d8f","#3fd0c9","#7d6bff","#fff","#e8343f"][i%6]+";--x:"+R(-60,60).toFixed(0)+"px;--r:"+R(-540,540).toFixed(0)+"deg;animation-delay:"+R(0,.6).toFixed(2)+"s;animation-duration:"+R(1.8,3).toFixed(2)+"s";scene.appendChild(d);setTimeout(()=>d.remove(),3800)}
     for(let k=0;k<3;k++){const f=el("div","ps-fw","<b></b>".repeat(12));f.style.cssText="left:"+R(15,85).toFixed(0)+"%;top:"+R(10,30).toFixed(0)+"%;--c:"+["#ffd23f","#ff5d8f","#3fd0c9"][k]+";animation-delay:"+(k*.35).toFixed(2)+"s";scene.appendChild(f);setTimeout(()=>f.remove(),2600)}}
-  function finishRace(step,order,anim){const w=climbers[order[0]];w.el.classList.remove("climb","slip");w.el.classList.add("win");w.lane.classList.add("won");scene.classList.remove("racing");
+  function finishRace(place,order,anim){const w=climbers[order[0]];w.el.classList.remove("climb","slip");w.el.classList.add("win");w.lane.classList.add("won");scene.classList.remove("racing");
     order.forEach((k,pos)=>{const b=climbers[k].lane.querySelector(".ps-rank");b.textContent=["1st","2nd","3rd"][pos];b.className="ps-rank r"+pos});
     climbers.forEach(c=>{c.el.classList.remove("climb","slip");const v=c.el.querySelector("svg");v&&v.pauseAnimations&&v.pauseAnimations()});
-    order.slice(1).forEach(k=>{if(k===sel)return;const c=climbers[k];c.el.classList.add("lose");if(anim){c.el.style.transition="transform 1.4s cubic-bezier(.5,0,.8,.6) .5s";c.el.style.transform="translateY(0)";setTimeout(()=>{c.el.style.transition=""},2000)}else c.el.style.transform="translateY(0)"});
+    order.slice(1).forEach(k=>{const c=climbers[k];c.el.classList.add("lose");if(anim){c.el.style.transition="transform 1.4s cubic-bezier(.5,0,.8,.6) .5s";c.el.style.transform="translateY(0)";setTimeout(()=>{c.el.style.transition=""},2000)}else c.el.style.transform="translateY(0)"});
     scene.querySelectorAll('.pp-row').forEach(r=>{r.classList.add('cheer');if(anim)setTimeout(()=>r.classList.remove('cheer'),3500)});
-    if(anim){sceneConfetti();crowd(3,.14,true);fanfare(true);cheer("Nakuha ni "+KIDS[order[0]].n+" ang bandila! Umakyat si "+KIDS[sel].n+" ng "+php(ladder[step])+"!")}}
+    if(anim){sceneConfetti();crowd(3,.14,true);fanfare(true);cheer("Nakuha ni "+KIDS[order[0]].n+" ang bandila! Si "+KIDS[sel].n+" ay "+BRAND.labels[place]+" · "+php(ladder[place])+"!")}}
   // the watching crowd, seen from behind
   const SKIN=["#c88a5a","#b8784a","#d8a070","#a86c42","#e0b080"],HAIR=["#1a1008","#2a1a10","#3a2a1a","#0e0804","#5a4a3a"],SHIRT=["#e8343f","#2a6ad8","#ffd23f","#3fd0c9","#7d6bff","#ff8a3d","#f2f2f2","#2a8a3a","#ff5d8f","#8a5a2a"];
   function person(i){const r=x=>{const v=Math.sin(i*12.9898+x*78.233)*43758.5453;return v-Math.floor(v)},pk=a=>a[Math.floor(r(a.length)*a.length)];
@@ -572,7 +572,7 @@ const GAME=(()=>{
     h+="<div class='pp-row back'>"+Array.from({length:11},(_,i)=>person(i+40)).join("")+"</div><div class='pp-row front'>"+Array.from({length:9},(_,i)=>person(i)).join("")+"</div>";return h}
 
   const G={label:"Palosebo",title:"PALOSEBO",btn:"Pumili muna ng aakyat",
-    how:["I-check ang T&C box.","Tatlong bata ang magpapaunahan umakyat sa madulas na kawayan para makuha ang bandila sa tuktok.","Piliin kung sino sa tingin mo ang pinakamabilis: Juan, Pedro o Tonyo. Hindi nito binabago ang premyo mo.","Pindutin ang SIMULAN ANG KARERA!, tapos i-tap nang i-tap ang screen para umakyat ang pinili mo. Madulas ang kawayan kaya puwede siyang madulas pababa.","Ang tuktok na maaabot ng pinili mo ang magdedesisyon ng premyo, ayon sa prize table sa itaas; hindi ito nababago ng pinili mo o ng bilis ng pag-tap mo."],
+    how:["I-check ang T&C box.","Tatlong bata ang magpapaunahan umakyat sa madulas na kawayan para makuha ang bandila sa tuktok.","Piliin kung sino sa tingin mo ang pinakamabilis: Juan, Pedro o Tonyo. Hindi nito binabago ang premyo mo.","Pindutin ang SIMULAN ANG KARERA!, tapos i-tap nang i-tap ang screen para umakyat ang pinili mo. Madulas ang kawayan kaya puwede siyang madulas pababa.","Premyo ayon sa puwesto ng pinili mo: 1st ₱37, 2nd ₱27, 3rd ₱17. Random ang puwesto ayon sa win rate; hindi ito nababago ng pinili mo o ng bilis ng pag-tap mo."],
     note:"Pumili ng aakyat, tapos i-tap nang mabilis ang screen para siya umakyat!",
     build(play,ctx){cancelAnimationFrame(run);busyR=false;sel=null;climbers=[];
       scene=el("div","ps");
@@ -608,7 +608,7 @@ const GAME=(()=>{
     go(ctx){
       if(busyR||ctx.isBusy()||(ctx.state&&ctx.state.done))return;if(!ctx.agreed())return;
       if(sel===null){cheer("Pumili muna ng aakyat!");return}
-      if(!ctx.state||(ctx.state.step==null&&!ctx.state.pending))ctx.start({kid:sel});
+      if(!ctx.state||(ctx.state.step==null&&!ctx.state.pending))ctx.start({kid:sel,flip:rnd()<.5});
       if(!ctx.state)return; // start refused (e.g. no entries)
       scene.classList.add("locked");
       busyR=true;ctx.setBusy(true);$("goBtn").disabled=true;$("goBtn").textContent="Karera na!";scene.classList.add("racing");drum();
@@ -620,21 +620,20 @@ const GAME=(()=>{
         })}
       },reduce()?1:700);
     },
-    // the tap-to-climb race: identical physics/feel to the source. "My" climber's target height
-    // is the server-decided step (fixed before the race starts, since the server already resolved
-    // during the 3-2-1 countdown above); the other two race to random target heights for show.
+    // the tap-to-climb race — ported from the real source's own place()/race()/go(), since the
+    // prize now IS the finishing place (1st/2nd/3rd). "place" is server-decided (ctx resolved
+    // during the 3-2-1 countdown above) and fixes who finishes ahead/behind before the race starts;
+    // the "can't pass someone destined to finish ahead" grease-slip below is the real near-miss
+    // mechanic — organic, not scripted, and only applies when the player isn't meant to win 1st.
     raceRun(ctx,anim){
       anim=anim!==false;
-      const st=ctx.state,me=st.kid,step=st.step,myEnd=ladder.length>1?step/(ladder.length-1):1;
-      const others=[0,1,2].filter(k=>k!==me),ends=[0,0,0];ends[me]=myEnd;others.forEach(k=>ends[k]=R(.45,.98));
-      const order=[0,1,2].slice().sort((a,b)=>ends[b]-ends[a]);
-      // the flag-grab (cosmetic "1st place") never goes to the player — it's just a show moment,
-      // unrelated to the real prize, which is already fixed above (ends[me], server-decided)
-      if(order[0]===me)[order[0],order[1]]=[order[1],order[0]];
-      climbers.forEach(c=>c.pts=null);[0,1,2].forEach(k=>{climbers[k].pts=curve(ends[k],RACE)});
-      if(!anim){climbers.forEach(c=>{setH(c,at(c.pts,RACE),0);c.el.classList.remove("climb","slip")});finishRace(step,order,false);return}
-      const H=[0,0,0],sp=[0,0,0],slipT=[0,0,0];let t0=performance.now(),last=t0,lastC=0,ended=false,nearMissed=false;
-      const NEAR_TOP=.84; // the player always gets a dramatic near-miss here; the designated flag-grabber then surges past
+      const st=ctx.state,me=st.kid,place=st.step;
+      const order=[0,1,2].filter(k=>k!==me);if(st.flip)order.reverse();order.splice(place,0,me);
+      const ends=[1,R(.72,.84),R(.48,.62)];
+      climbers.forEach(c=>c.pts=null);order.forEach((k,pos)=>{climbers[k].pts=curve(ends[pos],RACE)});
+      if(!anim){climbers.forEach(c=>{setH(c,at(c.pts,RACE),0);c.el.classList.remove("climb","slip")});finishRace(place,order,false);return}
+      const pos=order.indexOf(me),H=[0,0,0],sp=[0,0,0],slipT=[0,0,0];let t0=performance.now(),last=t0,lastC=0,ended=false;
+      const ahead=order.slice(0,pos),behind=order.slice(pos+1);
       [0,1,2].forEach(k=>sp[k]=R(.105,.13));
       const tapEl=scene.querySelector(".ps-tap");tapEl.classList.add("show");
       const onTap=e=>{if(ended)return;if(e.target.closest&&e.target.closest("button,a,input"))return;e.preventDefault();H[me]=Math.min(1,H[me]+R(.016,.024));
@@ -647,17 +646,18 @@ const GAME=(()=>{
       function slip(k,amt,msg){const t=(performance.now()-t0)/1000;H[k]=Math.max(0,H[k]-amt);if(t-slipT[k]>.6){slipT[k]=t;slipSnd();grease(climbers[k]);if(msg&&t-lastC>.7){lastC=t;cheer(msg)}}}
       (function f(now){now=now||performance.now();const dt=Math.min(.05,(now-last)/1000),t=(now-t0)/1000;last=now;const prev=H.slice();
         H[me]+=dt*(t>9?.09:.012);
-        if(!nearMissed&&H[me]>=NEAR_TOP){nearMissed=true;bigSlip(me);sp[order[0]]*=1.6;nextBig[order[0]]=t+99}
-        [0,1,2].forEach(k=>{if(t>=nextBig[k]&&H[k]>.18&&H[k]<.95)bigSlip(k);
+        [0,1,2].forEach(k=>{if(t>=nextBig[k]&&H[k]>.18&&H[k]<.95){if(ahead.includes(k)&&H[k]-H[me]<.3){nextBig[k]=t+.8;return}bigSlip(k)}
           if(slide[k]>0){const d=Math.min(slide[k],dt*.4);slide[k]-=d;H[k]-=d}});
-        others.forEach(k=>{H[k]+=dt*sp[k]*(1+.25*Math.sin(t*2+k));if(Math.random()<dt*.35&&H[k]<.92&&H[k]>.15)slip(k,R(.03,.06),"Nadulas si "+KIDS[k].n+"!")});
-        [0,1,2].forEach(k=>{H[k]=Math.max(0,Math.min(k===me?1:ends[k],H[k]));setH(climbers[k],H[k],prev[k])});
+        ahead.forEach((k,ix)=>{H[k]+=dt*sp[k]*(1+.25*Math.sin(t*2+k));if(Math.random()<dt*.35&&H[k]<.92&&H[k]>.15)slip(k,R(.03,.06),"Nadulas si "+KIDS[k].n+"!");
+          if(!slide[k]&&H[k]<H[me]+.07)H[k]=Math.min(1,H[k]+dt*.6);if(ix>0&&H[k]>H[ahead[ix-1]]-.04)H[k]=H[ahead[ix-1]]-.04});
+        behind.forEach(k=>{H[k]+=dt*sp[k]*.95;if(Math.random()<dt*.4&&H[k]>.1)slip(k,R(.03,.07),"Nadulas si "+KIDS[k].n+"!");if(H[k]>H[me]-.05)H[k]=Math.max(0,H[me]-.05-R(0,.02))});
+        if(ahead.length){const cap=Math.min(...ahead.map(k=>H[k]))-.05;if(H[me]>cap)slip(me,R(.05,.09),pos?"Nadulas si "+KIDS[me].n+"! Ang dulas ng grasa!":null)}
+        [0,1,2].forEach(k=>{H[k]=Math.max(0,Math.min(1,H[k]));setH(climbers[k],H[k],prev[k])});
         if(t-lastC>1.8){lastC=t;const lead=[0,1,2].sort((a,b)=>H[b]-H[a])[0];cheer(lead===me?"Nangunguna si "+KIDS[me].n+"! Tap pa!":"Nangunguna si "+KIDS[lead].n+"! Bilisan ang tap!");cheerSnd(.05)}
-        if((ends[me]>0&&H[me]>=ends[me]-.001)||t>=RACE+2){
+        if(H[order[0]]>=1){
           ended=true;scene.removeEventListener("pointerdown",onTap);tapEl.classList.remove("show");
-          [0,1,2].forEach(k=>setH(climbers[k],ends[k],H[k]));
           ctx.update({done:true});
-          finishRace(step,order,true);
+          finishRace(place,order,true);
           setTimeout(()=>{busyR=false;ctx.done()},reduce()?50:1600);
           return
         }
@@ -752,7 +752,7 @@ function buildView(){
   renderEntries();
   if(!qualifies()||(mode==="player"&&!session.playOpen)){$("ladder").innerHTML="";$("goBtn").disabled=true;$("note").textContent="";return}
   ladder=PRIZES;
-  $("ladder").innerHTML=ladder.map((v,i)=>"<li"+(i===PRIZES.length-1?" class='top'":"")+(GAME.chip?" style='"+GAME.chip(i)+"'":"")+">"+BRAND.labels[i]+"<b>"+php(v)+"</b></li>").join("");
+  $("ladder").innerHTML=ladder.map((v,i)=>"<li"+(v===Math.max(...ladder)?" class='top'":"")+(GAME.chip?" style='"+GAME.chip(i)+"'":"")+">"+BRAND.labels[i]+"<b>"+php(v)+"</b></li>").join("");
   $("note").textContent=GAME.note;
   $("goBtn").disabled=false;$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));
   state=load();
@@ -765,7 +765,7 @@ function buildView(){
   if(state&&state.step!=null){GAME.finish(ctx);finishView(false)}
 }
 function finishView(celebrate){
-  const amt=ladder[state.step],big=state.step>=2;
+  const amt=ladder[state.step],big=amt===Math.max(...ladder); // "big" = the actual top prize, not the highest index — index 0 is now 1st place (biggest), not smallest
   [...$("ladder").children].forEach((li,i)=>li.classList.toggle("on",i===state.step));
   $("amt").textContent=php(amt);$("winNote").textContent=BRAND.labels[state.step]+(big?" · Jackpot!":"");
   $("win").hidden=false;$("goBtn").disabled=true;$("goBtn").textContent="Nalaro mo na";
