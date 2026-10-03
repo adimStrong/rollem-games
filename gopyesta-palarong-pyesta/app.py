@@ -1,4 +1,4 @@
-"""Gopyesta · Palarong Pyesta (Basag Palayok) — backend-verified community game.
+"""Gopyesta · Palarong Pyesta (Palosebo) — backend-verified community game.
 
 Reads the Gopyesta platform Postgres (deposits / users / bets_daily_category, filled by the
 gopyesta-retention pullers), turns today's real deposits into game entries, gates each entry
