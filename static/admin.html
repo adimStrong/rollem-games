@@ -358,7 +358,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <h2>Link maker</h2>
     <p class="hint" id="adminGate">Sinusuri ang access…</p>
     <div id="adminBody" hidden style="display:grid;gap:14px">
-      <p class="hint">I-type ang <b>username</b> ng player. Kukunin ng system mula sa database ang Success deposits niya ngayong araw (1 PM–9 PM). Ang player ang pipili ng <b>cabin</b> — bawat cabin ay may sariling turnover na kailangan, at <b>nakatago</b> ang laki ng bonus. Para umikot: <b>deposit na ₱100 pataas</b> at maabot ang turnover ng napiling cabin. <b>Isang ikot bawat araw.</b> Server ang bumubunot ng bonus at naitatala agad sa wins ledger. Bonus credit ito — may turnover bago ma-withdraw, hindi diretsong cash.</p>
+      <p class="hint">I-type ang <b>username</b> ng player. Kukunin ng system mula sa database ang Success deposits niya ngayong araw (1 PM–9 PM) — <b>isang deposit na ₱100 pataas = 1 ikot</b>. Naka-lock ang palo hangga't hindi naaabot ang 3× turnover sa slots/casino. Server ang nagde-decide ng premyo at naitatala agad sa wins ledger.</p>
       <label class="field"><span>Player username</span><div class="btnrow"><input class="inp" id="acct" type="text" autocomplete="off" spellcheck="false" placeholder="hal. juan123" style="flex:1;min-width:0"><button class="btn small" id="lookupBtn" type="button">Check</button></div></label>
       <div class="tierbox" id="aTier"></div>
       <div class="offerbox" id="offerBox" hidden></div>
@@ -443,18 +443,12 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 </div>
 
 <script>
-const BRAND={"key": "gopyesta", "name": "Gopyesta", "labels": ["Cabin", "Cabin", "Cabin"], "promo": {"name": "Lucky Ferris Wheel", "target": "Lahat ng verified Gopyesta players", "trig": "Pumili ng cabin, mag-deposit ng ₱100 pataas (1 PM–9 PM), at abutin ang turnover na kailangan ng napiling cabin. Isang ikot bawat araw. Nakatago ang laki ng bonus hanggang umikot ang wheel.", "valid": "Araw-araw, 1 PM–9 PM; may daily budget ang bonus", "script": "Hi po! Pasok na ang deposit mo kaya pwede ka nang umikot sa Lucky Ferris Wheel. Pumili ng cabin sa wheel — bawat cabin ay may sariling turnover na kailangan, at sikreto ang laki ng bonus. Mag-deposit ng ₱100 pataas at abutin ang turnover ng cabin mo, tapos kusang iikot ang wheel. Isang ikot bawat araw! Bonus credit ang premyo — may turnover bago ma-withdraw."}, "confetti": ["#ff5d8f", "#ffd23f", "#3fd0c9", "#7d6bff", "#ffffff"], "confettiBig": ["#ffd23f", "#fff1b8", "#ff5d8f", "#ffffff"]};
+const BRAND={"key": "gopyesta", "name": "Gopyesta", "labels": ["1st", "2nd", "3rd"], "promo": {"name": "Lucky Ferris Wheel", "target": "Lahat ng verified Gopyesta players", "trig": "Isang deposit na ₱100 pataas mula 1 PM hanggang 9 PM = 1 ikot sa wheel; mabubuksan ang ikot kapag umabot na sa 3× ng deposit ang laro mo sa slots o casino", "valid": "Araw-araw, 1 PM–9 PM; may daily budget ang bonus", "script": "Hi po! Pasok na ang deposit mo kaya may ikot ka na sa Lucky Ferris Wheel. Isang deposit na ₱100 pataas = 1 ikot — maglaro muna ng slots/casino na 3× ng deposit mo para ma-unlock, tapos paikutin ang wheel! Hanggang ₱777 ang maaaring halaga ng mga premyo namin."}, "confetti": ["#ff5d8f", "#ffd23f", "#3fd0c9", "#7d6bff", "#ffffff"], "confettiBig": ["#ffd23f", "#fff1b8", "#ff5d8f", "#ffffff"]};
 // ---------- shared helpers ----------
 const $=id=>document.getElementById(id);
 // mechanics come from the server (/api/config); these are the fallback defaults
-let CONF={minDeposit:100,dailyCap:10000,wagerMult:5,depFrom:"13:00",depTo:"21:00",playUntil:"23:59",
-          cabins:8,cabTier:[1,2,3,4,1,2,3,4],tierRequired:{"1":300,"2":600,"3":8000,"4":50000},
-          wagerCats:["egame","casino"]};
-// The ferris wheel has no flat prize table, so /api/config no longer sends prizes/weights.
-// These stay defined only so the Palosebo demo code further down this file — dead in admin
-// mode, kept so the file stays a single diff against the version that was live — cannot
-// throw on a missing array.
-let PRIZES=[0],WEIGHTS=[100];
+let CONF={minDeposit:100,prizes:[37,27,17],weights:[5,85,10],dailyCap:10000,wagerMult:3,depFrom:"13:00",depTo:"21:00",playUntil:"23:59"};
+let PRIZES=CONF.prizes,WEIGHTS=CONF.weights;
 function php(n){return "₱"+Number(n).toLocaleString(undefined,{maximumFractionDigits:0})}
 function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296}
 function drawStep(){let r=rnd()*100;for(let i=0;i<WEIGHTS.length;i++){r-=WEIGHTS[i];if(r<0)return i}return 0} // DEMO only — real draws happen server-side
@@ -467,9 +461,9 @@ function syncHM(t){return t?String(t).slice(11,16):""}
 // ---------- player links ----------
 // #admin = link maker; #<account>-<hex> = a server-side session for one account/day; anything else = demo
 const raw=decodeURIComponent(location.hash.slice(1)).toLowerCase();
-// This file is the LINK MAKER now — index.html is the game. Pinned to admin mode so that
-// opening /admin.html without the #admin hash cannot fall through to the old Palosebo demo
-// that still sits further down this file.
+// This file is the LINK MAKER now — index.html is the game. Pinned to admin mode so
+// that opening /admin.html without the #admin hash cannot fall through to the old
+// Palosebo demo that still sits further down this file.
 let mode="admin";
 let cfg={code:mode==="player"?raw:"demo",name:mode==="player"?"":"Juan"};
 let session=null; // GET /api/session/<code> (player mode)
@@ -725,10 +719,10 @@ function lockedText(){
 }
 function renderEntries(){
   const e=$("entries"),r=$("results");e.hidden=false;r.hidden=true;
-  if(mode!=="player"){e.innerHTML="Isang deposit na <b>"+php(CONF.minDeposit)+"</b> pataas ("+fmtTime(CONF.depFrom)+"–"+fmtTime(CONF.depTo)+") = 1 palo";return}
+  if(mode!=="player"){e.innerHTML="Isang deposit na <b>"+php(CONF.minDeposit)+"</b> pataas ("+fmtTime(CONF.depFrom)+"–"+fmtTime(CONF.depTo)+") = 1 ikot";return}
   if(!session||!session.exists){e.textContent="Hindi valid ang link na ito. Humingi ng bagong link sa agent mo.";return}
   if(session.expired)e.textContent="Expired na ang link na ito — ibang araw na. Humingi ng bagong link sa agent mo.";
-  else if(session.entriesEarned===0)e.innerHTML="Wala ka pang entry ngayon. Isang deposit na <b>"+php(CONF.minDeposit)+"</b> pataas mula <b>"+fmtTime(CONF.depFrom)+"–"+fmtTime(CONF.depTo)+"</b> = 1 palo. I-refresh pagkatapos mag-deposit (mga 5 minuto).";
+  else if(session.entriesEarned===0)e.innerHTML="Wala ka pang entry ngayon. Isang deposit na <b>"+php(CONF.minDeposit)+"</b> pataas mula <b>"+fmtTime(CONF.depFrom)+"–"+fmtTime(CONF.depTo)+"</b> = 1 ikot. I-refresh pagkatapos mag-deposit (mga 5 minuto).";
   else if(!session.playOpen)e.textContent="Sarado na ang laro para ngayong araw.";
   else{
     let t="Entries ngayon: <b>"+session.entriesUsed+"/"+session.entriesEarned+"</b> na nagamit";
@@ -816,9 +810,9 @@ $("tncLink").onclick=e=>{e.preventDefault();$("tnc").open=true;$("tnc").scrollIn
 let adminToken="";
 try{adminToken=sessionStorage.getItem("cg-admin-token")||""}catch(e){}
 let look=null,capState=null;
-// The player link must point at the GAME (/), not at this page. It used to be built from
-// location.href because the link maker and the game were the same document; now that they
-// are two files, that would have handed every player a link to /admin.html.
+// The player link must point at the GAME (/), not at this page. It was built from
+// location.href back when the link maker and the game were one document; now that they
+// are two files that would hand every player a link to /admin.html.
 function playerLink(){return look&&look.code?location.origin+"/#"+look.code:""}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function peso(n){return "₱"+Number(n||0).toLocaleString(undefined,{maximumFractionDigits:0})}
@@ -840,31 +834,12 @@ function renderLookup(){
   if(!l.found){tb.className="tierbox bad";tb.innerHTML="<b>Hindi nakita</b> ang account <code>"+esc(l.account)+"</code>. I-check ang spelling — username ito, hindi real name.";return}
   const ok=l.entriesEarned>0;
   tb.className="tierbox"+(ok?"":" bad");
-  // The ferris day is one entry: qualified by the deposit, unlocked by the locked cabin's
-  // turnover, used once it has paid. Same three numbers the link maker always showed.
-  const pk=l.pick;
-  tb.innerHTML=(ok?"<b>Qualified</b>":"<b>Wala pang deposit</b>")+" — "+esc(l.account)+(l.name&&l.name!==l.account?" ("+esc(l.name)+")":"")
-    +"<br>Deposits "+fmtTime(CONF.depFrom)+"–"+fmtTime(CONF.depTo)+" ngayon: <b>"+peso(l.depositTotal||0)+"</b> (kailangan "+peso(CONF.minDeposit)+")"
-    +"<br>Cabin: "+(pk?"<b>#"+pk.cabin+"</b> (tier "+pk.tier+", kailangan "+peso(l.required||0)+" turnover)":"<b>wala pang pili</b>")
-    +"<br>Status: "+(l.entriesUsed?"✅ nakalaro na":l.entriesPlayable?"🔓 pwede nang paikutin":pk?"🔒 naka-lock":"⏳ hindi pa pumipili");
+  tb.innerHTML=(ok?"<b>Qualified</b>":"<b>Wala pang entry</b>")+" — "+esc(l.account)+(l.name&&l.name!==l.account?" ("+esc(l.name)+")":"")+"<br>Deposits "+fmtTime(CONF.depFrom)+"–"+fmtTime(CONF.depTo)+" ngayon: <b>"+l.entriesEarned+" entries</b> · nagamit "+l.entriesUsed+" · <b>"+l.entriesPlayable+" pwede nang laruin</b>"+(l.entriesLocked?" · "+l.entriesLocked+" naka-lock 🔒":"");
   const w=l.wagering;
-  const cats=(CONF.wagerCats||["egame","casino"]).join(" + ");
-  const wtxt=!w?"Turnover: wala pang data."
-    :("Turnover ("+esc(cats)+") ngayon: <b>"+peso(w.validBet)+"</b>"
-      +(w.nextRequired!=null?" / kailangan <b>"+peso(w.nextRequired)+"</b> para sa Cabin "+(pk?pk.cabin:"?"):" — wala pang cabin na pinili")
-      +(w.syncedAt?" <small>(bets sync "+esc(syncHM(w.syncedAt))+", tuwing ~30 min)</small>":""));
-  const req=CONF.tierRequired||{};
-  const rows=Object.keys(req).sort().map(t=>{
-    const cabs=(CONF.cabTier||[]).map((x,i)=>x==t?i+1:0).filter(Boolean).join(", ");
-    return "<tr><td>Tier "+esc(t)+"</td><td>"+peso(req[t])+"</td><td>"+esc(cabs)+"</td><td>"+(pk&&String(pk.tier)===String(t)?"← pinili":"")+"</td></tr>";
-  }).join("");
+  const wtxt=!w?"Turnover: wala pang data.":("Turnover sa slots + casino ngayon: <b>"+peso(w.validBet)+"</b>"+(w.nextRequired!=null?" / kailangan <b>"+peso(w.nextRequired)+"</b> para sa susunod na ikot":" — lahat ng entry unlocked")+(w.syncedAt?" <small>(bets sync "+esc(syncHM(w.syncedAt))+", tuwing ~30 min)</small>":""));
+  const rows=l.entries.map(e=>"<tr><td>#"+e.no+"</td><td>"+esc(e.at)+" · "+peso(e.amount)+"</td><td>"+peso(e.required)+"</td><td>"+(e.played?"✅ nalaro":e.unlocked?"🔓 pwede na":"🔒 naka-lock")+"</td></tr>").join("");
   const skipped=l.deposits.filter(d=>!d.qualifies);
-  ob.innerHTML="<strong>Detalye</strong>"
-    +"<table style='width:100%;border-collapse:collapse;font-size:12px'><thead><tr><th style='text-align:left'>Tier</th><th style='text-align:left'>Turnover</th><th style='text-align:left'>Cabins</th><th></th></tr></thead><tbody>"+rows+"</tbody></table>"
-    +(skipped.length?"<p class='small'>Hindi kasama (mas mababa sa "+peso(CONF.minDeposit)+"): "+skipped.map(d=>d.at+" · "+peso(d.amount)).join(", ")+"</p>":"")
-    +"<p>"+wtxt+"</p>"
-    +"<p>Napanalunan ngayon: "+(l.win?peso(l.win.amount)+" <small>(bonus credit · "+peso(l.win.wagerNeed)+" turnover bago ma-withdraw)</small>":"wala pa")+"</p>"
-    +"<p class='small'>Server time "+esc(l.serverTime)+" · hindi ipinapakita ang reward range: nakatago ito sa player.</p>";
+  ob.innerHTML="<strong>Detalye</strong>"+(rows?"<table style='width:100%;border-collapse:collapse;font-size:12px'><thead><tr><th style='text-align:left'>Entry</th><th style='text-align:left'>Deposit</th><th style='text-align:left'>3× cum.</th><th style='text-align:left'>Status</th></tr></thead><tbody>"+rows+"</tbody></table>":"<p>Walang qualified na deposit sa window ngayon. (Deposits sync tuwing ~5 min.)</p>")+(skipped.length?"<p class='small'>Hindi kasama (mas mababa sa "+peso(CONF.minDeposit)+"): "+skipped.map(d=>d.at+" · "+peso(d.amount)).join(", ")+"</p>":"")+"<p>"+wtxt+"</p><p>Napanalunan ngayon: "+(l.plays.length?l.plays.map(p=>peso(p.prize)).join(", "):"wala pa")+"</p><p class='small'>Server time "+esc(l.serverTime)+" · prize pool: "+PRIZES.map((p,i)=>peso(p)+" ("+WEIGHTS[i]+"%)").join(", ")+"</p>";
   $("makeLink").disabled=!!l.capped;
   $("plink").textContent=playerLink();
 }
@@ -872,10 +847,9 @@ function flash(btn,txt){const o=btn.textContent;btn.textContent=txt;setTimeout((
 async function copyText(t,btn){try{await navigator.clipboard.writeText(t);flash(btn,"Copied")}catch(e){const r=document.createRange();r.selectNodeContents($("plink"));const s=getSelection();s.removeAllRanges();s.addRange(r);flash(btn,"Selected")}}
 if(mode==="admin"){
   $("admin").hidden=false;
-  // The preview below this panel is the OLD Palosebo booth — this file still carries that
-  // game's code. Showing it under "Preview ng player view" would tell the admin the player
-  // sees a climbing race when the player actually gets the ferris wheel, so it is hidden
-  // and the real page is linked instead.
+  // The preview below this panel is the OLD Palosebo booth — this file still carries
+  // that game's code. Showing it would tell the admin the player sees a climbing race
+  // when the player now gets the ferris wheel.
   $("previewLabel").hidden=true;
   const _booth=$("booth"); if(_booth)_booth.hidden=true;
   const _mech=$("mech"); if(_mech)_mech.hidden=true;
@@ -908,15 +882,14 @@ if(mode==="admin"){
 
 // ---------- boot ----------
 (async function boot(){
-  try{const r=await fetch("/api/config");if(r.ok){CONF=await r.json()}}catch(e){}
+  try{const r=await fetch("/api/config");if(r.ok){CONF=await r.json();PRIZES=CONF.prizes;WEIGHTS=CONF.weights}}catch(e){}
   if(mode==="player"){
     try{const r=await fetch("/api/session/"+encodeURIComponent(cfg.code));session=await r.json()}catch(e){session={exists:false}}
     if(session&&session.exists){cfg.name=session.name||""}
   }
-  // Skipped in admin mode: buildView() constructs the whole Palosebo player booth —
-  // SVG climbers driven by SMIL, a canvas scene and confetti — which this page hides
-  // anyway now that index.html is the game. Building it cost real main-thread time and
-  // froze the renderer after a lookup; not building it is both faster and more honest.
+  // Skipped in admin mode: buildView() constructs the whole Palosebo booth — SVG
+  // climbers driven by SMIL, a canvas scene and confetti — which this page hides now
+  // that index.html is the game. Building a scene nobody sees is pure dead work.
   if (mode !== "admin") buildView();
 })();
 </script>

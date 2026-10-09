@@ -167,7 +167,13 @@ class _Cur:
             return
 
         if "INSERT INTO cg_plays" in s:
-            code, uid, acct, date, entry_no, step, prize, tier, ts = a
+            # The live statement has 8 placeholders (no `tier`); accept a 9th so this
+            # fake keeps working if a column is ever added back.
+            if len(a) == 8:
+                code, uid, acct, date, entry_no, step, prize, ts = a
+                tier = None
+            else:
+                code, uid, acct, date, entry_no, step, prize, tier, ts = a
             # stands in for UNIQUE (user_id, biz_date, entry_no)
             if any(p["user_id"] == uid and p["biz_date"] == date and p["entry_no"] == entry_no
                    for p in STATE["plays"]):

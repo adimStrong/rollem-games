@@ -70,12 +70,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;fl
 @keyframes wiggle{0%,100%{transform:rotate(0) scale(1)}20%{transform:rotate(-7deg) scale(1.06)}40%{transform:rotate(6deg) scale(1.08)}60%{transform:rotate(-4deg) scale(1.05)}80%{transform:rotate(3deg) scale(1.03)}}
 @keyframes shake{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
 @keyframes jackpot{0%,100%{transform:scale(1.15) rotate(0)}25%{transform:scale(1.3) rotate(-6deg)}75%{transform:scale(1.3) rotate(6deg)}}
-/* transition:none is load-bearing, not tidying: .gondola .cab carries
-   transition:transform .2s, and `wiggle` animates transform, so every animation
-   tick also started a transition on 8 cabins whose parent transform the canvas
-   loop rewrites each frame. That pegged the main thread hard enough to stop the
-   5s poll and freeze the page. Keeping the wiggle, dropping the transition. */
-.armed .gondola .cab{transition:none;animation:wiggle 1.3s ease-in-out infinite;animation-delay:var(--d);box-shadow:inset 0 -6px 0 rgba(0,0,0,.28),inset 0 4px 0 rgba(255,255,255,.4),0 0 22px #ffcf5a,0 0 40px color-mix(in srgb,var(--c) 70%,transparent)}
+.armed .gondola .cab{animation:wiggle 1.3s ease-in-out infinite;animation-delay:var(--d);box-shadow:inset 0 -6px 0 rgba(0,0,0,.28),inset 0 4px 0 rgba(255,255,255,.4),0 0 22px #ffcf5a,0 0 40px color-mix(in srgb,var(--c) 70%,transparent)}
 .armed .gondola:hover .cab{animation:none;transform:scale(1.18)}
 .spinning .gondola .cab{animation:shake .35s ease-in-out infinite;animation-delay:var(--d)}
 .gondola.picked .cab{animation:jackpot .9s ease-in-out infinite;box-shadow:0 0 0 3px #fff,0 0 26px #ffcf5a,0 0 50px #ffcf5a}
@@ -202,21 +197,25 @@ h2{font:800 13px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
 <body>
 
 <!--
-  Gopyesta · Lucky Ferris Wheel — the player page for this service.
+  Gopyesta · Lucky Ferris Wheel — the player page.
 
-  Built from the design file in Downloads/lucky-ferris-wheel. The carnival stage, the 3D
-  canvas wheel and the styling are that file's, unchanged. What was replaced is the data
-  layer: the design file kept accounts, deposits, bets, the daily release, the reward roll
-  and an admin PIN in localStorage, all editable from the console. Those now live in app.py
-  behind this service's existing per-player link codes.
+  The MECHANICS are unchanged from Palarong Pyesta, the game this replaces: one
+  qualifying deposit = one entry, each entry unlocks at 3x the cumulative deposits in
+  slots+casino turnover, the server draws the prize, the daily budget and the wins
+  ledger are the same. Only the thing on screen changed.
 
-  The link maker is at /admin.html#admin; opening /#admin here redirects there, so the
+  The carnival stage and the 3D canvas wheel come from the design file in
+  Downloads/lucky-ferris-wheel; its localStorage accounts, its cabin/tier rules and its
+  in-browser prize roll were all dropped, because this service already had a server that
+  decides those things.
+
+  The link maker is at /admin.html#admin; opening /#admin here redirects there so the
   bookmark the team already has keeps working.
 -->
 
 <div class="wrap">
   <header>
-    <div><img class="logo" src="/ferris-logo.png" alt="GoPyesta"><div class="brand" style="font-size:22px;margin-top:4px">Lucky Ferris Wheel<small>Pick a cabin · Spin · Win</small></div></div>
+    <div><img class="logo" src="/ferris-logo.png" alt="GoPyesta"><div class="brand" style="font-size:22px;margin-top:4px">Lucky Ferris Wheel<small>Deposit · Unlock · Ikot</small></div></div>
     <div class="who" id="who"></div>
   </header>
 
@@ -229,7 +228,7 @@ h2{font:800 13px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
       <div class="wheelbox" id="wheelbox">
         <canvas id="wheelCv" aria-hidden="true"></canvas>
         <div class="count" id="count" aria-live="assertive"></div>
-        <div class="startrow"><div class="startpick" id="startPick"></div><button class="btn start" id="startBtn" hidden>START</button></div>
+        <div class="startrow"><div class="startpick" id="startPick"></div><button class="btn start" id="startBtn" hidden>IKOT</button></div>
       </div>
       <div class="hint" id="hint"></div>
       <div class="toast" id="toast"></div>
@@ -237,87 +236,73 @@ h2{font:800 13px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
 
     <aside class="stack">
       <div class="card">
-        <h2>Ang cabin mo</h2>
+        <h2>Mga ikot mo</h2>
         <div id="goalInfo"></div>
       </div>
 
       <div class="card">
         <h2>Laro ngayong araw · <span id="dateLbl"></span></h2>
         <div class="today" style="grid-template-columns:repeat(2,minmax(0,1fr))">
-          <div class="stat"><div class="k">Deposit ngayon</div><div class="v" id="vDep">₱0</div></div>
+          <div class="stat"><div class="k">Deposit sa window</div><div class="v" id="vDep">₱0</div></div>
           <div class="stat"><div class="k">Turnover ngayon</div><div class="v" id="vBet">₱0</div></div>
         </div>
-        <!-- "Turnover", not "slot bets": bets_daily only stores game_type='ALL',
-             so the server cannot tell slots from any other game. Saying slots
-             would be a rule nothing on this side can enforce. -->
-        <p class="note">Galing sa platform ang mga numero at nag-a-update tuwing ilang minuto.</p>
+        <p class="note" id="depNote"></p>
       </div>
 
       <div class="card">
-        <h2>Ngayong linggo · Lunes–Linggo</h2>
+        <h2>Mga premyo</h2>
         <div class="week" id="week"></div>
         <div class="next" id="weekTxt"></div>
       </div>
 
       <div class="card">
-        <h2>Turnover ng bonus</h2>
-        <div id="wager"></div>
-        <div class="bar"><i id="wbar"></i></div>
-        <p class="note" id="wNote"></p>
-      </div>
-
-      <div class="card">
-        <h2>Mga nakaraang bonus</h2>
+        <h2>Napanalunan ngayong araw</h2>
         <ul class="hist" id="hist"></ul>
       </div>
     </aside>
   </div>
 </div>
 
-<!-- Shown when the page is opened without a valid bot link, and when the wheel
-     is switched off. Replaces the demo's signup form: there is no account to
-     create here, the deposit link IS the account. -->
+<!-- Shown when the page is opened without a valid player link, when the link has
+     expired, or when the game is closed for the day. There is no account to create
+     here: the link the team issues IS the account. -->
 <div class="auth" id="gate" hidden>
   <form id="gateCard" novalidate onsubmit="return false">
     <img src="/ferris-logo.png" alt="GoPyesta" style="width:220px;align-self:center;margin-top:-6px">
-    <h3 id="gateTitle">Buksan ang spin link</h3>
+    <h3 id="gateTitle">Buksan ang link mo</h3>
     <p style="margin:0;color:var(--mute);font-size:14px" id="gateMsg">Galing sa GoPyesta team ang link na ito. Buksan iyon para makalaro.</p>
   </form>
 </div>
 
 <script>
-/* ---------- link, constants, helpers ----------
-   Identity is the link code in the hash — the convention this service already used:
-     #admin           -> the link maker (now its own page)
+/* ---------- link and constants ----------
+   Identity is the link code in the hash, the convention this service already used:
+     #admin           -> the link maker (its own page now)
      #<acct>-<hex>    -> one player's session for one day
-   Nothing about the player is kept in this browser. The design file this page came from
-   held accounts, deposits, bets, the daily release, the reward roll and an admin PIN in
-   localStorage, all of which were editable from the console; every one of those now lives
-   on the server. */
+   Nothing about the player is kept in this browser, and no prize is decided here —
+   /api/play draws it server-side, exactly as it did for the game this replaces. */
 const RAW = decodeURIComponent(location.hash.slice(1)).toLowerCase();
 if (RAW === "admin") location.replace("/admin.html#admin");
 const CODE = /^[a-z0-9]{1,32}-[a-z0-9]{2,8}$/.test(RAW) ? RAW : "";
 
-const N = 8;
-let MIN_DEP = 100, TURNOVER = 5;
-let CAB_TIER = [0,1,2,3,0,1,2,3];          /* cabin index -> index into TIERS */
-/* Requirements only — the reward ranges stay on the server. /api/config sends
-   tierRequired and never the floors or ceilings, because a range in this file is a
-   range in DevTools. */
-let TIERS = [{n:1,bet:300},{n:2,bet:600},{n:3,bet:8000},{n:4,bet:50000}];
-let CATS = ["egame","casino"];
+const N = 8;   /* cabins on the wheel — spectacle only; the prize comes from the server */
+/* Mechanics come from /api/config; these are only the fallbacks if that call fails. */
+let CONF = {minDeposit:100, prizes:[37,27,17], weights:[5,85,10], dailyCap:10000,
+            wagerMult:3, wagerCats:["egame","casino"],
+            depFrom:"13:00", depTo:"21:00", playUntil:"23:59"};
 
 const peso = v => "₱" + Math.round(Number(v) || 0).toLocaleString("en-PH");
 const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const short = k => new Date(k + "T00:00:00").toLocaleDateString("en-PH", {weekday:"short", month:"short", day:"numeric"});
-const dayName = k => new Date(k + "T00:00:00").toLocaleDateString("en-PH", {weekday:"short"});
-const addDays = (k, n) => { const d = new Date(k + "T00:00:00"); d.setDate(d.getDate() + n); return d.toLocaleDateString("en-CA"); };
-const weekStart = k => addDays(k, -((new Date(k + "T00:00:00").getDay() + 6) % 7));
+const fmtTime = h => { const [H,M] = String(h).split(":"); const n = +H;
+  return (n % 12 || 12) + (M && M !== "00" ? ":" + M : "") + (n < 12 ? " AM" : " PM"); };
+const syncHM = t => t ? String(t).slice(11, 16) : "";
+/* The categories that count are whatever the server is configured with, rendered rather
+   than hard-coded — this is the same 3x slots+casino gate that was already live. */
+const catLabel = () => (CONF.wagerCats || []).map(c => c === "egame" ? "slots" : c).join(" + ");
 
-let armed = false, sel = null;
-let S = null;          /* last /api/session/<code> payload */
-let busy = false;      /* a pick or spin request is in flight */
-let collected = false; /* today's win toast has been dismissed */
+let armed = false, sel = null;   /* `sel` is unused here; the canvas block expects it */
+let S = null;      /* last /api/session/<code> payload */
+let busy = false;  /* a spin is in flight */
 
 async function api(path, body) {
   try {
@@ -328,22 +313,6 @@ async function api(path, body) {
   } catch (e) { return {error: "network"}; }
 }
 
-function applyConfig(c) {
-  if (!c) return;
-  if (c.minDeposit) MIN_DEP = c.minDeposit;
-  if (c.wagerMult) TURNOVER = c.wagerMult;
-  if (Array.isArray(c.wagerCats) && c.wagerCats.length) CATS = c.wagerCats;
-  if (Array.isArray(c.cabTier) && c.cabTier.length === N) CAB_TIER = c.cabTier.map(t => t - 1);
-  if (c.tierRequired) {
-    TIERS = Object.keys(c.tierRequired).sort().map(t => ({n: +t, bet: c.tierRequired[t]}));
-  }
-}
-
-/* The categories that count are whatever the server is configured with, rendered rather
-   than hard-coded: this service has been live on slots + casino, and a page that said
-   "slots only" would be describing a rule the backend is not enforcing. */
-const catLabel = () => CATS.map(c => c === "egame" ? "slots" : c).join(" + ");
-
 /* ---------- wheel (3D canvas) ---------- */
 const box=document.getElementById("wheelbox"),cv=document.getElementById("wheelCv"),cx2=cv.getContext("2d");
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -351,7 +320,7 @@ const CAB_COLORS=["#ff5d73","#33c7b4","#ffc53d","#8f6bff","#ff8fb1","#4aa3ff","#
 function winHTML(i){return `<span class="q">?</span>`}
 let ang=0,speed=reduce?0:.2,boxes=[],prizes=[],phase="idle",pickedIdx=-1,spin=null;
 for(let i=0;i<N;i++){const b=document.createElement("button");b.className="gondola";b.setAttribute("aria-label","Box "+(i+1));
-  const T0=TIERS[CAB_TIER[i]];b.setAttribute("aria-label",`Cabin ${i+1}: mystery bonus`);b.style.setProperty("--c",CAB_COLORS[i]);b.style.setProperty("--d",(-i*.37).toFixed(2)+"s");b.innerHTML=`<span class="hook"></span><span class="cab"><span class="roof"></span><span class="win">${winHTML(i)}</span><span class="stripe"></span></span>`;b.onclick=()=>pick(i);box.appendChild(b);boxes.push(b)}
+  b.setAttribute("aria-label",`Cabin ${i+1}: mystery bonus`);b.style.setProperty("--c",CAB_COLORS[i]);b.style.setProperty("--d",(-i*.37).toFixed(2)+"s");b.innerHTML=`<span class="hook"></span><span class="cab"><span class="roof"></span><span class="win">${winHTML(i)}</span><span class="stripe"></span></span>`;b.onclick=()=>pick(i);box.appendChild(b);boxes.push(b)}
 function fit(){const r=devicePixelRatio||1;cv.width=box.clientWidth*r;cv.height=box.clientHeight*r;cx2.setTransform(r,0,0,r,0,0)}
 addEventListener("resize",fit);fit();
 let lastT=performance.now(),vel=0,prevAng=0,yawOff=0,pitchOff=0,tYaw=0,tPitch=0;
@@ -456,29 +425,10 @@ function showGate(title,msg){
 }
 function hideGate(){document.getElementById("gate").hidden=true}
 
-/* ---------- picking ----------
-   Selecting is local; locking is a server call. The server owns the lock because the
-   cabin decides what the bonus costs, and a pick that could move after the goal was met
-   would let a player clear the cheap cabin then switch to the rich one. */
-function pick(i){
-  if(busy)return;
-  if(!S||S.win)return;
-  if(S.pick)return;
-  sel=i;render();
-}
-
-async function lockPick(){
-  if(busy||sel==null||!CODE)return;
-  busy=true;
-  const r=await api("/api/ferris/pick/"+encodeURIComponent(CODE),{cabin:sel+1});
-  busy=false;
-  if(r&&r.ok){
-    if(r.lockedElsewhere)flash("Cabin "+r.pick.cabin+" ang naka-lock na ngayong araw.");
-    sel=null;await refresh();
-  }else{
-    flash((r&&r.msg)||"Hindi na-lock ang cabin. Subukan ulit.");
-  }
-}
+/* Cabins are decoration. The design file let the player choose one and tied a prize tier
+   to the choice; this game has no tiers, so a tap does nothing and the landing cabin is
+   picked at random purely so the wheel has somewhere to stop. */
+function pick(i){}
 
 function flash(msg){
   const c=document.getElementById("count");
@@ -488,31 +438,34 @@ function flash(msg){
 }
 
 /* ---------- the spin ----------
-   The server decides the amount before a single frame animates, then the wheel is told
-   where to stop. The design file did the opposite: it rolled in the browser and the
-   animation was the source of truth. */
-async function trySpin(){
+   One unlocked entry is consumed per spin. The server draws the prize before a frame
+   animates and the wheel is then told where to stop — the same money-authoritative
+   contract the climbing race used, with a different thing drawn on screen. */
+async function spinNow(){
   if(busy||phase!=="idle"||!CODE)return;
-  if(!S||!S.pick||S.win||!S.goalMet)return;
+  if(!S||S.entriesPlayable<=0)return;
   busy=true;
+  document.getElementById("startBtn").disabled=true;
   const r=await api("/api/play/"+encodeURIComponent(CODE),{});
   busy=false;
+  document.getElementById("startBtn").disabled=false;
   if(!r||!r.ok){
     if(r&&r.msg)document.getElementById("hint").textContent=r.msg;
+    refresh();
     return;
   }
-  if(r.replay){await refresh();return}
-  runWheel(r.cabin-1,r.prize,r.wagerNeed);
+  const landing=Math.floor(Math.random()*N);
+  runWheel(landing,r.prize,r.entryNo);
 }
 
-function runWheel(i,amt,need){
+function runWheel(i,amt,entryNo){
   phase="countdown";resetBoxes();boxes[i].classList.add("picked");
   const cnt=document.getElementById("count"),hint=document.getElementById("hint");
-  hint.innerHTML=`Goal reached! Umiikot na ang <b>Cabin ${i+1}</b>...`;
+  hint.innerHTML=`Umiikot na ang wheel para sa <b>ikot #${entryNo}</b>...`;
   let n=3;
   const tick=()=>{
     if(n>0){cnt.className="count";void cnt.offsetWidth;cnt.textContent=n;cnt.classList.add("on");n--;setTimeout(tick,1000);return}
-    cnt.className="count msg";cnt.textContent="SPIN!";
+    cnt.className="count msg";cnt.textContent="IKOT!";
     phase="spin";
     spin={t0:performance.now(),dur:5000,a0:ang,total:Math.PI*2*(4+Math.random()),end:()=>{
       cnt.className="count";cnt.textContent="";
@@ -521,11 +474,11 @@ function runWheel(i,amt,need){
       {const r=box.getBoundingClientRect(),q=boxes[i].getBoundingClientRect();burst(q.left-r.left+q.width/2,q.top-r.top+q.height/2)}
       const t=document.getElementById("toast");
       t.innerHTML=`<div class="won">PANALO KA</div><div class="amt">${peso(amt)}</div>`
-        +`<div style="color:var(--mute);font-size:13px;margin-bottom:10px">Bonus credit · tumaya ng ${peso(need)} para ma-clear</div>`
+        +`<div style="color:var(--mute);font-size:13px;margin-bottom:10px">Ipapadala ng team sa GCash mo</div>`
         +`<button class="btn" id="tOk">Collect</button>`;
       t.classList.add("on");
       document.getElementById("tOk").onclick=()=>{
-        t.classList.remove("on");collected=true;phase="idle";refresh();
+        t.classList.remove("on");phase="idle";resetBoxes();refresh();
       };
     }};
   };
@@ -538,117 +491,88 @@ const chk=(ok,label,have,need)=>`<div class="goal"><div class="kv"><span><b clas
 function render(){
   if(!S)return;
   const toastOn=document.getElementById("toast").classList.contains("on");
-  const req=S.required||0, p=S.pick, win=S.win, today=S.date;
-  const turnover=S.turnover==null?0:S.turnover;
-  const turnoverUnknown=S.turnover==null;
+  const w=S.wagering||null;
+  const turnover=w?w.validBet:null;
+  const nextReq=w?w.nextRequired:null;
+  const playable=S.entriesPlayable||0, earned=S.entriesEarned||0;
+  const used=S.entriesUsed||0, locked=S.entriesLocked||0;
 
   document.getElementById("who").innerHTML=`Hi, <b>${esc(S.name||S.account)}</b> <span class="gid">GoPyesta ID: ${esc(S.account)}</span>`;
   document.getElementById("clock").textContent=esc(S.serverTime||"");
 
   const live=document.getElementById("live"),lt=document.getElementById("liveTxt"),hint=document.getElementById("hint");
-  armed=phase==="idle"&&!win&&!S.goalMet;
-  stageEl.classList.toggle("armed",armed&&!p);
-  live.classList.toggle("on",phase!=="idle"||!!win);
-  if(phase!=="idle")lt.textContent="SPINNING";
-  else if(win)lt.textContent="COLLECTED";
-  else if(p)lt.textContent="GOAL IN PROGRESS";
-  else lt.textContent="PUMILI NG CABIN";
-
-  boxes.forEach((bx,i)=>bx.classList.toggle("mine",phase==="idle"&&!win&&(p?p.cabin-1===i:sel===i)));
+  /* `armed` makes the cabins glow — reserved for "you can spin right now". */
+  armed=phase==="idle"&&playable>0&&S.playOpen&&!S.capped;
+  stageEl.classList.toggle("armed",armed);
+  live.classList.toggle("on",phase!=="idle"||playable>0);
+  if(phase!=="idle")lt.textContent="UMIIKOT";
+  else if(!S.playOpen)lt.textContent="SARADO";
+  else if(playable>0)lt.textContent=`${playable} IKOT NA PWEDE`;
+  else if(locked>0)lt.textContent="NAKA-LOCK";
+  else lt.textContent="WALA PANG IKOT";
 
   const sb=document.getElementById("startBtn");
-  const showStart=phase==="idle"&&!win&&sel!=null&&!p&&!toastOn;
-  sb.hidden=!showStart;
+  sb.hidden=!(phase==="idle"&&playable>0&&S.playOpen&&!S.capped&&!toastOn);
   document.getElementById("startPick").textContent=
-    p?`Cabin ${p.cabin} naka-lock`:(sel!=null?`Cabin ${sel+1} napili`:"");
+    playable>0?`${playable} ikot na pwede`:"";
 
   if(phase==="idle"&&!toastOn){
-    if(win)hint.innerHTML=`Nakuha mo na ang <b>${peso(win.amount)}</b> ngayong araw. Bukas ulit.`;
-    else if(!S.playOpen)hint.innerHTML=`Sarado na ang laro ngayong araw.`;
-    else if(S.capped&&!S.goalMet)hint.innerHTML=`Naabot na ang budget ngayong araw. Bukas ulit bubukas ang wheel.`;
-    else if(p){
-      const miss=[];
-      if(!S.depositOk)miss.push(`mag-deposit ng ${peso(MIN_DEP)} pataas`);
-      if(turnoverUnknown)miss.push(`hintayin ang turnover data`);
-      else if(!S.turnoverOk)miss.push(`tumaya pa ng ${peso(req-turnover)}`);
-      hint.innerHTML=miss.length
-        ? `<b>Cabin ${p.cabin}</b> ang naka-lock. Para umikot: ${miss.join(" at ")}. Kusang iikot ito pag tapos na.`
-        : `<b>Cabin ${p.cabin}</b> handa na.`;
-    }
-    else if(sel!=null)hint.innerHTML=`<b>Cabin ${sel+1}</b> ang napili. Pumindot ng ibang cabin para palitan, o <b>START</b> para i-lock.`;
-    else hint.innerHTML=`<b>Pumili ng cabin</b>. May nakatagong bonus ang bawat isa.`;
+    if(!S.playOpen)hint.innerHTML=`Sarado na ang laro ngayong araw. Bukas ulit.`;
+    else if(S.capped)hint.innerHTML=`Naabot na ang budget ngayong araw. Subukan ulit bukas.`;
+    else if(playable>0)hint.innerHTML=`May <b>${playable}</b> ikot ka. Pindutin ang <b>IKOT</b>.`;
+    else if(locked>0&&nextReq!=null)hint.innerHTML=`Naka-lock pa ang susunod mong ikot: kailangan ng <b>${peso(nextReq)}</b> turnover sa ${esc(catLabel())}${turnover!=null?` (meron ka pang ${peso(turnover)})`:""}.`;
+    else if(earned>0&&used>=earned)hint.innerHTML=`Ubos na ang ikot mo ngayong araw. Mag-deposit ulit bukas.`;
+    else hint.innerHTML=`Isang deposit na <b>${peso(CONF.minDeposit)}</b> pataas (${fmtTime(CONF.depFrom)}–${fmtTime(CONF.depTo)}) = <b>1 ikot</b>.`;
   }
 
-  /* goal card */
+  /* entries card */
   const gi=document.getElementById("goalInfo");
-  if(win)gi.innerHTML=`<div class="kv"><span>Bonus ngayong araw</span><span class="ok">${peso(win.amount)}</span></div>`
-    +`<div class="kv"><span>Turnover bago ma-withdraw</span><span>${peso(win.wagerNeed)}</span></div>`;
-  else if(p)gi.innerHTML=`<div class="pickhead" style="--c:${CAB_COLORS[p.cabin-1]}"><span>Cabin ${p.cabin}</span><b>? ? ?</b></div>`
-    +chk(S.depositOk,"Deposit ngayon",S.depositTotal||0,MIN_DEP)
-    +chk(!!S.turnoverOk,"Turnover ngayon",turnover,req)
-    +`<p class="note">Mag-deposit ng ₱${MIN_DEP} pataas at abutin ang turnover. Bilang ang ${esc(catLabel())}.${turnoverUnknown?" <b>Hindi pa mabasa ang turnover mo.</b>":""}</p>`;
-  else if(sel!=null){
-    const need=(TIERS[CAB_TIER[sel]]||{}).bet||0;
-    gi.innerHTML=`<div class="pickhead" style="--c:${CAB_COLORS[sel]}"><span>Cabin ${sel+1} · hindi pa simula</span><b>? ? ?</b></div>`
-      +`<div class="kv"><span>Deposit ngayon</span><span>${peso(MIN_DEP)}+</span></div>`
-      +`<div class="kv"><span>Turnover ngayon</span><span>${peso(need)}</span></div>`
-      +`<p class="note">Pindutin ang START sa wheel para i-lock ang cabin na ito.</p>`;
+  if(earned===0){
+    gi.innerHTML=`<p class="note" style="margin:0">Wala ka pang ikot ngayon. Isang deposit na <b>${peso(CONF.minDeposit)}</b> pataas mula <b>${fmtTime(CONF.depFrom)}–${fmtTime(CONF.depTo)}</b> = 1 ikot. I-refresh pagkatapos mag-deposit (mga 5 minuto).</p>`;
+  }else{
+    gi.innerHTML=`<div class="kv"><span>Ikot na kinita</span><span><b>${earned}</b></span></div>`
+      +`<div class="kv"><span>Nagamit</span><span>${used}</span></div>`
+      +`<div class="kv"><span>Pwede nang paikutin</span><span class="${playable?"ok":""}">${playable}</span></div>`
+      +(locked?`<div class="kv"><span>Naka-lock 🔒</span><span class="warn">${locked}</span></div>`:"")
+      +(nextReq!=null&&locked
+         ?chk(false,`Turnover para sa susunod`,turnover||0,nextReq)
+         :"")
+      +`<p class="note">Bawat ikot ay bubukas kapag umabot ang ${esc(catLabel())} turnover mo sa <b>${CONF.wagerMult}×</b> ng deposits hanggang doon.</p>`;
   }
-  else gi.innerHTML=`<p class="note" style="margin:0">Wala pang cabin na napili. May nakatagong bonus ang bawat cabin. Pindutin ang isa para makita ang kailangan.</p>`;
 
   /* today */
-  document.getElementById("dateLbl").textContent=short(today);
-  document.getElementById("vDep").textContent=peso(S.depositTotal||0);
-  document.getElementById("vBet").textContent=turnoverUnknown?"—":peso(turnover);
+  document.getElementById("dateLbl").textContent=esc((S.serverTime||"").slice(0,10));
+  document.getElementById("vDep").textContent=peso(S.depositTotal!=null?S.depositTotal:0);
+  document.getElementById("vBet").textContent=turnover==null?"—":peso(turnover);
+  document.getElementById("depNote").innerHTML=
+    `Bilang ang deposits mula ${fmtTime(CONF.depFrom)} hanggang ${fmtTime(CONF.depTo)}. Turnover: ${esc(catLabel())}`
+    +(w&&w.syncedAt?` <small>(bets sync ${esc(syncHM(w.syncedAt))}, tuwing ~30 min)</small>`:"")
+    +(turnover==null?` <b>Hindi pa mabasa ang turnover mo.</b>`:"");
 
-  /* week strip, from the server's own history */
-  const byDay={};(S.history||[]).forEach(h=>byDay[h.date]=h);
-  const ws=weekStart(today);let wk="",total=0,count=0;
-  for(let i=0;i<7;i++){
-    const R=addDays(ws,i),h=byDay[R];let cls="",val="—";
-    if(h&&h.state==="paid"){cls="paid";val=peso(h.amount);total+=h.amount;count++}
-    else if(h&&h.state==="missed"){cls="forfeit";val="Lost"}
-    else if(h&&h.state==="open"){cls="pending";val="●"}
-    wk+=`<div class="${cls} ${R===today?"today":""}" title="${short(R)}">${dayName(R)}<b>${val}</b></div>`;
-  }
-  document.getElementById("week").innerHTML=wk;
-  document.getElementById("weekTxt").textContent=`${count} bonus${count===1?"":"es"} ngayong linggo · ${peso(total)}`;
+  /* prize strip — the real table from the server, no odds */
+  const pz=CONF.prizes||[];
+  document.getElementById("week").innerHTML=pz.map(v=>
+    `<div class="${v===Math.max(...pz)?"paid":""}">Premyo<b>${peso(v)}</b></div>`).join("");
+  document.getElementById("weekTxt").textContent=
+    `Natitira sa budget ngayong araw: ${peso(S.capLeft||0)}`;
 
-  /* wagering — a progress readout, not a settlement. The bonus lives on the platform;
-     this page cannot release anybody's money and does not imply it can. */
-  const bonus=win?win.amount:0, need=win?win.wagerNeed:0;
-  const pct=need?Math.min(100,turnover/need*100):0;
-  document.getElementById("wager").innerHTML=
-     `<div class="kv"><span>Bonus na napanalunan</span><span class="warn">${peso(bonus)}</span></div>`
-    +`<div class="kv"><span>Turnover ngayon</span><span>${turnoverUnknown?"—":peso(turnover)} / ${peso(need)}</span></div>`;
-  document.getElementById("wbar").style.width=pct+"%";
-  document.getElementById("wNote").textContent=bonus
-    ? `Bawat ₱1 ng bonus ay kailangan ng ₱${TURNOVER} turnover bago ma-withdraw. Sa GoPyesta app ang balance at withdrawal.`
-    : "Wala pang bonus na naghihintay ng turnover.";
-
-  /* history */
+  /* today's wins */
   const h=document.getElementById("hist");
-  const hs=(S.history||[]);
-  h.innerHTML=hs.length?hs.map(x=>{
-    const bad=x.state==="missed";
-    const label=bad?`Cabin ${x.cabin} · hindi nakuha`:`Cabin ${x.cabin}`;
-    return `<li><span>${short(x.date)} · ${esc(label)}</span><span${bad?' style="color:var(--coral)"':""}>${bad?"—":peso(x.amount)}</span></li>`;
-  }).join(""):`<li class="empty">Wala pang bonus. Pumili ng cabin para magsimula.</li>`;
+  const plays=S.plays||[];
+  h.innerHTML=plays.length?plays.map(p=>
+    `<li><span>Ikot #${p.entry_no}</span><span>${peso(p.prize)}</span></li>`).join("")
+    :`<li class="empty">Wala pang panalo ngayong araw.</li>`;
 }
 
 /* ---------- poll ----------
-   One request per tick, every 5s rather than the design file's 1s: this reads the same
-   Postgres the link maker runs on, and the bets sync upstream only moves every ~30 min,
-   so a faster poll would buy nothing and cost the database. */
+   Every 5s. Deposits sync upstream every ~5 min and bets every ~30 min, so a faster
+   poll would buy nothing and cost the same database the link maker runs on. */
 async function refresh(){
   if(!CODE)return;
   const s=await api("/api/session/"+encodeURIComponent(CODE));
   if(s&&s.exists&&!s.expired){
-    applyConfig(s.config);
-    hideGate();S=s;
-    if(!S.win)collected=false;
-    render();
-    if(S.goalMet&&!S.win&&!collected&&S.playOpen)trySpin();
+    if(s.config)CONF=s.config;
+    hideGate();S=s;render();
     return;
   }
   if(s&&s.exists&&s.expired){
@@ -656,19 +580,16 @@ async function refresh(){
   }else if(s&&s.error==="network"){
     /* leave the last good state on screen; a dropped poll is not a logout */
   }else{
-    showGate("Hindi valid ang link","Buksan ang spin link na binigay ng GoPyesta team. Isang link bawat player, bawat araw.");
+    showGate("Hindi valid ang link","Buksan ang link na binigay ng GoPyesta team. Isang link bawat player, bawat araw.");
   }
 }
 
-document.getElementById("startBtn").onclick=()=>{
-  if(phase!=="idle")return;
-  if(sel!=null&&(!S||!S.pick))lockPick();
-};
+document.getElementById("startBtn").onclick=spinNow;
 
 (async function boot(){
-  try{const r=await fetch("/api/config");if(r.ok)applyConfig(await r.json())}catch(e){}
+  try{const r=await fetch("/api/config");if(r.ok)CONF=await r.json()}catch(e){}
   if(!CODE){
-    showGate("Buksan ang spin link","Galing sa GoPyesta team ang link na ito. Buksan iyon para makalaro.");
+    showGate("Buksan ang link mo","Galing sa GoPyesta team ang link na ito. Buksan iyon para makalaro.");
     return;
   }
   refresh();
