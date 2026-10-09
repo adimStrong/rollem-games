@@ -5,7 +5,7 @@ service deployed from its own branch in this repo.
 
 | Branch | Laro | Brand | Deploy kind |
 | --- | --- | --- | --- |
-| `gopyesta` | Basag Palayok | Gopyesta | static |
+| `gopyesta` | Lucky Ferris Wheel | Gopyesta | Flask + Postgres (platform-verified deposits + turnover) |
 | `pots` | Pearl Drop | POTS | static |
 | `rollem` | ROLL IT (3D dice) | Roll'em | Flask + Postgres (live admin↔player sync) |
 | `winforlife` | Tree of Life | Win For Life | static |
@@ -19,11 +19,19 @@ no dedicated brand).
 
 ## Mechanic (all 8 games, same rules)
 
-- Minimum qualifying deposit: **₱200**, verified by an agent off-platform as before.
+- Minimum qualifying deposit: **₱200**. On the five STATIC brands an agent verifies it
+  off-platform and types the amount. On **`gopyesta`, `rollem` and `tamasa` it is read
+  from the platform database** — the agent only types a username, and on `gopyesta` an
+  entry stays locked until real slots+casino turnover reaches 3x the deposits behind it.
 - Prize pool is flat: **₱10 (4%), ₱27 (95%), ₱57 (1%)**. Marketing headline: "prizes up to ₱777"
   (a cap/tagline, not a literal 4th outcome).
 - Admin flow: open `#admin`, enter the **player's name**, the page generates a unique link for
   that player. One play per link — a player can't reset and re-roll after seeing their result.
+
+`gopyesta` keeps its source in `gopyesta-palarong-pyesta/` (folder name unchanged so the
+Railway root directory keeps resolving). The branch is flattened to the repo root, as with
+every brand; changes have to be made in BOTH places — `main`'s folder is the record, the
+branch is what deploys.
 
 ## Links inside each game
 

@@ -40,7 +40,7 @@ st, s = call("/api/session/nope-0000"); check("unknown session", st == 200 and n
 left = 2 - used_before; prizes = []
 for i in range(left):
     st, p = call(f"/api/play/{code}", "POST", {})
-    check(f"juan play #{used_before+i+1}", st == 200 and p["prize"] in (17, 27, 37) and p["entriesPlayable"] == left - i - 1, p)
+    check(f"juan play #{used_before+i+1}", st == 200 and p["prize"] in (10, 27, 57) and p["entriesPlayable"] == left - i - 1, p)
     prizes.append(p.get("prize"))
 st, p = call(f"/api/play/{code}", "POST", {}); check("3rd play refused no_entries", st == 409 and p["error"] == "no_entries", p)
 st, p = call(f"/api/play/{j3['code']}", "POST", {}); check("fresh link shares the same entries (refused)", st == 409 and p["error"] == "no_entries", p)
@@ -69,6 +69,6 @@ st, p = call(f"/api/play/{pcode}", "POST", {}); check("pedro plays once budget i
 st, c3 = call("/api/cap", tok=tok); check("cap default restored", c3["dailyCap"] == 10000 and c3["capUsed"] == used + p["prize"], c3)
 time.sleep(1.5)
 posts = [json.loads(l) for l in open(os.path.join(os.path.dirname(__file__), "ledger_posts.jsonl"), encoding="utf-8") if l.strip()]
-check("ledger got Juan's 2 wins with account name", len([x for x in posts if x["name"] == "Juan123"]) == 2 and all(x["brand"] == "gopyesta" and x["game"] == "Palarong Pyesta" and x["amount"] in (17, 27, 37) for x in posts), posts)
+check("ledger got Juan's 2 wins with account name", len([x for x in posts if x["name"] == "Juan123"]) == 2 and all(x["brand"] == "gopyesta" and x["game"] == "Lucky Ferris Wheel" and x["amount"] in (10, 27, 57) for x in posts), posts)
 check("ledger got maria's 2 + pedro's 1", len([x for x in posts if x["name"] == "maria_x"]) == 2 and len([x for x in posts if x["name"] == "pedro"]) == 1, posts)
 print("\nFAILS:", fails or "none")
