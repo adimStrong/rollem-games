@@ -192,6 +192,23 @@ h2{font:800 13px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
 .txlog td{padding:6px 4px;border-top:1px solid var(--line);font-family:var(--mono)}
 .gid{font:600 12px var(--mono);color:var(--bulb);background:rgba(255,207,90,.12);border:1px solid rgba(255,207,90,.35);padding:3px 8px;border-radius:999px}
 .note{font-size:12.5px;color:var(--mute);margin:10px 0 0;line-height:1.5}
+
+/* T&C gate — carried over from the game this replaces. The original blocked play until
+   the player ticked the box, and dropping that on a reskin would quietly remove a
+   compliance step, so it is restored here rather than left to the admin page. */
+.agree{display:flex;gap:9px;align-items:flex-start;margin:12px 2px 0;font-size:13.5px;color:var(--mute)}
+.agree input{margin-top:3px;width:17px;height:17px;accent-color:var(--bulb);flex:none}
+.agree .linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--bulb);text-decoration:underline;cursor:pointer}
+.agree.nudge{animation:shake .45s ease-in-out 2;color:var(--coral)}
+.tnc{margin-top:26px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 18px}
+.tnc summary{cursor:pointer;font-weight:800;color:var(--ink);list-style:none}
+.tnc summary::-webkit-details-marker{display:none}
+.tnc summary::before{content:"▸ ";color:var(--bulb)}
+.tnc[open] summary::before{content:"▾ ";color:var(--bulb)}
+.tnc h3{margin:14px 0 6px;font-size:15px;color:var(--ink)}
+.tnc ol{margin:0;padding-left:18px;color:var(--mute);font-size:13px;line-height:1.65}
+.tnc li{margin-bottom:7px}
+.tnc .small{font-size:12px;color:var(--mute);margin-top:10px}
 </style>
 </head>
 <body>
@@ -231,6 +248,7 @@ h2{font:800 13px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
         <div class="startrow"><div class="startpick" id="startPick"></div><button class="btn start" id="startBtn" hidden>IKOT</button></div>
       </div>
       <div class="hint" id="hint"></div>
+      <label class="agree" id="agreeLbl"><input type="checkbox" id="agree"><span>Nabasa ko at sang-ayon ako sa <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button>.</span></label>
       <div class="toast" id="toast"></div>
     </section>
 
@@ -261,6 +279,25 @@ h2{font:800 13px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
       </div>
     </aside>
   </div>
+
+<details class="tnc" id="tnc">
+    <summary>Lucky Ferris Wheel Terms &amp; Conditions</summary>
+    <h3>Terms &amp; Conditions</h3>
+    <ol>
+      <li>Open to verified Gopyesta players aged 21 and above. Self-excluded, restricted, test or unverified accounts are not eligible.</li>
+      <li>Each successful deposit of at least ₱100 made between 1:00 PM and 9:00 PM (Philippine time) earns one entry (one spin of the wheel), regardless of the deposit amount. Entries are computed from the platform's deposit records; pending, failed or reversed deposits, and deposits made outside the window, do not count.</li>
+      <li>An entry is locked until your valid bets on slots and casino games for the day reach 3× the deposit behind it (deposits unlock in the order they were made, cumulatively). Other game types do not count toward this requirement. Bet records refresh periodically, so an entry may unlock up to about 30 minutes after the requirement is met.</li>
+      <li>Each entry is one spin of the Lucky Ferris Wheel. Your prize — ₱37, ₱27 or ₱17 — is drawn at random by the system <b>before</b> the wheel turns; the cabin it stops at is for show and changes neither your prize nor your chances.</li>
+      <li>Entries are valid only on the day the deposit was made and must be unlocked and played before the end of that day. Unplayed or still-locked entries expire.</li>
+      <li>Total bonus awarded under this promo is limited to a daily budget (₱10,000 unless announced otherwise) across all players. Once the budget is used up, no further links or plays are issued that day.</li>
+      <li>Each result is recorded by the system the moment it is drawn and is final. Refreshing the page, reopening the link or using another device does not give another turn.</li>
+      <li>Rewards are sent manually by your agent (e.g. via GCash) after verification, within the time your agent announces. Gopyesta may withhold or revoke a reward where the deposit is reversed or the promo is abused.</li>
+      <li>Multiple or linked accounts, or any attempt to abuse this promo, void the reward and may lead to action on the account.</li>
+      <li>Gopyesta may change, suspend or end this promo at any time. Gopyesta management's decision on any dispute is final.</li>
+      <li>Play responsibly. Set limits on your deposits and time, and ask for help if gambling stops being fun.</li>
+    </ol>
+    <p class="small">By ticking the agreement box and playing, you accept these Terms &amp; Conditions.</p>
+  </details>
 </div>
 
 <!-- Shown when the page is opened without a valid player link, when the link has
@@ -441,9 +478,22 @@ function flash(msg){
    One unlocked entry is consumed per spin. The server draws the prize before a frame
    animates and the wheel is then told where to stop — the same money-authoritative
    contract the climbing race used, with a different thing drawn on screen. */
+/* The original game refused to play until the T&C box was ticked. A reskin that
+   dropped that would be quietly removing a compliance step, so the same gate is here —
+   and it is checked before the request, so an unticked box never consumes an entry. */
+function needAgree(){
+  const box=document.getElementById("agree");
+  if(box.checked)return false;
+  const l=document.getElementById("agreeLbl");
+  l.classList.remove("nudge");void l.offsetWidth;l.classList.add("nudge");
+  flash("I-check muna ang T&C.");
+  return true;
+}
+
 async function spinNow(){
   if(busy||phase!=="idle"||!CODE)return;
   if(!S||S.entriesPlayable<=0)return;
+  if(needAgree())return;
   busy=true;
   document.getElementById("startBtn").disabled=true;
   const r=await api("/api/play/"+encodeURIComponent(CODE),{});
@@ -513,6 +563,7 @@ function render(){
 
   const sb=document.getElementById("startBtn");
   sb.hidden=!(phase==="idle"&&playable>0&&S.playOpen&&!S.capped&&!toastOn);
+  document.getElementById("agreeLbl").hidden=sb.hidden;
   document.getElementById("startPick").textContent=
     playable>0?`${playable} ikot na pwede`:"";
 
@@ -585,6 +636,13 @@ async function refresh(){
 }
 
 document.getElementById("startBtn").onclick=spinNow;
+document.getElementById("tncLink").onclick=()=>{
+  const d=document.getElementById("tnc");d.open=true;d.scrollIntoView({behavior:"smooth",block:"start"});
+};
+document.getElementById("agree").onchange=()=>{
+  document.getElementById("agreeLbl").classList.remove("nudge");
+  if(S)render();
+};
 
 (async function boot(){
   try{const r=await fetch("/api/config");if(r.ok)CONF=await r.json()}catch(e){}

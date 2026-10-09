@@ -221,6 +221,24 @@ check("the admin still states the real mechanics",
 check("art resolves", cli.get("/ferris-logo.png").status_code == 200
       and cli.get("/ferris-bg.jpg").status_code == 200)
 
+print("\n-- the T&C gate carried over from the game this replaces")
+check("the player page shows the T&C", 'class="tnc"' in page and "Terms &amp; Conditions" in page)
+check("the T&C describes the wheel, not Palosebo",
+      "one spin of the wheel" in page and "greased" not in page and "climber" not in page)
+check("the T&C still states the real rules",
+      "3× the deposit behind it" in page and "₱10,000" in page)
+check("there is an agreement box", 'id="agree"' in page and 'id="agreeLbl"' in page)
+check("the spin is gated on it", "if(needAgree())return;" in _code)
+check("the gate is checked before the request, so it cannot burn an entry",
+      _code.index("if(needAgree())return;") < _code.index('api("/api/play/'))
+check("the admin T&C matches the player T&C",
+      "one spin of the wheel" in adm and "greased" not in adm)
+
+check("no stray control characters in the page",
+      not [c for c in page if ord(c) < 9 or 11 <= ord(c) < 32])
+check("the T&C disclosure markers render",
+      'content:"▸ "' in page and 'content:"▾ "' in page)
+
 print()
 if failures:
     print(f"{len(failures)} FAILED: " + ", ".join(failures))
