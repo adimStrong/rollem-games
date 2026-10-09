@@ -1,882 +1,681 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Gopyesta Palarong Pyesta</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>GoPyesta Lucky Ferris Wheel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: brand logo on the brand's own ground, one centered game booth. Player view = the brand's game; admin view (#admin) = link maker above a live preview. Single dark look by choice. */
+/* Layout: night-carnival stage — wheel on the left, player's ledger on the right; stacks on phones */
 :root{
-  --night:#1e0b24;
-  --booth:#2b1033;
-  --plank:#36143f;
-  --line:#5d2a66;
-  --gold:#ffd23f;
-  --paper:#fff4ea;
-  --muted:#d6b3d4;
-  --accent:#ff5d8f;
-  --accent-ink:#2a0614;
-  --bad:#ffb0b0;
-  --glow:rgba(255,210,63,.55);
-  --shadowink:#8a1f4a;
-  --bgimg:radial-gradient(70% 40% at 50% 0%,rgba(255,93,143,.28),transparent 70%);
-  --display:"Lilita One", "Arial Rounded MT Bold", Impact, sans-serif;
-  --body:"Nunito", "Segoe UI", system-ui, sans-serif;
-  --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
-  color-scheme:dark;
+  color-scheme: dark;
+  --night:#1b1640; --panel:rgba(28,22,66,.78); --line:rgba(160,140,230,.28); --ink:#eef0fb; --mute:#97a0c7;
+  --bulb:#ffcf5a; --coral:#ff6b5b; --teal:#3fd4c0; --plum:#8f6bff;
+  --display:"Shrikhand","Georgia",serif; --body:"Figtree",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
 }
 *{box-sizing:border-box}
-body{background:var(--bgimg),var(--night);background-attachment:fixed;color:var(--paper);font-family:var(--body);font-size:15px;line-height:1.5;margin:0;padding-inline:16px;padding-block:24px}
-.stack{width:100%;max-width:520px;margin:0 auto;display:grid;gap:18px}
-.mark{display:grid;justify-items:center;gap:6px;text-align:center}
-.mark img{display:block;height:64px;width:auto;max-width:80%;filter:drop-shadow(0 4px 12px rgba(0,0,0,.5))}
-.mark p{margin:0;font:600 11px var(--body);letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
-.booth{position:relative;background:var(--plank);border-radius:20px;padding:54px 16px 22px;text-align:center;display:grid;gap:16px;overflow:hidden;border-top:6px solid var(--accent)}
-.eyebrow{font:600 12px var(--body);letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin:0}
-h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38px);line-height:1.05;margin:4px 0 0;text-wrap:balance;color:var(--paper)}
-.range{margin:6px 0 0;color:var(--muted);font-size:14px}
-.range b{color:var(--gold);font-family:var(--mono)}
-.cheer{font-family:var(--display);font-weight:400;font-size:clamp(18px,5vw,24px);color:var(--gold);min-height:1.35em;margin:0}
-.cheer.pop{animation:pop .35s ease-out}
-@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
-.play{display:grid;justify-items:center;gap:12px;position:relative}
-.ladder{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0;padding:0;list-style:none;width:min(360px,100%)}
-.ladder li{display:grid;gap:1px;padding:6px 6px;border-radius:9px;border:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.25;min-width:0}
-.ladder li b{font:700 13px var(--mono);color:var(--paper);font-variant-numeric:tabular-nums}
-.ladder li.top{border-color:var(--gold)}
-.ladder li.top b{color:var(--gold)}
-.ladder li.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.ladder li.on b{color:var(--accent-ink)}
-.btn{font:700 18px var(--body);letter-spacing:.3px;padding:15px 22px;border-radius:12px;border:0;cursor:pointer;background:var(--accent);color:var(--accent-ink);width:100%}
-.btn:disabled,.btn[aria-disabled="true"]{opacity:.5;cursor:default}
-.btn:focus-visible,.linkbtn:focus-visible,.chip:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
-.btn.ghost{background:transparent;color:var(--paper);border:1px solid var(--line);font-size:16px}
-.btn.small{width:auto;font-size:14px;padding:10px 14px}
-.acts{display:flex;gap:10px}
-.acts .btn{flex:1}
-.acts .btn.ghost{flex:0 0 auto;width:auto;padding:15px 20px}
-.acts .btn[hidden]+.btn.ghost{flex:1}
-.agree{display:flex;align-items:flex-start;gap:10px;text-align:left;font-size:14px;cursor:pointer;line-height:1.4}
-.agree input{width:20px;height:20px;flex:none;margin:0;accent-color:var(--accent)}
-.agree.nudge{animation:nudge .4s}
-@keyframes nudge{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-.linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--gold);text-decoration:underline;cursor:pointer}
-.win{display:grid;gap:4px}
-.win small{font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted)}
-.win strong{font-family:var(--display);font-weight:400;font-size:clamp(40px,12vw,56px);color:var(--gold);line-height:1}
-.win p{margin:0;font-size:14px}
-.note{margin:0;font-size:12.5px;color:var(--muted);max-width:44ch;justify-self:center}
-.demo{margin:0;font-size:12px;font-weight:600;color:var(--accent-ink);background:var(--gold);border-radius:999px;padding:4px 12px;justify-self:center}
-.soundbtn{position:absolute;top:14px;right:14px;z-index:3;background:transparent;border:1px solid var(--line);color:var(--muted);font:600 12px var(--body);border-radius:999px;padding:5px 11px;cursor:pointer}
-.soundbtn[aria-pressed="true"]{color:var(--paper);border-color:var(--accent)}
-/* admin */
-.panel{background:var(--booth);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:14px}
-.panel h2{font-family:var(--display);font-weight:400;font-size:20px;margin:0}
-.hint{margin:0;color:var(--muted);font-size:13px}
-.field{display:grid;gap:6px;text-align:left}
-.field>span{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);font-weight:600}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{font:600 14px var(--body);color:var(--paper);background:var(--plank);border:1px solid var(--line);padding:8px 13px;border-radius:999px;cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.money{display:flex;align-items:center;gap:8px}
-.money span{font-family:var(--mono);color:var(--muted)}
-.inp{font:700 18px var(--mono);background:var(--plank);color:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
-.tierbox{border-radius:12px;padding:12px 14px;background:rgba(0,0,0,.25);font-size:14px}
-.tierbox b{color:var(--gold)}
-.tierbox.bad b{color:var(--bad)}
-.offerbox{border-radius:12px;padding:12px 14px;border:1px dashed var(--line);font-size:13.5px;display:grid;gap:6px}
-.offerbox strong{font-family:var(--display);font-weight:400;font-size:17px;color:var(--gold)}
-.offerbox p{margin:0}
-.linkrow{display:flex;gap:8px;align-items:center}
-.linkrow code{flex:1;min-width:0;font:500 12px var(--mono);background:var(--plank);border:1px solid var(--line);border-radius:8px;padding:10px;overflow-x:auto;white-space:nowrap}
-.btnrow{display:flex;flex-wrap:wrap;gap:8px}
-.preview-label{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:center;margin:0}
-/* win pop-up */
-.jp{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.78);backdrop-filter:blur(3px);overflow:hidden}
-.jp canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.jp-card{position:relative;width:min(420px,100%);text-align:center;border-radius:22px;padding:30px 22px 22px;background:var(--booth);border:2px solid var(--accent);box-shadow:0 0 80px rgba(0,0,0,.6);display:grid;gap:10px;animation:jpIn .55s cubic-bezier(.2,1.4,.4,1)}
-.jp.big .jp-card{border-color:var(--gold);box-shadow:0 0 0 6px rgba(255,255,255,.06),0 0 90px var(--glow)}
-@keyframes jpIn{0%{transform:scale(.4) rotate(-6deg);opacity:0}100%{transform:scale(1);opacity:1}}
-.jp-title{font-family:var(--display);font-weight:400;font-size:clamp(34px,10vw,50px);line-height:1;margin:0;color:var(--paper)}
-.jp.big .jp-title{color:var(--gold);animation:jpPulse 1s ease-in-out infinite alternate}
-@keyframes jpPulse{to{transform:scale(1.06)}}
-.jp-sub{font:700 13px var(--mono);letter-spacing:1px;margin:0;color:var(--muted)}
-.jp-label{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:6px 0 0}
-.jp-amt{font-family:var(--display);font-weight:400;font-size:clamp(46px,14vw,68px);line-height:1;color:#fff;margin:0;text-shadow:0 4px 0 var(--shadowink)}
-.jp-note{margin:0;font-size:14px}
-/* T&C */
-.tnc{background:var(--booth);border:1px solid var(--line);border-radius:16px;padding:0 18px;text-align:left}
-.tnc summary{cursor:pointer;padding:15px 0;font-weight:700}
-.tnc h3{font-family:var(--display);font-weight:400;font-size:17px;margin:0 0 10px}
-.tnc ol{margin:0 0 12px;padding-left:20px;display:grid;gap:9px;font-size:13.5px;max-width:65ch}
-.tnc li::marker{color:var(--muted);font-family:var(--mono);font-size:12px}
-.tblwrap{overflow-x:auto}
-.tnc table{border-collapse:collapse;margin:6px 0 2px;font-size:12.5px;font-variant-numeric:tabular-nums}
-.tnc td,.tnc th{border-bottom:1px solid var(--line);padding:4px 10px 4px 0;text-align:left;white-space:nowrap}
-.tnc th{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:1px;text-transform:uppercase}
-.tnc .small{font-size:12px;color:var(--muted);margin:0 0 16px}
-/* mechanics */
-.mech{background:var(--booth);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:12px}
-.mech h2{font-family:var(--display);font-weight:400;font-size:22px;margin:0;color:var(--paper)}
-.mech-sub{margin:0;color:var(--accent);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase}
-.mech ol{margin:0;padding-left:22px;display:grid;gap:8px;font-size:14px;max-width:65ch}
-.mech li::marker{color:var(--gold);font-family:var(--mono);font-weight:700}
-.mech li b{color:var(--gold)}
-.mech h3{margin:4px 0 0;font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted)}
-.mech table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
-.mech td,.mech th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
-.mech th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:600}
-.mech tr.cur td{color:var(--gold);font-weight:700}
-/* game: Palosebo — ported verbatim from the real GoPyesta source (gopyesta-palosebo/split/styles.css) */
-.pb-lights{position:absolute;left:0;right:0;top:4px;height:20px;z-index:3}
-.pb-lights i{position:absolute;top:6px;width:7px;height:9px;border-radius:50% 50% 45% 45%;background:var(--c);box-shadow:0 0 8px var(--c);animation:pblamp 1.2s ease-in-out infinite alternate}
-@keyframes pblamp{to{opacity:.35;box-shadow:none}}
-.banderitas{position:absolute;left:-4px;right:-4px;top:0;height:20px;display:flex;justify-content:space-between;border-top:2px solid #c9a26b;border-radius:0 0 50% 50%/0 0 10px 10px;z-index:3;pointer-events:none}
-.banderitas i{width:12px;height:15px;background:var(--c);clip-path:polygon(0 0,100% 0,50% 100%);opacity:.95;transform-origin:50% 0;animation:flag 1.6s ease-in-out infinite alternate;animation-delay:calc(var(--d) * -1)}
-@keyframes flag{from{transform:rotate(-8deg) scaleY(.92)}to{transform:rotate(8deg)}}
-/* ===== Palosebo ===== */
-.ps{position:relative;width:min(390px,100%);height:520px;border-radius:18px;overflow:hidden;margin:0 auto;
-  background:radial-gradient(ellipse 80% 30% at 50% 100%,rgba(255,170,60,.3),transparent 70%),linear-gradient(180deg,#5ab8e8 0%,#a8dcf0 45%,#ffe0a8 75%,#c8a060 76%,#9a7a40 100%);
-  box-shadow:0 0 0 3px var(--gold),0 14px 30px rgba(0,0,0,.55)}
-.ps .banderitas{top:16px}
-.ps-field{position:absolute;left:0;right:0;bottom:0;height:24%;background:radial-gradient(circle at 30% 30%,rgba(0,0,0,.08) 1px,transparent 2px) 0 0/9px 9px}
-.ps-lanes{position:absolute;left:4%;right:4%;top:40px;bottom:132px;display:grid;grid-template-columns:repeat(3,1fr)}
-.ps-lane{position:relative;display:grid;justify-items:center;grid-template-rows:34px 1fr}
-.ps-flag{position:relative;width:40px;height:34px}
-.ps-flag::before{content:"";position:absolute;left:50%;top:0;bottom:-4px;width:3px;margin-left:-1.5px;background:#5a3a1a}
-.ps-flag i{position:absolute;left:calc(50% + 1px);top:2px;width:26px;height:16px;background:var(--c);clip-path:polygon(0 0,100% 50%,0 100%);transform-origin:0 50%;animation:psflag .5s ease-in-out infinite alternate}
-@keyframes psflag{to{transform:scaleX(.8) skewY(6deg)}}
-.ps-lane.won .ps-flag i{opacity:0}
-.ps-pole{position:relative;width:22px;height:100%;border-radius:8px;
-  background:linear-gradient(90deg,#8a6a2a,#e8cf7a 35%,#fff6c8 45%,#c8a04a 60%,#7a5a1a),#c9a26b;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
-.ps-pole::before{content:"";position:absolute;inset:0;border-radius:8px;background:repeating-linear-gradient(180deg,transparent 0 58px,rgba(90,60,20,.7) 58px 62px)}
-.ps-pole::after{content:"";position:absolute;left:3px;top:0;bottom:0;width:4px;border-radius:2px;background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.1));animation:psgrease 2.4s ease-in-out infinite alternate}
-@keyframes psgrease{to{opacity:.3}}
-.ps-kid{position:absolute;left:50%;bottom:-6px;width:52px;margin-left:-26px;z-index:2;will-change:transform}
-.ps-kid svg{width:100%;height:auto;display:block}
-.kd *{transform-box:fill-box}
-.kd .kd-arm{transform-origin:50% 100%}.kd .kd-leg{transform-origin:50% 0}
-.ps-kid.climb .kd-arm.a,.ps-kid.climb .kd-leg.b{animation:kdup .28s ease-in-out infinite alternate}
-.ps-kid.climb .kd-arm.b,.ps-kid.climb .kd-leg.a{animation:kdup .28s ease-in-out infinite alternate-reverse}
-@keyframes kdup{from{transform:translateY(3px)}to{transform:translateY(-3px)}}
-.ps-kid .kd-sweat{opacity:0}
-.ps-kid.climb .kd-sweat{opacity:1}
-.ps-kid.slip .kd{animation:kdslip .12s linear infinite alternate}
-@keyframes kdslip{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}
-.ps-kid.slip .kd-arm{transform:translateY(-4px) rotate(-10deg)}
-.ps-kid.win .kd-arm.a{animation:kdwave .3s ease-in-out infinite alternate}
-@keyframes kdwave{from{transform:rotate(-30deg) translateY(-4px)}to{transform:rotate(20deg) translateY(-6px)}}
-.ps-kid.win::after{content:"";position:absolute;left:4px;top:-18px;width:22px;height:14px;background:var(--gold);clip-path:polygon(0 0,100% 50%,0 100%)}
-.ps-lane.mine .ps-pole{box-shadow:0 0 0 2px var(--gold),0 0 16px var(--gold)}
-.ps-name{position:absolute;bottom:-26px;z-index:4;font:400 15px var(--display);color:#fff;background:var(--c);padding:1px 10px;border-radius:10px;box-shadow:0 2px 0 rgba(0,0,0,.3);white-space:nowrap}
-.ps-lane.mine .ps-name::after{content:" ★"}
-.ps-rank{position:absolute;top:46px;font:400 18px var(--display);padding:2px 9px;border-radius:9px;opacity:0;transform:scale(.4);transition:all .4s cubic-bezier(.2,1.6,.4,1);z-index:3}
-.ps-rank.r0,.ps-rank.r1,.ps-rank.r2{opacity:1;transform:scale(1)}
-.ps-rank.r0{background:var(--gold);color:#3a1a00;box-shadow:0 0 14px var(--gold)}.ps-rank.r1{background:#e0e4ec;color:#2a2a3a}.ps-rank.r2{background:#c87a3a;color:#fff}
-.ps-crowd{position:absolute;left:0;right:0;bottom:84px;height:30px;z-index:1;display:flex;justify-content:space-around;align-items:flex-end;pointer-events:none}
-.ps-crowd i{width:20px;height:20px;border-radius:50% 50% 40% 40%;background:#c88a5a;border-top:5px solid #2a1810;box-shadow:0 14px 0 4px var(--c);animation:bbcrowd 1s ease-in-out infinite alternate;animation-delay:calc(var(--d) * -1)}
-.ps.racing .ps-crowd i{animation:bbjump .3s ease-in-out infinite alternate;animation-delay:calc(var(--d) * -1)}
-.ps-ann{position:absolute;left:50%;top:36%;transform:translate(-50%,-50%) scale(.3);opacity:0;z-index:5;font:400 64px var(--display);color:#fff;-webkit-text-stroke:2px #8a1f4a;text-shadow:0 4px 0 #8a1f4a;pointer-events:none}
-.ps-ann.show{animation:psann .7s cubic-bezier(.2,1.6,.4,1) forwards}
-.ps-ann.go{font-size:46px;color:var(--gold)}
-@keyframes psann{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
-.ps-pick{position:absolute;left:4%;right:4%;bottom:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;z-index:4}
-.ps-pick button{appearance:none;border:0;cursor:pointer;display:grid;padding:6px 4px;border-radius:12px;background:var(--c);color:#fff;font:600 10px var(--body);box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.35);transition:transform .15s}
-.ps-pick b{font:400 19px var(--display);text-shadow:0 2px 0 rgba(0,0,0,.3)}
-.ps-pick button.on{transform:translateY(-4px);box-shadow:0 0 0 3px #fff,0 0 18px var(--gold)}
-.ps.locked .ps-pick button:not(.on){opacity:.45}
-.ps-prz{position:absolute;left:0;right:0;bottom:6px;margin:0;text-align:center;font:800 12px var(--body);color:#3a1a00;letter-spacing:.5px}
-@media (prefers-reduced-motion:reduce){.ps *{animation:none!important}}
-/* Palosebo extra animation */
-.ps-sun{position:absolute;right:10%;top:52px;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle,#fff6c8,#ffd23f 60%,#ffb21f);box-shadow:0 0 30px #ffd23f}
-.ps-sun i{position:absolute;inset:-22px;border-radius:50%;background:repeating-conic-gradient(rgba(255,230,120,.55) 0 8deg,transparent 8deg 30deg);animation:pssun 14s linear infinite;z-index:-1}
-@keyframes pssun{to{transform:rotate(360deg)}}
-.ps-cloud{position:absolute;width:70px;height:22px;border-radius:20px;background:#fff;opacity:.9;animation:pscloud linear infinite}
-.ps-cloud::before,.ps-cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
-.ps-cloud::before{left:12px;top:-12px;width:28px;height:28px}.ps-cloud::after{left:32px;top:-17px;width:32px;height:32px}
-.ps-cloud.c0{top:70px;animation-duration:38s}.ps-cloud.c1{top:118px;scale:.7;animation-duration:52s;animation-delay:-20s}.ps-cloud.c2{top:92px;scale:.85;animation-duration:44s;animation-delay:-33s}
-@keyframes pscloud{from{left:-90px}to{left:110%}}
-.ps-bird{position:absolute;width:16px;height:6px;animation:psbird linear infinite}
-.ps-bird i{position:absolute;top:0;width:8px;height:2px;background:#2a2a3a;border-radius:2px;animation:psflap .35s ease-in-out infinite alternate}
-.ps-bird i:first-child{left:0;transform-origin:100% 50%}.ps-bird i:last-child{right:0;transform-origin:0 50%;animation-direction:alternate-reverse}
-@keyframes psflap{from{transform:rotate(-25deg)}to{transform:rotate(25deg)}}
-.ps-bird.b0{top:80px;animation-duration:16s}.ps-bird.b1{top:96px;animation-duration:19s;animation-delay:-6s}.ps-bird.b2{top:66px;animation-duration:23s;animation-delay:-12s}
-@keyframes psbird{from{left:110%}to{left:-30px}}
-.ps-huts{position:absolute;left:0;right:0;bottom:24%;height:46px;display:flex;justify-content:space-between;padding:0 4px;opacity:.75}
-.ps-huts i{width:62px;height:38px;align-self:flex-end;background:linear-gradient(#b8904a,#8a6a2a);position:relative}
-.ps-huts i::before{content:"";position:absolute;left:-8px;right:-8px;top:-22px;height:24px;background:#6a4a1a;clip-path:polygon(50% 0,100% 100%,0 100%)}
-.ps-huts i:nth-child(2){opacity:0}
-.ps-arch{position:absolute;left:50%;bottom:34%;padding:3px 14px;border-radius:12px;background:linear-gradient(180deg,#ff5d8f,#d8306a);box-shadow:0 3px 0 #8a1f4a;z-index:0;opacity:.9;transform-origin:50% 0;animation:psarch 2.6s ease-in-out infinite alternate}
-.ps-arch span{font:400 13px var(--display);color:#fff;letter-spacing:1px;white-space:nowrap}
-@keyframes psarch{from{transform:translateX(-50%) rotate(-2deg)}to{transform:translateX(-50%) rotate(2deg)}}
-.ps-pole{animation:pssway 3s ease-in-out infinite alternate;transform-origin:50% 100%}
-.ps-lane:nth-child(2) .ps-pole{animation-delay:-1s}.ps-lane:nth-child(3) .ps-pole{animation-delay:-2s}
-@keyframes pssway{from{transform:rotate(-.8deg)}to{transform:rotate(.8deg)}}
-.ps-drip{position:absolute;left:6px;width:5px;height:8px;border-radius:50%/60% 60% 40% 40%;background:rgba(255,248,200,.9);z-index:1;animation:psdrip 3.4s ease-in infinite}
-.ps-drip.d1{top:10%}.ps-drip.d2{top:45%;left:12px;animation-delay:-1.7s}
-@keyframes psdrip{0%{transform:translateY(0);opacity:0}10%{opacity:1}100%{transform:translateY(120px);opacity:0}}
-.ps:not(.racing):not(.locked) .ps-kid .kd{animation:pshop .6s ease-in-out infinite alternate}
-.ps-lane:nth-child(2) .ps-kid .kd{animation-delay:-.2s}.ps-lane:nth-child(3) .ps-kid .kd{animation-delay:-.4s}
-@keyframes pshop{to{transform:translateY(-5px)}}
-.ps:not(.racing):not(.locked) .kd-arm.a{animation:kdwave .5s ease-in-out infinite alternate}
-.ps-gr{position:absolute;left:50%;top:60%;width:6px;height:6px;border-radius:50%;background:#fff3b0;box-shadow:0 0 4px #ffe680;animation:psgr .7s ease-out forwards;pointer-events:none}
-@keyframes psgr{to{transform:translate(var(--dx),var(--dy));opacity:0}}
-.ps-kid.lose .kd{animation:psshrug .5s ease-in-out 3 alternate}
-@keyframes psshrug{to{transform:rotate(-6deg) translateY(2px)}}
-.ps-cf{position:absolute;top:-12px;width:8px;height:12px;background:var(--c);z-index:6;animation:pscf linear forwards;pointer-events:none}
-@keyframes pscf{to{transform:translate(var(--x),560px) rotate(var(--r))}}
-.ps-fw{position:absolute;width:0;height:0;z-index:5;pointer-events:none;animation:psfw 1.2s ease-out both}
-.ps-fw b{position:absolute;left:0;top:0;width:3px;height:16px;margin-left:-1.5px;background:var(--c);border-radius:2px;box-shadow:0 0 6px var(--c);transform-origin:50% 0}
-.ps-fw b:nth-child(1){transform:rotate(0deg) translateY(10px)}.ps-fw b:nth-child(2){transform:rotate(30deg) translateY(10px)}.ps-fw b:nth-child(3){transform:rotate(60deg) translateY(10px)}.ps-fw b:nth-child(4){transform:rotate(90deg) translateY(10px)}.ps-fw b:nth-child(5){transform:rotate(120deg) translateY(10px)}.ps-fw b:nth-child(6){transform:rotate(150deg) translateY(10px)}.ps-fw b:nth-child(7){transform:rotate(180deg) translateY(10px)}.ps-fw b:nth-child(8){transform:rotate(210deg) translateY(10px)}.ps-fw b:nth-child(9){transform:rotate(240deg) translateY(10px)}.ps-fw b:nth-child(10){transform:rotate(270deg) translateY(10px)}.ps-fw b:nth-child(11){transform:rotate(300deg) translateY(10px)}.ps-fw b:nth-child(12){transform:rotate(330deg) translateY(10px)}
-@keyframes psfw{0%{transform:scale(.1);opacity:0}15%{opacity:1}100%{transform:scale(2.4);opacity:0}}
-.ps-crowd i.fl::after{content:"";position:absolute;left:14px;top:-26px;width:2px;height:22px;background:#5a3a1a}
-.ps-crowd i.fl::before{content:"";position:absolute;left:16px;top:-26px;width:14px;height:9px;background:var(--f);clip-path:polygon(0 0,100% 50%,0 100%);animation:psflag .4s ease-in-out infinite alternate;transform-origin:0 50%}
-.ps.racing .ps-crowd i.fl::before{animation-duration:.18s}
-.ps-crowd i{position:relative}
-/* realistic climbers */
-.ps-kid{width:60px;margin-left:-30px;bottom:-10px}
-.ps-kid .kd{overflow:visible;filter:drop-shadow(1px 2px 1px rgba(0,0,0,.35))}
-.ps-kid .kd-sweat{opacity:0;transition:opacity .3s}
-.ps-kid.climb .kd-sweat{opacity:1}
-.ps-kid .kd-head{transform-box:fill-box;transform-origin:50% 100%;animation:kdlook 1.2s ease-in-out infinite alternate}
-@keyframes kdlook{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
-.ps-kid.slip .kd{animation:kdslip2 .1s linear infinite alternate}
-@keyframes kdslip2{from{transform:rotate(-7deg) translateX(-1px)}to{transform:rotate(7deg) translateX(1px)}}
-.ps-kid.slip .kd-head{animation:none;transform:rotate(-14deg)}
-.ps:not(.racing):not(.locked) .ps-kid .kd{animation:pshop 1.2s ease-in-out infinite alternate}
-.ps-kid.win .kd{animation:kdwin .3s ease-in-out infinite alternate}
-@keyframes kdwin{to{transform:translateY(-6px) rotate(3deg)}}
-.ps-kid.win::after{left:22px;top:-20px}
-.ps-kid.lose .kd{animation:psshrug .5s ease-in-out 3 alternate}
-/* real bamboo */
-.ps-pole{width:24px;border-radius:6px;
-  background:
-   repeating-linear-gradient(180deg,transparent 0 60px,rgba(40,60,10,.85) 60px 62px,rgba(220,235,150,.9) 62px 64px,rgba(120,150,40,.6) 64px 67px,transparent 67px 70px),
-   linear-gradient(90deg,#3e6a1e 0%,#6a9a2a 18%,#a8cc5a 38%,#d8eaa0 46%,#9ac04a 58%,#5a8a24 80%,#345a16 100%);
-  box-shadow:0 0 0 1px rgba(30,50,10,.5),2px 0 6px rgba(0,0,0,.25)}
-.ps-pole::before{background:repeating-linear-gradient(180deg,transparent 0 18px,rgba(60,90,20,.18) 18px 19px,transparent 19px 35px),linear-gradient(180deg,rgba(255,230,140,.25),transparent 30%,rgba(120,90,30,.25))}
-.ps-pole::after{left:5px;width:5px;background:linear-gradient(180deg,rgba(255,255,230,.85),rgba(255,255,210,.25) 60%,rgba(255,255,230,.6));filter:blur(.4px)}
-.ps-leaf{position:absolute;top:-8px;width:26px;height:9px;border-radius:0 100% 0 100%;background:linear-gradient(90deg,#2a6a1a,#6aaa3a);transform-origin:0 50%;z-index:-1;animation:psleaf 1.8s ease-in-out infinite alternate}
-.ps-leaf.a{left:14px;transform:rotate(-30deg)}.ps-leaf.b{left:14px;top:2px;transform:rotate(10deg);animation-delay:-.6s}.ps-leaf.c{left:-14px;top:-2px;transform:scaleX(-1) rotate(-20deg);transform-origin:100% 50%;animation-delay:-1.2s}
-@keyframes psleaf{to{rotate:12deg}}
-.ps-lane.mine .ps-pole{box-shadow:0 0 0 2px var(--gold),0 0 16px var(--gold),2px 0 6px rgba(0,0,0,.25)}
-/* realistic crowd */
-.ps-crowd{display:block;height:74px;bottom:66px}
-.ps-crowd i{display:none}
-.pp-row{position:absolute;left:-10px;right:-10px;bottom:0;display:flex;justify-content:space-between}
-.pp-row.back{bottom:14px;filter:brightness(.72) saturate(.85)}
-.pp-row.back .pp{width:34px}
-.pp-row.front .pp{width:46px;margin:0 -3px}
-.pp{display:block;height:auto;overflow:visible}
-.pp *{transform-box:fill-box}
-.pp .pp-body{transform-origin:50% 100%;animation:ppsway 2.4s ease-in-out infinite alternate;animation-delay:var(--d)}
-@keyframes ppsway{from{transform:rotate(-2deg)}to{transform:rotate(2deg) translateY(1px)}}
-.pp .pp-arm{transform-origin:50% 0}
-.pp .pp-fan{transform-origin:50% 100%;animation:ppfan .3s ease-in-out infinite alternate}
-@keyframes ppfan{to{transform:rotate(30deg)}}
-.pp .pp-fl{animation:psflag .4s ease-in-out infinite alternate}
-.ps.racing .pp .pp-body{animation:ppjump var(--j) ease-in-out infinite alternate;animation-delay:var(--d)}
-@keyframes ppjump{from{transform:translateY(0)}to{transform:translateY(-6px)}}
-.ps.racing .pp .pp-arm.r{animation:ppwave var(--j) ease-in-out infinite alternate;animation-delay:var(--d)}
-.ps.racing .pp:nth-child(odd) .pp-arm.l{animation:ppwavel var(--j) ease-in-out infinite alternate;animation-delay:var(--d)}
-@keyframes ppwave{from{transform:rotate(-150deg)}to{transform:rotate(-185deg)}}
-@keyframes ppwavel{from{transform:rotate(150deg)}to{transform:rotate(185deg)}}
-.ps.over .pp .pp-body,.ps .pp-row.cheer .pp-body{animation:ppjump .22s ease-in-out infinite alternate}
-.ps .pp-row.cheer .pp-arm.r{animation:ppwave .22s ease-in-out infinite alternate}
-.ps .pp-row.cheer .pp-arm.l{animation:ppwavel .22s ease-in-out infinite alternate}
-.ps{height:580px}
-.ps-lanes{bottom:150px}
-.ps-crowd{bottom:78px;height:84px}
-.ps-pick{bottom:28px}
-/* palayan background */
-.ps{background:linear-gradient(180deg,#5ab8e8 0%,#a8dcf0 38%,#d8f0e0 46%,#6ab84a 74%,#5a9a3a 76%,#7a8a3a 100%)}
-.ps-field{background:radial-gradient(circle at 30% 30%,rgba(0,0,0,.1) 1px,transparent 2px) 0 0/9px 9px,linear-gradient(180deg,#8a9a4a,#6a7a30)}
-.ps-huts{display:none}
-.ps-farm{position:absolute;left:0;right:0;top:38%;width:100%;height:38%}
-.ps-farm *{transform-box:fill-box}
-.ps-rice1{animation:psrice 2.6s ease-in-out infinite alternate}
-.ps-rice2{animation:psrice 2s ease-in-out infinite alternate-reverse}
-@keyframes psrice{from{transform:skewX(-6deg)}to{transform:skewX(6deg)}}
-.ps-shim{animation:psshim 3s ease-in-out infinite alternate}
-@keyframes psshim{from{transform:translateX(-8px);opacity:.4}to{transform:translateX(8px);opacity:1}}
-.ps-fronds{transform-origin:12px 0;transform-box:view-box;animation:psfrond 2.2s ease-in-out infinite alternate}
-@keyframes psfrond{to{transform:rotate(6deg)}}
-.ps-carabao{animation:pscarabao 40s linear infinite}
-@keyframes pscarabao{from{transform:translate(-40px,108px)}to{transform:translate(420px,108px)}}
-.ps-egret{animation:psegret 18s linear infinite}
-@keyframes psegret{from{transform:translate(420px,60px)}50%{transform:translate(200px,50px)}to{transform:translate(-30px,66px)}}
-.ps-arch{bottom:46%}
-/* black grease on the bamboo and on the climbers */
-.ps-grease{position:absolute;inset:0;border-radius:6px;pointer-events:none;z-index:0;
-  background:
-   radial-gradient(ellipse 80% 5% at 40% 8%,rgba(8,6,4,.92),transparent 72%),
-   radial-gradient(ellipse 90% 7% at 55% 22%,rgba(8,6,4,.9),transparent 72%),
-   radial-gradient(ellipse 75% 5% at 45% 38%,rgba(8,6,4,.92),transparent 72%),
-   radial-gradient(ellipse 90% 8% at 50% 55%,rgba(8,6,4,.9),transparent 72%),
-   radial-gradient(ellipse 80% 6% at 45% 72%,rgba(8,6,4,.92),transparent 72%),
-   radial-gradient(ellipse 90% 7% at 55% 88%,rgba(8,6,4,.88),transparent 72%),
-   linear-gradient(90deg,rgba(8,6,4,.35) 0%,rgba(12,10,8,.7) 20%,rgba(12,10,8,.25) 32%,transparent 40%,transparent 56%,rgba(12,10,8,.65) 66%,rgba(12,10,8,.35) 82%,rgba(8,6,4,.4) 100%),
-   repeating-linear-gradient(180deg,rgba(10,8,6,0) 0 10px,rgba(10,8,6,.45) 10px 13px,rgba(10,8,6,0) 13px 28px)}
-.ps-grease::after{content:"";position:absolute;left:30%;top:0;bottom:0;width:3px;border-radius:2px;background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,.15) 40%,rgba(255,255,255,.6) 70%,rgba(255,255,255,.2));animation:psgrease 2s ease-in-out infinite alternate}
-.ps-drip{background:radial-gradient(circle at 35% 30%,#6a6a6a,#0a0806 60%);width:5px;height:9px}
-.ps-gr{background:#0a0806;box-shadow:0 0 2px rgba(255,255,255,.4)}
-.ps-kid .kd-grease{opacity:.15;transition:opacity .4s}
-.ps-kid .kd-grease path{opacity:1}
-/* GoPyesta title banner: shown before the race, gone once it starts */
-.ps-arch{left:50%;top:40%;bottom:auto;z-index:6;opacity:1;display:grid;justify-items:center;padding:8px 26px 10px;border-radius:18px;
-  background:linear-gradient(180deg,#ff6a9a,#d8306a);box-shadow:0 4px 0 #8a1f4a,0 0 0 3px #fff,0 10px 24px rgba(0,0,0,.35);
-  transition:opacity .45s,transform .45s;animation:psarch 2.6s ease-in-out infinite alternate}
-.ps-arch span{font:400 34px/1 var(--display);letter-spacing:1px;color:#fff;text-shadow:0 3px 0 #8a1f4a}
-.ps-arch small{font:400 14px var(--display);letter-spacing:3px;color:var(--gold)}
-.ps.racing .ps-arch,.ps.locked .ps-arch{opacity:0;pointer-events:none;animation:none;transform:translateX(-50%) scale(.6)}
-/* tap to climb */
-.ps-tap{position:absolute;left:50%;top:24%;transform:translateX(-50%);z-index:7;display:grid;justify-items:center;gap:2px;padding:8px 16px;border-radius:16px;background:rgba(20,8,24,.72);color:#fff;text-align:center;opacity:0;pointer-events:none;transition:opacity .3s}
-.ps-tap.show{opacity:1;animation:pstap .6s ease-in-out infinite alternate}
-.ps-tap b{font:400 26px var(--display);color:var(--gold);letter-spacing:1px}
-.ps-tap small{font:700 12px var(--body)}
-.ps-tap.hit b{animation:pstaphit .18s ease-out}
-@keyframes pstap{to{transform:translateX(-50%) scale(1.06)}}
-@keyframes pstaphit{50%{transform:scale(1.25);color:#fff}}
-.ps.racing{cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
-/* GoPyesta logo banner */
-.ps-arch{padding:0;background:none;box-shadow:none;border-radius:0;width:min(300px,78%);gap:0}
-.ps-arch img{display:block;width:100%;height:auto;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45))}
-.ps-arch small{margin-top:-6px;padding:2px 16px;border-radius:10px;background:linear-gradient(180deg,#ff6a9a,#d8306a);box-shadow:0 3px 0 #8a1f4a,0 0 0 2px #fff;font:400 16px var(--display);letter-spacing:4px;color:#fff}
-.ps-arch span{display:none}
-.ps-arch{top:30%}
-.ps-tap{top:auto;bottom:178px;padding:4px 12px;border-radius:12px;white-space:nowrap}
-.ps-tap b{font-size:20px}
-.ps-tap small{font-size:11px}
-/* sudden slide */
-.ps-kid.bigslip .kd{animation:psbig .14s linear infinite alternate;filter:drop-shadow(0 -10px 0 rgba(255,255,255,.25)) drop-shadow(0 -20px 0 rgba(255,255,255,.12))}
-@keyframes psbig{from{transform:rotate(-14deg) translateX(-3px)}to{transform:rotate(14deg) translateX(3px)}}
-.ps.jolt .ps-lanes{animation:psjolt .3s ease-out}
-@keyframes psjolt{25%{transform:translateY(3px)}60%{transform:translateY(-2px)}}
+html,body{height:100%}
+body{background:var(--night);position:relative;color:var(--ink);font:15px/1.5 var(--body);padding-inline:16px}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--bulb);outline-offset:2px}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(20,14,50,.25) 0%,rgba(20,14,50,.55) 55%,rgba(16,10,40,.85) 100%),url("/ferris-bg.jpg") center 30%/cover no-repeat,var(--night)}
+.card,.stage{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.logo{display:block;width:clamp(200px,32vw,340px);height:auto;filter:drop-shadow(0 8px 22px rgba(0,0,0,.45))}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 48px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.brand{font-family:var(--display);font-size:clamp(26px,4vw,38px);line-height:1;color:var(--bulb);text-shadow:0 0 18px #ffcf5a55}
+.brand small{display:block;font:600 12px/1.6 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);text-shadow:none;margin-top:6px}
+.who{display:flex;gap:10px;align-items:center;color:var(--mute);font-size:14px}
+.who b{color:var(--ink)}
+.btn{border:0;border-radius:999px;padding:10px 18px;font-weight:800;background:var(--bulb);color:#2a1d00}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.small{padding:6px 12px;font-size:13px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:880px){.grid{grid-template-columns:1fr}}
 
-@media (prefers-reduced-motion:reduce){.cheer.pop,.jp-card,.jp.big .jp-title,.agree.nudge{animation:none}}
+/* stage */
+.stage{position:relative;background:rgba(24,18,60,.28);border:1px solid var(--line);border-radius:22px;padding:18px;overflow:hidden}
+.modes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.mode{border:1px solid var(--line);background:transparent;color:var(--mute);border-radius:999px;padding:8px 14px;font-weight:600;font-size:14px}
+.mode[aria-pressed="true"]{background:var(--panel);color:var(--ink);border-color:var(--bulb)}
+.mode .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--line);margin-right:6px;vertical-align:1px}
+.mode.ready .dot{background:var(--teal);box-shadow:0 0 8px var(--teal)}
+.wheelbox{position:relative;width:100%;max-width:760px;aspect-ratio:1/1.05;margin:0 auto}
+.wheelbox canvas{position:absolute;inset:0;width:100%;height:100%}
+.gondola{transform-origin:50% 0}
+.count{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-family:var(--display);font-size:clamp(70px,16vw,130px);color:var(--bulb);text-shadow:0 0 30px #ffcf5a,0 6px 0 #7a2410;pointer-events:none;z-index:900;opacity:0}
+.count.on{animation:pop 1s ease-out}
+.count.need{font-size:clamp(20px,4vw,30px);top:14%;white-space:nowrap}
+.count.msg{font-size:clamp(28px,6vw,46px);opacity:1;animation:none;top:8%}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-50%) scale(1.8)}25%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.85)}}
+.gondola{position:absolute;width:13.5%;aspect-ratio:1/1.2;transform:translate(-50%,0);border:0;padding:0;background:none}
+.gondola .hook{position:absolute;left:50%;top:0;width:3px;height:14%;background:linear-gradient(#ffd27a,#c4502a);border-radius:2px;transform:translateX(-50%)}
+.gondola .cab{position:absolute;inset:16% 0 0 0;transform-origin:50% -10%;border-radius:40% 40% 22% 22%/28% 28% 22% 22%;
+  background:linear-gradient(160deg,color-mix(in srgb,var(--c) 70%,#fff),var(--c) 42%,color-mix(in srgb,var(--c) 55%,#000));
+  box-shadow:inset 0 -6px 0 rgba(0,0,0,.28),inset 0 4px 0 rgba(255,255,255,.4),0 6px 14px rgba(0,0,0,.45),0 0 14px color-mix(in srgb,var(--c) 60%,transparent);
+  animation:bob 2.6s ease-in-out infinite;animation-delay:var(--d);transition:transform .2s}
+.gondola .roof{position:absolute;left:14%;right:14%;top:-12%;height:20%;border-radius:50% 50% 25% 25%;background:linear-gradient(#fff0b8,#e09a2a 70%,#a85f12);box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.gondola .roof::after{content:"";position:absolute;left:50%;top:-45%;width:28%;aspect-ratio:1;border-radius:50%;transform:translateX(-50%);background:#fff6c8;box-shadow:0 0 8px #ffcf5a,0 0 16px #ffcf5a;animation:twinkle 1.1s steps(2) infinite;animation-delay:var(--d)}
+.gondola .win{position:absolute;inset:24% 13% 30%;border-radius:10px;background:linear-gradient(140deg,rgba(255,255,255,.95),rgba(200,235,255,.75) 55%,rgba(150,200,240,.7));box-shadow:inset 0 0 0 2px rgba(0,0,0,.18),inset 0 -6px 10px rgba(0,60,120,.15);overflow:hidden;display:grid;place-items:center}
+.gondola .win::after{content:"";position:absolute;top:-20%;bottom:-20%;width:35%;left:-60%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent);transform:skewX(-20deg);animation:shine 3.2s ease-in-out infinite;animation-delay:var(--d)}
+.gondola .stripe{position:absolute;left:0;right:0;bottom:12%;height:9%;background:repeating-linear-gradient(90deg,rgba(255,255,255,.75) 0 8px,transparent 8px 16px);opacity:.6}
+.gondola .q{position:relative;font-family:var(--display);font-size:clamp(16px,3vw,26px);color:color-mix(in srgb,var(--c) 70%,#000);line-height:1}
+.gondola .lbl{position:relative;font:800 clamp(10px,1.9vw,15px) var(--mono);color:#2a1300}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6%) rotate(2deg)}}
+@keyframes twinkle{50%{background:#ffb347;box-shadow:0 0 3px #ff8a3d}}
+@keyframes shine{0%,55%{left:-60%}85%,100%{left:130%}}
+@keyframes wiggle{0%,100%{transform:rotate(0) scale(1)}20%{transform:rotate(-7deg) scale(1.06)}40%{transform:rotate(6deg) scale(1.08)}60%{transform:rotate(-4deg) scale(1.05)}80%{transform:rotate(3deg) scale(1.03)}}
+@keyframes shake{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
+@keyframes jackpot{0%,100%{transform:scale(1.15) rotate(0)}25%{transform:scale(1.3) rotate(-6deg)}75%{transform:scale(1.3) rotate(6deg)}}
+/* transition:none is load-bearing, not tidying: .gondola .cab carries
+   transition:transform .2s, and `wiggle` animates transform, so every animation
+   tick also started a transition on 8 cabins whose parent transform the canvas
+   loop rewrites each frame. That pegged the main thread hard enough to stop the
+   5s poll and freeze the page. Keeping the wiggle, dropping the transition. */
+.armed .gondola .cab{transition:none;animation:wiggle 1.3s ease-in-out infinite;animation-delay:var(--d);box-shadow:inset 0 -6px 0 rgba(0,0,0,.28),inset 0 4px 0 rgba(255,255,255,.4),0 0 22px #ffcf5a,0 0 40px color-mix(in srgb,var(--c) 70%,transparent)}
+.armed .gondola:hover .cab{animation:none;transform:scale(1.18)}
+.spinning .gondola .cab{animation:shake .35s ease-in-out infinite;animation-delay:var(--d)}
+.gondola.picked .cab{animation:jackpot .9s ease-in-out infinite;box-shadow:0 0 0 3px #fff,0 0 26px #ffcf5a,0 0 50px #ffcf5a}
+.gondola.dim .cab{filter:grayscale(.85) brightness(.55);animation:none}
+@media (prefers-reduced-motion:reduce){.gondola .cab,.gondola .roof::after,.gondola .win::after{animation:none!important}}
+.hint{text-align:center;color:var(--mute);font-size:14px;min-height:42px;margin-top:6px}
+.hint b{color:var(--bulb)}
+.toast{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(.6);z-index:1000;background:radial-gradient(circle at 50% 0%,#4a2a7a,#1c1440 70%);border:3px solid var(--bulb);border-radius:24px;padding:22px 34px 20px;text-align:center;opacity:0;pointer-events:none;transition:transform .45s cubic-bezier(.2,1.6,.4,1),opacity .25s;min-width:250px;box-shadow:0 0 0 6px rgba(255,207,90,.18),0 0 60px rgba(255,207,90,.45),0 24px 70px #000c}
+.toast.on{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:auto}
+.toast .won{font-family:var(--display);font-size:clamp(34px,7vw,52px);line-height:1;color:#fff;text-shadow:0 0 18px #ffcf5a,0 4px 0 #c4502a;letter-spacing:.02em}
+.toast .amt{font:800 clamp(44px,10vw,72px)/1.05 var(--mono);color:var(--bulb);text-shadow:0 0 24px rgba(255,207,90,.7);margin:6px 0 14px}
+
+/* ledger */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px}
+.stack{display:flex;flex-direction:column;gap:18px}
+h2{font:800 13px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 12px}
+.today{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat .k{font-size:12px;color:var(--mute);letter-spacing:.08em;text-transform:uppercase}
+.stat .v{font:700 24px var(--mono);font-variant-numeric:tabular-nums}
+.tierpill{display:inline-block;padding:3px 10px;border-radius:999px;font-weight:800;font-size:13px;background:var(--line);color:var(--mute)}
+.tierpill.on{background:var(--teal);color:#062823}
+.tiers{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+.tiers th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);text-align:right;font-weight:600;padding:0 6px 8px}
+.tiers th:first-child,.tiers td:first-child{text-align:left}
+.tiers td{padding:9px 6px;border-top:1px solid var(--line);text-align:right;font-family:var(--mono)}
+.tiers td:first-child{font-family:var(--body);font-weight:800}
+.tiers tr.hit td{color:var(--teal)}
+.tiers .cap{display:block;font-size:11px;color:var(--bulb)}
+.bar{height:8px;border-radius:9px;background:rgba(14,10,40,.7);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--bulb));width:0;transition:width .5s}
+.next{font-size:13px;color:var(--mute);margin-top:6px}
+.streak{display:flex;gap:6px;margin:6px 0 8px}
+.streak span{flex:1;height:30px;border-radius:8px;background:rgba(14,10,40,.7);border:1px solid var(--line);display:grid;place-items:center;font:700 11px var(--mono);color:var(--mute)}
+.streak span.ok{background:var(--plum);border-color:var(--plum);color:#fff}
+.hist{list-style:none;margin:0;padding:0;max-height:200px;overflow:auto;font-size:13.5px}
+.hist li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line)}
+.hist li span:last-child{font-family:var(--mono);color:var(--bulb);white-space:nowrap}
+.hist .empty{color:var(--mute);border:0}
+.demo{border-style:dashed}
+.demo .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.demo input{width:110px;background:rgba(14,10,40,.7);border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:8px 10px;font:600 14px var(--mono)}
+.demo p{font-size:12.5px;color:var(--mute);margin:0}
+
+/* auth */
+.auth{position:fixed;inset:0;background:#0b1024e6;backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px;z-index:9}
+.auth[hidden]{display:none!important}
+.auth form{width:min(380px,100%);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px}
+.auth h3{font-family:var(--display);font-weight:400;color:var(--bulb);font-size:28px;margin:0}
+.auth label{font-size:13px;color:var(--mute);display:flex;flex-direction:column;gap:4px}
+.auth input{background:rgba(14,10,40,.7);border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:11px 12px;font:15px var(--body)}
+.auth .err{color:var(--coral);font-size:13px;min-height:18px;margin:0}
+.auth .switch{background:none;border:0;color:var(--teal);font-weight:600;padding:0}
+
+.status{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.live{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:14px;padding:6px 12px;border-radius:999px;background:rgba(14,10,40,.7);border:1px solid var(--line);color:var(--mute)}
+.live i{width:9px;height:9px;border-radius:50%;background:var(--mute)}
+.live.on{color:#062823;background:var(--teal);border-color:var(--teal)}.live.on i{background:#062823;animation:blinkdot 1s infinite}
+@keyframes blinkdot{50%{opacity:.2}}
+.clock{font:700 14px var(--mono);color:var(--mute);font-variant-numeric:tabular-nums}
+.timer{font:700 clamp(22px,4vw,30px) var(--mono);color:var(--bulb);font-variant-numeric:tabular-nums}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.week div{border-radius:10px;background:rgba(14,10,40,.7);border:1px solid var(--line);padding:6px 2px;text-align:center;font-size:11px;color:var(--mute);min-width:0}
+.week div b{display:block;font:700 12px var(--mono);color:var(--ink);margin-top:2px;overflow:hidden;text-overflow:ellipsis}
+.week .paid{border-color:var(--teal)}.week .paid b{color:var(--teal)}
+.week .forfeit{border-color:var(--coral)}.week .forfeit b{color:var(--coral)}
+.week .pending{border-color:var(--bulb)}.week .pending b{color:var(--bulb)}
+.week .today{outline:2px solid var(--plum);outline-offset:1px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-size:14px}
+.kv:first-of-type{border-top:0}
+.kv span:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.ok{color:var(--teal)}.bad{color:var(--coral)}.warn{color:var(--bulb)}
+.rules{margin:0;padding-left:20px;font-size:13.5px;color:var(--ink);display:flex;flex-direction:column;gap:8px}
+.rules li::marker{color:var(--bulb);font-weight:800}
+.rules b{color:var(--bulb)}
+.gondola .rng{position:relative;font:800 clamp(8px,1.45vw,12px)/1.15 var(--mono);color:#2a1300;text-align:center}
+.gondola.mine .cab{box-shadow:0 0 0 3px #fff,0 0 22px var(--c),0 0 40px var(--c);animation:jackpot 1.6s ease-in-out infinite}
+.gondola.mine::after{content:"YOUR PICK";position:absolute;left:50%;bottom:-18%;transform:translateX(-50%);white-space:nowrap;font:800 10px var(--body);letter-spacing:.08em;color:#2a1300;background:var(--bulb);padding:2px 7px;border-radius:999px}
+.pickhead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--c) 22%,transparent);border:1px solid var(--c);margin-bottom:10px}
+.pickhead b{font:800 20px var(--mono);color:var(--c)}
+.goal{margin-top:6px}.goal .kv{border-top:0;padding-bottom:2px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;vertical-align:0}
+.startrow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:950;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+.startrow>*{pointer-events:auto}
+.startpick{font:800 13px var(--body);letter-spacing:.08em;text-transform:uppercase;color:#fff;background:rgba(20,12,50,.8);border:1px solid var(--bulb);padding:4px 12px;border-radius:999px}
+.startpick:empty{display:none}
+.btn.start{font-family:var(--display);font-weight:400;font-size:clamp(22px,4vw,30px);letter-spacing:.06em;padding:12px 56px;margin-top:6px;background:linear-gradient(#ffe08a,#ffb030 60%,#e0841a);color:#4a1d00;box-shadow:0 6px 0 #a3520c,0 0 30px rgba(255,190,70,.6);animation:startpulse 1.2s ease-in-out infinite}
+.btn.start:active{transform:translateY(4px);box-shadow:0 2px 0 #a3520c,0 0 20px rgba(255,190,70,.6)}
+@keyframes startpulse{50%{box-shadow:0 6px 0 #a3520c,0 0 46px rgba(255,210,90,.95)}}
+@media (prefers-reduced-motion:reduce){.btn.start{animation:none}}
+.admin{position:fixed;inset:0;z-index:20;background:#0b0820f2;backdrop-filter:blur(6px);overflow:auto;padding-inline:16px}
+.adm-wrap{max-width:1180px;margin:0 auto;padding-block:20px 60px}
+.adm-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+.adm-login{max-width:360px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:12px}
+.adm-login h3{margin:0;font-family:var(--display);font-weight:400;color:var(--bulb);font-size:24px}
+.adm-login label{font-size:13px;color:var(--mute);display:flex;flex-direction:column;gap:4px}
+.adm-login input,.adm-filters input{background:rgba(14,10,40,.7);border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:10px 12px;font:15px var(--body)}
+.adm-login .err{color:var(--coral);font-size:13px;min-height:18px;margin:0}
+.adm-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.adm-stats div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.adm-stats span{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.adm-stats b{font:700 22px var(--mono)}
+.adm-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.adm-filters input{margin-left:auto;min-width:0;width:200px}
+.adm-table{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.adm-table table{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums;min-width:860px}
+.adm-table th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);text-align:left;padding:10px;font-weight:600;border-bottom:1px solid var(--line)}
+.adm-table td{padding:10px;border-top:1px solid var(--line);vertical-align:middle}
+.adm-table td.num{font-family:var(--mono)}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}
+.badge.pass{background:rgba(63,212,192,.18);color:var(--teal)}.badge.fail{background:rgba(255,107,91,.2);color:var(--coral)}
+.badge.approved{background:rgba(63,212,192,.18);color:var(--teal)}.badge.rejected{background:rgba(255,107,91,.2);color:var(--coral)}.badge.pending{background:rgba(255,207,90,.18);color:var(--bulb)}
+.why{display:block;font-size:11.5px;color:var(--coral);margin-top:3px}
+.revbtns{display:flex;gap:6px}
+.player{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-bottom:10px}
+.player summary{cursor:pointer;padding:12px 14px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:600}
+.player summary span{color:var(--mute);font-weight:400;font-size:13px}
+.txlog{padding:0 14px 12px;overflow-x:auto}
+.txlog table{width:100%;border-collapse:collapse;font-size:13px;min-width:420px}
+.txlog td{padding:6px 4px;border-top:1px solid var(--line);font-family:var(--mono)}
+.gid{font:600 12px var(--mono);color:var(--bulb);background:rgba(255,207,90,.12);border:1px solid rgba(255,207,90,.35);padding:3px 8px;border-radius:999px}
+.note{font-size:12.5px;color:var(--mute);margin:10px 0 0;line-height:1.5}
 </style>
+</head>
+<body>
 
-<div class="stack">
-  <section class="panel" id="admin" hidden>
-    <h2>Link maker</h2>
-    <p class="hint" id="adminGate">Sinusuri ang access…</p>
-    <div id="adminBody" hidden style="display:grid;gap:14px">
-      <p class="hint">I-type ang <b>username</b> ng player. Kukunin ng system mula sa database ang Success deposits niya ngayong araw (1 PM–9 PM) — <b>isang deposit na ₱100 pataas = 1 palo</b>. Naka-lock ang palo hangga't hindi naaabot ang 3× turnover sa slots/casino. Server ang nagde-decide ng premyo at naitatala agad sa wins ledger.</p>
-      <label class="field"><span>Player username</span><div class="btnrow"><input class="inp" id="acct" type="text" autocomplete="off" spellcheck="false" placeholder="hal. juan123" style="flex:1;min-width:0"><button class="btn small" id="lookupBtn" type="button">Check</button></div></label>
-      <div class="tierbox" id="aTier"></div>
-      <div class="offerbox" id="offerBox" hidden></div>
-      <div class="btnrow" id="makeRow" hidden><button class="btn small" id="makeLink" type="button">Gumawa ng link</button></div>
-      <div class="field" id="linkField" hidden><span>Player link</span>
-        <div class="linkrow"><code id="plink"></code></div>
-        <div class="btnrow"><button class="btn small" id="copyLink" type="button">Copy link</button><button class="btn small" id="copyMsg" type="button">Copy message + link</button><button class="btn small ghost" id="newLink" type="button">Bagong link</button></div>
-      </div>
-      <p class="hint" id="aMsg"></p>
-      <div class="offerbox" id="capBox"><strong>Daily budget</strong><p id="capText">…</p><div class="btnrow"><div class="money" style="flex:1;min-width:0"><span>₱</span><input class="inp" id="capInput" type="number" min="0" step="100" inputmode="numeric" placeholder="bagong budget ngayong araw"></div><button class="btn small ghost" id="capBtn" type="button">Dagdag budget</button></div><p class="hint" id="capMsg"></p></div>
-    </div>
-  </section>
-  <p class="preview-label" id="previewLabel" hidden>Preview ng player view</p>
+<!--
+  Gopyesta · Lucky Ferris Wheel — the player page for this service.
 
-  <header class="mark">
-    <img src="data:image/png;base64,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" alt="Gopyesta">
-    <p>Community Games</p>
+  Built from the design file in Downloads/lucky-ferris-wheel. The carnival stage, the 3D
+  canvas wheel and the styling are that file's, unchanged. What was replaced is the data
+  layer: the design file kept accounts, deposits, bets, the daily release, the reward roll
+  and an admin PIN in localStorage, all editable from the console. Those now live in app.py
+  behind this service's existing per-player link codes.
+
+  The link maker is at /admin.html#admin; opening /#admin here redirects there, so the
+  bookmark the team already has keeps working.
+-->
+
+<div class="wrap">
+  <header>
+    <div><img class="logo" src="/ferris-logo.png" alt="GoPyesta"><div class="brand" style="font-size:22px;margin-top:4px">Lucky Ferris Wheel<small>Pick a cabin · Spin · Win</small></div></div>
+    <div class="who" id="who"></div>
   </header>
 
-  <main class="booth" id="booth" aria-live="polite">
-    <button class="soundbtn" id="soundBtn" type="button" aria-pressed="true">Sound on</button>
-    <div>
-      <p class="eyebrow" id="eyebrow">Gopyesta</p>
-      <p id="greeting" hidden style="font-weight:700;color:var(--accent);margin:2px 0 0"></p>
-      <h1 class="game" id="gameTitle"></h1>
-      <p class="range" id="range"></p>
-      <p class="range" id="entries" hidden style="font-weight:700"></p>
-    </div>
-    <p class="demo" id="demoTag" hidden>DEMO · kailangan ng link mula sa agent mo para sa totoong premyo</p>
-    <p class="cheer" id="cheer"></p>
-    <div class="play" id="play"></div>
-    <ul class="ladder" id="ladder" aria-label="Mga premyo" hidden></ul>
-    <label class="agree" id="agreeLbl"><input type="checkbox" id="agree"><span>Nabasa ko at sang-ayon ako sa <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button> ng Palarong Pyesta.</span></label>
-    <div class="acts"><button class="btn" id="goBtn" type="button"></button><button class="btn ghost" id="resetBtn" type="button">Reset</button></div>
-    <div class="win" id="win" hidden>
-      <small>Bonus mo</small>
-      <strong id="amt"></strong>
-      <p id="winNote"></p>
-    </div>
-    <p class="note" id="results" hidden></p>
-    <p class="note" id="note"></p>
-  </main>
+  <div class="grid">
+    <section class="stage" id="stage">
+      <div class="status">
+        <span class="live" id="live"><i></i><span id="liveTxt">Locked</span></span>
+        <span class="clock" id="clock"></span>
+      </div>
+      <div class="wheelbox" id="wheelbox">
+        <canvas id="wheelCv" aria-hidden="true"></canvas>
+        <div class="count" id="count" aria-live="assertive"></div>
+        <div class="startrow"><div class="startpick" id="startPick"></div><button class="btn start" id="startBtn" hidden>START</button></div>
+      </div>
+      <div class="hint" id="hint"></div>
+      <div class="toast" id="toast"></div>
+    </section>
 
-  <section class="mech" id="mech" aria-labelledby="mechTitle" hidden>
-    <h2 id="mechTitle">Mechanics</h2>
-    <p class="mech-sub" id="mechOffer"></p>
-    <ol id="mechSteps"></ol>
-    <h3 hidden>Prize pool</h3>
-    <div class="tblwrap" hidden><table><thead><tr><th>Premyo</th><th>Halaga</th><th>Tsansa</th></tr></thead><tbody id="mechTiers"></tbody></table></div>
-  </section>
+    <aside class="stack">
+      <div class="card">
+        <h2>Ang cabin mo</h2>
+        <div id="goalInfo"></div>
+      </div>
 
-  <div class="jp" id="jp" role="dialog" aria-modal="true" aria-labelledby="jpTitle" hidden>
-    <canvas id="confetti"></canvas>
-    <div class="jp-card">
-      <p class="jp-title" id="jpTitle">YOU WON!</p>
-      <p class="jp-sub" id="jpSub"></p>
-      <p class="jp-label">Reward mo</p>
-      <p class="jp-amt" id="jpAmt"></p>
-      <p class="jp-note">Naitala na ang panalo mo. Ipapadala ng agent mo ang reward sa GCash pagkatapos ma-verify.</p>
-      <button class="btn" id="jpClose" type="button">Claim reward</button>
-    </div>
+      <div class="card">
+        <h2>Laro ngayong araw · <span id="dateLbl"></span></h2>
+        <div class="today" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+          <div class="stat"><div class="k">Deposit ngayon</div><div class="v" id="vDep">₱0</div></div>
+          <div class="stat"><div class="k">Turnover ngayon</div><div class="v" id="vBet">₱0</div></div>
+        </div>
+        <!-- "Turnover", not "slot bets": bets_daily only stores game_type='ALL',
+             so the server cannot tell slots from any other game. Saying slots
+             would be a rule nothing on this side can enforce. -->
+        <p class="note">Galing sa platform ang mga numero at nag-a-update tuwing ilang minuto.</p>
+      </div>
+
+      <div class="card">
+        <h2>Ngayong linggo · Lunes–Linggo</h2>
+        <div class="week" id="week"></div>
+        <div class="next" id="weekTxt"></div>
+      </div>
+
+      <div class="card">
+        <h2>Turnover ng bonus</h2>
+        <div id="wager"></div>
+        <div class="bar"><i id="wbar"></i></div>
+        <p class="note" id="wNote"></p>
+      </div>
+
+      <div class="card">
+        <h2>Mga nakaraang bonus</h2>
+        <ul class="hist" id="hist"></ul>
+      </div>
+    </aside>
   </div>
+</div>
 
-  <details class="tnc" id="tnc">
-    <summary>Palarong Pyesta Terms &amp; Conditions</summary>
-    <h3>Terms &amp; Conditions</h3>
-    <ol>
-      <li>Open to verified Gopyesta players aged 21 and above. Self-excluded, restricted, test or unverified accounts are not eligible.</li>
-      <li>Each successful deposit of at least ₱100 made between 1:00 PM and 9:00 PM (Philippine time) earns one entry (one "palo"), regardless of the deposit amount. Entries are computed from the platform's deposit records; pending, failed or reversed deposits, and deposits made outside the window, do not count.</li>
-      <li>An entry is locked until your valid bets on slots and casino games for the day reach 3× the deposit behind it (deposits unlock in the order they were made, cumulatively). Other game types do not count toward this requirement. Bet records refresh periodically, so an entry may unlock up to about 30 minutes after the requirement is met.</li>
-      <li>In Palosebo you pick a climber (Juan, Pedro or Tonyo) and tap to climb a greased bamboo pole; your finishing place decides your prize: 1st ₱37, 2nd ₱27, 3rd ₱17, drawn at random by the system for each entry. Which climber you pick does not change your chances.</li>
-      <li>Entries are valid only on the day the deposit was made and must be unlocked and played before the end of that day. Unplayed or still-locked entries expire.</li>
-      <li>Total bonus awarded under this promo is limited to a daily budget (₱10,000 unless announced otherwise) across all players. Once the budget is used up, no further links or plays are issued that day.</li>
-      <li>Each result is recorded by the system the moment it is drawn and is final. Refreshing the page, reopening the link or using another device does not give another turn.</li>
-      <li>Rewards are sent manually by your agent (e.g. via GCash) after verification, within the time your agent announces. Gopyesta may withhold or revoke a reward where the deposit is reversed or the promo is abused.</li>
-      <li>Multiple or linked accounts, or any attempt to abuse this promo, void the reward and may lead to action on the account.</li>
-      <li>Gopyesta may change, suspend or end this promo at any time. Gopyesta management's decision on any dispute is final.</li>
-      <li>Play responsibly. Set limits on your deposits and time, and ask for help if gambling stops being fun.</li>
-    </ol>
-    <p class="small">By ticking the agreement box and playing, you accept these Terms &amp; Conditions.</p>
-  </details>
+<!-- Shown when the page is opened without a valid bot link, and when the wheel
+     is switched off. Replaces the demo's signup form: there is no account to
+     create here, the deposit link IS the account. -->
+<div class="auth" id="gate" hidden>
+  <form id="gateCard" novalidate onsubmit="return false">
+    <img src="/ferris-logo.png" alt="GoPyesta" style="width:220px;align-self:center;margin-top:-6px">
+    <h3 id="gateTitle">Buksan ang spin link</h3>
+    <p style="margin:0;color:var(--mute);font-size:14px" id="gateMsg">Galing sa GoPyesta team ang link na ito. Buksan iyon para makalaro.</p>
+  </form>
 </div>
 
 <script>
-const BRAND={"key":"gopyesta","name":"Gopyesta","labels":["1st","2nd","3rd"],"promo":{"name":"Palarong Pyesta","target":"Lahat ng verified Gopyesta players","trig":"Isang deposit na ₱100 pataas mula 1 PM hanggang 9 PM = 1 palo; mabubuksan ang palo kapag umabot na sa 3× ng deposit ang laro mo sa slots o casino","valid":"Araw-araw, 1 PM–9 PM; may daily budget ang bonus","script":"Hi po! Pasok na ang deposit mo kaya may Palarong Pyesta ka na. Isang deposit na ₱100 pataas = 1 akyat sa palosebo — maglaro muna ng slots/casino na 3× ng deposit mo para ma-unlock, tapos umakyat! Hanggang ₱777 ang maaaring halaga ng mga premyo namin."},"confetti":["#ff5d8f","#ffd23f","#3fd0c9","#7d6bff","#ffffff"],"confettiBig":["#ffd23f","#fff1b8","#ff5d8f","#ffffff"]};
-// ---------- shared helpers ----------
-const $=id=>document.getElementById(id);
-// mechanics come from the server (/api/config); these are the fallback defaults
-let CONF={minDeposit:100,prizes:[37,27,17],weights:[5,85,10],dailyCap:10000,wagerMult:3,depFrom:"13:00",depTo:"21:00",playUntil:"23:59"};
-let PRIZES=CONF.prizes,WEIGHTS=CONF.weights;
-function php(n){return "₱"+Number(n).toLocaleString(undefined,{maximumFractionDigits:0})}
-function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296}
-function drawStep(){let r=rnd()*100;for(let i=0;i<WEIGHTS.length;i++){r-=WEIGHTS[i];if(r<0)return i}return 0} // DEMO only — real draws happen server-side
-function shuffle(a){for(let k=a.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
-const reduce=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
-function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
-function fmtTime(h){const [H,M]=String(h).split(":");const n=+H;return (n%12||12)+(M&&M!=="00"?":"+M:"")+(n<12?" AM":" PM")}
-function syncHM(t){return t?String(t).slice(11,16):""}
+/* ---------- link, constants, helpers ----------
+   Identity is the link code in the hash — the convention this service already used:
+     #admin           -> the link maker (now its own page)
+     #<acct>-<hex>    -> one player's session for one day
+   Nothing about the player is kept in this browser. The design file this page came from
+   held accounts, deposits, bets, the daily release, the reward roll and an admin PIN in
+   localStorage, all of which were editable from the console; every one of those now lives
+   on the server. */
+const RAW = decodeURIComponent(location.hash.slice(1)).toLowerCase();
+if (RAW === "admin") location.replace("/admin.html#admin");
+const CODE = /^[a-z0-9]{1,32}-[a-z0-9]{2,8}$/.test(RAW) ? RAW : "";
 
-// ---------- player links ----------
-// #admin = link maker; #<account>-<hex> = a server-side session for one account/day; anything else = demo
-const raw=decodeURIComponent(location.hash.slice(1)).toLowerCase();
-let mode=raw==="admin"?"admin":/^[a-z0-9]{1,32}-[a-z0-9]{2,8}$/.test(raw)?"player":"demo";
-let cfg={code:mode==="player"?raw:"demo",name:mode==="player"?"":"Juan"};
-let session=null; // GET /api/session/<code> (player mode)
-function qualifies(){return mode!=="player"||!!(session&&session.exists&&!session.expired&&session.entriesEarned>0)}
-function storeKey(){return BRAND.key+":"+mode+":"+cfg.code}
+const N = 8;
+let MIN_DEP = 100, TURNOVER = 5;
+let CAB_TIER = [0,1,2,3,0,1,2,3];          /* cabin index -> index into TIERS */
+/* Requirements only — the reward ranges stay on the server. /api/config sends
+   tierRequired and never the floors or ceilings, because a range in this file is a
+   range in DevTools. */
+let TIERS = [{n:1,bet:300},{n:2,bet:600},{n:3,bet:8000},{n:4,bet:50000}];
+let CATS = ["egame","casino"];
 
-// ---------- sound ----------
-let actx=null,soundOn=true;
-try{soundOn=localStorage.getItem(BRAND.key+"-sound")!=="off"}catch(e){}
-function audio(){if(!soundOn)return null;if(!actx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;actx=new AC()}if(actx.state==="suspended")actx.resume();return actx}
-function beep(f,dur,vol,type,delay){const a=audio();if(!a)return;const t=a.currentTime+(delay||0),o=a.createOscillator(),g=a.createGain();o.type=type||"triangle";o.frequency.value=f;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);o.connect(g).connect(a.destination);o.start(t);o.stop(t+dur+.02)}
-function noise(dur,vol,freq){const a=audio();if(!a)return;const n=Math.floor(a.sampleRate*dur),b=a.createBuffer(1,n,a.sampleRate),ch=b.getChannelData(0);for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type="bandpass";f.frequency.value=freq||1200;const g=a.createGain();g.gain.value=vol;s.connect(f).connect(g).connect(a.destination);s.start()}
-function tick(){beep(1700+rnd()*400,.04,.07,"square")}
-function fanfare(big){(big?[523.25,659.25,783.99,1046.5,1318.5,1568]:[659.25,783.99,1046.5]).forEach((f,i)=>beep(f,.5,big?.07:.12,big?"square":"triangle",i*.11))}
-function paintSound(){$("soundBtn").textContent=soundOn?"Sound on":"Sound off";$("soundBtn").setAttribute("aria-pressed",soundOn)}
-$("soundBtn").onclick=()=>{soundOn=!soundOn;try{localStorage.setItem(BRAND.key+"-sound",soundOn?"on":"off")}catch(e){}if(!soundOn&&actx)actx.suspend();paintSound()};
-paintSound();
-function cheer(text){const c=$("cheer");c.textContent=text;c.classList.remove("pop");void c.offsetWidth;c.classList.add("pop")}
-function needAgree(){if($("agree").checked)return false;const l=$("agreeLbl");l.classList.remove("nudge");void l.offsetWidth;l.classList.add("nudge");cheer("I-check muna ang T&C.");return true}
+const peso = v => "₱" + Math.round(Number(v) || 0).toLocaleString("en-PH");
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const short = k => new Date(k + "T00:00:00").toLocaleDateString("en-PH", {weekday:"short", month:"short", day:"numeric"});
+const dayName = k => new Date(k + "T00:00:00").toLocaleDateString("en-PH", {weekday:"short"});
+const addDays = (k, n) => { const d = new Date(k + "T00:00:00"); d.setDate(d.getDate() + n); return d.toLocaleDateString("en-CA"); };
+const weekStart = k => addDays(k, -((new Date(k + "T00:00:00").getDay() + 6) % 7));
 
-// ---------- game ----------
-// Palosebo — ported from the real GoPyesta source (gopyesta-palosebo/split/app.js), same art,
-// physics, sounds and farm scene. The only change from the standalone source: the outcome used
-// to be drawn by a local random (PLACES, 3 fixed prizes). Here it's this backend's real, server-
-// decided prize step (4 tiers, ctx.start/resolve — the same money-authoritative contract every
-// other GAME module in this file already uses) — "my" climber's final height is set from that
-// step; the other two climbers race to their own random heights, purely for spectacle, since
-// placement no longer carries any money meaning once there are 4 prize tiers and 3 racers.
-const GAME=(()=>{
-  const KIDS=[{n:"Juan",c:"#e8343f",c2:"#ffd23f"},{n:"Pedro",c:"#2a6ad8",c2:"#fff"},{n:"Tonyo",c:"#f0b21a",c2:"#2a8a3a"}];
-  const RACE=8.2,R=(a,b)=>a+Math.random()*(b-a);
-  let scene,climbers=[],sel=null,raf=null,run=null,busyR=false;
-  const logoSrc=(document.querySelector(".mark img")||{}).src||"";
+let armed = false, sel = null;
+let S = null;          /* last /api/session/<code> payload */
+let busy = false;      /* a pick or spin request is in flight */
+let collected = false; /* today's win toast has been dismissed */
 
-  // a climber seen from behind, hugging the pole; arms and legs shimmy with SMIL so it runs on every browser
-  function kidSVG(k,id){const D=".6s",A=(a,b)=>"<animate attributeName='d' dur='"+D+"' repeatCount='indefinite' values='"+a+";"+b+";"+a+"' keyTimes='0;.5;1' calcMode='spline' keySplines='.45 0 .55 1;.45 0 .55 1'/>",
-    C=(x1,y1,x2,y2)=>"<animate attributeName='cx' dur='"+D+"' repeatCount='indefinite' values='"+x1+";"+x2+";"+x1+"'/><animate attributeName='cy' dur='"+D+"' repeatCount='indefinite' values='"+y1+";"+y2+";"+y1+"'/>",
-    skin="#c88a5a",skin2="#a86c42",g="kg"+id;
-    const LA1="M21 31 Q11 21 27 9",LA2="M21 31 Q12 27 27 19",RA1="M39 31 Q49 27 33 19",RA2="M39 31 Q48 21 33 9";
-    const LL1="M26 55 Q12 60 27 70",LL2="M26 55 Q14 66 27 76",RL1="M34 55 Q48 66 33 76",RL2="M34 55 Q46 60 33 70";
-    return "<svg viewBox='0 0 60 84' class='kd' aria-hidden='true'><defs>"+
-      "<linearGradient id='"+g+"s' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='#000' stop-opacity='.28'/><stop offset='.45' stop-color='#000' stop-opacity='0'/><stop offset='.75' stop-color='#fff' stop-opacity='.12'/><stop offset='1' stop-color='#000' stop-opacity='.25'/></linearGradient>"+
-      "<radialGradient id='"+g+"h' cx='45%' cy='35%' r='65%'><stop offset='0' stop-color='#3a2a1a'/><stop offset='1' stop-color='#0e0804'/></radialGradient></defs>"+
-      "<g class='kd-all'><animateTransform attributeName='transform' type='translate' dur='"+D+"' repeatCount='indefinite' values='0 1;0 -2.5;0 1' keyTimes='0;.5;1'/>"+
-      "<path d='"+LL1+"' stroke='"+skin2+"' stroke-width='7' fill='none' stroke-linecap='round'>"+A(LL1,LL2)+"</path>"+
-      "<path d='"+RL1+"' stroke='"+skin+"' stroke-width='7' fill='none' stroke-linecap='round'>"+A(RL1,RL2)+"</path>"+
-      "<ellipse rx='4.5' ry='2.6' fill='#5a3414' cx='27' cy='70'>"+C(27,70,27,76)+"</ellipse><ellipse rx='4.5' ry='2.6' fill='#4a2a10' cx='33' cy='76'>"+C(33,76,33,70)+"</ellipse>"+
-      "<path d='M20 48 Q30 46 40 48 L41 58 Q36 60 31 57 L29 57 Q24 60 19 58 Z' fill='#24325a' stroke='#121a30' stroke-width='.6'/>"+
-      "<path d='M17 30 Q30 23 43 30 L41 50 Q30 53 19 50 Z' fill='"+k.c+"' stroke='#2a1408' stroke-width='.7'/>"+
-      "<path d='M17 30 Q30 23 43 30 L41 50 Q30 53 19 50 Z' fill='url(#"+g+"s)'/>"+
-      "<path d='M22 38 h16' stroke='"+k.c2+"' stroke-width='2.2' opacity='.9'/><path d='M24 33 q6 3 12 0 M25 44 q5 2 10 0' stroke='#000' stroke-opacity='.18' stroke-width='1' fill='none'/>"+
-      "<path d='M26 46 q3 -2 6 1 q-2 3 -6 -1 Z' fill='#4a3218' opacity='.5'/>"+
-      "<path d='"+LA1+"' stroke='"+skin+"' stroke-width='6.5' fill='none' stroke-linecap='round'>"+A(LA1,LA2)+"</path>"+
-      "<path d='"+RA1+"' stroke='"+skin2+"' stroke-width='6.5' fill='none' stroke-linecap='round'>"+A(RA1,RA2)+"</path>"+
-      "<circle r='4' fill='"+skin+"' cx='28' cy='9' stroke='#6a3a1a' stroke-width='.5'>"+C(28,9,28,19)+"</circle><circle r='4' fill='"+skin2+"' cx='32' cy='19' stroke='#6a3a1a' stroke-width='.5'>"+C(32,19,32,9)+"</circle>"+
-      "<path d='M17 31 q-2 -3 2 -4 M43 31 q2 -3 -2 -4' stroke='"+k.c+"' stroke-width='4' stroke-linecap='round'/>"+
-      "<g class='kd-grease'><path d='M20 34 q4 -2 7 2 q-3 4 -7 -2 Z M33 40 q4 -1 5 3 q-4 2 -5 -3 Z M22 47 q6 -2 12 1 q-6 3 -12 -1 Z' fill='#0a0806' opacity='.75'/>"+
-        "<path d='M14 24 q2 2 0 4 M47 22 q-2 2 0 4 M19 62 q3 2 1 5 M41 62 q-3 2 -1 5' stroke='#0a0806' stroke-width='3' stroke-linecap='round' opacity='.7'/><path d='M23 36 q2 -1 3 1' stroke='#fff' stroke-width='.6' opacity='.5'/></g>"+
-      "<g class='kd-head'><rect x='27' y='22' width='6' height='6' rx='2' fill='"+skin2+"'/><ellipse cx='22.6' cy='20' rx='1.8' ry='2.6' fill='"+skin+"'/><ellipse cx='37.4' cy='20' rx='1.8' ry='2.6' fill='"+skin+"'/>"+
-      "<ellipse cx='30' cy='18' rx='7.8' ry='8.3' fill='url(#"+g+"h)'/><path d='M25 14 q5 -4 10 0' stroke='#5a4a3a' stroke-width='.8' fill='none' opacity='.7'/><path d='M27 25 q3 1.5 6 0' stroke='#0e0804' stroke-width='1.6' fill='none'/>"+
-      "<path class='kd-sweat' d='M39 11 q-1.6 2.6 0 3.6 q1.6 -1 0 -3.6 Z' fill='#9ad8ff'/></g>"+
-      "</g></svg>"}
-  function crowd(dur,vol,loud){const a=audio();if(!a)return;const n=Math.floor(a.sampleRate*dur),b=a.createBuffer(2,n,a.sampleRate);
-    for(let c=0;c<2;c++){const ch=b.getChannelData(c);let m=0;for(let i=0;i<n;i++){m+=(Math.random()-.5)*.02;m*=.999;ch[i]=(Math.random()*2-1)*(.6+.4*Math.sin(i/a.sampleRate*(5+c))+m)}}
-    const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type="bandpass";f.frequency.value=loud?1100:750;f.Q.value=.6;const g=a.createGain(),t=a.currentTime;
-    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+Math.min(.4,dur/3));g.gain.linearRampToValueAtTime(vol*.8,t+dur*.7);g.gain.linearRampToValueAtTime(0,t+dur);s.connect(f).connect(g).connect(a.destination);s.start();
-    if(loud)[0,.35,.8].forEach(d=>{const o=a.createOscillator(),gg=a.createGain();o.frequency.setValueAtTime(1900,t+d);o.frequency.linearRampToValueAtTime(2600,t+d+.18);o.frequency.linearRampToValueAtTime(2100,t+d+.35);gg.gain.setValueAtTime(.0001,t+d);gg.gain.exponentialRampToValueAtTime(.05,t+d+.03);gg.gain.exponentialRampToValueAtTime(.0001,t+d+.38);o.connect(gg).connect(a.destination);o.start(t+d);o.stop(t+d+.4)})}
-  function cheerSnd(v){crowd(1.2,v||.06)}
-  function slipSnd(){const a=audio();if(!a)return;const t=a.currentTime,o=a.createOscillator(),g=a.createGain();o.type="triangle";o.frequency.setValueAtTime(900,t);o.frequency.exponentialRampToValueAtTime(220,t+.4);g.gain.setValueAtTime(.08,t);g.gain.exponentialRampToValueAtTime(.001,t+.42);o.connect(g).connect(a.destination);o.start(t);o.stop(t+.45)}
-  function drum(){const a=audio();if(!a)return;for(let i=0;i<4;i++){beep(110,.08,.25,"sine",i*.5);noise(.05,.15,300)}}
-  function bugle(){[523,659,784,1047].forEach((f,i)=>beep(f,.18,.1,"square",i*.13))}
-  // a climb curve: height (0..1) over time with random slips, ending at `end` at time T — used for
-  // the non-animated resume/replay path only (the live race drives height from real taps instead)
-  function curve(end,T){const n=16,pts=[[0,0]];let h=0;const raw=[0];for(let i=1;i<=n;i++){h+=Math.random()<.22?-R(.03,.09):R(.05,.12);h=Math.max(0,h);raw.push(h)}
-    const k=end/Math.max(.01,raw[n]);for(let i=1;i<=n;i++)pts.push([T*i/n,Math.min(1,Math.max(0,raw[i]*k))]);pts[n][1]=end;return pts}
-  function at(pts,t){if(t<=0)return 0;for(let i=1;i<pts.length;i++)if(t<=pts[i][0]){const a=pts[i-1],b=pts[i],u=(t-a[0])/(b[0]-a[0]);return a[1]+(b[1]-a[1])*u}return pts[pts.length-1][1]}
-  function setH(c,h,prev){const top=c.pole.clientHeight-74;const gr=c.el.querySelector(".kd-grease");if(gr)gr.style.opacity=Math.min(1,.15+Math.max(h,c.maxH||0)*1.1).toFixed(2);c.maxH=Math.max(c.maxH||0,h);c.el.style.transform="translateY("+(-h*top).toFixed(1)+"px)";const sl=h<prev-.002,cl=!sl&&h>prev+.0005;const sv=c.el.querySelector("svg");if(sv&&sv.pauseAnimations){if(cl&&sv.animationsPaused())sv.unpauseAnimations();else if(!cl&&!sv.animationsPaused())sv.pauseAnimations()}c.el.classList.toggle("slip",sl);c.el.classList.toggle("climb",!sl&&h>prev+.0005)}
-  function pick(i,ctx){if(busyR||(ctx.state&&ctx.state.done))return;sel=i;scene.querySelectorAll(".ps-pick button").forEach((b,k)=>b.classList.toggle("on",k===i));climbers.forEach((c,k)=>c.lane.classList.toggle("mine",k===i));
-    beep(660,.1,.08,"triangle");scene.querySelector(".ps-me").textContent=KIDS[i].n;cheer("Pambato mo si "+KIDS[i].n+"! Pindutin ang SIMULAN, tapos i-tap nang mabilis ang screen!");const b=$("goBtn");b.disabled=false;b.textContent="SIMULAN ANG KARERA!"}
-  function grease(c){for(let i=0;i<6;i++){const d=el("i","ps-gr");d.style.cssText="--dx:"+R(-26,26).toFixed(0)+"px;--dy:"+R(10,40).toFixed(0)+"px";c.el.appendChild(d);setTimeout(()=>d.remove(),700)}}
-  // in-scene celebration sprites — renamed from the source's confetti() to avoid colliding with
-  // this page's own canvas confetti(count,big) used by the shared win popup
-  function sceneConfetti(){for(let i=0;i<40;i++){const d=el("i","ps-cf");d.style.cssText="left:"+R(5,95).toFixed(0)+"%;--c:"+["#ffd23f","#ff5d8f","#3fd0c9","#7d6bff","#fff","#e8343f"][i%6]+";--x:"+R(-60,60).toFixed(0)+"px;--r:"+R(-540,540).toFixed(0)+"deg;animation-delay:"+R(0,.6).toFixed(2)+"s;animation-duration:"+R(1.8,3).toFixed(2)+"s";scene.appendChild(d);setTimeout(()=>d.remove(),3800)}
-    for(let k=0;k<3;k++){const f=el("div","ps-fw","<b></b>".repeat(12));f.style.cssText="left:"+R(15,85).toFixed(0)+"%;top:"+R(10,30).toFixed(0)+"%;--c:"+["#ffd23f","#ff5d8f","#3fd0c9"][k]+";animation-delay:"+(k*.35).toFixed(2)+"s";scene.appendChild(f);setTimeout(()=>f.remove(),2600)}}
-  function finishRace(place,order,anim){const w=climbers[order[0]];w.el.classList.remove("climb","slip");w.el.classList.add("win");w.lane.classList.add("won");scene.classList.remove("racing");
-    order.forEach((k,pos)=>{const b=climbers[k].lane.querySelector(".ps-rank");b.textContent=["1st","2nd","3rd"][pos];b.className="ps-rank r"+pos});
-    climbers.forEach(c=>{c.el.classList.remove("climb","slip");const v=c.el.querySelector("svg");v&&v.pauseAnimations&&v.pauseAnimations()});
-    order.slice(1).forEach(k=>{const c=climbers[k];c.el.classList.add("lose");if(anim){c.el.style.transition="transform 1.4s cubic-bezier(.5,0,.8,.6) .5s";c.el.style.transform="translateY(0)";setTimeout(()=>{c.el.style.transition=""},2000)}else c.el.style.transform="translateY(0)"});
-    scene.querySelectorAll('.pp-row').forEach(r=>{r.classList.add('cheer');if(anim)setTimeout(()=>r.classList.remove('cheer'),3500)});
-    if(anim){sceneConfetti();crowd(3,.14,true);fanfare(true);cheer("Nakuha ni "+KIDS[order[0]].n+" ang bandila! Si "+KIDS[sel].n+" ay "+BRAND.labels[place]+" · "+php(ladder[place])+"!")}}
-  // the watching crowd, seen from behind
-  const SKIN=["#c88a5a","#b8784a","#d8a070","#a86c42","#e0b080"],HAIR=["#1a1008","#2a1a10","#3a2a1a","#0e0804","#5a4a3a"],SHIRT=["#e8343f","#2a6ad8","#ffd23f","#3fd0c9","#7d6bff","#ff8a3d","#f2f2f2","#2a8a3a","#ff5d8f","#8a5a2a"];
-  function person(i){const r=x=>{const v=Math.sin(i*12.9898+x*78.233)*43758.5453;return v-Math.floor(v)},pk=a=>a[Math.floor(r(a.length)*a.length)];
-    const sk=pk(SKIN),hc=pk(HAIR),sh=SHIRT[(i*7+3)%SHIRT.length],sty=Math.floor(r(9)*5);let hair;
-    if(sty===0)hair="<ellipse cx='20' cy='17' rx='8.6' ry='8.2' fill='"+hc+"'/>";
-    else if(sty===1)hair="<path d='M11 18 Q11 7 20 7 Q29 7 29 18 L30 34 Q25 31 20 32 Q15 31 10 34 Z' fill='"+hc+"'/>";
-    else if(sty===2)hair="<ellipse cx='20' cy='17' rx='8.6' ry='8.2' fill='"+hc+"'/><path d='M8 16 L20 4 L32 16 Z' fill='#d8b070' stroke='#8a6a30' stroke-width='.8'/>";
-    else if(sty===3)hair="<ellipse cx='20' cy='17' rx='8.6' ry='8.2' fill='"+hc+"'/><path d='M11.5 15 Q20 6 28.5 15 Z' fill='"+SHIRT[(i*3)%SHIRT.length]+"'/><rect x='18' y='9' width='14' height='3' rx='1.5' fill='"+SHIRT[(i*3)%SHIRT.length]+"' transform='rotate(180 25 10.5)'/>";
-    else hair="<ellipse cx='20' cy='16' rx='8.4' ry='7.4' fill='"+hc+"'/><circle cx='20' cy='9' r='4' fill='"+hc+"'/>";
-    const hold=i%4===1?"<g class='pp-fl'><rect x='-1' y='-22' width='2' height='22' fill='#5a3a1a'/><path d='M1 -22 L14 -18 L1 -14 Z' fill='"+["#e8343f","#2a6ad8","#ffd23f"][i%3]+"'/></g>":i%4===3?"<ellipse class='pp-fan' cx='0' cy='-6' rx='6' ry='5' fill='#d8b070' stroke='#8a6a30' stroke-width='.6'/>":"";
-    return "<svg viewBox='0 0 40 64' class='pp' style='--d:"+(-r(5)*2).toFixed(2)+"s;--j:"+(.26+r(6)*.14).toFixed(2)+"s' aria-hidden='true'>"+
-      "<g class='pp-body'>"+
-      "<g class='pp-arm l'><path d='M9 36 L5 52' stroke='"+sk+"' stroke-width='5' stroke-linecap='round'/><path d='M9 36 L7 43' stroke='"+sh+"' stroke-width='6' stroke-linecap='round'/></g>"+
-      "<g class='pp-arm r'><path d='M31 36 L35 52' stroke='"+sk+"' stroke-width='5' stroke-linecap='round'/><path d='M31 36 L33 43' stroke='"+sh+"' stroke-width='6' stroke-linecap='round'/><g transform='translate(35 52)'>"+hold+"</g></g>"+
-      "<path d='M8 36 Q20 28 32 36 L33 64 L7 64 Z' fill='"+sh+"' stroke='rgba(0,0,0,.35)' stroke-width='.6'/><path d='M8 36 Q20 28 32 36 L33 64 L7 64 Z' fill='url(#ppShade)'/>"+
-      "<rect x='17' y='24' width='6' height='7' rx='2' fill='"+sk+"'/><ellipse cx='11.6' cy='19' rx='1.6' ry='2.4' fill='"+sk+"'/><ellipse cx='28.4' cy='19' rx='1.6' ry='2.4' fill='"+sk+"'/>"+
-      "<ellipse cx='20' cy='19' rx='8' ry='8.6' fill='"+sk+"'/>"+hair+"</g></svg>"}
-  function crowdHTML(){let h="<svg width='0' height='0' style='position:absolute'><defs><linearGradient id='ppShade' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='#000' stop-opacity='.3'/><stop offset='.5' stop-color='#000' stop-opacity='0'/><stop offset='1' stop-color='#000' stop-opacity='.3'/></linearGradient></defs></svg>";
-    h+="<div class='pp-row back'>"+Array.from({length:11},(_,i)=>person(i+40)).join("")+"</div><div class='pp-row front'>"+Array.from({length:9},(_,i)=>person(i)).join("")+"</div>";return h}
+async function api(path, body) {
+  try {
+    const r = body
+      ? await fetch(path, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)})
+      : await fetch(path);
+    return await r.json();
+  } catch (e) { return {error: "network"}; }
+}
 
-  const G={label:"Palosebo",title:"PALOSEBO",btn:"Pumili muna ng aakyat",
-    how:["I-check ang T&C box.","Tatlong bata ang magpapaunahan umakyat sa madulas na kawayan para makuha ang bandila sa tuktok.","Piliin kung sino sa tingin mo ang pinakamabilis: Juan, Pedro o Tonyo. Hindi nito binabago ang premyo mo.","Pindutin ang SIMULAN ANG KARERA!, tapos i-tap nang i-tap ang screen para umakyat ang pinili mo. Madulas ang kawayan kaya puwede siyang madulas pababa.","Premyo ayon sa puwesto ng pinili mo: 1st ₱37, 2nd ₱27, 3rd ₱17. Random ang puwesto ayon sa win rate; hindi ito nababago ng pinili mo o ng bilis ng pag-tap mo."],
-    note:"Pumili ng aakyat, tapos i-tap nang mabilis ang screen para siya umakyat!",
-    build(play,ctx){cancelAnimationFrame(run);busyR=false;sel=null;climbers=[];
-      scene=el("div","ps");
-      let lights="";for(let k=0;k<14;k++)lights+="<i style='left:"+(k*7.5+2)+"%;--c:"+["#ffd23f","#ff5d8f","#3fd0c9","#7d6bff"][k%4]+";animation-delay:-"+(k*.23).toFixed(2)+"s'></i>";
-      const sky="<div class='ps-sun'><i></i></div>"+[0,1,2].map(i=>"<div class='ps-cloud c"+i+"'></div>").join("")+[0,1,2].map(i=>"<div class='ps-bird b"+i+"'><i></i><i></i></div>").join("")+
-        "<svg class='ps-farm' viewBox='0 0 400 200' preserveAspectRatio='none' aria-hidden='true'><defs><linearGradient id='psW' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#bfe6f4'/><stop offset='1' stop-color='#7fbcd8'/></linearGradient>"+
-          "<pattern id='psR' width='8' height='6' patternUnits='userSpaceOnUse'><path d='M2 6 L1 1 M2 6 L3.5 1.5 M2 6 L4.8 3 M6 6 L5 2 M6 6 L7.6 1' stroke='#3e8a2a' stroke-width='.7' fill='none'/></pattern>"+
-          "<pattern id='psR2' width='12' height='9' patternUnits='userSpaceOnUse'><path d='M3 9 L1.5 1 M3 9 L5 1.5 M3 9 L7 4 M9 9 L8 2 M9 9 L11.5 1.5' stroke='#2e7a1e' stroke-width='1' fill='none'/></pattern></defs>"+
-          "<path d='M0 70 L40 38 L70 56 L110 24 L160 60 L200 36 L250 62 L300 28 L350 58 L400 40 L400 90 L0 90 Z' fill='#7aa8c4' opacity='.85'/>"+
-          "<path d='M0 84 L50 60 L100 78 L150 58 L220 82 L270 62 L330 80 L400 64 L400 100 L0 100 Z' fill='#5a9a6a'/>"+
-          "<rect x='0' y='96' width='400' height='26' fill='#8ac85a'/><rect x='0' y='96' width='400' height='26' fill='url(#psR)' opacity='.8'/>"+
-          "<path d='M0 122 H400' stroke='#8a6a3a' stroke-width='2.5'/>"+
-          "<rect x='0' y='123' width='400' height='30' fill='url(#psW)'/><g class='ps-shim'><path d='M20 132 h60 M150 140 h80 M290 130 h70 M60 147 h50 M250 149 h60' stroke='#fff' stroke-width='1.4' opacity='.7' stroke-linecap='round'/></g>"+
-          "<g class='ps-rice1'><rect x='0' y='123' width='400' height='30' fill='url(#psR)' opacity='.75'/></g>"+
-          "<path d='M0 153 H400 M130 122 L110 153 M280 122 L300 153' stroke='#8a6a3a' stroke-width='3'/>"+
-          "<rect x='0' y='155' width='400' height='45' fill='#6ab84a'/><g class='ps-rice2'><rect x='0' y='155' width='400' height='45' fill='url(#psR2)'/></g>"+
-          "<g transform='translate(330 82)'><rect x='0' y='12' width='34' height='22' fill='#b8904a'/><path d='M-6 14 L17 0 L40 14 Z' fill='#7a5a2a'/><rect x='12' y='20' width='9' height='14' fill='#5a3a1a'/><path d='M2 34 v6 M32 34 v6' stroke='#5a3a1a' stroke-width='2'/></g>"+
-          "<g class='ps-coco' transform='translate(28 70)'><path d='M8 60 Q4 30 12 0' stroke='#8a6a3a' stroke-width='4' fill='none'/><g class='ps-fronds'><path d='M12 0 Q-6 -4 -14 8 M12 0 Q28 -6 36 6 M12 0 Q2 -14 -8 -14 M12 0 Q22 -16 32 -12 M12 0 Q12 10 0 18 M12 0 Q20 10 30 18' stroke='#3a8a2a' stroke-width='3' fill='none' stroke-linecap='round'/></g></g>"+
-          "<g class='ps-carabao'><path d='M0 8 Q2 0 12 1 L26 1 Q32 -1 34 4 L36 10 Q32 12 30 9 L28 14 L26 14 L25 9 L13 9 L12 14 L10 14 L9 9 Q3 10 0 8 Z' fill='#4a4a52'/><path d='M30 1 Q34 -5 40 -3 M30 1 Q28 -5 22 -4' stroke='#d8d0c0' stroke-width='1.4' fill='none'/></g>"+
-          "<g class='ps-egret'><path d='M0 4 Q4 0 8 4 Q4 2 0 4 M8 4 Q12 0 16 4' stroke='#fff' stroke-width='1.4' fill='none'/></g></svg>"+
-        "<div class='ps-huts'><i></i><i></i><i></i></div><div class='ps-arch'><img src='"+logoSrc+"' alt='GoPyesta'></div>";
-      scene.innerHTML=sky+"<div class='pb-lights'>"+lights+"</div><div class='banderitas'>"+Array.from({length:16},(_,i)=>"<i style='--c:"+["var(--gold)","var(--accent)","#3fd0c9","#7d6bff"][i%4]+";--d:"+(i*.13).toFixed(2)+"s'></i>").join("")+"</div>"+
-        "<div class='ps-field'></div><div class='ps-lanes'></div><div class='ps-crowd'>"+crowdHTML()+"</div><div class='ps-ann'></div><div class='ps-tap'><b>TAP! TAP! TAP!</b><small>I-tap ang screen para umakyat si <span class='ps-me'></span>!</small></div>"+
-        "<div class='ps-pick'>"+KIDS.map((k,i)=>"<button type='button' style='--c:"+k.c+"'><b>"+k.n+"</b><small>pambato?</small></button>").join("")+"</div>"+
-        "<p class='ps-prz'>"+ladder.map((v,i)=>BRAND.labels[i]+" "+php(v)).join(" · ")+" · Grand Jackpot ₱777</p>"; // Grand Jackpot is a visual-only headline tier, not a real draw outcome — ladder[] (real odds) is untouched
-      const lanes=scene.querySelector(".ps-lanes");
-      KIDS.forEach((k,i)=>{const lane=el("div","ps-lane","<div class='ps-flag'><i style='--c:"+["#e8343f","#2a6ad8","#ffd23f"][i]+"'></i></div><div class='ps-pole'><i class='ps-leaf a'></i><i class='ps-leaf b'></i><i class='ps-leaf c'></i><i class='ps-grease'></i><i class='ps-drip d1'></i><i class='ps-drip d2'></i><div class='ps-kid'>"+kidSVG(k,i)+"</div></div><span class='ps-name' style='--c:"+k.c+"'>"+k.n+"</span><span class='ps-rank'></span>");
-        lanes.appendChild(lane);climbers.push({lane,pole:lane.querySelector(".ps-pole"),el:lane.querySelector(".ps-kid")})});
-      scene.querySelectorAll(".ps-pick button").forEach((b,i)=>b.onclick=()=>pick(i,ctx));
-      setTimeout(()=>scene.querySelectorAll(".ps-kid svg").forEach(v=>v.pauseAnimations&&v.pauseAnimations()),0);
-      play.appendChild(scene);const b=$("goBtn");b.disabled=true;b.textContent=G.btn;
-    },
-    go(ctx){
-      if(busyR||ctx.isBusy()||(ctx.state&&ctx.state.done))return;if(!ctx.agreed())return;
-      if(sel===null){cheer("Pumili muna ng aakyat!");return}
-      if(!ctx.state||(ctx.state.step==null&&!ctx.state.pending))ctx.start({kid:sel,flip:rnd()<.5});
-      if(!ctx.state)return; // start refused (e.g. no entries)
-      scene.classList.add("locked");
-      busyR=true;ctx.setBusy(true);$("goBtn").disabled=true;$("goBtn").textContent="Karera na!";scene.classList.add("racing");drum();
-      let cd=3;const ann=scene.querySelector(".ps-ann");ann.textContent="3";ann.className="ps-ann show";
-      const ci=setInterval(()=>{cd--;if(cd>0){ann.textContent=cd;beep(660,.12,.1,"square");ann.className="ps-ann";void ann.offsetWidth;ann.className="ps-ann show"}
-        else{clearInterval(ci);ctx.resolve().then(ok=>{
-          if(!ok){busyR=false;scene.classList.remove("racing","locked");ctx.setBusy(false);$("goBtn").disabled=false;$("goBtn").textContent="SIMULAN ANG KARERA!";return}
-          ann.textContent="AKYAT!";ann.className="ps-ann go show";bugle();cheerSnd(.08);G.raceRun(ctx);
-        })}
-      },reduce()?1:700);
-    },
-    // the tap-to-climb race — ported from the real source's own place()/race()/go(), since the
-    // prize now IS the finishing place (1st/2nd/3rd). "place" is server-decided (ctx resolved
-    // during the 3-2-1 countdown above) and fixes who finishes ahead/behind before the race starts;
-    // the "can't pass someone destined to finish ahead" grease-slip below is the real near-miss
-    // mechanic — organic, not scripted, and only applies when the player isn't meant to win 1st.
-    raceRun(ctx,anim){
-      anim=anim!==false;
-      const st=ctx.state,me=st.kid,place=st.step;
-      const order=[0,1,2].filter(k=>k!==me);if(st.flip)order.reverse();order.splice(place,0,me);
-      const ends=[1,R(.72,.84),R(.48,.62)];
-      climbers.forEach(c=>c.pts=null);order.forEach((k,pos)=>{climbers[k].pts=curve(ends[pos],RACE)});
-      if(!anim){climbers.forEach(c=>{setH(c,at(c.pts,RACE),0);c.el.classList.remove("climb","slip")});finishRace(place,order,false);return}
-      const pos=order.indexOf(me),H=[0,0,0],sp=[0,0,0],slipT=[0,0,0];let t0=performance.now(),last=t0,lastC=0,ended=false;
-      const ahead=order.slice(0,pos),behind=order.slice(pos+1);
-      [0,1,2].forEach(k=>sp[k]=R(.105,.13));
-      const tapEl=scene.querySelector(".ps-tap");tapEl.classList.add("show");
-      const onTap=e=>{if(ended)return;if(e.target.closest&&e.target.closest("button,a,input"))return;e.preventDefault();H[me]=Math.min(1,H[me]+R(.016,.024));
-        tapEl.classList.remove("hit");void tapEl.offsetWidth;tapEl.classList.add("hit");beep(500+H[me]*500,.05,.05,"square")};
-      scene.addEventListener("pointerdown",onTap);
-      const slide=[0,0,0],nextBig=[R(1.5,3.5),R(2,4.5),R(2.5,5)];
-      function bigSlip(k){const t=(performance.now()-t0)/1000;nextBig[k]=t+R(2.2,4.2);const amt=R(.1,.2);slide[k]+=amt;const c=climbers[k];c.el.classList.remove("bigslip");void c.el.offsetWidth;c.el.classList.add("bigslip");setTimeout(()=>c.el.classList.remove("bigslip"),700);
-        slipSnd();setTimeout(slipSnd,180);grease(c);grease(c);crowd(1,.08);lastC=t;cheer(k===me?"Ay! Biglang nadulas si "+KIDS[k].n+"! Tap pa!":"Biglang nadulas si "+KIDS[k].n+"!");
-        scene.classList.remove("jolt");void scene.offsetWidth;scene.classList.add("jolt")}
-      function slip(k,amt,msg){const t=(performance.now()-t0)/1000;H[k]=Math.max(0,H[k]-amt);if(t-slipT[k]>.6){slipT[k]=t;slipSnd();grease(climbers[k]);if(msg&&t-lastC>.7){lastC=t;cheer(msg)}}}
-      (function f(now){now=now||performance.now();const dt=Math.min(.05,(now-last)/1000),t=(now-t0)/1000;last=now;const prev=H.slice();
-        H[me]+=dt*(t>9?.09:.012);
-        [0,1,2].forEach(k=>{if(t>=nextBig[k]&&H[k]>.18&&H[k]<.95){if(ahead.includes(k)&&H[k]-H[me]<.3){nextBig[k]=t+.8;return}bigSlip(k)}
-          if(slide[k]>0){const d=Math.min(slide[k],dt*.4);slide[k]-=d;H[k]-=d}});
-        ahead.forEach((k,ix)=>{H[k]+=dt*sp[k]*(1+.25*Math.sin(t*2+k));if(Math.random()<dt*.35&&H[k]<.92&&H[k]>.15)slip(k,R(.03,.06),"Nadulas si "+KIDS[k].n+"!");
-          if(!slide[k]&&H[k]<H[me]+.07)H[k]=Math.min(1,H[k]+dt*.6);if(ix>0&&H[k]>H[ahead[ix-1]]-.04)H[k]=H[ahead[ix-1]]-.04});
-        behind.forEach(k=>{H[k]+=dt*sp[k]*.95;if(Math.random()<dt*.4&&H[k]>.1)slip(k,R(.03,.07),"Nadulas si "+KIDS[k].n+"!");if(H[k]>H[me]-.05)H[k]=Math.max(0,H[me]-.05-R(0,.02))});
-        if(ahead.length){const cap=Math.min(...ahead.map(k=>H[k]))-.05;if(H[me]>cap)slip(me,R(.05,.09),pos?"Nadulas si "+KIDS[me].n+"! Ang dulas ng grasa!":null)}
-        [0,1,2].forEach(k=>{H[k]=Math.max(0,Math.min(1,H[k]));setH(climbers[k],H[k],prev[k])});
-        if(t-lastC>1.8){lastC=t;const lead=[0,1,2].sort((a,b)=>H[b]-H[a])[0];cheer(lead===me?"Nangunguna si "+KIDS[me].n+"! Tap pa!":"Nangunguna si "+KIDS[lead].n+"! Bilisan ang tap!");cheerSnd(.05)}
-        if(H[order[0]]>=1){
-          ended=true;scene.removeEventListener("pointerdown",onTap);tapEl.classList.remove("show");
-          ctx.update({done:true});
-          finishRace(place,order,true);
-          setTimeout(()=>{busyR=false;ctx.done()},reduce()?50:1600);
-          return
-        }
-        run=requestAnimationFrame(f)})()
-    },
-    stop(){cancelAnimationFrame(run)},
-    finish(ctx){sel=ctx.state.kid??0;scene.classList.add("locked");
-      scene.querySelectorAll(".ps-pick button").forEach((b,k)=>b.classList.toggle("on",k===sel));
-      climbers.forEach((c,k)=>c.lane.classList.toggle("mine",k===sel));
-      G.raceRun(ctx,false)}
+function applyConfig(c) {
+  if (!c) return;
+  if (c.minDeposit) MIN_DEP = c.minDeposit;
+  if (c.wagerMult) TURNOVER = c.wagerMult;
+  if (Array.isArray(c.wagerCats) && c.wagerCats.length) CATS = c.wagerCats;
+  if (Array.isArray(c.cabTier) && c.cabTier.length === N) CAB_TIER = c.cabTier.map(t => t - 1);
+  if (c.tierRequired) {
+    TIERS = Object.keys(c.tierRequired).sort().map(t => ({n: +t, bet: c.tierRequired[t]}));
+  }
+}
+
+/* The categories that count are whatever the server is configured with, rendered rather
+   than hard-coded: this service has been live on slots + casino, and a page that said
+   "slots only" would be describing a rule the backend is not enforcing. */
+const catLabel = () => CATS.map(c => c === "egame" ? "slots" : c).join(" + ");
+
+/* ---------- wheel (3D canvas) ---------- */
+const box=document.getElementById("wheelbox"),cv=document.getElementById("wheelCv"),cx2=cv.getContext("2d");
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const CAB_COLORS=["#ff5d73","#33c7b4","#ffc53d","#8f6bff","#ff8fb1","#4aa3ff","#7fd858","#ff9a3d"];
+function winHTML(i){return `<span class="q">?</span>`}
+let ang=0,speed=reduce?0:.2,boxes=[],prizes=[],phase="idle",pickedIdx=-1,spin=null;
+for(let i=0;i<N;i++){const b=document.createElement("button");b.className="gondola";b.setAttribute("aria-label","Box "+(i+1));
+  const T0=TIERS[CAB_TIER[i]];b.setAttribute("aria-label",`Cabin ${i+1}: mystery bonus`);b.style.setProperty("--c",CAB_COLORS[i]);b.style.setProperty("--d",(-i*.37).toFixed(2)+"s");b.innerHTML=`<span class="hook"></span><span class="cab"><span class="roof"></span><span class="win">${winHTML(i)}</span><span class="stripe"></span></span>`;b.onclick=()=>pick(i);box.appendChild(b);boxes.push(b)}
+function fit(){const r=devicePixelRatio||1;cv.width=box.clientWidth*r;cv.height=box.clientHeight*r;cx2.setTransform(r,0,0,r,0,0)}
+addEventListener("resize",fit);fit();
+let lastT=performance.now(),vel=0,prevAng=0,yawOff=0,pitchOff=0,tYaw=0,tPitch=0;
+const embers=Array.from({length:46},()=>({x:Math.random(),y:Math.random(),r:.6+Math.random()*2.2,v:.00004+Math.random()*.00012,dx:(Math.random()-.5)*.00004,h:20+Math.random()*30,ph:Math.random()*6}));
+let confetti=[];
+function burst(x,y){const cols=["#ffcf5a","#ff6b5b","#3fd4c0","#8f6bff","#ff8fb1","#ffffff"];for(let i=0;i<110;i++){const a=Math.random()*Math.PI*2,sp=2+Math.random()*6;confetti.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-4,r:2+Math.random()*3,c:cols[i%cols.length],rot:Math.random()*6,vr:(Math.random()-.5)*.4,life:1})}}
+box.addEventListener("pointermove",e=>{const r=box.getBoundingClientRect();tYaw=((e.clientX-r.left)/r.width-.5)*.5;tPitch=((e.clientY-r.top)/r.height-.5)*.18});
+box.addEventListener("pointerleave",()=>{tYaw=0;tPitch=0});
+const stageEl=document.getElementById("stage");
+function frame(now){
+  const dt=Math.min(50,now-lastT);lastT=now;
+  if(phase==="spin"){const k=Math.min(1,(now-spin.t0)/spin.dur);const e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;ang=spin.a0+spin.total*e;if(k>=1){phase="done";spin.end()}}
+  else if(phase!=="done")ang+=speed*dt/16*Math.PI/180;
+  vel+=(((ang-prevAng)/Math.max(dt,1))-vel)*.15;prevAng=ang;
+  yawOff+=(tYaw-yawOff)*.06;pitchOff+=(tPitch-pitchOff)*.06;
+  stageEl.classList.toggle("spinning",phase==="spin"||phase==="countdown");
+  draw(now,dt);requestAnimationFrame(frame);
+}
+function draw(now,dt){
+  const W=box.clientWidth,H=box.clientHeight,c=cx2;c.clearRect(0,0,W,H);
+  const CX=W*.5,CY=H*.43,R=W*.385,D=R*.22,F=W*2.2;
+  const spinning=phase==="spin",hot=spinning||armed;
+  const yaw=.45,pitch=-.1; /* fixed camera: stand stays still, only the wheel turns */
+  const cy_=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+  const P=(x,y,z)=>{let X=x*cy_+z*sy,Z=-x*sy+z*cy_;let Y=y*cp-Z*sp;Z=y*sp+Z*cp;const k=F/(F+Z);return{x:CX+X*k,y:CY+Y*k,z:Z,k}};
+  const rim=(r,a,z)=>P(r*Math.cos(a),r*Math.sin(a),z);
+  const line=(p,q,col,w,glow)=>{c.beginPath();c.moveTo(p.x,p.y);c.lineTo(q.x,q.y);c.strokeStyle=col;c.lineWidth=w;c.shadowColor=glow||"transparent";c.shadowBlur=glow?9:0;c.stroke()};
+  const ring=(r,z,col,w,glow)=>{c.beginPath();for(let i=0;i<=90;i++){const p=rim(r,ang+i/90*Math.PI*2,z);i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y)}c.strokeStyle=col;c.lineWidth=w;c.shadowColor=glow||"transparent";c.shadowBlur=glow?14:0;c.stroke()};
+  const hue=(now/12)%360,neon=hot?`hsl(${(28+20*Math.sin(now/300))},100%,62%)`:"#ff9a4d";
+
+  // searchlight beams
+  c.save();c.globalCompositeOperation="lighter";
+  for(const [bx,ph,col] of [[.18,0,"255,190,110"],[.82,2.2,"140,200,255"],[.5,4.1,"255,140,200"]]){
+    const a=-Math.PI/2+Math.sin(now/(spinning?600:2400)+ph)*.55,len=H*1.2,sx=W*bx,syy=H*.98;
+    const gr=c.createLinearGradient(sx,syy,sx+Math.cos(a)*len,syy+Math.sin(a)*len);gr.addColorStop(0,`rgba(${col},${hot?.28:.16})`);gr.addColorStop(1,`rgba(${col},0)`);
+    c.fillStyle=gr;c.beginPath();c.moveTo(sx,syy);c.lineTo(sx+Math.cos(a-.09)*len,syy+Math.sin(a-.09)*len);c.lineTo(sx+Math.cos(a+.09)*len,syy+Math.sin(a+.09)*len);c.closePath();c.fill()}
+  // halo behind wheel
+  const hc=P(0,0,0),halo=c.createRadialGradient(hc.x,hc.y,R*.2,hc.x,hc.y,R*1.35);halo.addColorStop(0,`rgba(255,150,70,${hot?.22:.12})`);halo.addColorStop(1,"rgba(255,120,60,0)");c.fillStyle=halo;c.fillRect(0,0,W,H);
+  c.restore();
+
+  // ground glow + shadow
+  c.save();c.fillStyle="rgba(0,0,0,.4)";c.beginPath();c.ellipse(CX,CY+R*1.64,R*1.15,R*.17,0,0,Math.PI*2);c.fill();
+  c.globalCompositeOperation="lighter";const gg=c.createRadialGradient(CX,CY+R*1.62,2,CX,CY+R*1.62,R*1.1);gg.addColorStop(0,"rgba(255,140,60,.35)");gg.addColorStop(1,"rgba(255,140,60,0)");c.fillStyle=gg;c.beginPath();c.ellipse(CX,CY+R*1.62,R*1.1,R*.2,0,0,Math.PI*2);c.fill();c.restore();
+
+  const g=R*1.6,legs=(z,col,glow)=>{const top=P(0,0,z),l=P(-R*.8,g,z*1.35),r=P(R*.8,g,z*1.35);line(top,l,col,4.5*top.k,glow);line(top,r,col,4.5*top.k,glow);
+    for(const f of [.35,.62,.86]){const m1=P(-R*.8*f,g*f,z*(1+.35*f)),m2=P(R*.8*f,g*f,z*(1+.35*f));line(m1,m2,col,1.6*top.k,glow)}
+    const m1=P(-R*.4,g*.5,z*1.17),m2=P(R*.4,g*.5,z*1.17);line(m1,r,col,1,glow);line(m2,l,col,1,glow)};
+  // back side
+  legs(-D*1.5,"#7a2c12");
+  ring(R,-D,"#a8401c",2.4,"#ff6a2a66");ring(R*.86,-D,"#7a2c12",1);ring(R*.38,-D,"#7a2c12",1);
+  for(let i=0;i<N*2;i++){const a=ang+i/(N*2)*Math.PI*2;line(P(0,0,-D),rim(R,a,-D),"#7a2c12",1)}
+  // axle
+  const h1=P(0,0,-D*1.5),h2=P(0,0,D*1.5);line(h1,h2,"#ffb35c",8*h2.k,"#ff8a3d");
+  // struts between rims
+  for(let i=0;i<N*2;i++){const a=ang+i/(N*2)*Math.PI*2;line(rim(R,a,-D),rim(R,a,D),"#d8602a",1.5);if(i%2===0)line(rim(R*.86,a,-D),rim(R,a+Math.PI/N,D),"#a8441c",.8)}
+  // front spokes + light runs
+  for(let i=0;i<N*2;i++){const a=ang+i/(N*2)*Math.PI*2,o=P(0,0,D),e=rim(R,a,D);line(o,e,i%2?"#d8602a":neon,i%2?1:2,"#ff7a2f");
+    if(!reduce&&i%2===0){const f=((now/(spinning?260:1400))+i*.13)%1;const q={x:o.x+(e.x-o.x)*f,y:o.y+(e.y-o.y)*f};c.fillStyle="#fff3c8";c.shadowColor="#ffcf5a";c.shadowBlur=14;c.beginPath();c.arc(q.x,q.y,2.2*o.k,0,Math.PI*2);c.fill()}}
+  for(let i=0;i<N;i++){const a=ang+i/N*Math.PI*2;line(rim(R*.86,a,D),rim(R,a+Math.PI*2/N,D),"#ff6a2a",.9);line(rim(R*.86,a,D),rim(R,a-Math.PI*2/N,D),"#c4502a",.6)}
+  ring(R*.86,D,"#ff6a2a",1.4,"#ff6a2a");ring(R*.62,D,"#d8602a",.8);ring(R*.38,D,"#ff6a2a",1.3,"#ff6a2a");
+  ring(R*1.02,D,"rgba(255,180,90,.35)",6,"#ff7a2f");ring(R,D,neon,3.4,"#ff7a2f");
+  // bulbs: warm chase idle, rainbow chase when unlocked/spinning
+  const blink=Math.floor(now/(spinning?70:armed?140:280));
+  for(const [r,n,z,sz,front] of [[R,56,D,2.3,1],[R*.86,36,D,1.6,1],[R*.62,16,D,1.4,1],[R*.38,16,D,1.3,1],[R,56,-D,1.3,0]]){
+    for(let i=0;i<n;i++){const p=rim(r,ang+i/n*Math.PI*2,z);const on=(i+blink)%3!==0;
+      let col=!on?"#5a2a14":!front?"#c9823c":hot?`hsl(${(hue+i*360/n*2)%360},100%,70%)`:"#ffe2a0";
+      c.fillStyle=col;c.shadowColor=col;c.shadowBlur=on&&front?12:0;c.beginPath();c.arc(p.x,p.y,sz*p.k*(on&&front&&hot?1.15:1),0,Math.PI*2);c.fill()}}
+  // hub with rotating star
+  const hub=P(0,0,D*1.5),hr=R*.12*hub.k;c.shadowBlur=24;c.shadowColor="#ffcf5a";
+  const hg=c.createRadialGradient(hub.x-hr*.3,hub.y-hr*.3,1,hub.x,hub.y,hr);hg.addColorStop(0,"#fff6d6");hg.addColorStop(.6,"#ffb347");hg.addColorStop(1,"#b85a12");c.fillStyle=hg;c.beginPath();c.arc(hub.x,hub.y,hr,0,Math.PI*2);c.fill();
+  c.shadowBlur=0;c.fillStyle="#fff";c.beginPath();for(let i=0;i<16;i++){const a=ang*2+i*Math.PI/8,rr=i%2?hr*.3:hr*.75;c.lineTo(hub.x+rr*Math.cos(a),hub.y+rr*Math.sin(a))}c.closePath();c.globalAlpha=.85;c.fill();c.globalAlpha=1;
+  legs(D*1.5,"#ff8a3d","#ff7a2f");
+  c.shadowBlur=0;
+  const b1=P(-R*1,g,D*2),b2=P(R*1,g,D*2),b3=P(-R*1,g,-D*2),b4=P(R*1,g,-D*2);line(b3,b4,"#7a2c12",4);line(b1,b2,"#ff8a3d",5,"#ff7a2f");line(b1,b3,"#c4502a",3);line(b2,b4,"#c4502a",3);
+
+  // embers
+  c.save();c.globalCompositeOperation="lighter";
+  for(const e of embers){if(!reduce){e.y-=e.v*dt*(spinning?3:1);e.x+=e.dx*dt+Math.sin(now/1000+e.ph)*.0002;if(e.y<-.05){e.y=1.05;e.x=Math.random()}}
+    const x=e.x*W,y=e.y*H,a=.35+.35*Math.sin(now/400+e.ph);const eg=c.createRadialGradient(x,y,0,x,y,e.r*4);eg.addColorStop(0,`hsla(${e.h},100%,70%,${a})`);eg.addColorStop(1,`hsla(${e.h},100%,60%,0)`);c.fillStyle=eg;c.fillRect(x-e.r*4,y-e.r*4,e.r*8,e.r*8)}
+  c.restore();
+  // confetti
+  confetti=confetti.filter(q=>q.life>0);
+  for(const q of confetti){q.vy+=.18;q.vx*=.99;q.x+=q.vx;q.y+=q.vy;q.rot+=q.vr;q.life-=.008;c.save();c.globalAlpha=Math.max(0,q.life);c.translate(q.x,q.y);c.rotate(q.rot);c.fillStyle=q.c;c.fillRect(-q.r,-q.r/2,q.r*2,q.r);c.restore()}
+
+  // gondolas hang at mid-axle and swing with the wheel's speed
+  const swayBase=Math.max(-28,Math.min(28,-vel*900));
+  boxes.forEach((b,i)=>{const a=ang+i/N*Math.PI*2;const p=rim(R,a,0);const depth=(p.z+R)/(2*R);const s=p.k*(.8+.22*(1-depth));
+    const sway=reduce?0:swayBase*(.7+.3*Math.sin(i))+2.5*Math.sin(now/700+i);
+    b.style.left=p.x+"px";b.style.top=p.y+"px";b.style.transform=`translate(-50%,0) scale(${s.toFixed(3)}) rotate(${sway.toFixed(2)}deg)`;b.style.zIndex=String(100-Math.round(p.z));
+    b.style.filter=b.classList.contains("picked")||b.classList.contains("dim")?"":`brightness(${(1.08-depth*.4).toFixed(2)})`});
+}
+requestAnimationFrame(frame);
+
+function resetBoxes(){boxes.forEach((b,i)=>{b.classList.remove("picked","dim","mine");b.querySelector(".win").innerHTML=winHTML(i)})}
+
+/* ---------- gate overlay ---------- */
+function showGate(title,msg){
+  const g=document.getElementById("gate");
+  document.getElementById("gateTitle").textContent=title;
+  document.getElementById("gateMsg").textContent=msg;
+  g.hidden=false;
+}
+function hideGate(){document.getElementById("gate").hidden=true}
+
+/* ---------- picking ----------
+   Selecting is local; locking is a server call. The server owns the lock because the
+   cabin decides what the bonus costs, and a pick that could move after the goal was met
+   would let a player clear the cheap cabin then switch to the rich one. */
+function pick(i){
+  if(busy)return;
+  if(!S||S.win)return;
+  if(S.pick)return;
+  sel=i;render();
+}
+
+async function lockPick(){
+  if(busy||sel==null||!CODE)return;
+  busy=true;
+  const r=await api("/api/ferris/pick/"+encodeURIComponent(CODE),{cabin:sel+1});
+  busy=false;
+  if(r&&r.ok){
+    if(r.lockedElsewhere)flash("Cabin "+r.pick.cabin+" ang naka-lock na ngayong araw.");
+    sel=null;await refresh();
+  }else{
+    flash((r&&r.msg)||"Hindi na-lock ang cabin. Subukan ulit.");
+  }
+}
+
+function flash(msg){
+  const c=document.getElementById("count");
+  c.className="count msg need";c.textContent=msg;
+  clearTimeout(window._flashT);
+  window._flashT=setTimeout(()=>{if(phase==="idle"){c.className="count";c.textContent=""}},2800);
+}
+
+/* ---------- the spin ----------
+   The server decides the amount before a single frame animates, then the wheel is told
+   where to stop. The design file did the opposite: it rolled in the browser and the
+   animation was the source of truth. */
+async function trySpin(){
+  if(busy||phase!=="idle"||!CODE)return;
+  if(!S||!S.pick||S.win||!S.goalMet)return;
+  busy=true;
+  const r=await api("/api/play/"+encodeURIComponent(CODE),{});
+  busy=false;
+  if(!r||!r.ok){
+    if(r&&r.msg)document.getElementById("hint").textContent=r.msg;
+    return;
+  }
+  if(r.replay){await refresh();return}
+  runWheel(r.cabin-1,r.prize,r.wagerNeed);
+}
+
+function runWheel(i,amt,need){
+  phase="countdown";resetBoxes();boxes[i].classList.add("picked");
+  const cnt=document.getElementById("count"),hint=document.getElementById("hint");
+  hint.innerHTML=`Goal reached! Umiikot na ang <b>Cabin ${i+1}</b>...`;
+  let n=3;
+  const tick=()=>{
+    if(n>0){cnt.className="count";void cnt.offsetWidth;cnt.textContent=n;cnt.classList.add("on");n--;setTimeout(tick,1000);return}
+    cnt.className="count msg";cnt.textContent="SPIN!";
+    phase="spin";
+    spin={t0:performance.now(),dur:5000,a0:ang,total:Math.PI*2*(4+Math.random()),end:()=>{
+      cnt.className="count";cnt.textContent="";
+      boxes[i].querySelector(".win").innerHTML=`<span class="lbl">${peso(amt)}</span>`;
+      boxes.forEach((b,j)=>{if(j!==i)b.classList.add("dim")});
+      {const r=box.getBoundingClientRect(),q=boxes[i].getBoundingClientRect();burst(q.left-r.left+q.width/2,q.top-r.top+q.height/2)}
+      const t=document.getElementById("toast");
+      t.innerHTML=`<div class="won">PANALO KA</div><div class="amt">${peso(amt)}</div>`
+        +`<div style="color:var(--mute);font-size:13px;margin-bottom:10px">Bonus credit · tumaya ng ${peso(need)} para ma-clear</div>`
+        +`<button class="btn" id="tOk">Collect</button>`;
+      t.classList.add("on");
+      document.getElementById("tOk").onclick=()=>{
+        t.classList.remove("on");collected=true;phase="idle";refresh();
+      };
+    }};
   };
-  return G;
-})();
-
-
-// ---------- engine ----------
-let state=null,ladder=[],busy=false,pendingDraw=null;
-function save(){if(mode!=="demo")return;try{localStorage.setItem(storeKey(),JSON.stringify(state))}catch(e){}}
-function load(){if(mode!=="demo")return null;try{return JSON.parse(localStorage.getItem(storeKey())||"null")}catch(e){return null}}
-function applyPub(j){if(!session)return;["entriesEarned","entriesUnlocked","entriesUsed","entriesPlayable","entriesLocked","plays","wagering","capLeft","capped","playOpen"].forEach(k=>{if(j[k]!==undefined)session[k]=j[k]})}
-async function apiPlay(){
-  const r=await fetch("/api/play/"+encodeURIComponent(cfg.code),{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
-  const j=await r.json().catch(()=>({}));
-  if(!r.ok){applyPub(j);throw new Error(j.msg||"Hindi natuloy ang laro. Subukan ulit.")}
-  return j;
+  tick();
 }
-const ctx={
-  get ladder(){return ladder},get state(){return state},
-  start(extra){
-    if(mode==="player"){
-      state=Object.assign({step:null,pending:true},extra||{});
-      pendingDraw=apiPlay().then(j=>{state.step=j.step;state.pending=false;state.entryNo=j.entryNo;session.plays.push({entry_no:j.entryNo,step:j.step,prize:j.prize});applyPub(j);return true})
-        .catch(e=>{state=null;pendingDraw=null;cheer("Hindi natuloy");$("note").textContent=e.message||"";renderEntries();lockUI();return false});
-    }else{state=Object.assign({step:drawStep()},extra||{});save()}
-    return state},
-  resolve(){return pendingDraw||Promise.resolve(!!(state&&state.step!=null))},
-  update(extra){Object.assign(state,extra);save()},
-  setBusy(v){busy=v;$("resetBtn").disabled=v},isBusy(){return busy},
-  agreed(){return !needAgree()},
-  done(){busy=false;pendingDraw=null;$("resetBtn").disabled=false;finishView(true)}
+
+/* ---------- render ---------- */
+const chk=(ok,label,have,need)=>`<div class="goal"><div class="kv"><span><b class="${ok?"ok":"bad"}">${ok?"✓":"○"}</b> ${label}</span><span class="${ok?"ok":""}">${peso(have)} / ${peso(need)}</span></div><div class="bar"><i style="width:${need>0?Math.min(100,have/need*100):0}%"></i></div></div>`;
+
+function render(){
+  if(!S)return;
+  const toastOn=document.getElementById("toast").classList.contains("on");
+  const req=S.required||0, p=S.pick, win=S.win, today=S.date;
+  const turnover=S.turnover==null?0:S.turnover;
+  const turnoverUnknown=S.turnover==null;
+
+  document.getElementById("who").innerHTML=`Hi, <b>${esc(S.name||S.account)}</b> <span class="gid">GoPyesta ID: ${esc(S.account)}</span>`;
+  document.getElementById("clock").textContent=esc(S.serverTime||"");
+
+  const live=document.getElementById("live"),lt=document.getElementById("liveTxt"),hint=document.getElementById("hint");
+  armed=phase==="idle"&&!win&&!S.goalMet;
+  stageEl.classList.toggle("armed",armed&&!p);
+  live.classList.toggle("on",phase!=="idle"||!!win);
+  if(phase!=="idle")lt.textContent="SPINNING";
+  else if(win)lt.textContent="COLLECTED";
+  else if(p)lt.textContent="GOAL IN PROGRESS";
+  else lt.textContent="PUMILI NG CABIN";
+
+  boxes.forEach((bx,i)=>bx.classList.toggle("mine",phase==="idle"&&!win&&(p?p.cabin-1===i:sel===i)));
+
+  const sb=document.getElementById("startBtn");
+  const showStart=phase==="idle"&&!win&&sel!=null&&!p&&!toastOn;
+  sb.hidden=!showStart;
+  document.getElementById("startPick").textContent=
+    p?`Cabin ${p.cabin} naka-lock`:(sel!=null?`Cabin ${sel+1} napili`:"");
+
+  if(phase==="idle"&&!toastOn){
+    if(win)hint.innerHTML=`Nakuha mo na ang <b>${peso(win.amount)}</b> ngayong araw. Bukas ulit.`;
+    else if(!S.playOpen)hint.innerHTML=`Sarado na ang laro ngayong araw.`;
+    else if(S.capped&&!S.goalMet)hint.innerHTML=`Naabot na ang budget ngayong araw. Bukas ulit bubukas ang wheel.`;
+    else if(p){
+      const miss=[];
+      if(!S.depositOk)miss.push(`mag-deposit ng ${peso(MIN_DEP)} pataas`);
+      if(turnoverUnknown)miss.push(`hintayin ang turnover data`);
+      else if(!S.turnoverOk)miss.push(`tumaya pa ng ${peso(req-turnover)}`);
+      hint.innerHTML=miss.length
+        ? `<b>Cabin ${p.cabin}</b> ang naka-lock. Para umikot: ${miss.join(" at ")}. Kusang iikot ito pag tapos na.`
+        : `<b>Cabin ${p.cabin}</b> handa na.`;
+    }
+    else if(sel!=null)hint.innerHTML=`<b>Cabin ${sel+1}</b> ang napili. Pumindot ng ibang cabin para palitan, o <b>START</b> para i-lock.`;
+    else hint.innerHTML=`<b>Pumili ng cabin</b>. May nakatagong bonus ang bawat isa.`;
+  }
+
+  /* goal card */
+  const gi=document.getElementById("goalInfo");
+  if(win)gi.innerHTML=`<div class="kv"><span>Bonus ngayong araw</span><span class="ok">${peso(win.amount)}</span></div>`
+    +`<div class="kv"><span>Turnover bago ma-withdraw</span><span>${peso(win.wagerNeed)}</span></div>`;
+  else if(p)gi.innerHTML=`<div class="pickhead" style="--c:${CAB_COLORS[p.cabin-1]}"><span>Cabin ${p.cabin}</span><b>? ? ?</b></div>`
+    +chk(S.depositOk,"Deposit ngayon",S.depositTotal||0,MIN_DEP)
+    +chk(!!S.turnoverOk,"Turnover ngayon",turnover,req)
+    +`<p class="note">Mag-deposit ng ₱${MIN_DEP} pataas at abutin ang turnover. Bilang ang ${esc(catLabel())}.${turnoverUnknown?" <b>Hindi pa mabasa ang turnover mo.</b>":""}</p>`;
+  else if(sel!=null){
+    const need=(TIERS[CAB_TIER[sel]]||{}).bet||0;
+    gi.innerHTML=`<div class="pickhead" style="--c:${CAB_COLORS[sel]}"><span>Cabin ${sel+1} · hindi pa simula</span><b>? ? ?</b></div>`
+      +`<div class="kv"><span>Deposit ngayon</span><span>${peso(MIN_DEP)}+</span></div>`
+      +`<div class="kv"><span>Turnover ngayon</span><span>${peso(need)}</span></div>`
+      +`<p class="note">Pindutin ang START sa wheel para i-lock ang cabin na ito.</p>`;
+  }
+  else gi.innerHTML=`<p class="note" style="margin:0">Wala pang cabin na napili. May nakatagong bonus ang bawat cabin. Pindutin ang isa para makita ang kailangan.</p>`;
+
+  /* today */
+  document.getElementById("dateLbl").textContent=short(today);
+  document.getElementById("vDep").textContent=peso(S.depositTotal||0);
+  document.getElementById("vBet").textContent=turnoverUnknown?"—":peso(turnover);
+
+  /* week strip, from the server's own history */
+  const byDay={};(S.history||[]).forEach(h=>byDay[h.date]=h);
+  const ws=weekStart(today);let wk="",total=0,count=0;
+  for(let i=0;i<7;i++){
+    const R=addDays(ws,i),h=byDay[R];let cls="",val="—";
+    if(h&&h.state==="paid"){cls="paid";val=peso(h.amount);total+=h.amount;count++}
+    else if(h&&h.state==="missed"){cls="forfeit";val="Lost"}
+    else if(h&&h.state==="open"){cls="pending";val="●"}
+    wk+=`<div class="${cls} ${R===today?"today":""}" title="${short(R)}">${dayName(R)}<b>${val}</b></div>`;
+  }
+  document.getElementById("week").innerHTML=wk;
+  document.getElementById("weekTxt").textContent=`${count} bonus${count===1?"":"es"} ngayong linggo · ${peso(total)}`;
+
+  /* wagering — a progress readout, not a settlement. The bonus lives on the platform;
+     this page cannot release anybody's money and does not imply it can. */
+  const bonus=win?win.amount:0, need=win?win.wagerNeed:0;
+  const pct=need?Math.min(100,turnover/need*100):0;
+  document.getElementById("wager").innerHTML=
+     `<div class="kv"><span>Bonus na napanalunan</span><span class="warn">${peso(bonus)}</span></div>`
+    +`<div class="kv"><span>Turnover ngayon</span><span>${turnoverUnknown?"—":peso(turnover)} / ${peso(need)}</span></div>`;
+  document.getElementById("wbar").style.width=pct+"%";
+  document.getElementById("wNote").textContent=bonus
+    ? `Bawat ₱1 ng bonus ay kailangan ng ₱${TURNOVER} turnover bago ma-withdraw. Sa GoPyesta app ang balance at withdrawal.`
+    : "Wala pang bonus na naghihintay ng turnover.";
+
+  /* history */
+  const h=document.getElementById("hist");
+  const hs=(S.history||[]);
+  h.innerHTML=hs.length?hs.map(x=>{
+    const bad=x.state==="missed";
+    const label=bad?`Cabin ${x.cabin} · hindi nakuha`:`Cabin ${x.cabin}`;
+    return `<li><span>${short(x.date)} · ${esc(label)}</span><span${bad?' style="color:var(--coral)"':""}>${bad?"—":peso(x.amount)}</span></li>`;
+  }).join(""):`<li class="empty">Wala pang bonus. Pumili ng cabin para magsimula.</li>`;
+}
+
+/* ---------- poll ----------
+   One request per tick, every 5s rather than the design file's 1s: this reads the same
+   Postgres the link maker runs on, and the bets sync upstream only moves every ~30 min,
+   so a faster poll would buy nothing and cost the database. */
+async function refresh(){
+  if(!CODE)return;
+  const s=await api("/api/session/"+encodeURIComponent(CODE));
+  if(s&&s.exists&&!s.expired){
+    applyConfig(s.config);
+    hideGate();S=s;
+    if(!S.win)collected=false;
+    render();
+    if(S.goalMet&&!S.win&&!collected&&S.playOpen)trySpin();
+    return;
+  }
+  if(s&&s.exists&&s.expired){
+    showGate("Expired na ang link","Ibang araw na — humingi ng bagong link sa GoPyesta team.");
+  }else if(s&&s.error==="network"){
+    /* leave the last good state on screen; a dropped poll is not a logout */
+  }else{
+    showGate("Hindi valid ang link","Buksan ang spin link na binigay ng GoPyesta team. Isang link bawat player, bawat araw.");
+  }
+}
+
+document.getElementById("startBtn").onclick=()=>{
+  if(phase!=="idle")return;
+  if(sel!=null&&(!S||!S.pick))lockPick();
 };
-function renderMech(){
-  const off=BRAND.promo;
-  $("mechOffer").textContent=off.name;
-  const steps=["<b>Sino ang pwede:</b> "+off.target+".","<b>Paano ma-unlock:</b> "+off.trig+". Bibigyan ka ng agent mo ng personal na game link.","<b>Validity:</b> "+off.valid+"."]
-    .concat(GAME.how.map(s=>"<b>"+GAME.label+":</b> "+s))
-    .concat(["<b>Premyo:</b> Random ang lalabas na premyo, at pinakamadalang ang pinakamalaking halaga.",
-      "<b>Pag-claim:</b> Awtomatikong naitatala ang panalo mo; ipapadala ng agent mo ang reward sa GCash pagkatapos ma-verify.",
-      "<b>Isang palo bawat entry.</b> Ang server ang nagde-decide ng resulta; kahit mag-refresh, hindi na mauulit ang nalarong entry."]);
-  $("mechSteps").innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
-  $("mechTiers").innerHTML=PRIZES.map((p,i)=>"<tr><td>"+BRAND.labels[i]+"</td><td>"+php(p)+"</td><td>"+WEIGHTS[i]+"%</td></tr>").join("");
-}
-function lockedText(){
-  const w=session.wagering||{};
-  return "Naka-lock pa ang susunod na palo: kailangan ng <b>"+php(w.nextRequired||0)+"</b> na laro sa slots/casino ngayon (meron ka nang <b>"+php(w.validBet||0)+"</b>"+(w.syncedAt?", sync "+syncHM(w.syncedAt):"")+"). Mag-laro muna, tapos i-refresh pagkalipas ng ~30 min.";
-}
-function renderEntries(){
-  const e=$("entries"),r=$("results");e.hidden=false;r.hidden=true;
-  if(mode!=="player"){e.innerHTML="Isang deposit na <b>"+php(CONF.minDeposit)+"</b> pataas ("+fmtTime(CONF.depFrom)+"–"+fmtTime(CONF.depTo)+") = 1 palo";return}
-  if(!session||!session.exists){e.textContent="Hindi valid ang link na ito. Humingi ng bagong link sa agent mo.";return}
-  if(session.expired)e.textContent="Expired na ang link na ito — ibang araw na. Humingi ng bagong link sa agent mo.";
-  else if(session.entriesEarned===0)e.innerHTML="Wala ka pang entry ngayon. Isang deposit na <b>"+php(CONF.minDeposit)+"</b> pataas mula <b>"+fmtTime(CONF.depFrom)+"–"+fmtTime(CONF.depTo)+"</b> = 1 palo. I-refresh pagkatapos mag-deposit (mga 5 minuto).";
-  else if(!session.playOpen)e.textContent="Sarado na ang laro para ngayong araw.";
-  else{
-    let t="Entries ngayon: <b>"+session.entriesUsed+"/"+session.entriesEarned+"</b> na nagamit";
-    if(session.entriesPlayable>0)t+=" · <b>"+session.entriesPlayable+"</b> pwedeng laruin";
-    if(session.entriesLocked>0)t+=" · <b>"+session.entriesLocked+"</b> naka-lock 🔒";
-    e.innerHTML=t;
-  }
-  if(session.plays&&session.plays.length){r.hidden=false;r.innerHTML="Mga napanalunan ngayon: "+session.plays.map(p=>"<b>"+php(p.prize)+"</b>").join(" · ")+" — kabuuan <b>"+php(session.plays.reduce((a,p)=>a+p.prize,0))+"</b>"}
-}
-// after a refused/finished play: decide what the big button does next
-function lockUI(){
-  if(mode!=="player")return;
-  const b=$("goBtn");delete b.dataset.next;delete b.dataset.refresh;
-  if(session.entriesPlayable>0){b.disabled=false;b.textContent="Laro ulit ("+session.entriesPlayable+" pa)";b.dataset.next="1";$("note").textContent=""}
-  else if(session.entriesLocked>0){b.disabled=false;b.textContent="I-refresh (naka-lock pa)";b.dataset.refresh="1";$("note").innerHTML=lockedText()}
-  else if(session.capped){b.disabled=true;b.textContent="Ubos na ang daily budget";$("note").textContent="Naabot na ang daily bonus budget. Subukan ulit bukas."}
-  else{b.disabled=true;b.textContent="Ubos na ang entries ngayon";$("note").textContent=""}
-}
-function buildView(){
-  renderMech();
-  const off=BRAND.promo;
-  $("eyebrow").textContent=BRAND.name+" · "+off.name;
-  $("greeting").hidden=!cfg.name;if(cfg.name)$("greeting").textContent="Para kay "+cfg.name+"! 🎉";
-  $("gameTitle").textContent=GAME.title;
-  $("demoTag").hidden=mode==="player";
-  $("play").innerHTML="";$("win").hidden=true;$("cheer").textContent="";
-  busy=false;pendingDraw=null;$("resetBtn").disabled=false;$("resetBtn").hidden=mode==="player";
-  $("goBtn").hidden=!GAME.btn;$("goBtn").textContent=GAME.btn||"";delete $("goBtn").dataset.next;delete $("goBtn").dataset.refresh;
-  $("range").innerHTML="Mga premyo namin, hanggang <b>₱777</b> ang halaga!"; // headline only — visual tagline, not a real outcome; real ladder is PRIZES above
-  renderEntries();
-  if(!qualifies()||(mode==="player"&&!session.playOpen)){$("ladder").innerHTML="";$("goBtn").disabled=true;$("note").textContent="";return}
-  ladder=PRIZES;
-  $("ladder").innerHTML=ladder.map((v,i)=>"<li"+(v===Math.max(...ladder)?" class='top'":"")+(GAME.chip?" style='"+GAME.chip(i)+"'":"")+">"+BRAND.labels[i]+"<b>"+php(v)+"</b></li>").join("");
-  $("note").textContent=GAME.note;
-  $("goBtn").disabled=false;$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));
-  state=load();
-  GAME.build($("play"),ctx);
-  if(mode==="player"&&session.entriesPlayable<=0){
-    const last=session.plays[session.plays.length-1];
-    if(last){state={step:last.step,kid:0,done:true};GAME.finish(ctx);finishView(false)}
-    else{[...document.querySelectorAll(".ps-pick button")].forEach(p=>{p.disabled=true;p.classList.add("dim")});lockUI()}
-    return}
-  if(state&&state.step!=null){GAME.finish(ctx);finishView(false)}
-}
-function finishView(celebrate){
-  const amt=ladder[state.step],big=amt===Math.max(...ladder); // "big" = the actual top prize, not the highest index — index 0 is now 1st place (biggest), not smallest
-  [...$("ladder").children].forEach((li,i)=>li.classList.toggle("on",i===state.step));
-  $("amt").textContent=php(amt);$("winNote").textContent=BRAND.labels[state.step]+(big?" · Jackpot!":"");
-  $("win").hidden=false;$("goBtn").disabled=true;$("goBtn").textContent="Nalaro mo na";
-  if(mode==="player"){renderEntries();lockUI()}
-  cheer(big?"JACKPOT!":"You Won!");
-  if(celebrate)setTimeout(()=>openWin(amt,big),reduce()?50:450)
-}
-$("goBtn").onclick=()=>{const b=$("goBtn");if(b.dataset.refresh){location.reload();return}if(b.dataset.next){state=null;if(GAME.stop)GAME.stop();buildView();return}if(GAME.go)GAME.go(ctx)};
-$("resetBtn").onclick=()=>{if(busy||mode==="player")return;try{localStorage.removeItem(storeKey())}catch(e){}state=null;if(GAME.stop)GAME.stop();buildView();$("goBtn").focus()};
 
-// ---------- win pop-up ----------
-let confettiRAF=null;
-function openWin(amt,big){
-  const jp=$("jp"),a=$("jpAmt");jp.classList.toggle("big",big);
-  $("jpTitle").textContent=big?"JACKPOT!":"YOU WON!";$("jpSub").textContent=GAME.label+" · "+BRAND.labels[state.step];
-  jp.hidden=false;$("jpClose").focus();fanfare(big);
-  if(reduce()){a.textContent=php(amt);return}
-  const s=performance.now(),dur=big?1600:1100;
-  (function f(now){const k=Math.min(1,(now-s)/dur);a.textContent=php(Math.round(amt*(1-Math.pow(1-k,3))));if(k<1&&!jp.hidden)requestAnimationFrame(f);else a.textContent=php(amt)})(s);
-  confetti(big?180:90,big);
-}
-function confetti(count,big){
-  const cv=$("confetti"),c=cv.getContext("2d"),d=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;cv.width=W*d;cv.height=H*d;c.setTransform(d,0,0,d,0,0);
-  const cols=big?BRAND.confettiBig:BRAND.confetti;
-  const ps=Array.from({length:count},()=>({x:W/2+(rnd()-.5)*80,y:H*.42,vx:(rnd()-.5)*14,vy:-rnd()*14-4,r:4+rnd()*5,c:cols[Math.floor(rnd()*cols.length)],a:rnd()*6,va:(rnd()-.5)*.3}));
-  const s=performance.now();
-  (function fr(now){c.clearRect(0,0,W,H);ps.forEach(p=>{p.vy+=.28;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;c.save();c.translate(p.x,p.y);c.rotate(p.a);c.fillStyle=p.c;c.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);c.restore()});
-    if(now-s<4500&&!$("jp").hidden)confettiRAF=requestAnimationFrame(fr);else c.clearRect(0,0,W,H)})(s);
-}
-function closeWin(){$("jp").hidden=true;cancelAnimationFrame(confettiRAF)}
-$("jpClose").onclick=closeWin;
-$("jp").addEventListener("click",e=>{if(e.target===$("jp"))closeWin()});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("jp").hidden)closeWin()});
-try{$("agree").checked=localStorage.getItem(BRAND.key+"-tnc")==="yes"}catch(e){}
-$("agree").addEventListener("change",()=>{try{localStorage.setItem(BRAND.key+"-tnc",$("agree").checked?"yes":"no")}catch(e){}$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));if($("cheer").textContent==="I-check muna ang T&C.")$("cheer").textContent=""});
-$("tncLink").onclick=e=>{e.preventDefault();$("tnc").open=true;$("tnc").scrollIntoView({behavior:"smooth",block:"start"})};
-
-// ---------- link maker (agents) ----------
-let adminToken="";
-try{adminToken=sessionStorage.getItem("cg-admin-token")||""}catch(e){}
-let look=null,capState=null;
-function playerLink(){return look&&look.code?location.href.split("#")[0]+"#"+look.code:""}
-function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function peso(n){return "₱"+Number(n||0).toLocaleString(undefined,{maximumFractionDigits:0})}
-async function api(path,opts){
-  const r=await fetch(path,Object.assign({headers:{"Content-Type":"application/json","X-Admin-Token":adminToken}},opts||{}));
-  const j=await r.json().catch(()=>({}));
-  if(r.status===403){adminToken="";try{sessionStorage.removeItem("cg-admin-token")}catch(e){}location.reload()}
-  return {ok:r.ok,status:r.status,j};
-}
-function renderCap(){
-  const c=capState;if(!c)return;
-  $("capText").innerHTML="Ngayong araw: <b>"+peso(c.capUsed)+"</b> nagamit · <b>"+peso(c.capLeft)+"</b> natitira sa <b>"+peso(c.dailyCap)+"</b>"+(c.dailyCap!==c.defaultCap?" <small>(default "+peso(c.defaultCap)+")</small>":"")+(c.capped?" — <span style='color:var(--bad)'>NAABOT NA ang budget: walang bagong link o palo</span>":"");
-  $("capInput").placeholder="hal. "+(c.dailyCap+5000);
-}
-function renderLookup(){
-  const tb=$("aTier"),ob=$("offerBox"),l=look;
-  $("linkField").hidden=!(l&&l.code);$("makeRow").hidden=!(l&&l.found&&!l.code);ob.hidden=!(l&&l.found);
-  if(!l){tb.className="tierbox";tb.innerHTML="I-type ang username at pindutin ang Check.";return}
-  if(!l.found){tb.className="tierbox bad";tb.innerHTML="<b>Hindi nakita</b> ang account <code>"+esc(l.account)+"</code>. I-check ang spelling — username ito, hindi real name.";return}
-  const ok=l.entriesEarned>0;
-  tb.className="tierbox"+(ok?"":" bad");
-  tb.innerHTML=(ok?"<b>Qualified</b>":"<b>Wala pang entry</b>")+" — "+esc(l.account)+(l.name&&l.name!==l.account?" ("+esc(l.name)+")":"")+"<br>Deposits "+fmtTime(CONF.depFrom)+"–"+fmtTime(CONF.depTo)+" ngayon: <b>"+l.entriesEarned+" entries</b> · nagamit "+l.entriesUsed+" · <b>"+l.entriesPlayable+" pwede nang laruin</b>"+(l.entriesLocked?" · "+l.entriesLocked+" naka-lock 🔒":"");
-  const w=l.wagering;
-  const wtxt=!w?"Turnover: wala pang data.":("Turnover sa slots + casino ngayon: <b>"+peso(w.validBet)+"</b>"+(w.nextRequired!=null?" / kailangan <b>"+peso(w.nextRequired)+"</b> para sa susunod na palo":" — lahat ng entry unlocked")+(w.syncedAt?" <small>(bets sync "+esc(syncHM(w.syncedAt))+", tuwing ~30 min)</small>":""));
-  const rows=l.entries.map(e=>"<tr><td>#"+e.no+"</td><td>"+esc(e.at)+" · "+peso(e.amount)+"</td><td>"+peso(e.required)+"</td><td>"+(e.played?"✅ nalaro":e.unlocked?"🔓 pwede na":"🔒 naka-lock")+"</td></tr>").join("");
-  const skipped=l.deposits.filter(d=>!d.qualifies);
-  ob.innerHTML="<strong>Detalye</strong>"+(rows?"<table style='width:100%;border-collapse:collapse;font-size:12px'><thead><tr><th style='text-align:left'>Entry</th><th style='text-align:left'>Deposit</th><th style='text-align:left'>3× cum.</th><th style='text-align:left'>Status</th></tr></thead><tbody>"+rows+"</tbody></table>":"<p>Walang qualified na deposit sa window ngayon. (Deposits sync tuwing ~5 min.)</p>")+(skipped.length?"<p class='small'>Hindi kasama (mas mababa sa "+peso(CONF.minDeposit)+"): "+skipped.map(d=>d.at+" · "+peso(d.amount)).join(", ")+"</p>":"")+"<p>"+wtxt+"</p><p>Napanalunan ngayon: "+(l.plays.length?l.plays.map(p=>peso(p.prize)).join(", "):"wala pa")+"</p><p class='small'>Server time "+esc(l.serverTime)+" · prize pool: "+PRIZES.map((p,i)=>peso(p)+" ("+WEIGHTS[i]+"%)").join(", ")+"</p>";
-  $("makeLink").disabled=!!l.capped;
-  $("plink").textContent=playerLink();
-}
-function flash(btn,txt){const o=btn.textContent;btn.textContent=txt;setTimeout(()=>btn.textContent=o,1500)}
-async function copyText(t,btn){try{await navigator.clipboard.writeText(t);flash(btn,"Copied")}catch(e){const r=document.createRange();r.selectNodeContents($("plink"));const s=getSelection();s.removeAllRanges();s.addRange(r);flash(btn,"Selected")}}
-if(mode==="admin"){
-  $("admin").hidden=false;$("previewLabel").hidden=false;
-  async function loadCap(){const r=await api("/api/cap");if(r.ok){capState=r.j;renderCap()}}
-  async function doLookup(){const a=$("acct").value.trim();if(!a)return;$("aMsg").textContent="Hinahanap…";const r=await api("/api/lookup?account="+encodeURIComponent(a));$("aMsg").textContent=r.ok?"":(r.j.error||"Error");look=r.ok?r.j:null;renderLookup();loadCap()}
-  async function makeLink(fresh){if(!look||!look.found)return;$("aMsg").textContent="Gumagawa ng link…";const r=await api("/api/link",{method:"POST",body:JSON.stringify({account:look.account,fresh:!!fresh})});if(!r.ok){$("aMsg").textContent=r.j.msg||r.j.error||"Error";loadCap();return}look=Object.assign({found:true},r.j);renderLookup();$("aMsg").textContent=fresh?"Bagong link. Pareho pa rin ang entries — nakatali ito sa account, hindi sa link.":"Handa na ang link."}
-  async function setCap(){const v=parseInt($("capInput").value,10);if(!(v>=0)){$("capMsg").textContent="Ilagay ang bagong budget (whole number).";return}if(!confirm("Gawing "+peso(v)+" ang daily budget ngayong araw?"))return;const r=await api("/api/cap",{method:"POST",body:JSON.stringify({dailyCap:v})});$("capMsg").textContent=r.ok?"Na-update ang budget ngayong araw.":(r.j.msg||r.j.error||"Error");if(r.ok){capState=r.j;renderCap();$("capInput").value="";if(look&&look.found)doLookup()}}
-  function unlockAdmin(){
-    $("adminGate").hidden=true;$("adminBody").hidden=false;
-    $("lookupBtn").onclick=doLookup;$("acct").addEventListener("keydown",e=>{if(e.key==="Enter")doLookup()});
-    $("makeLink").onclick=()=>makeLink(false);
-    $("newLink").onclick=()=>makeLink(true);
-    $("capBtn").onclick=setCap;
-    $("copyLink").onclick=()=>copyText(playerLink(),$("copyLink"));
-    $("copyMsg").onclick=()=>{if(!playerLink()){$("aMsg").textContent="Gumawa muna ng link.";return}copyText(BRAND.promo.script+"\n\nI-play dito: "+playerLink(),$("copyMsg"))};
-    renderLookup();loadCap();
-  }
-  if(adminToken){unlockAdmin()}
-  else{
-    $("adminGate").innerHTML="<span>Kailangan ng password para dito. Tanungin ang supervisor para sa password.</span><div style='display:flex;gap:8px;margin-top:8px'><input class='inp' type='password' id='adminPass' placeholder='Password' autocomplete='off' style='max-width:200px'><button class='btn small' id='adminPassGo' type='button'>Unlock</button></div><p id='adminPassErr' style='color:var(--bad);margin:6px 0 0'></p>";
-    const tryUnlock=async()=>{
-      const r=await fetch("/api/admin-login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:$("adminPass").value})});
-      if(r.ok){const j=await r.json();adminToken=j.token;try{sessionStorage.setItem("cg-admin-token",adminToken)}catch(e){}unlockAdmin()}
-      else{$("adminPassErr").textContent="Mali ang password."}
-    };
-    $("adminPassGo").onclick=tryUnlock;
-    $("adminPass").addEventListener("keydown",e=>{if(e.key==="Enter")tryUnlock()});
-  }
-}
-
-// ---------- boot ----------
 (async function boot(){
-  try{const r=await fetch("/api/config");if(r.ok){CONF=await r.json();PRIZES=CONF.prizes;WEIGHTS=CONF.weights}}catch(e){}
-  if(mode==="player"){
-    try{const r=await fetch("/api/session/"+encodeURIComponent(cfg.code));session=await r.json()}catch(e){session={exists:false}}
-    if(session&&session.exists){cfg.name=session.name||""}
+  try{const r=await fetch("/api/config");if(r.ok)applyConfig(await r.json())}catch(e){}
+  if(!CODE){
+    showGate("Buksan ang spin link","Galing sa GoPyesta team ang link na ito. Buksan iyon para makalaro.");
+    return;
   }
-  buildView();
+  refresh();
+  setInterval(()=>{if(!busy&&phase==="idle")refresh()},5000);
 })();
+
 </script>
 
-</body></html>
+</body>
+</html>
