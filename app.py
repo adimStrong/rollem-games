@@ -1,9 +1,10 @@
 """Gopyesta · Lucky Ferris Wheel — backend-verified community game.
 
-Same game as Palarong Pyesta (Palosebo) in every way that decides money: the entries,
-the turnover gate, the prize table, the daily budget and the ledger post are unchanged.
-Only the thing the player looks at changed — a ferris wheel instead of a climbing race.
-The mechanics below are the ones that were already live.
+Replaces Palarong Pyesta (Palosebo). The machinery that decides money is the same —
+entries from real deposits, the turnover gate, the daily budget, the ledger post — but
+the QUALIFYING DEPOSIT and the PRIZE POOL were moved onto the shared community-game
+numbers in "Rollem Games - Admin Reference", so this brand now matches the other seven:
+₱200 in, and a flat ₱10 / ₱27 / ₱57 pool instead of ₱100 in and ₱37 / ₱27 / ₱17.
 
 Reads the Gopyesta platform Postgres (deposits / users / bets_daily_category, filled by the
 gopyesta-retention pullers), turns today's real deposits into game entries, gates each entry
@@ -11,14 +12,20 @@ behind the player's real slots+casino turnover, draws every prize SERVER-SIDE, e
 daily bonus budget, and records every win in the shared wins-ledger.
 
 Mechanics (whiteboard "GPT2027 — Community Game Mechanics", Gopyesta column, as confirmed 2026-10-03):
-  * ONE Success deposit of >= ₱100 made 1 PM–9 PM today = ONE entry (palo), whatever the amount
+  * ONE Success deposit of >= ₱200 made 1 PM–9 PM today = ONE entry, whatever the amount
   * an entry is LOCKED until the player's slots (egame) + casino valid bet today reaches
     3× the cumulative qualifying deposits up to that entry (deposits unlock in time order)
-  * prize is drawn SERVER-SIDE and then revealed by the wheel: 1st ₱37 (5%) · 2nd ₱27 (85%) · 3rd ₱17 (10%)
+  * prize is drawn SERVER-SIDE and then revealed by the wheel: ₱10 (4%) · ₱27 (95%) · ₱57 (1%)
+    — the flat community-game pool shared by all eight brands
   * ₱10,000 bonus budget per day across all players; when reached, no new links and no plays —
     the admin can raise today's budget (stored per day in cg_settings)
   * unplayed / still-locked entries expire at the end of the day (PLAY_UNTIL)
   * payout is a manual GCash send tracked in wins-ledger (Paid / Revoke)
+
+Unlike the five STATIC brands, where an agent types a name and a deposit amount they
+verified off-platform, this service reads the deposit from the platform itself and
+holds the entry behind real turnover. The Admin Reference spreadsheet describes the
+agent-typed flow; that is accurate for the static brands, not for this one.
 
 Tables it OWNS in that database (created on boot, prefixed cg_): cg_sessions, cg_plays, cg_settings.
 """
@@ -49,9 +56,12 @@ TZ = ZoneInfo(os.environ.get("TZ", "Asia/Manila"))
 # ---- mechanics (env-overridable so the numbers can be tuned without a code change) ----
 BRAND = "gopyesta"
 GAME_NAME = "Lucky Ferris Wheel"
-MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", os.environ.get("ENTRY_PESO", "100")))  # one deposit >= this = one entry
-PRIZES = [int(x) for x in os.environ.get("PRIZES", "37,27,17").split(",")]  # [1st, 2nd, 3rd] place prize
-WEIGHTS = [int(x) for x in os.environ.get("WEIGHTS", "5,85,10").split(",")]  # win rate per placement
+# The shared community-game mechanic, per "Rollem Games - Admin Reference": a P200
+# qualifying deposit and a flat P10 / P27 / P57 pool at 4% / 95% / 1%. These are the
+# numbers the other seven brands run, so GoPyesta now matches them. Still env-overridable.
+MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", os.environ.get("ENTRY_PESO", "200")))  # one deposit >= this = one entry
+PRIZES = [int(x) for x in os.environ.get("PRIZES", "10,27,57").split(",")]   # paired with WEIGHTS by index
+WEIGHTS = [int(x) for x in os.environ.get("WEIGHTS", "4,95,1").split(",")]   # win rate per prize
 DAILY_CAP = int(os.environ.get("DAILY_CAP", "10000"))
 WAGER_MULT = float(os.environ.get("WAGER_MULT", "3"))   # 0 = no turnover gate
 WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame,casino").split(",") if c.strip()]

@@ -358,7 +358,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <h2>Link maker</h2>
     <p class="hint" id="adminGate">Sinusuri ang access…</p>
     <div id="adminBody" hidden style="display:grid;gap:14px">
-      <p class="hint">I-type ang <b>username</b> ng player. Kukunin ng system mula sa database ang Success deposits niya ngayong araw (1 PM–9 PM) — <b>isang deposit na ₱100 pataas = 1 ikot</b>. Naka-lock ang palo hangga't hindi naaabot ang 3× turnover sa slots/casino. Server ang nagde-decide ng premyo at naitatala agad sa wins ledger.</p>
+      <p class="hint">I-type ang <b>username</b> ng player. Kukunin ng system mula sa database ang Success deposits niya ngayong araw (1 PM–9 PM) — <b>isang deposit na ₱200 pataas = 1 ikot</b>. Naka-lock ang ikot hangga't hindi naaabot ang 3× turnover sa slots/casino. Server ang nagde-decide ng premyo at naitatala agad sa wins ledger.</p>
       <label class="field"><span>Player username</span><div class="btnrow"><input class="inp" id="acct" type="text" autocomplete="off" spellcheck="false" placeholder="hal. juan123" style="flex:1;min-width:0"><button class="btn small" id="lookupBtn" type="button">Check</button></div></label>
       <div class="tierbox" id="aTier"></div>
       <div class="offerbox" id="offerBox" hidden></div>
@@ -427,9 +427,9 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <h3>Terms &amp; Conditions</h3>
     <ol>
       <li>Open to verified Gopyesta players aged 21 and above. Self-excluded, restricted, test or unverified accounts are not eligible.</li>
-      <li>Each successful deposit of at least ₱100 made between 1:00 PM and 9:00 PM (Philippine time) earns one entry (one spin of the wheel), regardless of the deposit amount. Entries are computed from the platform's deposit records; pending, failed or reversed deposits, and deposits made outside the window, do not count.</li>
+      <li>Each successful deposit of at least ₱200 made between 1:00 PM and 9:00 PM (Philippine time) earns one entry (one spin of the wheel), regardless of the deposit amount. Entries are computed from the platform's deposit records; pending, failed or reversed deposits, and deposits made outside the window, do not count.</li>
       <li>An entry is locked until your valid bets on slots and casino games for the day reach 3× the deposit behind it (deposits unlock in the order they were made, cumulatively). Other game types do not count toward this requirement. Bet records refresh periodically, so an entry may unlock up to about 30 minutes after the requirement is met.</li>
-      <li>Each entry is one spin of the Lucky Ferris Wheel. Your prize — ₱37, ₱27 or ₱17 — is drawn at random by the system <b>before</b> the wheel turns; the cabin it stops at is for show and changes neither your prize nor your chances.</li>
+      <li>Each entry is one spin of the Lucky Ferris Wheel. Your prize — ₱10, ₱27 or ₱57 — is drawn at random by the system <b>before</b> the wheel turns; the cabin it stops at is for show and changes neither your prize nor your chances.</li>
       <li>Entries are valid only on the day the deposit was made and must be unlocked and played before the end of that day. Unplayed or still-locked entries expire.</li>
       <li>Total bonus awarded under this promo is limited to a daily budget (₱10,000 unless announced otherwise) across all players. Once the budget is used up, no further links or plays are issued that day.</li>
       <li>Each result is recorded by the system the moment it is drawn and is final. Refreshing the page, reopening the link or using another device does not give another turn.</li>
@@ -443,7 +443,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 </div>
 
 <script>
-const BRAND={"key": "gopyesta", "name": "Gopyesta", "labels": ["1st", "2nd", "3rd"], "promo": {"name": "Lucky Ferris Wheel", "target": "Lahat ng verified Gopyesta players", "trig": "Isang deposit na ₱100 pataas mula 1 PM hanggang 9 PM = 1 ikot sa wheel; mabubuksan ang ikot kapag umabot na sa 3× ng deposit ang laro mo sa slots o casino", "valid": "Araw-araw, 1 PM–9 PM; may daily budget ang bonus", "script": "Hi po! Pasok na ang deposit mo kaya may ikot ka na sa Lucky Ferris Wheel. Isang deposit na ₱100 pataas = 1 ikot — maglaro muna ng slots/casino na 3× ng deposit mo para ma-unlock, tapos paikutin ang wheel! Hanggang ₱777 ang maaaring halaga ng mga premyo namin."}, "confetti": ["#ff5d8f", "#ffd23f", "#3fd0c9", "#7d6bff", "#ffffff"], "confettiBig": ["#ffd23f", "#fff1b8", "#ff5d8f", "#ffffff"]};
+const BRAND={"key": "gopyesta", "name": "Gopyesta", "labels": ["1st", "2nd", "3rd"], "promo": {"name": "Lucky Ferris Wheel", "target": "Lahat ng verified Gopyesta players", "trig": "Isang deposit na ₱200 pataas mula 1 PM hanggang 9 PM = 1 ikot sa wheel; mabubuksan ang ikot kapag umabot na sa 3× ng deposit ang laro mo sa slots o casino", "valid": "Araw-araw, 1 PM–9 PM; may daily budget ang bonus", "script": "Hi po! Pasok na ang deposit mo kaya may ikot ka na sa Lucky Ferris Wheel. Isang deposit na ₱200 pataas = 1 ikot — maglaro muna ng slots/casino na 3× ng deposit mo para ma-unlock, tapos paikutin ang wheel! Hanggang ₱777 ang maaaring halaga ng mga premyo namin."}, "confetti": ["#ff5d8f", "#ffd23f", "#3fd0c9", "#7d6bff", "#ffffff"], "confettiBig": ["#ffd23f", "#fff1b8", "#ff5d8f", "#ffffff"]};
 // ---------- shared helpers ----------
 const $=id=>document.getElementById(id);
 // mechanics come from the server (/api/config); these are the fallback defaults
@@ -485,6 +485,11 @@ function cheer(text){const c=$("cheer");c.textContent=text;c.classList.remove("p
 function needAgree(){if($("agree").checked)return false;const l=$("agreeLbl");l.classList.remove("nudge");void l.offsetWidth;l.classList.add("nudge");cheer("I-check muna ang T&C.");return true}
 
 // ---------- game ----------
+// DEAD CODE. This whole module built the Palosebo booth; the game is now the Lucky
+// Ferris Wheel in index.html and buildView() is never called here (mode is pinned to
+// "admin"). Kept only to hold this file to a single reviewable diff against the
+// version that was live. Any peso figure below is RETIRED — the live pool is in
+// /api/config. Delete this module once the rollout has settled.
 // Palosebo — ported from the real GoPyesta source (gopyesta-palosebo/split/app.js), same art,
 // physics, sounds and farm scene. The only change from the standalone source: the outcome used
 // to be drawn by a local random (PLACES, 3 fixed prizes). Here it's this backend's real, server-
@@ -575,7 +580,7 @@ const GAME=(()=>{
     h+="<div class='pp-row back'>"+Array.from({length:11},(_,i)=>person(i+40)).join("")+"</div><div class='pp-row front'>"+Array.from({length:9},(_,i)=>person(i)).join("")+"</div>";return h}
 
   const G={label:"Palosebo",title:"PALOSEBO",btn:"Pumili muna ng aakyat",
-    how:["I-check ang T&C box.","Tatlong bata ang magpapaunahan umakyat sa madulas na kawayan para makuha ang bandila sa tuktok.","Piliin kung sino sa tingin mo ang pinakamabilis: Juan, Pedro o Tonyo. Hindi nito binabago ang premyo mo.","Pindutin ang SIMULAN ANG KARERA!, tapos i-tap nang i-tap ang screen para umakyat ang pinili mo. Madulas ang kawayan kaya puwede siyang madulas pababa.","Premyo ayon sa puwesto ng pinili mo: 1st ₱37, 2nd ₱27, 3rd ₱17. Random ang puwesto ayon sa win rate; hindi ito nababago ng pinili mo o ng bilis ng pag-tap mo."],
+    how:["I-check ang T&C box.","Tatlong bata ang magpapaunahan umakyat sa madulas na kawayan para makuha ang bandila sa tuktok.","Piliin kung sino sa tingin mo ang pinakamabilis: Juan, Pedro o Tonyo. Hindi nito binabago ang premyo mo.","Pindutin ang SIMULAN ANG KARERA!, tapos i-tap nang i-tap ang screen para umakyat ang pinili mo. Madulas ang kawayan kaya puwede siyang madulas pababa.","RETIRADO NA ANG LARONG ITO — Lucky Ferris Wheel na ang laro. Tingnan ang kasalukuyang premyo sa /api/config."],
     note:"Pumili ng aakyat, tapos i-tap nang mabilis ang screen para siya umakyat!",
     build(play,ctx){cancelAnimationFrame(run);busyR=false;sel=null;climbers=[];
       scene=el("div","ps");

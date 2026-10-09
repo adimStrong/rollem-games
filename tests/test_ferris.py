@@ -1,10 +1,11 @@
-"""Lucky Ferris Wheel — the mechanics are Palarong Pyesta's, unchanged.
+"""Lucky Ferris Wheel — rules, prize pool and the page split.
 
-So most of what is asserted here is that the RULES still behave exactly as they did
-before the game was reskinned: one qualifying deposit in the window = one entry, each
-entry unlocks at WAGER_MULT x the cumulative deposits up to it, the prize is drawn
-server-side from PRIZES/WEIGHTS, the daily cap holds, and entries cannot be replayed.
-The rest covers the page split (game at /, link maker at /admin.html).
+The VERIFICATION is Palarong Pyesta's, unchanged: one qualifying deposit in the window
+= one entry, each entry unlocks at WAGER_MULT x the cumulative deposits up to it, the
+prize is drawn server-side, the daily cap holds, and entries cannot be replayed. What
+moved is the qualifying deposit and the prize pool, onto the shared community-game
+numbers in "Rollem Games - Admin Reference" (P200 in; P10/P27/P57 at 4/95/1), so this
+brand matches the other seven. The rest covers the page split and the T&C gate.
 
 Runs against tests/fakedb.py — see its docstring for what that cannot prove.
 """
@@ -62,11 +63,12 @@ PLAY = "/api/play/laus87-ab12"
 SESS = "/api/session/laus87-ab12"
 IN = "14:00"   # inside the 1 PM - 9 PM deposit window
 
-print("\n-- the mechanics are the ones that were already live")
+print("\n-- verification kept from the old game, pool moved to the reference")
 check("game renamed", A.GAME_NAME == "Lucky Ferris Wheel")
-check("minimum deposit still P100", A.MIN_DEPOSIT == 100)
-check("prize table still 37/27/17", A.PRIZES == [37, 27, 17])
-check("weights still 5/85/10", A.WEIGHTS == [5, 85, 10])
+check("minimum deposit is the reference P200", A.MIN_DEPOSIT == 200)
+check("prize pool is the reference 10/27/57", A.PRIZES == [10, 27, 57])
+check("odds are the reference 4/95/1", A.WEIGHTS == [4, 95, 1])
+check("odds sum to 100", sum(A.WEIGHTS) == 100)
 check("turnover gate still 3x", A.WAGER_MULT == 3)
 check("still slots + casino", A.WAGER_CATS == ["egame", "casino"])
 check("daily cap still P10,000", A.DAILY_CAP == 10000)
@@ -79,15 +81,15 @@ steps = [A.draw_step() for _ in range(6000)]
 check("every step is a real placement", set(steps) <= {0, 1, 2}, str(sorted(set(steps))))
 check("all three placements occur", set(steps) == {0, 1, 2})
 mid = steps.count(1) / len(steps)
-check("the 85% placement dominates", 0.80 < mid < 0.90, f"{mid:.2%}")
+check("the 95% outcome dominates", 0.92 < mid < 0.98, f"{mid:.2%}")
 
 print("\n-- entries come from qualifying deposits in the window")
 fresh(deposits=[(500, IN)])
 s = cli.get(SESS).get_json()
 check("one qualifying deposit = one entry", s["entriesEarned"] == 1, str(s["entriesEarned"]))
-fresh(deposits=[(500, IN), (300, "15:00"), (50, "16:00")])
+fresh(deposits=[(500, IN), (300, "15:00"), (150, "16:00")])
 s = cli.get(SESS).get_json()
-check("a deposit under P100 earns nothing", s["entriesEarned"] == 2, str(s["entriesEarned"]))
+check("a deposit under P200 earns nothing", s["entriesEarned"] == 2, str(s["entriesEarned"]))
 fresh(deposits=[(500, "09:00"), (500, "22:00")])
 s = cli.get(SESS).get_json()
 check("deposits outside the window earn nothing", s["entriesEarned"] == 0, str(s["entriesEarned"]))
@@ -146,7 +148,7 @@ check("the rows are entry_no 1 and 2",
       [p["entry_no"] for p in fakedb.STATE["plays"]] == [1, 2])
 
 print("\n-- the daily cap")
-fresh(deposits=[(500, IN)], turnover=1500, cap=10)
+fresh(deposits=[(500, IN)], turnover=1500, cap=5)
 r = cli.post(PLAY)
 check("a prize that would exceed the cap is refused",
       r.status_code == 409 and r.get_json()["error"] == "cap", str(r.get_json())[:120])
@@ -169,7 +171,7 @@ fresh(deposits=[(500, IN)], turnover=1500)
 s = cli.get(SESS).get_json()
 check("carries the deposit total the page shows", s["depositTotal"] == 500, str(s.get("depositTotal")))
 check("carries turnover", s["wagering"]["validBet"] == 1500)
-check("carries the config", s["config"]["prizes"] == [37, 27, 17])
+check("carries the config", s["config"]["prizes"] == [10, 27, 57])
 
 print("\n-- admin link maker")
 fresh(deposits=[(500, IN)], turnover=1500)
@@ -225,6 +227,8 @@ print("\n-- the T&C gate carried over from the game this replaces")
 check("the player page shows the T&C", 'class="tnc"' in page and "Terms &amp; Conditions" in page)
 check("the T&C describes the wheel, not Palosebo",
       "one spin of the wheel" in page and "greased" not in page and "climber" not in page)
+check("the T&C quotes the reference minimum and pool",
+      "at least ₱200" in page and "₱10, ₱27 or ₱57" in page)
 check("the T&C still states the real rules",
       "3× the deposit behind it" in page and "₱10,000" in page)
 check("there is an agreement box", 'id="agree"' in page and 'id="agreeLbl"' in page)
