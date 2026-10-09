@@ -238,8 +238,13 @@ check("the gate is checked before the request, so it cannot burn an entry",
 check("the admin T&C matches the player T&C",
       "one spin of the wheel" in adm and "greased" not in adm)
 
+# Guards against a mangled escape shipping a raw control byte: a backslash-25 in CSS
+# content was once read as a Python octal escape and put 0x15 into the page. Tab, LF and
+# CR are excluded - with core.autocrlf=true every line is served CRLF, which is a line
+# ending, not a stray byte, and flagging it made this test fail on a clean checkout.
+WHITESPACE = (chr(9), chr(10), chr(13))
 check("no stray control characters in the page",
-      not [c for c in page if ord(c) < 9 or 11 <= ord(c) < 32])
+      not [c for c in page if ord(c) < 32 and c not in WHITESPACE])
 check("the T&C disclosure markers render",
       'content:"▸ "' in page and 'content:"▾ "' in page)
 
