@@ -57,6 +57,6 @@ The `fw_spins` table is created on first boot in the gpr database; `cg_sessions`
 ## What changed vs. Palarong Pyesta (same harness, new mechanic)
 - Entry model → cabin model: `POST /api/pick/<code> {cabin}`, `POST /api/spin/<code>`, `POST /api/seen/<code>`; `GET /api/session/<code>` now returns `cur`, `dep`, `slot`, `other`, `depOk`, `betOk`, `ready`, `missing`, `wager`, `hist`, `week`.
 - Deposit = total Success deposits for the day (whole day by default, not 1–9 PM); slot bets = `bets_daily_category` category `egame` only (casino no longer counts).
-- Reward = random in the cabin tier's range (8–18 / 18–28 / 18–188 / 288–888), posted to wins-ledger with `game: "Lucky Ferris Wheel"`.
+- Reward = random in the cabin tier's range. Defaults since 2026-10-12 (user: "only 1-6"): 6 cabins, cabins 1/3/5 need ₱300 → ₱8–18, cabins 2/4/6 need ₱600 → ₱18–28 (`WHEEL_CABINS`, `WHEEL_TIERS`, `WHEEL_CAB_TIER` restore the 8-cabin/4-tier design). Posted to wins-ledger with `game: "Lucky Ferris Wheel"`.
 - Daily budget, admin link maker, T&C gate, manual GCash payout via wins-ledger: unchanged.
 - Tests: `tests/README.md` (docker postgres + fixture + stub ledger; `test_api.py` 47 checks, `test_ui.py` Playwright 15 checks) — all passing on 2026-10-12.

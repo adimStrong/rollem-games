@@ -17,7 +17,7 @@ def check(name, cond, info=""):
 db = psycopg2.connect("postgresql://postgres:cgtest@localhost:55432/cg"); db.autocommit = True; cur = db.cursor()
 
 st, j = call("/health"); check("health names the game", st == 200 and j["game"] == "Lucky Ferris Wheel", j)
-st, cfg = call("/api/config"); check("config: 8 cabins, 4 tiers, slots only", cfg["cabins"] == 8 and len(cfg["tiers"]) == 4 and cfg["wagerCats"] == ["egame"] and cfg["minDeposit"] == 100, cfg)
+st, cfg = call("/api/config"); check("config: 6 cabins, 2 tiers alternating, slots only", cfg["cabins"] == 6 and len(cfg["tiers"]) == 2 and cfg["cabTier"] == [0, 1, 0, 1, 0, 1] and cfg["maxPrize"] == 28 and cfg["wagerCats"] == ["egame"] and cfg["minDeposit"] == 100, cfg)
 st, j = call("/api/admin-login", "POST", {"password": "wrong"}); check("bad password 403", st == 403)
 st, j = call("/api/admin-login", "POST", {"password": "testpw"}); tok = j.get("token"); check("login", st == 200 and tok)
 st, j = call("/api/lookup?account=Juan123"); check("lookup needs token", st == 403)
@@ -35,10 +35,12 @@ st, s = call(f"/api/session/{code}"); check("session public GET", st == 200 and 
 st, s = call("/api/session/nope-0000"); check("unknown session", st == 200 and not s["exists"])
 # ---- spin before pick / pick / change cabin
 st, p = call(f"/api/spin/{code}", "POST", {}); check("spin before pick refused", st == 409 and p["error"] == "no_pick", p)
-st, p = call(f"/api/pick/{code}", "POST", {"cabin": 9}); check("cabin 9 rejected", st == 400, p)
-st, p = call(f"/api/pick/{code}", "POST", {"cabin": 3}); check("cabin 3 = tier 3 (8000) open, not ready", st == 200 and p["cur"]["cabin"] == 3 and p["cur"]["need"] == 8000 and p["cur"]["status"] == "open" and not p["ready"], p.get("cur"))
-check("missing says slots short by 7100", any("7,100" in m for m in p["missing"]), p.get("missing"))
-st, p = call(f"/api/spin/{code}", "POST", {}); check("spin refused while locked", st == 409 and p["error"] == "locked" and "7,100" in p["msg"], p)
+st, p = call(f"/api/pick/{code}", "POST", {"cabin": 7}); check("cabin 7 rejected (only 6)", st == 400, p)
+cur.execute("UPDATE bets_daily_category SET valid_bet=500 WHERE user_id=1 AND biz_date=%s AND category='egame'", (today,))   # 500 < 600 for the locked case
+st, p = call(f"/api/pick/{code}", "POST", {"cabin": 2}); check("cabin 2 = tier 2 (600) open, not ready with 500 slots", st == 200 and p["cur"]["cabin"] == 2 and p["cur"]["need"] == 600 and p["cur"]["status"] == "open" and not p["ready"], p.get("cur"))
+check("missing says slots short by 100", any("100" in m for m in p["missing"]), p.get("missing"))
+st, p = call(f"/api/spin/{code}", "POST", {}); check("spin refused while locked", st == 409 and p["error"] == "locked" and "100" in p["msg"], p)
+cur.execute("UPDATE bets_daily_category SET valid_bet=900 WHERE user_id=1 AND biz_date=%s AND category='egame'", (today,))
 st, p = call(f"/api/pick/{code}", "POST", {"cabin": 5}); check("change to cabin 5 = tier 1 (300) -> ready", st == 200 and p["cur"]["cabin"] == 5 and p["cur"]["need"] == 300 and p["ready"], p.get("cur"))
 st, s = call(f"/api/session/{code}"); check("session shows ready + today pending in week", s["ready"] and any(w["day"] == today and w["amount"] is None for w in s["week"]), s.get("week"))
 st, p = call(f"/api/spin/{code}", "POST", {})
@@ -69,7 +71,7 @@ st, c1 = call("/api/cap", "POST", {"dailyCap": used + 5}, tok=tok); check("cap s
 st, j = call("/api/link", "POST", {"account": "pedro"}, tok=tok); check("link refused while capped", st == 409 and j["error"] == "cap", j)
 st, c2 = call("/api/cap", "POST", {"dailyCap": used + 5000}, tok=tok); check("budget raised", st == 200 and not c2["capped"], c2)
 st, j = call("/api/link", "POST", {"account": "pedro"}, tok=tok); pcode = j.get("code"); check("link ok after raise", st == 200 and pcode, j)
-st, p = call(f"/api/pick/{pcode}", "POST", {"cabin": 2}); check("pedro cabin 2 (600) ready with 5000 slots", p["ready"], p.get("cur"))
+st, p = call(f"/api/pick/{pcode}", "POST", {"cabin": 6}); check("pedro cabin 6 (tier 2, 600) ready with 5000 slots", p["ready"] and p["cur"]["need"] == 600, p.get("cur"))
 cur.execute("UPDATE cg_settings SET daily_cap=%s WHERE biz_date=%s", (used + 10, today))   # cap again, but link exists
 st, p = call(f"/api/spin/{pcode}", "POST", {}); check("spin refused by cap", st == 409 and p["error"] == "cap", p)
 cur.execute("DELETE FROM cg_settings WHERE biz_date=%s", (today,))                           # back to default 10,000

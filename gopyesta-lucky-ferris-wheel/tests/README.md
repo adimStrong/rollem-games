@@ -13,3 +13,4 @@ Re-run `fixture.py` (and restart app.py — it recreates the `fw_spins` table) b
 
 Fixture players: `Juan123` (deposit 400, slots 900 → tier 1/2 goals met), `maria_x` (deposit 80 → short), `pedro` (cap test),
 `luis` (casino 9,000 but no slots → must NOT count), `tester` (is_test=1 → not found).
+Defaults under test: 6 cabins, tiers ₱300→₱8–18 and ₱600→₱18–28 alternating (WHEEL_CABINS / WHEEL_TIERS / WHEEL_CAB_TIER).
