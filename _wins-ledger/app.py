@@ -15,6 +15,14 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 
 VALID_AMOUNTS = {10, 27, 57, 17, 37, 77}  # 17/37/77 = Gopyesta Palarong Pyesta tiers
+# Gopyesta Lucky Ferris Wheel (2026-10-12) rolls a random P8-888 per spin, so gopyesta accepts any whole-peso amount in range
+WHEEL_RANGE = (1, 1000)
+
+
+def amount_ok(brand: str, amount: int) -> bool:
+    if amount in VALID_AMOUNTS:
+        return True
+    return brand == "gopyesta" and WHEEL_RANGE[0] <= amount <= WHEEL_RANGE[1]
 VALID_BRANDS = {"gopyesta", "pots", "rollem", "winforlife", "cow", "tamasa", "gspot", "t2b"}
 
 
@@ -94,7 +102,7 @@ def record_win():
     except (TypeError, ValueError):
         return jsonify({"error": "bad amount"}), 400
 
-    if brand not in VALID_BRANDS or amount not in VALID_AMOUNTS or not code:
+    if brand not in VALID_BRANDS or not amount_ok(brand, amount) or not code:
         return jsonify({"error": "invalid payload"}), 400
 
     with db() as conn, conn.cursor() as cur:
