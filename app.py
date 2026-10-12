@@ -6,9 +6,10 @@ rolls every reward SERVER-SIDE, enforces the daily bonus budget, and records eve
 shared wins-ledger. Payout stays a manual GCash send tracked there (Paid / Revoke).
 
 Mechanics (from the standalone "GoPyesta Lucky Ferris Wheel" page, verified here instead of in the browser):
-  * the player picks ONE of 8 cabins; each cabin hides a reward tier (cabin 1&5 tier 1 … 4&8 tier 4):
-      tier 1  slot bets ₱300    → ₱8–18        tier 2  slot bets ₱600    → ₱18–28
-      tier 3  slot bets ₱8,000  → ₱18–188      tier 4  slot bets ₱50,000 → ₱288–888
+  * the player picks ONE of 6 cabins (WHEEL_CABINS); each cabin hides a reward tier (WHEEL_CAB_TIER, default alternating):
+      tier 1  slot bets ₱300 → ₱8–18 (cabins 1, 3, 5)      tier 2  slot bets ₱600 → ₱18–28 (cabins 2, 4, 6)
+    (the original 8-cabin / 4-tier design with ₱8,000 → ₱18–188 and ₱50,000 → ₱288–888 is one env change away:
+     WHEEL_CABINS=8  WHEEL_TIERS=[[300,8,18],[600,18,28],[8000,18,188],[50000,288,888]]  WHEEL_CAB_TIER=0,1,2,3,0,1,2,3)
   * goal for the day (PH time): Success deposits totalling >= ₱100 AND valid bet on SLOTS (egame) >= the cabin's target
   * the moment both are met the wheel spins: a random reward in the tier's range, drawn server-side, one round per day
     (the cabin can still be changed while the round is open; round 2+ — if enabled — counts slot bets after the previous spin)
@@ -44,11 +45,13 @@ TZ = ZoneInfo(os.environ.get("TZ", "Asia/Manila"))
 # ---- mechanics (env-overridable so the numbers can be tuned without a code change) ----
 BRAND = "gopyesta"
 GAME_NAME = "Lucky Ferris Wheel"
-N = 8
-CAB_TIER = [0, 1, 2, 3, 0, 1, 2, 3]
-_DEFAULT_TIERS = [[300, 8, 18], [600, 18, 28], [8000, 18, 188], [50000, 288, 888]]
+_DEFAULT_TIERS = [[300, 8, 18], [600, 18, 28]]
 TIERS = [{"bet": int(b), "min": int(lo), "max": int(hi)}
          for b, lo, hi in json.loads(os.environ.get("WHEEL_TIERS") or json.dumps(_DEFAULT_TIERS))]
+N = int(os.environ.get("WHEEL_CABINS", "6"))
+CAB_TIER = [int(x) for x in os.environ.get("WHEEL_CAB_TIER", "").split(",") if x.strip().lstrip("-").isdigit()] \
+    or [i % len(TIERS) for i in range(N)]                      # cabin i (1-based) -> tier index, default alternating
+assert len(CAB_TIER) == N and all(0 <= t < len(TIERS) for t in CAB_TIER), "WHEEL_CAB_TIER must list one tier index per cabin"
 MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", "100"))          # deposits for the day must total at least this
 TURNOVER_MULT = float(os.environ.get("TURNOVER_MULT", "5"))      # reward × this in slot bets to "clear" (0 = none)
 WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame").split(",") if c.strip()]   # slots only
