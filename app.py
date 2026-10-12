@@ -1,21 +1,21 @@
-"""Gopyesta · Palarong Pyesta (Palosebo) — backend-verified community game.
+"""Gopyesta · Lucky Ferris Wheel — backend-verified community game (replaces Palarong Pyesta, 2026-10-12).
 
 Reads the Gopyesta platform Postgres (deposits / users / bets_daily_category, filled by the
-gopyesta-retention pullers), turns today's real deposits into game entries, gates each entry
-behind the player's real slots+casino turnover, draws every prize SERVER-SIDE, enforces the
-daily bonus budget, and records every win in the shared wins-ledger.
+gopyesta-retention pullers), checks the player's REAL deposit + slot turnover for the day,
+rolls every reward SERVER-SIDE, enforces the daily bonus budget, and records every win in the
+shared wins-ledger. Payout stays a manual GCash send tracked there (Paid / Revoke).
 
-Mechanics (whiteboard "GPT2027 — Community Game Mechanics", Gopyesta column, as confirmed 2026-10-03):
-  * ONE Success deposit of >= ₱100 made 1 PM–9 PM today = ONE entry (palo), whatever the amount
-  * an entry is LOCKED until the player's slots (egame) + casino valid bet today reaches
-    3× the cumulative qualifying deposits up to that entry (deposits unlock in time order)
-  * prize is the climbing race's finishing place, drawn server-side: 1st ₱37 (5%) · 2nd ₱27 (85%) · 3rd ₱17 (10%)
-  * ₱10,000 bonus budget per day across all players; when reached, no new links and no plays —
-    the admin can raise today's budget (stored per day in cg_settings)
-  * unplayed / still-locked entries expire at the end of the day (PLAY_UNTIL)
-  * payout is a manual GCash send tracked in wins-ledger (Paid / Revoke)
+Mechanics (from the standalone "GoPyesta Lucky Ferris Wheel" page, verified here instead of in the browser):
+  * the player picks ONE of 8 cabins; each cabin hides a reward tier (cabin 1&5 tier 1 … 4&8 tier 4):
+      tier 1  slot bets ₱300    → ₱8–18        tier 2  slot bets ₱600    → ₱18–28
+      tier 3  slot bets ₱8,000  → ₱18–188      tier 4  slot bets ₱50,000 → ₱288–888
+  * goal for the day (PH time): Success deposits totalling >= ₱100 AND valid bet on SLOTS (egame) >= the cabin's target
+  * the moment both are met the wheel spins: a random reward in the tier's range, drawn server-side, one round per day
+    (the cabin can still be changed while the round is open; round 2+ — if enabled — counts slot bets after the previous spin)
+  * the reward carries a 5× slot turnover before it counts as cleared (shown to player + agent; informational for payout)
+  * ₱10,000 bonus budget per day across all players (cg_settings per day, raisable by the admin)
 
-Tables it OWNS in that database (created on boot, prefixed cg_): cg_sessions, cg_plays, cg_settings.
+Tables it OWNS in that database (created on boot): cg_sessions, cg_settings (shared with the previous game), fw_spins.
 """
 import hashlib
 import hmac
@@ -25,7 +25,7 @@ import secrets
 import threading
 import time
 import urllib.request
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import psycopg2
@@ -43,23 +43,27 @@ TZ = ZoneInfo(os.environ.get("TZ", "Asia/Manila"))
 
 # ---- mechanics (env-overridable so the numbers can be tuned without a code change) ----
 BRAND = "gopyesta"
-GAME_NAME = "Palarong Pyesta"
-MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", os.environ.get("ENTRY_PESO", "100")))  # one deposit >= this = one entry
-PRIZES = [int(x) for x in os.environ.get("PRIZES", "37,27,17").split(",")]  # [1st, 2nd, 3rd] place prize
-WEIGHTS = [int(x) for x in os.environ.get("WEIGHTS", "5,85,10").split(",")]  # win rate per placement
+GAME_NAME = "Lucky Ferris Wheel"
+N = 8
+CAB_TIER = [0, 1, 2, 3, 0, 1, 2, 3]
+_DEFAULT_TIERS = [[300, 8, 18], [600, 18, 28], [8000, 18, 188], [50000, 288, 888]]
+TIERS = [{"bet": int(b), "min": int(lo), "max": int(hi)}
+         for b, lo, hi in json.loads(os.environ.get("WHEEL_TIERS") or json.dumps(_DEFAULT_TIERS))]
+MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", "100"))          # deposits for the day must total at least this
+TURNOVER_MULT = float(os.environ.get("TURNOVER_MULT", "5"))      # reward × this in slot bets to "clear" (0 = none)
+WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame").split(",") if c.strip()]   # slots only
 DAILY_CAP = int(os.environ.get("DAILY_CAP", "10000"))
-WAGER_MULT = float(os.environ.get("WAGER_MULT", "3"))   # 0 = no turnover gate
-WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame,casino").split(",") if c.strip()]
-DEP_FROM = os.environ.get("DEP_FROM", "13:00")   # deposits counted from (inclusive, HH:MM)
-DEP_TO = os.environ.get("DEP_TO", "21:00")       # deposits counted until (exclusive)
-PLAY_UNTIL = os.environ.get("PLAY_UNTIL", "23:59")  # entries playable until this time, same day
-assert len(PRIZES) == len(WEIGHTS) and sum(WEIGHTS) == 100
-MIN_PRIZE = min(p for p, w in zip(PRIZES, WEIGHTS) if w > 0)
+ROUNDS_PER_DAY = int(os.environ.get("ROUNDS_PER_DAY", "1"))
+DEP_FROM = os.environ.get("DEP_FROM", "00:00")   # deposits counted from (inclusive, HH:MM)
+DEP_TO = os.environ.get("DEP_TO", "24:00")       # deposits counted until (exclusive)
+PLAY_UNTIL = os.environ.get("PLAY_UNTIL", "23:59")
+MIN_PRIZE = min(t["min"] for t in TIERS)
+MAX_PRIZE = max(t["max"] for t in TIERS)
 
 CONFIG = {
-    "brand": BRAND, "game": GAME_NAME, "minDeposit": MIN_DEPOSIT, "prizes": PRIZES, "weights": WEIGHTS,
-    "dailyCap": DAILY_CAP, "wagerMult": WAGER_MULT, "wagerCats": WAGER_CATS,
-    "depFrom": DEP_FROM, "depTo": DEP_TO, "playUntil": PLAY_UNTIL,
+    "brand": BRAND, "game": GAME_NAME, "version": "fw1", "cabins": N, "cabTier": CAB_TIER, "tiers": TIERS,
+    "minDeposit": MIN_DEPOSIT, "turnover": TURNOVER_MULT, "wagerCats": WAGER_CATS, "dailyCap": DAILY_CAP,
+    "roundsPerDay": ROUNDS_PER_DAY, "depFrom": DEP_FROM, "depTo": DEP_TO, "playUntil": PLAY_UNTIL, "maxPrize": MAX_PRIZE,
 }
 
 
@@ -103,23 +107,6 @@ def init_db():
         cur.execute("CREATE INDEX IF NOT EXISTS cg_sessions_user_date_idx ON cg_sessions (user_id, biz_date)")
         cur.execute(
             """
-            CREATE TABLE IF NOT EXISTS cg_plays (
-                id SERIAL PRIMARY KEY,
-                code TEXT NOT NULL,
-                user_id INTEGER NOT NULL,
-                account TEXT NOT NULL,
-                biz_date TEXT NOT NULL,
-                entry_no INTEGER NOT NULL,
-                step INTEGER NOT NULL,
-                prize INTEGER NOT NULL,
-                played_at BIGINT NOT NULL,
-                UNIQUE (user_id, biz_date, entry_no)
-            )
-            """
-        )
-        cur.execute("CREATE INDEX IF NOT EXISTS cg_plays_date_idx ON cg_plays (biz_date)")
-        cur.execute(
-            """
             CREATE TABLE IF NOT EXISTS cg_settings (
                 biz_date TEXT PRIMARY KEY,
                 daily_cap INTEGER NOT NULL,
@@ -127,19 +114,45 @@ def init_db():
             )
             """
         )
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS fw_spins (
+                id SERIAL PRIMARY KEY,
+                code TEXT NOT NULL,
+                user_id INTEGER NOT NULL,
+                account TEXT NOT NULL,
+                biz_date TEXT NOT NULL,
+                round_no INTEGER NOT NULL,
+                cabin INTEGER NOT NULL,
+                tier INTEGER NOT NULL,
+                need INTEGER NOT NULL,
+                status TEXT NOT NULL DEFAULT 'open',
+                amount INTEGER NOT NULL DEFAULT 0,
+                dep DOUBLE PRECISION NOT NULL DEFAULT 0,
+                slot DOUBLE PRECISION NOT NULL DEFAULT 0,
+                slot_base DOUBLE PRECISION NOT NULL DEFAULT 0,
+                seen INTEGER NOT NULL DEFAULT 0,
+                created_at BIGINT NOT NULL,
+                spun_at BIGINT,
+                cleared_at BIGINT,
+                UNIQUE (user_id, biz_date, round_no)
+            )
+            """
+        )
+        cur.execute("CREATE INDEX IF NOT EXISTS fw_spins_date_idx ON fw_spins (biz_date, status)")
+        cur.execute("CREATE INDEX IF NOT EXISTS fw_spins_user_idx ON fw_spins (user_id, status)")
 
 
 def clean_code(s: str) -> str:
     return "".join(ch for ch in (s or "").lower() if ch.isalnum())[:32] or "player"
 
 
-def draw_step() -> int:
-    r = secrets.randbelow(100)
-    for i, w in enumerate(WEIGHTS):
-        r -= w
-        if r < 0:
-            return i
-    return 0
+def ms():
+    return int(time.time() * 1000)
+
+
+def hm_of(t):
+    return t.strftime("%H:%M")
 
 
 def find_user(cur, account: str):
@@ -159,30 +172,39 @@ def window_deposits(cur, user_id: int, date: str):
         "ORDER BY created_at",
         (user_id, date, DEP_FROM, DEP_TO),
     )
-    return [{"amount": float(r["amount"]), "at": r["created_at"][11:16],
-             "qualifies": float(r["amount"]) >= MIN_DEPOSIT} for r in cur.fetchall()]
+    return [{"amount": float(r["amount"]), "at": r["created_at"][11:16]} for r in cur.fetchall()]
 
 
-def wagering(cur, user_id: int, date: str):
-    """Valid bet in the allowed categories today. None if the category table isn't there."""
+def bets_by_cat(cur, user_id: int, date: str):
+    """{category: valid_bet} for the day + latest sync time. None if the table isn't there."""
     try:
         cur.execute(
-            "SELECT COALESCE(SUM(valid_bet),0) AS valid_bet, MAX(updated_at) AS synced_at "
-            "FROM bets_daily_category WHERE user_id=%s AND biz_date=%s AND category = ANY(%s)",
-            (user_id, date, WAGER_CATS),
+            "SELECT category, COALESCE(valid_bet,0) AS valid_bet, updated_at FROM bets_daily_category "
+            "WHERE user_id=%s AND biz_date=%s",
+            (user_id, date),
         )
-        r = cur.fetchone()
-        return {"validBet": float(r["valid_bet"] or 0), "syncedAt": r["synced_at"]}
+        rows = cur.fetchall()
     except psycopg2.Error:
-        return None
+        return None, None
+    synced = max((r["updated_at"] or "" for r in rows), default=None) or None
+    return {r["category"]: float(r["valid_bet"] or 0) for r in rows}, synced
 
 
-def plays_for(cur, user_id: int, date: str):
-    cur.execute(
-        "SELECT entry_no, step, prize, played_at FROM cg_plays "
-        "WHERE user_id=%s AND biz_date=%s ORDER BY entry_no",
-        (user_id, date),
-    )
+def slot_bets_from(cur, user_id: int, date_from: str):
+    """Valid bet in the counted categories on every day >= date_from (for turnover that spans days)."""
+    try:
+        cur.execute(
+            "SELECT COALESCE(SUM(valid_bet),0) AS v FROM bets_daily_category "
+            "WHERE user_id=%s AND biz_date >= %s AND category = ANY(%s)",
+            (user_id, date_from, WAGER_CATS),
+        )
+        return float(cur.fetchone()["v"] or 0)
+    except psycopg2.Error:
+        return 0.0
+
+
+def spins_for(cur, user_id: int, date: str):
+    cur.execute("SELECT * FROM fw_spins WHERE user_id=%s AND biz_date=%s ORDER BY round_no", (user_id, date))
     return [dict(r) for r in cur.fetchall()]
 
 
@@ -193,7 +215,7 @@ def daily_cap_for(cur, date: str) -> int:
 
 
 def cap_used(cur, date: str) -> int:
-    cur.execute("SELECT COALESCE(SUM(prize),0) AS used FROM cg_plays WHERE biz_date=%s", (date,))
+    cur.execute("SELECT COALESCE(SUM(amount),0) AS used FROM fw_spins WHERE biz_date=%s AND status='paid'", (date,))
     return int(cur.fetchone()["used"])
 
 
@@ -204,48 +226,89 @@ def cap_info(cur, date: str):
     return {"dailyCap": cap, "capUsed": used, "capLeft": left, "capped": left < MIN_PRIZE}
 
 
+def pub_spin(r):
+    return {"id": r["id"], "day": r["biz_date"], "round_no": r["round_no"], "cabin": r["cabin"], "tier": r["tier"],
+            "need": int(r["need"]), "status": r["status"], "amount": int(r["amount"] or 0), "seen": int(r["seen"] or 0),
+            "dep": float(r["dep"] or 0), "slot": float(r["slot"] or 0),
+            "spun_at": datetime.fromtimestamp(r["spun_at"] / 1000, TZ).strftime("%Y-%m-%d %H:%M") if r.get("spun_at") else None,
+            "cleared": bool(r.get("cleared_at"))}
+
+
+def wager(cur, user_id: int):
+    """Bonus awaiting turnover: TURNOVER_MULT × the uncleared rewards, in slot bets made after the oldest one."""
+    cur.execute("SELECT * FROM fw_spins WHERE user_id=%s AND status='paid' ORDER BY spun_at", (user_id,))
+    rows = [dict(r) for r in cur.fetchall()]
+    cleared = sum(int(r["amount"]) for r in rows if r.get("cleared_at"))
+    open_rows = [r for r in rows if not r.get("cleared_at")]
+    if not open_rows or TURNOVER_MULT <= 0:
+        return {"bonus": 0, "need": 0, "done": 0, "cleared": cleared}
+    bonus = sum(int(r["amount"]) for r in open_rows)
+    need = bonus * TURNOVER_MULT
+    first = open_rows[0]
+    done = max(0.0, slot_bets_from(cur, user_id, first["biz_date"]) - float(first["slot_base"] or 0))
+    if done >= need:
+        cur.execute("UPDATE fw_spins SET cleared_at=%s WHERE id = ANY(%s)", (ms(), [r["id"] for r in open_rows]))
+        return {"bonus": 0, "need": 0, "done": 0, "cleared": cleared + bonus}
+    return {"bonus": bonus, "need": need, "done": done, "cleared": cleared}
+
+
 def summary(cur, user, date: str):
-    deps = window_deposits(cur, user["user_id"], date)
-    qual = [d for d in deps if d["qualifies"]]
-    plays = plays_for(cur, user["user_id"], date)
-    used = len(plays)
-    wag = wagering(cur, user["user_id"], date)
-    valid = None if wag is None else wag["validBet"]
-    # cumulative gate: entry i needs WAGER_MULT × (sum of qualifying deposits 1..i)
-    entries, cum, unlocked = [], 0.0, 0
-    for i, d in enumerate(qual, 1):
-        cum += d["amount"]
-        req = cum * WAGER_MULT
-        ok = WAGER_MULT <= 0 or (valid is not None and valid >= req)
-        if ok and unlocked == i - 1:
-            unlocked = i
-        entries.append({"no": i, "amount": d["amount"], "at": d["at"], "required": req,
-                        "unlocked": ok, "played": i <= used})
-    earned = len(qual)
-    playable = max(0, unlocked - used)
-    locked = max(0, earned - unlocked)
-    next_req = entries[unlocked]["required"] if unlocked < earned else None
+    uid = user["user_id"]
+    deps = window_deposits(cur, uid, date)
+    dep_total = sum(d["amount"] for d in deps)
+    cats, synced = bets_by_cat(cur, uid, date)
+    slot_today = sum(v for c, v in (cats or {}).items() if c in WAGER_CATS)
+    other = sum(v for c, v in (cats or {}).items() if c not in WAGER_CATS)
+    rows = spins_for(cur, uid, date)
+    cur_row = rows[-1] if rows else None
+    base = float(rows[-2]["slot_base"] or 0) if cur_row and cur_row["round_no"] > 1 else 0.0
+    slot = max(0.0, slot_today - base)
     t = now()
-    hm = t.strftime("%H:%M")
+    hm = hm_of(t)
+    dep_ok = dep_total >= MIN_DEPOSIT
+    bet_ok = bool(cur_row) and slot >= float(cur_row["need"])
+    play_open = hm <= PLAY_UNTIL
+    missing = []
+    if not dep_ok:
+        missing.append("mag-deposit pa ng ₱%s" % f"{MIN_DEPOSIT - dep_total:,.0f}")
+    if cur_row and not bet_ok:
+        missing.append("mag-slots pa ng ₱%s" % f"{float(cur_row['need']) - slot:,.0f}")
+    wg = wager(cur, uid)   # may mark rows cleared -> fetch history after it
+    cur.execute(
+        "SELECT * FROM fw_spins WHERE user_id=%s AND status='paid' ORDER BY spun_at DESC LIMIT 30", (uid,))
+    hist = [pub_spin(dict(r)) for r in cur.fetchall()]
+    d0 = datetime.strptime(date, "%Y-%m-%d")
+    mon = d0 - timedelta(days=d0.weekday())
+    week_days = [(mon + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
+    paid_by_day = {}
+    for h in hist:
+        if h["day"] in week_days:
+            paid_by_day[h["day"]] = paid_by_day.get(h["day"], 0) + h["amount"]
+    week = [{"day": d, "amount": paid_by_day.get(d, None if (d == date and cur_row and cur_row["status"] == "open") else -1)}
+            for d in week_days]
     return {
         "account": user["account"],
         "name": user["real_name"] or user["account"],
         "date": date,
         "deposits": deps,
-        "depositTotal": sum(d["amount"] for d in qual),
-        "entries": entries,
-        "entriesEarned": earned,
-        "entriesUnlocked": unlocked,
-        "entriesUsed": used,
-        "entriesPlayable": playable,
-        "entriesLocked": locked,
-        "plays": plays,
-        "wagering": None if wag is None else {
-            "validBet": valid, "nextRequired": next_req, "syncedAt": wag["syncedAt"],
-        },
+        "dep": dep_total,
+        "slot": slot,
+        "slotToday": slot_today,
+        "other": other,
+        "syncedAt": synced,
+        "cur": pub_spin(cur_row) if cur_row else None,
+        "roundsUsed": len(rows),
+        "canPick": (cur_row is not None and cur_row["status"] == "open") or len(rows) < ROUNDS_PER_DAY,
+        "depOk": dep_ok,
+        "betOk": bet_ok,
+        "ready": bool(cur_row) and cur_row["status"] == "open" and dep_ok and bet_ok and play_open,
+        "missing": missing,
+        "wager": wg,
+        "hist": hist,
+        "week": week,
         **cap_info(cur, date),
         "windowOpen": DEP_FROM <= hm < DEP_TO,
-        "playOpen": hm <= PLAY_UNTIL,
+        "playOpen": play_open,
         "serverTime": t.strftime("%Y-%m-%d %H:%M"),
     }
 
@@ -326,7 +389,7 @@ def make_link():
             cur.execute(
                 "INSERT INTO cg_sessions (code, user_id, account, name, biz_date, created_at) "
                 "VALUES (%s,%s,%s,%s,%s,%s)",
-                (code, user["user_id"], user["account"], user["real_name"] or "", date, int(time.time() * 1000)),
+                (code, user["user_id"], user["account"], user["real_name"] or "", date, ms()),
             )
         s = summary(cur, user, date)
     s["found"] = True
@@ -355,7 +418,7 @@ def cap():
             cur.execute(
                 "INSERT INTO cg_settings (biz_date, daily_cap, updated_at) VALUES (%s,%s,%s) "
                 "ON CONFLICT (biz_date) DO UPDATE SET daily_cap=EXCLUDED.daily_cap, updated_at=EXCLUDED.updated_at",
-                (date, new_cap, int(time.time() * 1000)),
+                (date, new_cap, ms()),
             )
         return jsonify({"ok": True, "date": date, "defaultCap": DAILY_CAP, **cap_info(cur, date)})
 
@@ -366,10 +429,21 @@ def config():
     return jsonify(CONFIG)
 
 
+_PUB = ("dep", "slot", "slotToday", "other", "syncedAt", "cur", "roundsUsed", "canPick", "depOk", "betOk", "ready",
+        "missing", "wager", "hist", "week", "capLeft", "capped", "windowOpen", "playOpen", "serverTime")
+
+
 def _pub(s):
-    return {k: s[k] for k in ("entriesEarned", "entriesUnlocked", "entriesUsed", "entriesPlayable",
-                              "entriesLocked", "plays", "wagering", "capLeft", "capped", "windowOpen",
-                              "playOpen", "serverTime")}
+    return {k: s[k] for k in _PUB}
+
+
+def _session_state(cur, sess):
+    date = today()
+    user = {"user_id": sess["user_id"], "account": sess["account"], "real_name": sess["name"]}
+    s = summary(cur, user, date)
+    out = {"exists": True, "code": sess["code"], "name": sess["name"] or sess["account"], "account": sess["account"],
+           "expired": sess["biz_date"] != date, "config": CONFIG, **_pub(s)}
+    return out, s
 
 
 @app.route("/api/session/<code>", methods=["GET"])
@@ -379,25 +453,29 @@ def get_session(code):
         sess = cur.fetchone()
         if not sess:
             return jsonify({"exists": False})
-        date = today()
-        user = {"user_id": sess["user_id"], "account": sess["account"], "real_name": sess["name"]}
-        s = summary(cur, user, sess["biz_date"])
-    expired = sess["biz_date"] != date
-    out = {"exists": True, "code": code, "name": sess["name"] or sess["account"], "account": sess["account"],
-           "expired": expired, "config": CONFIG, **_pub(s)}
-    if expired:
-        out.update({"entriesPlayable": 0, "entriesLocked": 0, "playOpen": False})
+        out, _ = _session_state(cur, sess)
     return jsonify(out)
 
 
-@app.route("/api/play/<code>", methods=["POST"])
-def play(code):
-    """Consume one unlocked entry: server draws the prize. Row-locked so double taps can't double-award."""
+def _locked_session(cur, code):
+    cur.execute("SELECT * FROM cg_sessions WHERE code=%s FOR UPDATE", (code,))
+    return cur.fetchone()
+
+
+@app.route("/api/pick/<code>", methods=["POST"])
+def pick(code):
+    """Lock cabin 1..8 for today (or change it while the round is still open)."""
+    payload = request.get_json(force=True, silent=True) or {}
+    try:
+        cabin = int(payload.get("cabin"))
+    except (TypeError, ValueError):
+        cabin = 0
+    if not 1 <= cabin <= N:
+        return jsonify({"error": "bad_cabin", "msg": "Pumili ng cabin 1 hanggang %d." % N}), 400
     conn = db(autocommit=False)
     try:
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cur.execute("SELECT * FROM cg_sessions WHERE code=%s FOR UPDATE", (code,))
-        sess = cur.fetchone()
+        sess = _locked_session(cur, code)
         if not sess:
             conn.rollback()
             return jsonify({"error": "no_session", "msg": "Hindi valid ang link."}), 404
@@ -405,60 +483,104 @@ def play(code):
         if sess["biz_date"] != date:
             conn.rollback()
             return jsonify({"error": "expired", "msg": "Expired na ang link na ito (ibang araw na)."}), 409
-        if now().strftime("%H:%M") > PLAY_UNTIL:
+        rows = spins_for(cur, sess["user_id"], date)
+        cur_row = rows[-1] if rows else None
+        tier = CAB_TIER[cabin - 1]
+        need = TIERS[tier]["bet"]
+        if cur_row and cur_row["status"] == "open":
+            cur.execute("UPDATE fw_spins SET cabin=%s, tier=%s, need=%s WHERE id=%s", (cabin, tier, need, cur_row["id"]))
+        elif len(rows) >= ROUNDS_PER_DAY:
             conn.rollback()
-            return jsonify({"error": "closed", "msg": "Sarado na ang laro para ngayong araw."}), 409
-        user = {"user_id": sess["user_id"], "account": sess["account"], "real_name": sess["name"]}
-        # the session row lock serialises plays per link; UNIQUE(user_id,biz_date,entry_no)
-        # catches a race between two links issued for the same account
-        s = summary(cur, user, date)
-        if s["entriesEarned"] == 0:
-            conn.rollback()
-            return jsonify({"error": "no_entries", "msg": "Wala ka pang entry. Isang deposit na ₱%d pataas (%s–%s) = 1 palo."
-                            % (MIN_DEPOSIT, DEP_FROM, DEP_TO), **_pub(s)}), 409
-        if s["entriesUsed"] >= s["entriesEarned"]:
-            conn.rollback()
-            return jsonify({"error": "no_entries", "msg": "Ubos na ang entries mo ngayon.", **_pub(s)}), 409
-        if s["entriesPlayable"] <= 0:
-            conn.rollback()
-            w = s["wagering"] or {}
-            return jsonify({"error": "locked", "msg": "Naka-lock pa ang susunod na palo: kailangan ng ₱%s turnover sa slots/casino "
-                            "(meron ka pang ₱%s)." % (f"{(w.get('nextRequired') or 0):,.0f}", f"{(w.get('validBet') or 0):,.0f}"),
-                            **_pub(s)}), 409
-        step = draw_step()
-        prize = PRIZES[step]
-        if s["capUsed"] + prize > s["dailyCap"]:
-            conn.rollback()
-            return jsonify({"error": "cap", "msg": "Naabot na ang daily bonus budget. Subukan ulit bukas.", **_pub(s)}), 409
-        entry_no = s["entriesUsed"] + 1
-        cur.execute(
-            "INSERT INTO cg_plays (code, user_id, account, biz_date, entry_no, step, prize, played_at) "
-            "VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
-            (code, sess["user_id"], sess["account"], date, entry_no, step, prize, int(time.time() * 1000)),
-        )
+            return jsonify({"error": "done", "msg": "Tapos na ang ikot mo ngayong araw. Pumili ulit bukas."}), 409
+        else:
+            cur.execute(
+                "INSERT INTO fw_spins (code, user_id, account, biz_date, round_no, cabin, tier, need, status, created_at) "
+                "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,'open',%s)",
+                (code, sess["user_id"], sess["account"], date, len(rows) + 1, cabin, tier, need, ms()),
+            )
+        out, _ = _session_state(cur, sess)
         conn.commit()
     except psycopg2.IntegrityError:
         conn.rollback()
         return jsonify({"error": "race", "msg": "Subukan ulit."}), 409
     finally:
         conn.close()
+    return jsonify(out)
+
+
+@app.route("/api/spin/<code>", methods=["POST"])
+def spin(code):
+    """START: spin now if today's goal is met. Server rolls the reward; the session row lock serialises spins."""
+    conn = db(autocommit=False)
+    try:
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        sess = _locked_session(cur, code)
+        if not sess:
+            conn.rollback()
+            return jsonify({"error": "no_session", "msg": "Hindi valid ang link."}), 404
+        date = today()
+        if sess["biz_date"] != date:
+            conn.rollback()
+            return jsonify({"error": "expired", "msg": "Expired na ang link na ito (ibang araw na)."}), 409
+        out, s = _session_state(cur, sess)
+        c = s["cur"]
+        if not c:
+            conn.rollback()
+            return jsonify({"error": "no_pick", "msg": "Pumili muna ng cabin.", **out}), 409
+        if c["status"] == "paid":
+            conn.rollback()
+            return jsonify({"ok": True, "spun": False, "already": True, **out})
+        if not s["playOpen"]:
+            conn.rollback()
+            return jsonify({"error": "closed", "msg": "Sarado na ang laro para ngayong araw.", **out}), 409
+        if not s["ready"]:
+            conn.rollback()
+            return jsonify({"error": "locked", "msg": "Tapusin muna ang goal: " + " at ".join(s["missing"]) + ".", **out}), 409
+        t = TIERS[c["tier"]]
+        amount = t["min"] + secrets.randbelow(t["max"] - t["min"] + 1)
+        if s["capUsed"] + amount > s["dailyCap"]:
+            conn.rollback()
+            return jsonify({"error": "cap", "msg": "Naabot na ang daily bonus budget. Subukan ulit bukas.", **out}), 409
+        cur.execute(
+            "UPDATE fw_spins SET status='paid', amount=%s, dep=%s, slot=%s, slot_base=%s, spun_at=%s, code=%s "
+            "WHERE id=%s AND status='open'",
+            (amount, s["dep"], s["slot"], s["slotToday"], ms(), code, c["id"]),
+        )
+        if cur.rowcount != 1:
+            conn.rollback()
+            return jsonify({"error": "race", "msg": "Subukan ulit."}), 409
+        out, s = _session_state(cur, sess)
+        conn.commit()
+    finally:
+        conn.close()
     post_ledger({"brand": BRAND, "game": GAME_NAME, "name": sess["account"], "code": code,
-                 "amount": prize, "link": request.headers.get("Referer", "")})
-    return jsonify({"ok": True, "step": step, "prize": prize, "entryNo": entry_no,
-                    "entriesPlayable": s["entriesPlayable"] - 1, "entriesLocked": s["entriesLocked"],
-                    "entriesEarned": s["entriesEarned"], "entriesUsed": entry_no,
-                    "capLeft": max(0, s["dailyCap"] - s["capUsed"] - prize)})
+                 "amount": amount, "link": request.headers.get("Referer", "")})
+    return jsonify({"ok": True, "spun": True, **out})
+
+
+@app.route("/api/seen/<code>", methods=["POST"])
+def seen(code):
+    payload = request.get_json(force=True, silent=True) or {}
+    try:
+        sid = int(payload.get("id"))
+    except (TypeError, ValueError):
+        return jsonify({"error": "bad id"}), 400
+    with db() as conn, conn.cursor() as cur:
+        cur.execute("UPDATE fw_spins SET seen=1 WHERE id=%s AND code=%s", (sid, code))
+    return jsonify({"ok": True})
 
 
 # ---------------------------------------------------------------- static
 @app.route("/")
 def index():
-    return send_from_directory(STATIC_DIR, "index.html")
+    resp = send_from_directory(STATIC_DIR, "index.html", max_age=0)
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return resp
 
 
 @app.route("/health")
 def health():
-    return jsonify({"ok": True, "time": now().isoformat()})
+    return jsonify({"ok": True, "game": GAME_NAME, "time": now().isoformat()})
 
 
 @app.route("/<path:path>")
