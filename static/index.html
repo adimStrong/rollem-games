@@ -196,7 +196,7 @@ h2{font:800 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
     <div><img class="logo" src="logo.png" alt="GoPyesta"><div class="brand" style="font-size:22px;margin-top:4px">Lucky Ferris Wheel<small>Pumili ng cabin · Ikot · Panalo</small></div></div>
     <div class="who" id="who"></div>
   </header>
-  <p class="demo" id="demoTag" hidden>DEMO · kailangan ng link mula sa agent mo para sa totoong premyo</p>
+  <p class="demo" id="demoTag" hidden>DEMO · pumili ng cabin at pindutin ang START para subukan · kailangan ng link mula sa agent mo para sa totoong premyo</p>
 
   <div class="grid">
     <section class="stage" id="stage">
@@ -425,7 +425,10 @@ async function pick(i){
 }
 async function start(){
   if(phase!=="idle"||busy||!S)return;
-  if(mode!=="player"){flash("Demo lang ito. Humingi ng link sa agent mo para sa totoong ikot.");return}
+  if(mode!=="player"){
+    if(demoPick==null){flash("Pumili muna ng cabin.");return}
+    const t=CONF.tiers[CONF.cabTier[demoPick]],amt=t.min+Math.floor(Math.random()*(t.max-t.min+1));
+    animateSpin({cabin:demoPick+1,amount:amt,id:null,demo:true});return}
   if(!S.cur){flash("Pumili muna ng cabin.");return}
   if(needAgree())return;
   busy=true;const r=await post("/api/spin/"+encodeURIComponent(code));busy=false;
@@ -492,6 +495,7 @@ function render(){
   if(!popOn()){
     if(cur&&cur.status==="paid")hint.innerHTML=`Nakuha mo ang <b>${peso(cur.amount)}</b> ngayong araw mula sa Cabin ${cur.cabin}. ${S.canPick?"Pumili ng cabin para sa panibagong ikot.":"Pumili ulit bukas."}`;
     else if(cur&&S.ready)hint.innerHTML=`Abot na ang goal ng <b>Cabin ${cur.cabin}</b>! I-check ang T&C at pindutin ang <b>START</b>.`;
+    else if(cur&&S.demo)hint.innerHTML=`<b>Cabin ${cur.cabin}</b> ang pili mo (target: slots ${peso(cur.need)}). Sa demo, pindutin ang <b>START</b> para makita ang ikot.`;
     else if(cur){const miss=[];if(!S.depOk)miss.push(`mag-deposit pa ng ${peso(CONF.minDeposit-S.dep)}`);if(!S.betOk)miss.push(`mag-slots pa ng ${peso(cur.need-S.slot)}`);
       hint.innerHTML=`<b>Cabin ${cur.cabin}</b> ang pili mo. Para umikot: ${miss.join(" at ")}. Pindutin ang ibang cabin para magpalit.`}
     else if(S.canPick)hint.innerHTML=`<b>Pumili ng cabin</b>. Bawat isa may tagong mystery bonus.`;
@@ -520,14 +524,16 @@ function render(){
 /* ---------- win pop-up ---------- */
 let confettiRAF=null;
 function openWin(row){
-  const jp=$("jp");$("jpSub").textContent="Lucky Ferris Wheel · Cabin "+row.cabin;$("jpAmt").textContent=peso(row.amount);jp.hidden=false;$("jpClose").focus();
+  const jp=$("jp");$("jpSub").textContent=(row.demo?"DEMO · ":"")+"Lucky Ferris Wheel · Cabin "+row.cabin;$("jpAmt").textContent=peso(row.amount);
+  document.querySelector(".jp-note").textContent=row.demo?"Demo lang ito — walang naitalang panalo. Sa totoong link, naitatala agad at ipinapadala ng agent ang reward pagkatapos ma-verify.":"Naitala na ang panalo mo. Ipapadala ng agent mo ang reward sa GCash pagkatapos ma-verify.";
+  $("jpClose").textContent=row.demo?"Ulitin ang demo":"Claim reward";jp.hidden=false;$("jpClose").focus();
   const cv2=$("confetti"),c=cv2.getContext("2d"),d=devicePixelRatio||1,W=cv2.clientWidth,H=cv2.clientHeight;cv2.width=W*d;cv2.height=H*d;c.setTransform(d,0,0,d,0,0);
   const cols=["#ffcf5a","#ff6b5b","#3fd4c0","#8f6bff","#ff8fb1","#ffffff"];
   const ps=Array.from({length:140},()=>({x:W/2+(Math.random()-.5)*80,y:H*.42,vx:(Math.random()-.5)*14,vy:-Math.random()*14-4,r:4+Math.random()*5,c:cols[Math.floor(Math.random()*cols.length)],a:Math.random()*6,va:(Math.random()-.5)*.3}));
   const s=performance.now();
   (function fr(now){c.clearRect(0,0,W,H);ps.forEach(p=>{p.vy+=.28;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;c.save();c.translate(p.x,p.y);c.rotate(p.a);c.fillStyle=p.c;c.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);c.restore()});
     if(now-s<4500&&!jp.hidden)confettiRAF=requestAnimationFrame(fr);else c.clearRect(0,0,W,H)})(s);
-  $("jpClose").onclick=async()=>{jp.hidden=true;cancelAnimationFrame(confettiRAF);if(mode==="player"&&row.id)await post("/api/seen/"+encodeURIComponent(code),{id:row.id});resetBoxes();phase="idle";refresh()};
+  $("jpClose").onclick=async()=>{jp.hidden=true;cancelAnimationFrame(confettiRAF);if(mode==="player"&&row.id)await post("/api/seen/"+encodeURIComponent(code),{id:row.id});if(row.demo)demoPick=null;resetBoxes();phase="idle";refresh()};
 }
 $("startBtn").onclick=start;
 setInterval(()=>{$("clock").textContent=new Date().toLocaleString("en-PH",{timeZone:"Asia/Manila",weekday:"short",hour:"numeric",minute:"2-digit",second:"2-digit"})},1000);
