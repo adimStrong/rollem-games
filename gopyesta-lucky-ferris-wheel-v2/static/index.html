@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Gopyesta Lucky Ferris Wheel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  color-scheme: dark;
+  --night:#1b1640; --panel:rgba(28,22,66,.78); --line:rgba(160,140,230,.28); --ink:#eef0fb; --mute:#97a0c7;
+  --bulb:#ffcf5a; --coral:#ff6b5b; --teal:#3fd4c0; --plum:#8f6bff; --bad:#ffb0b0;
+  --display:"Shrikhand","Georgia",serif; --body:"Figtree",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--night);position:relative;color:var(--ink);font:15px/1.5 var(--body);padding-inline:16px}
+img{max-width:100%}
+[hidden]{display:none!important}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--bulb);outline-offset:2px}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(20,14,50,.25) 0%,rgba(20,14,50,.55) 55%,rgba(16,10,40,.85) 100%),url("bg.jpg") center 30%/cover no-repeat,var(--night)}
+.card,.stage,.panel{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.logo{display:block;width:clamp(170px,32vw,320px);height:auto;filter:drop-shadow(0 8px 22px rgba(0,0,0,.45))}
+.wrap{max-width:1180px;margin:0 auto;padding-block:14px 48px;display:grid;gap:14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:clamp(22px,4vw,34px);line-height:1;color:var(--bulb);text-shadow:0 0 18px #ffcf5a55}
+.brand small{display:block;font:600 11px/1.6 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);text-shadow:none;margin-top:6px}
+.who{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--mute);font-size:14px}
+.who b{color:var(--ink)}
+.btn{border:0;border-radius:999px;padding:10px 18px;font-weight:800;background:var(--bulb);color:#2a1d00}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.small{padding:6px 12px;font-size:13px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:880px){.grid{grid-template-columns:1fr;gap:14px}}
+.demo{margin:0;font-size:12px;font-weight:700;color:#2a1d00;background:var(--bulb);border-radius:999px;padding:4px 12px;justify-self:center;text-align:center}
+
+/* stage + wheel (SVG ferris wheel ported from the Oct-23 raw export) */
+.stage{position:relative;background:rgba(24,18,60,.28);border:1px solid var(--line);border-radius:22px;padding:18px;overflow:hidden}
+.wheelbox{position:relative;width:100%;max-width:470px;aspect-ratio:400/452;margin:0 auto;touch-action:manipulation}
+.wheelbox svg.wheel{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.wheelbox canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:40}
+.wheel .bulb{fill:#ffe9ad;animation:chase 2.8s linear infinite}
+.wheel .bulb.b1{animation-delay:-.7s}.wheel .bulb.b2{animation-delay:-1.4s}.wheel .bulb.b3{animation-delay:-2.1s}
+.spinning .wheel .bulb{animation-duration:1.2s}
+@keyframes chase{0%,55%,100%{opacity:1}25%{opacity:.3}}
+.wheel .star{fill:#fff;opacity:.55}
+.wheel .star.tw{animation:twk 3.4s ease-in-out infinite}
+@keyframes twk{50%{opacity:.12}}
+.prompt{display:grid;place-items:center;min-height:50px;margin:2px 0 4px;text-align:center}
+.prompt>*{grid-area:1/1}
+.count{font-family:var(--display);font-size:clamp(30px,6vw,40px);line-height:1;color:var(--bulb);text-shadow:0 0 16px rgba(255,207,90,.55),0 3px 0 #7a2410;pointer-events:none;opacity:0}
+.count.on{animation:pop 1s ease-out}
+@keyframes pop{0%{opacity:0;transform:scale(1.6)}25%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.85)}}
+.spinrow{display:flex;justify-content:center;align-items:center;min-height:74px;margin-top:4px}
+.gondola{position:absolute;left:50%;top:0;width:18.5%;height:19.5%;transform:translate(-50%,0);transform-origin:50% 0;border:0;padding:0;background:none;z-index:20;cursor:default;-webkit-tap-highlight-color:transparent;will-change:transform}
+.armed .gondola{cursor:pointer}
+.gondola .hook{position:absolute;left:50%;top:0;width:3px;height:19%;transform:translateX(-50%);background:linear-gradient(90deg,#b9ae9a,#f4ecdc,#b9ae9a);border-radius:2px}
+.gondola .hook::before{content:"";position:absolute;left:50%;top:-4px;width:9px;height:9px;border-radius:50%;transform:translateX(-50%);background:#f6efe0;border:2px solid #5d5068;box-sizing:border-box}
+.gondola .cab{position:absolute;left:4%;right:4%;top:17%;bottom:0;border-radius:26% 26% 18% 18%/20% 20% 16% 16%;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--c) 78%,#fff) 0%,var(--c) 38%,color-mix(in srgb,var(--c) 72%,#000) 100%);
+  box-shadow:inset 0 -4px 0 rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.35),0 5px 10px rgba(0,0,0,.45);transition:transform .2s,filter .35s,box-shadow .3s}
+.gondola .roof{position:absolute;left:-7%;right:-7%;top:-4%;height:19%;border-radius:999px 999px 5px 5px;background:linear-gradient(#fff4d2,#f2be55 55%,#b97a1f);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+.gondola .roof::after{content:"";position:absolute;left:50%;top:-34%;width:16%;aspect-ratio:1;border-radius:50%;transform:translateX(-50%);background:#fff4d2;box-shadow:0 0 0 1.5px #b97a1f}
+.gondola .glass{position:absolute;left:12%;right:12%;top:22%;height:22%;border-radius:5px;background:linear-gradient(180deg,#36407a,#1b2150);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 0 0 1px rgba(0,0,0,.3);display:grid;place-items:center;
+  font:800 clamp(8px,1.9vw,11px)/1 var(--body);color:#ffe9ad;letter-spacing:.04em}
+.gondola .win{position:absolute;left:11%;right:11%;top:51%;bottom:12%;border-radius:7px;background:linear-gradient(#fffdf6,#f3ead6);box-shadow:inset 0 0 0 1.5px rgba(60,30,0,.22),0 1px 0 rgba(255,255,255,.35);display:grid;place-items:center;overflow:hidden}
+.gondola .q,.fly .q{position:relative;font-family:var(--display);font-size:clamp(15px,3.6vw,21px);color:#5b3a8c;line-height:1}
+.fly{position:absolute;z-index:35;border-radius:7px;background:linear-gradient(#fffdf6,#f3ead6);box-shadow:0 0 0 2px #ffcf5a,0 8px 16px rgba(0,0,0,.5);display:grid;place-items:center;pointer-events:none;--up:-14px;--s:1.18;animation:fly .2s ease-in-out forwards}
+.fly:not(.front){z-index:34;--up:10px;--s:.92;box-shadow:0 0 0 2px rgba(255,207,90,.6),0 4px 10px rgba(0,0,0,.45)}
+@keyframes fly{0%{transform:none}25%{transform:translate(calc(var(--dx)*.12),calc(var(--dy)*.12 + var(--up))) scale(var(--s))}75%{transform:translate(calc(var(--dx)*.88),calc(var(--dy)*.88 + var(--up))) scale(var(--s))}100%{transform:translate(var(--dx),var(--dy))}}
+.gondola.lift .win{background:rgba(20,16,50,.6);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.22)}
+.gondola.lift .win>span{visibility:hidden}
+.gondola .lbl{position:relative;font:800 clamp(13px,3.5vw,19px)/1 var(--mono);color:#2a1300;letter-spacing:-.03em;white-space:nowrap}
+.gondola .lbl.big{color:#c0141e}
+.gondola .win>span{display:inline-block}
+.gondola.flip .win>span{animation:flipin .45s ease-out both;animation-delay:var(--fd,0s)}
+.gondola.open .win>span{animation:flipopen .8s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes flipin{0%{transform:rotateY(90deg);opacity:0}100%{transform:none;opacity:1}}
+@keyframes flipopen{0%{transform:rotateY(90deg) scale(.4);opacity:0}55%{transform:rotateY(-12deg) scale(1.3);opacity:1}100%{transform:none}}
+.armed .gondola .cab{animation:invite 1.6s ease-in-out infinite;animation-delay:var(--d)}
+@keyframes invite{50%{box-shadow:inset 0 -4px 0 rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.35),0 0 0 2px rgba(255,207,90,.85),0 0 16px rgba(255,207,90,.55)}}
+.armed .gondola:hover .cab,.armed .gondola:focus-visible .cab{transform:scale(1.06)}
+.gondola.picked{z-index:30}
+.gondola.picked .cab{transform:scale(1.1);animation:pickbounce .7s cubic-bezier(.3,1.6,.5,1) both;box-shadow:0 0 0 3px #ffcf5a,0 0 18px rgba(255,207,90,.85),0 5px 10px rgba(0,0,0,.45)}
+@keyframes pickbounce{0%{transform:scale(1)}40%{transform:translateY(-6%) scale(1.2)}100%{transform:scale(1.1)}}
+.gondola.dim .cab{filter:grayscale(.7) brightness(.6);animation:none}
+.gondola.mine .cab{box-shadow:0 0 0 3px #fff,0 0 18px var(--c),0 0 32px var(--c)}
+.gondola.mine::after{content:"PILI MO";position:absolute;left:50%;bottom:-16%;transform:translateX(-50%);white-space:nowrap;font:800 9px var(--body);letter-spacing:.06em;color:#2a1300;background:var(--bulb);padding:2px 7px;border-radius:999px}
+@media (prefers-reduced-motion:reduce){.gondola .cab,.wheel .bulb,.wheel .star{animation:none!important}}
+.hint{text-align:center;color:var(--mute);font-size:14px;min-height:42px;margin-top:6px}
+.hint b{color:var(--bulb)}
+.status{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.live{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:13px;padding:6px 12px;border-radius:999px;background:rgba(14,10,40,.7);border:1px solid var(--line);color:var(--mute)}
+.live i{width:9px;height:9px;border-radius:50%;background:var(--mute)}
+.live.on{color:#062823;background:var(--teal);border-color:var(--teal)}.live.on i{background:#062823;animation:blinkdot 1s infinite}
+@keyframes blinkdot{50%{opacity:.2}}
+.clock{font:700 13px var(--mono);color:var(--mute);font-variant-numeric:tabular-nums}
+.startpick{font:800 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:#fff;background:rgba(20,12,50,.8);border:1px solid var(--bulb);padding:4px 12px;border-radius:999px}
+.startpick:empty{display:none}
+.btn.start{font-family:var(--display);font-weight:400;font-size:clamp(22px,4vw,30px);letter-spacing:.06em;padding:12px 56px;background:linear-gradient(#ffe08a,#ffb030 60%,#e0841a);color:#4a1d00;box-shadow:0 6px 0 #a3520c,0 0 24px rgba(255,190,70,.5);animation:startpulse 1.4s ease-in-out infinite}
+.btn.start:active{transform:translateY(4px);box-shadow:0 2px 0 #a3520c,0 0 20px rgba(255,190,70,.6)}
+@keyframes startpulse{50%{box-shadow:0 6px 0 #a3520c,0 0 40px rgba(255,210,90,.85)}}
+@media (prefers-reduced-motion:reduce){.btn.start{animation:none}}
+
+/* ledger cards */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}
+.stack{display:flex;flex-direction:column;gap:14px}
+h2{font:800 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 12px}
+.today{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.stat .k{font-size:11px;color:var(--mute);letter-spacing:.08em;text-transform:uppercase}
+.stat .v{font:700 20px var(--mono);font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:9px;background:rgba(14,10,40,.7);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--bulb));width:0;transition:width .5s}
+.next{font-size:13px;color:var(--mute);margin-top:6px}
+.hist{list-style:none;margin:0;padding:0;max-height:200px;overflow:auto;font-size:13.5px}
+.hist li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line)}
+.hist li span:last-child{font-family:var(--mono);color:var(--bulb);white-space:nowrap}
+.hist .empty{color:var(--mute);border:0}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.week div{border-radius:10px;background:rgba(14,10,40,.7);border:1px solid var(--line);padding:6px 2px;text-align:center;font-size:11px;color:var(--mute);min-width:0}
+.week div b{display:block;font:700 12px var(--mono);color:var(--ink);margin-top:2px;overflow:hidden;text-overflow:ellipsis}
+.week .paid{border-color:var(--teal)}.week .paid b{color:var(--teal)}
+.week .pending{border-color:var(--bulb)}.week .pending b{color:var(--bulb)}
+.week .today{outline:2px solid var(--plum);outline-offset:1px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-size:14px}
+.kv:first-of-type{border-top:0}
+.kv span:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.ok{color:var(--teal)}.bad{color:var(--coral)}.warn{color:var(--bulb)}
+.rules{margin:0;padding-left:20px;font-size:13.5px;color:var(--ink);display:flex;flex-direction:column;gap:8px}
+.rules li::marker{color:var(--bulb);font-weight:800}
+.rules b{color:var(--bulb)}
+.goal{margin-top:6px}.goal .kv{border-top:0;padding-bottom:2px}
+.note{font-size:12.5px;color:var(--mute);margin:10px 0 0;line-height:1.5}
+.gid{font:600 12px var(--mono);color:var(--bulb);background:rgba(255,207,90,.12);border:1px solid rgba(255,207,90,.35);padding:3px 8px;border-radius:999px}
+.agree{display:flex;align-items:flex-start;gap:10px;text-align:left;font-size:14px;cursor:pointer;line-height:1.4}
+.agree input{width:20px;height:20px;flex:none;margin:0;accent-color:var(--bulb)}
+.agree.nudge{animation:nudge .4s}
+@keyframes nudge{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--bulb);text-decoration:underline;cursor:pointer}
+.tnc{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:0 16px;text-align:left}
+.tnc summary{cursor:pointer;padding:14px 0;font-weight:700}
+.tnc h3{font-family:var(--display);font-weight:400;font-size:18px;margin:0 0 10px;color:var(--bulb)}
+.tnc ol{margin:0 0 12px;padding-left:20px;display:grid;gap:9px;font-size:13.5px;max-width:65ch}
+.tnc li::marker{color:var(--mute);font-family:var(--mono);font-size:12px}
+.tnc .small{font-size:12px;color:var(--mute);margin:0 0 16px}
+
+/* win pop-up */
+.jp{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.78);backdrop-filter:blur(3px);overflow:hidden}
+.jp canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.jp-card{position:relative;width:min(420px,100%);text-align:center;border-radius:24px;padding:26px 22px 22px;background:radial-gradient(circle at 50% 0%,#4a2a7a,#1c1440 70%);border:3px solid var(--bulb);box-shadow:0 0 0 6px rgba(255,207,90,.18),0 0 60px rgba(255,207,90,.45),0 24px 70px #000c;display:grid;gap:8px;animation:jpIn .55s cubic-bezier(.2,1.4,.4,1)}
+@keyframes jpIn{0%{transform:scale(.4) rotate(-6deg);opacity:0}100%{transform:scale(1);opacity:1}}
+.jp-title{font-family:var(--display);font-weight:400;font-size:clamp(34px,9vw,52px);line-height:1;margin:0;color:#fff;text-shadow:0 0 18px #ffcf5a,0 4px 0 #c4502a}
+.jp-sub{font:700 13px var(--mono);letter-spacing:1px;margin:0;color:var(--mute)}
+.jp-amt{font:800 clamp(44px,12vw,72px)/1.05 var(--mono);color:var(--bulb);text-shadow:0 0 24px rgba(255,207,90,.7);margin:4px 0}
+.jp-note{margin:0 0 8px;font-size:14px;color:var(--ink)}
+
+/* admin (link maker) */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;display:grid;gap:14px}
+.panel h2{font-family:var(--display);font-weight:400;font-size:22px;margin:0;color:var(--bulb);letter-spacing:0;text-transform:none}
+.hintp{margin:0;color:var(--mute);font-size:13px}
+.field{display:grid;gap:6px;text-align:left}
+.field>span{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--mute);font-weight:600}
+.inp{font:700 16px var(--mono);background:rgba(14,10,40,.7);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
+.tierbox{border-radius:12px;padding:12px 14px;background:rgba(0,0,0,.25);font-size:14px}
+.tierbox b{color:var(--bulb)}
+.tierbox.bad b{color:var(--bad)}
+.offerbox{border-radius:12px;padding:12px 14px;border:1px dashed var(--line);font-size:13.5px;display:grid;gap:6px}
+.offerbox strong{font-family:var(--display);font-weight:400;font-size:17px;color:var(--bulb)}
+.offerbox p{margin:0}
+.offerbox .small{font-size:12px;color:var(--mute)}
+.linkrow{display:flex;gap:8px;align-items:center}
+.linkrow code{flex:1;min-width:0;font:500 12px var(--mono);background:rgba(14,10,40,.7);border:1px solid var(--line);border-radius:8px;padding:10px;overflow-x:auto;white-space:nowrap}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.money{display:flex;align-items:center;gap:8px}
+.money span{font-family:var(--mono);color:var(--mute)}
+.preview-label{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--mute);font-weight:600;text-align:center;margin:0}
+.flash{position:fixed;left:16px;right:16px;bottom:16px;background:#000c;color:#fff;padding:12px;border-radius:10px;text-align:center;font-size:14px;z-index:60}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <section class="panel" id="admin" hidden>
+    <h2>Link maker · Lucky Ferris Wheel</h2>
+    <p class="hintp" id="adminGate">Sinusuri ang access…</p>
+    <div id="adminBody" hidden style="display:grid;gap:14px">
+      <p class="hintp">I-type ang <b>username</b> ng player. Kukunin ng system mula sa database ang Success deposits (1PM&ndash;9PM) at slot/casino turnover niya ngayong araw. <b>Deposit na ₱100 pataas + turnover na 3&times; ng deposit = iikot ang gulong</b>, server ang nagde-decide ng premyo (₱17/₱27/₱37, bihira ₱77) at naitatala agad sa wins ledger. May 3&times; turnover pa ang bonus bago ma-clear.</p>
+      <label class="field"><span>Player username</span><div class="btnrow"><input class="inp" id="acct" type="text" autocomplete="off" spellcheck="false" placeholder="hal. juan123" style="flex:1;min-width:0"><button class="btn small" id="lookupBtn" type="button">Check</button></div></label>
+      <div class="tierbox" id="aTier"></div>
+      <div class="offerbox" id="offerBox" hidden></div>
+      <div class="btnrow" id="makeRow" hidden><button class="btn small" id="makeLink" type="button">Gumawa ng link</button></div>
+      <div class="field" id="linkField" hidden><span>Player link</span>
+        <div class="linkrow"><code id="plink"></code></div>
+        <div class="btnrow"><button class="btn small" id="copyLink" type="button">Copy link</button><button class="btn small" id="copyMsg" type="button">Copy message + link</button><button class="btn small ghost" id="newLink" type="button">Bagong link</button></div>
+      </div>
+      <p class="hintp" id="aMsg"></p>
+      <div class="offerbox" id="capBox"><strong>Daily budget</strong><p id="capText">…</p><div class="btnrow"><div class="money" style="flex:1;min-width:0"><span>₱</span><input class="inp" id="capInput" type="number" min="0" step="100" inputmode="numeric" placeholder="bagong budget ngayong araw"></div><button class="btn small ghost" id="capBtn" type="button">Dagdag budget</button></div><p class="hintp" id="capMsg"></p></div>
+    </div>
+  </section>
+  <p class="preview-label" id="previewLabel" hidden>Preview ng player view</p>
+
+  <header>
+    <div><img class="logo" src="logo.png" alt="GoPyesta"><div class="brand" style="font-size:22px;margin-top:4px">Lucky Ferris Wheel<small>Pumili ng cabin · Ikot · Panalo</small></div></div>
+    <div class="who" id="who"></div>
+  </header>
+  <p class="demo" id="demoTag" hidden>DEMO · pumili ng cabin at pindutin ang SPIN para subukan · kailangan ng link mula sa agent mo para sa totoong premyo</p>
+
+  <div class="grid">
+    <section class="stage" id="stage">
+      <div class="status">
+        <span class="live" id="live"><i></i><span id="liveTxt">Loading</span></span>
+        <span class="clock" id="clock"></span>
+      </div>
+      <div class="prompt" id="prompt"><div class="count" id="count" aria-live="assertive"></div><div class="startpick" id="startPick"></div></div>
+      <div class="wheelbox" id="wheelbox">
+        <svg class="wheel" id="wheelSvg" viewBox="0 0 400 452" aria-hidden="true"></svg>
+        <canvas id="wheelCv" aria-hidden="true"></canvas>
+      </div>
+      <div class="spinrow"><button class="btn start" id="startBtn" hidden>SPIN</button></div>
+      <div class="hint" id="hint"></div>
+    </section>
+
+    <aside class="stack">
+      <div class="card">
+        <h2>Ang goal mo ngayong araw</h2>
+        <div id="goalInfo"></div>
+      </div>
+
+      <div class="card">
+        <h2>Laro ngayong araw · <span id="dateLbl"></span></h2>
+        <div class="today">
+          <div class="stat"><div class="k">Deposit (1-9PM)</div><div class="v" id="vDep">₱0</div></div>
+          <div class="stat"><div class="k">Slots/casino</div><div class="v" id="vBet">₱0</div></div>
+          <div class="stat"><div class="k">Ibang laro</div><div class="v" id="vOther" style="color:var(--mute)">₱0</div></div>
+        </div>
+        <p class="note" id="syncNote">Deposits na 1PM&ndash;9PM lang ang bilang. Deposits nagre-refresh tuwing ~5 min, bets tuwing ~30 min.</p>
+      </div>
+
+      <div class="card">
+        <h2>Linggong ito · Lun hanggang Lin</h2>
+        <div class="week" id="week"></div>
+        <div class="next" id="weekTxt"></div>
+      </div>
+
+      <div class="card">
+        <h2>Bonus turnover · <span id="turnLbl">3×</span> slots/casino</h2>
+        <div id="wager"></div>
+        <div class="bar"><i id="wbar"></i></div>
+        <p class="note" id="wNote"></p>
+      </div>
+
+      <div class="card">
+        <h2>Bonus history</h2>
+        <ul class="hist" id="hist"></ul>
+      </div>
+
+      <div class="card">
+        <h2>Paano maglaro</h2>
+        <ol class="rules">
+          <li><b>Pumili ng cabin.</b> Bawat isa sa <b id="rCabins">8</b> cabins pareho lang ang laban — ang pagpili ay hindi nagbabago ng panalo, basta may napili bago mag-SPIN.</li>
+          <li><b>Abutin ang goal ngayong araw.</b> Deposit na <b id="rMinDep">₱100</b> pataas (1PM&ndash;9PM) at slots/casino turnover na <b id="rTurn2">3×</b> ng deposit mo, parehong ngayong araw (PH time).</li>
+          <li><b>Iikot nang mag-isa.</b> Pag-abot sa goal, iikot ang gulong at bubukas ang napili mong cabin — panalo ka ng <b>₱17, ₱27, o ₱37</b> (bihirang-bihira: ₱77). Mag-slots/casino pa ng <b id="rTurn">3×</b> ng bonus para ma-clear ito. Ipapadala ng agent mo ang reward pagkatapos ma-verify.</li>
+        </ol>
+        <label class="agree" id="agreeLbl" style="margin-top:12px"><input type="checkbox" id="agree"><span>Nabasa ko at sang-ayon ako sa <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button> ng Lucky Ferris Wheel.</span></label>
+      </div>
+
+      <details class="tnc" id="tnc">
+        <summary>Lucky Ferris Wheel Terms &amp; Conditions</summary>
+        <h3>Terms &amp; Conditions</h3>
+        <ol>
+          <li>Open to verified Gopyesta players aged 21 and above. Self-excluded, restricted, test or unverified accounts are not eligible.</li>
+          <li>Each day (Philippine time) you may pick one of the 8 cabins on the Lucky Ferris Wheel; the cabin may be changed until the wheel spins. Which cabin is picked does not change the odds — all cabins share the same prize draw.</li>
+          <li>The wheel spins once your successful deposits made between 1 PM and 9 PM today total at least ₱100, and your valid bets on slot and casino games today reach at least 3× that deposit total. Deposits and bets are computed from the platform's records; pending, failed or reversed deposits do not count, and bets on other game types do not count toward the target. Bet records refresh periodically, so the wheel may spin up to about 30 minutes after the target is met.</li>
+          <li>The prize is drawn at random by the system the moment the wheel spins, from a fixed pool: ₱17 (85% chance), ₱27 (10% chance), ₱37 (5% chance). ₱77 is a display-only jackpot and is never actually awarded. Which cabin was picked does not change these odds.</li>
+          <li>A bonus must be wagered 3× on slot and casino games before it is considered cleared. One spin per day; the goal does not carry over to the next day.</li>
+          <li>Total bonus awarded under this promo is limited to a daily budget (₱10,000 unless announced otherwise) across all players. Once the budget is used up, no further links or spins are issued that day.</li>
+          <li>Each result is recorded by the system the moment it is drawn and is final. Refreshing the page, reopening the link or using another device does not give another spin.</li>
+          <li>Rewards are sent manually by your agent (e.g. via GCash) after verification, within the time your agent announces. Gopyesta may withhold or revoke a reward where the deposit is reversed or the promo is abused.</li>
+          <li>Multiple or linked accounts, or any attempt to abuse this promo, void the reward and may lead to action on the account.</li>
+          <li>Gopyesta may change, suspend or end this promo at any time. Gopyesta management's decision on any dispute is final.</li>
+          <li>Play responsibly. Set limits on your deposits and time, and ask for help if gambling stops being fun.</li>
+        </ol>
+        <p class="small">By ticking the agreement box and playing, you accept these Terms &amp; Conditions.</p>
+      </details>
+    </aside>
+  </div>
+</div>
+
+<div class="jp" id="jp" role="dialog" aria-modal="true" aria-labelledby="jpTitle" hidden>
+  <canvas id="confetti"></canvas>
+  <div class="jp-card">
+    <p class="jp-title" id="jpTitle">YOU WON!</p>
+    <p class="jp-sub" id="jpSub"></p>
+    <p class="jp-amt" id="jpAmt"></p>
+    <p class="jp-note">Naitala na ang panalo mo. Ipapadala ng agent mo ang reward sa GCash pagkatapos ma-verify.</p>
+    <button class="btn" id="jpClose" type="button">Claim reward</button>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const peso=v=>"₱"+Number(v||0).toLocaleString("en-PH",{maximumFractionDigits:0});
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function flash(msg){const t=document.createElement("div");t.className="flash";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
+let CONF={cabins:8,prizes:[{amt:17,p:85},{amt:27,p:10},{amt:37,p:5},{amt:77,p:0}],minDeposit:100,turnover:3,maxPrize:77,roundsPerDay:1};
+const BRAND={key:"gopyesta",name:"Gopyesta",script:()=>"Hi po! Pasok na ang deposit mo kaya pwede ka nang sumakay sa Lucky Ferris Wheel 🎡 Pumili ng cabin, mag-deposit ng "+peso(CONF.minDeposit)+" pataas (1PM-9PM) at mag-slots/casino hanggang "+CONF.turnover+"× ng deposit mo — iikot ang gulong at panalo ka ng ₱17, ₱27, o ₱37!"};
+
+// ---------- player links ----------
+// #admin = link maker; #<account>-<hex> = a server-side session for one account/day; anything else = demo
+const raw=decodeURIComponent(location.hash.slice(1)).toLowerCase();
+const mode=raw==="admin"?"admin":/^[a-z0-9]{1,32}-[a-z0-9]{2,8}$/.test(raw)?"player":"demo";
+const code=mode==="player"?raw:"";
+let S=null,phase="idle",armed=false,busy=false,demoPick=null;
+let N=8;const CAB_COLORS=["#ff5d73","#33c7b4","#ffc53d","#8f6bff","#ff8fb1","#4aa3ff","#7fd858","#ff9a3d"];
+
+function pickPrizeClient(){const live=CONF.prizes.filter(x=>x.p>0),tot=live.reduce((a,x)=>a+x.p,0);let x=Math.random()*tot;for(const P of live){if(x<P.p)return P.amt;x-=P.p}return live[live.length-1].amt}
+
+/* ---------- wheel (flat, front-facing SVG ferris wheel; gondolas hang from rim pins and stay upright) ---------- */
+const box=$("wheelbox"),svg=$("wheelSvg"),cv=$("wheelCv"),cx2=cv.getContext("2d");
+function winHTML(){return `<span class="q">?</span>`}
+const VW=400,VH=452,CX=200,CY=180,RO=146,RI=126,NSP=16,NBULB=32,GW=18.5,GH=19.5;
+let ang=0,boxes=[],spin=null;
+let th=new Float64Array(0),om=new Float64Array(0);
+const IDLE_W=reduce?0:.05;
+function buildWheel(){
+  const f=n=>n.toFixed(1),pt=(r,a)=>[CX+r*Math.cos(a),CY+r*Math.sin(a)];
+  let s=`<defs><radialGradient id="wGlow"><stop offset="0" stop-color="#ffb35c" stop-opacity=".16"/><stop offset=".7" stop-color="#ff8a3d" stop-opacity=".06"/><stop offset="1" stop-color="#ff8a3d" stop-opacity="0"/></radialGradient>
+    <filter id="bGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="legG" x1="0" x2="1"><stop offset="0" stop-color="#b8402f"/><stop offset=".5" stop-color="#e2604a"/><stop offset="1" stop-color="#b8402f"/></linearGradient></defs>`;
+  let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  for(let i=0;i<26;i++){const x=rnd()*VW,y=rnd()*250,r=.6+rnd()*1.1;s+=`<circle class="star${i%3?"":" tw"}" cx="${f(x)}" cy="${f(y)}" r="${f(r)}" style="animation-delay:${f(-rnd()*3)}s"/>`}
+  s+=`<circle cx="${CX}" cy="${CY}" r="${RO+40}" fill="url(#wGlow)"/>`;
+  s+=`<ellipse cx="${CX}" cy="440" rx="180" ry="12" fill="#000" opacity=".35"/>`;
+  let truss="",spokes="",pins="",bulbs="";
+  for(let j=0;j<=NSP*2;j++){const [x,y]=pt(j%2?RI:RO,j/(NSP*2)*Math.PI*2);truss+=(j?"L":"M")+f(x)+" "+f(y)}
+  for(let i=0;i<NSP;i++){const a=i/NSP*Math.PI*2,[x0,y0]=pt(22,a),[x,y]=pt(RO,a);spokes+=`M${f(x0)} ${f(y0)}L${f(x)} ${f(y)}`}
+  for(let i=0;i<N;i++){const [x,y]=pt(RO,i/N*Math.PI*2-Math.PI/2);pins+=`<circle cx="${f(x)}" cy="${f(y)}" r="5.5"/>`}
+  for(let i=0;i<NBULB;i++){const [x,y]=pt(RO,(i+.5)/NBULB*Math.PI*2);bulbs+=`<circle class="bulb b${i%4}" cx="${f(x)}" cy="${f(y)}" r="3.3"/>`}
+  s+=`<g id="wRot">
+    <path d="${spokes}" stroke="#e9dfcc" stroke-width="2.2" stroke-opacity=".85" fill="none"/>
+    <circle cx="${CX}" cy="${CY}" r="44" fill="none" stroke="#e9dfcc" stroke-width="3"/>
+    <path d="${truss}" stroke="#e4d7bd" stroke-width="2" fill="none" stroke-linejoin="round"/>
+    <circle cx="${CX}" cy="${CY}" r="${RI}" fill="none" stroke="#f3e9d6" stroke-width="3.2"/>
+    <circle cx="${CX}" cy="${CY}" r="${RO}" fill="none" stroke="#f6eddc" stroke-width="5"/>
+    <g fill="#5d5068" stroke="#f6eddc" stroke-width="1.5">${pins}</g>
+    <g filter="url(#bGlow)">${bulbs}</g></g>`;
+  const legs=[-1,1].map(sd=>{const fx=CX+sd*122,fy=430,A=[CX+sd*3,CY+8],B1=[fx-14,fy],B2=[fx+14,fy];
+    const L=(P,t)=>[A[0]+(P[0]-A[0])*t,A[1]+(P[1]-A[1])*t];let z="";const ts=[.16,.27,.38,.5,.62,.74,.87,1];
+    ts.forEach((t,k)=>{const p=L(k%2?B2:B1,t);z+=(k?"L":"M")+f(p[0])+" "+f(p[1])});
+    return `<path d="${z}" stroke="#a8392b" stroke-width="2.4" fill="none" stroke-linejoin="round"/><path d="M${f(A[0])} ${f(A[1])}L${B1[0]} ${fy}M${f(A[0])} ${f(A[1])}L${B2[0]} ${fy}" stroke="url(#legG)" stroke-width="6" stroke-linecap="round"/>`}).join("");
+  s+=`<g>${legs}</g>`;
+  s+=`<path d="M${CX-96} 352L${CX+96} 352" stroke="#a8392b" stroke-width="4" stroke-linecap="round"/>`;
+  s+=`<rect x="34" y="428" width="332" height="13" rx="3" fill="#3e3270" stroke="#7d6fc0" stroke-width="1.5"/>
+    <rect x="${CX-46}" y="416" width="92" height="12" rx="2" fill="#5a4a96" stroke="#9a8cd8" stroke-width="1.5"/>
+    <path d="M${CX+46} 419h10v3h10v3h10v3" fill="none" stroke="#9a8cd8" stroke-width="1.5"/>
+    <path d="M${CX+46} 419h10v9h-10zM${CX+56} 422h10v6h-10zM${CX+66} 425h10v3h-10z" fill="#4c3e86"/>`;
+  let deck="";for(let i=0;i<11;i++)deck+=`<circle cx="${44+i*31.2}" cy="434.5" r="1.8"/>`;
+  s+=`<g fill="#ffd77a" filter="url(#bGlow)">${deck}</g>`;
+  s+=`<circle cx="${CX}" cy="${CY}" r="16" fill="#5d5068"/>`;
+  const segs=["#ffcf5a","#ff6b5b","#3fd4c0","#8f6bff"];let cap="";
+  for(let i=0;i<8;i++){const a0=i/8*Math.PI*2,a1=(i+1)/8*Math.PI*2,[x0,y0]=pt(17,a0),[x1,y1]=pt(17,a1);cap+=`<path d="M${CX} ${CY}L${f(x0)} ${f(y0)}A17 17 0 0 1 ${f(x1)} ${f(y1)}Z" fill="${segs[i%4]}"/>`}
+  s+=`<g id="wHub"><circle cx="${CX}" cy="${CY}" r="22" fill="#f6eddc" stroke="#5d5068" stroke-width="1.5"/>${cap}<circle cx="${CX}" cy="${CY}" r="6" fill="#fff6dc" stroke="#5d5068" stroke-width="1.5"/></g>`;
+  svg.innerHTML=s;
+}
+function buildGondolas(n){N=n;boxes.forEach(b=>b.remove());boxes=[];
+  for(let i=0;i<N;i++){const b=document.createElement("button");b.className="gondola";
+    b.setAttribute("aria-label",`Cabin ${i+1}: mystery bonus`);b.style.setProperty("--c",CAB_COLORS[i%CAB_COLORS.length]);b.style.setProperty("--d",(-i*.2).toFixed(2)+"s");
+    b.style.width=GW+"%";b.style.height=GH+"%";
+    b.innerHTML=`<span class="hook"></span><span class="cab"><span class="roof"></span><span class="glass">${i+1}</span><span class="win">${winHTML()}</span></span>`;b.onclick=()=>pick(i);box.appendChild(b);boxes.push(b)}
+  th=new Float64Array(N);om=new Float64Array(N);
+}
+buildWheel();
+let wRot=$("wRot"),wHub=$("wHub");
+buildGondolas(N);
+function fit(){const r=devicePixelRatio||1;cv.width=box.clientWidth*r;cv.height=box.clientHeight*r;cx2.setTransform(r,0,0,r,0,0)}
+addEventListener("resize",fit);fit();
+let lastT=performance.now();
+let confetti=[];
+function burst(x,y){const cols=["#ffcf5a","#ff6b5b","#3fd4c0","#8f6bff","#ffffff"];for(let i=0;i<48;i++){const a=Math.random()*Math.PI*2,sp=1.5+Math.random()*4.5;confetti.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-3.5,r:1.5+Math.random()*2.5,c:cols[i%cols.length],rot:Math.random()*6,vr:(Math.random()-.5)*.4,life:1})}}
+const stageEl=$("stage");
+const EA=.28;
+function ease(k){if(k<EA){const u=k/EA;return[2*EA*(u*u*u-u*u*u*u/2),2*(3*u*u-2*u*u*u),2*(6*u-6*u*u)/EA]}
+  const w=(k-EA)/(1-EA);return[2*(EA*.5+(1-EA)*(w-(w*w*w-w*w*w*w/2))),2*(1-(3*w*w-2*w*w*w)),-2*(6*w-6*w*w)/(1-EA)]}
+const PG=2600,PL=58,KT=.45,KC=.03,DAMP=2.4,MAXS=.22;
+function frame(t){
+  const dt=Math.min(50,Math.max(0,t-lastT))/1000;lastT=t;let W=0,Al=0;
+  if(phase==="spin"){const k=Math.min(1,(t-spin.t0)/spin.dur),E=ease(k),ds=spin.dur/1000;ang=spin.a0+spin.total*E[0];W=spin.total*E[1]/ds;Al=spin.total*E[2]/ds/ds;if(k>=1){phase="done";spin.end()}}
+  else if(phase==="idle"||phase==="shuffle"){W=IDLE_W;ang+=W*dt}
+  stageEl.classList.toggle("spinning",phase==="spin");
+  const deg=(ang*180/Math.PI).toFixed(3);if(wRot)wRot.setAttribute("transform",`rotate(${deg} ${CX} ${CY})`);if(wHub)wHub.setAttribute("transform",`rotate(${deg} ${CX} ${CY})`);
+  boxes.forEach((b,i)=>{const a=ang+i/N*Math.PI*2-Math.PI/2,ca=Math.cos(a),sa=Math.sin(a);
+    if(!reduce){const ax=-KT*RO*Al*sa-KC*RO*W*W*ca,ay=KT*RO*Al*ca-KC*RO*W*W*sa,h=dt/4;
+      for(let s=0;s<4;s++){const acc=(-PG*Math.sin(th[i])-ax*Math.cos(th[i])+ay*Math.sin(th[i]))/PL-DAMP*om[i];om[i]+=acc*h;th[i]+=om[i]*h}
+      if(th[i]>MAXS){th[i]=MAXS;om[i]=0}else if(th[i]<-MAXS){th[i]=-MAXS;om[i]=0}}
+    const breeze=reduce?0:.012*Math.sin(t/950+i*1.7);
+    b.style.left=((CX+RO*ca)/VW*100).toFixed(3)+"%";b.style.top=((CY+RO*sa)/VH*100).toFixed(3)+"%";
+    b.style.transform=`translate(-50%,0) rotate(${(-(th[i]+breeze)*180/Math.PI).toFixed(2)}deg)`});
+  drawFx();requestAnimationFrame(frame);
+}
+function drawFx(){const W=box.clientWidth,H=box.clientHeight,c=cx2;if(!confetti.length&&!drawFx.dirty)return;c.clearRect(0,0,W,H);drawFx.dirty=confetti.length>0;
+  confetti=confetti.filter(q=>q.life>0);
+  for(const q of confetti){q.vy+=.16;q.vx*=.99;q.x+=q.vx;q.y+=q.vy;q.rot+=q.vr;q.life-=.011;c.save();c.globalAlpha=Math.max(0,q.life);c.translate(q.x,q.y);c.rotate(q.rot);c.fillStyle=q.c;c.fillRect(-q.r,-q.r/2,q.r*2,q.r);c.restore()}}
+requestAnimationFrame(frame);
+function resetBoxes(){boxes.forEach(b=>b.classList.remove("picked","dim","mine","flip","open","lift"))}
+function setWin(b,html,cls,delay){b.classList.remove("flip","open");b.querySelector(".win").innerHTML=html;b.style.setProperty("--fd",(delay||0)+"s");if(cls){void b.offsetWidth;b.classList.add(cls)}}
+function hideAll(anim){resetBoxes();boxes.forEach((b,i)=>{setWin(b,winHTML(),anim?"flip":"",anim?i*.04:0);b.setAttribute("aria-label",`Cabin ${i+1}: hidden bonus`)})}
+const lblHTML=v=>`<span class="lbl${v>=77?" big":""}">${peso(v)}</span>`;
+const popOn=()=>!$("jp").hidden;
+
+/* shuffle: hidden "?" plates lift off and swap between two gondolas (cosmetic — the real cabin was already chosen) */
+const SWAP_MS=200;
+function shufflePlates(n,done){let last="";
+  const step=k=>{if(k>=n){setTimeout(done,180);return}
+    let i,j;do{i=Math.floor(Math.random()*N);j=Math.floor(Math.random()*N)}while(i===j||[i,j].sort().join()===last);last=[i,j].sort().join();
+    swapPlates(i,j,()=>setTimeout(()=>step(k+1),15))};
+  step(0)}
+function swapPlates(i,j,cb){
+  const r0=box.getBoundingClientRect(),A=boxes[i].querySelector(".win").getBoundingClientRect(),B=boxes[j].querySelector(".win").getBoundingClientRect();
+  const mk=(from,to,front)=>{const d=document.createElement("div");d.className="fly"+(front?" front":"");d.innerHTML=`<span class="q">?</span>`;
+    Object.assign(d.style,{left:from.left-r0.left+"px",top:from.top-r0.top+"px",width:from.width+"px",height:from.height+"px"});
+    d.style.setProperty("--dx",(to.left-from.left)+"px");d.style.setProperty("--dy",(to.top-from.top)+"px");box.appendChild(d);return d};
+  boxes[i].classList.add("lift");boxes[j].classList.add("lift");
+  const f1=mk(A,B,1),f2=mk(B,A,0);
+  setTimeout(()=>{f1.remove();f2.remove();boxes[i].classList.remove("lift");boxes[j].classList.remove("lift");cb()},SWAP_MS)}
+
+/* ---------- consent ---------- */
+try{$("agree").checked=localStorage.getItem(BRAND.key+"-fw-tnc")==="yes"}catch(e){}
+$("agree").addEventListener("change",()=>{try{localStorage.setItem(BRAND.key+"-fw-tnc",$("agree").checked?"yes":"no")}catch(e){}if(S)render()});
+$("tncLink").onclick=e=>{e.preventDefault();$("tnc").open=true;$("tnc").scrollIntoView({behavior:"smooth",block:"start"})};
+function needAgree(){if($("agree").checked)return false;const l=$("agreeLbl");l.classList.remove("nudge");void l.offsetWidth;l.classList.add("nudge");flash("I-check muna ang T&C sa ibaba.");l.scrollIntoView({behavior:"smooth",block:"center"});return true}
+
+/* ---------- server-driven game flow ---------- */
+async function post(path,body){const r=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})});const j=await r.json().catch(()=>({}));return{status:r.status,...j}}
+function demoState(){const c=demoPick==null?null:{cabin:demoPick+1,need:CONF.minDeposit*CONF.turnover,status:"open",amount:0,seen:1};
+  return{exists:true,demo:true,name:"Juan",dep:0,slot:0,other:0,cur:c,canPick:true,needAmt:CONF.minDeposit*CONF.turnover,depOk:false,betOk:false,ready:false,missing:[],wager:{bonus:0,need:0,done:0,cleared:0},hist:[],week:[],serverTime:""}}
+async function refresh(){
+  if(busy)return;
+  if(mode!=="player"){S=demoState();render();return}
+  const r=await fetch("/api/session/"+encodeURIComponent(code)).then(r=>r.json()).catch(()=>null);
+  if(!r)return;
+  if(r.config)CONF=r.config;
+  S=r;render();
+}
+async function pick(i){
+  if(phase!=="idle"||busy||!S)return;
+  if(mode!=="player"){demoPick=i;S=demoState();render();return}
+  if(!S.exists||S.expired)return;
+  const cur=S.cur;
+  if(cur&&cur.status==="paid"){flash("Tapos na ang ikot mo ngayong araw. Pumili ulit bukas.");return}
+  if(!S.canPick){flash("Wala nang pili ngayong araw.");return}
+  if(cur&&cur.cabin===i+1)return;
+  busy=true;const r=await post("/api/pick/"+encodeURIComponent(code),{cabin:i+1});busy=false;
+  if(r.status!==200){flash(r.msg||r.error||"Subukan ulit");return}
+  S=r;render();
+}
+async function start(){
+  if(phase!=="idle"||busy||!S)return;
+  if(mode!=="player"){
+    if(demoPick==null){flash("Pumili muna ng cabin.");return}
+    const amt=pickPrizeClient();animateSpin({cabin:demoPick+1,amount:amt,id:null,demo:true});return}
+  if(!S.cur){flash("Pumili muna ng cabin.");return}
+  if(needAgree())return;
+  busy=true;const r=await post("/api/spin/"+encodeURIComponent(code));busy=false;
+  if(r.ok&&r.spun){S=r;animateSpin(r.cur);return}
+  if(r.ok&&r.already){S=r;render();return}
+  const c=$("count");c.className="count";c.textContent="Tapusin muna ang goal";
+  if(r.missing&&r.missing.length)$("hint").innerHTML=`Para umikot ang <b>Cabin ${S.cur.cabin}</b>: ${r.missing.join(" at ")}. Iikot nang mag-isa pag tapos na.`;
+  else if(r.msg)$("hint").textContent=r.msg;
+  clearTimeout(window._needT);window._needT=setTimeout(()=>{if(phase==="idle"){c.className="count";c.textContent=""}},2600);
+}
+function animateSpin(row){
+  const i=row.cabin-1,amt=row.amount;
+  phase="shuffle";resetBoxes();hideAll(true);
+  const cnt=$("count"),hint=$("hint");
+  setLive("SHUFFLING",true);$("startBtn").hidden=true;$("startPick").textContent="";
+  hint.innerHTML=`Nagtatago ang mga premyo... panoorin ang mga cabin!`;
+  const go=()=>{
+    phase="spin";hint.innerHTML=`Umiikot ang gulong...`;
+    spin={t0:performance.now(),dur:reduce?700:6000,a0:ang,total:Math.PI*2*(3+Math.random()),end:()=>{
+      resetBoxes();boxes[i].classList.add("picked");setWin(boxes[i],lblHTML(amt),"open");
+      {const r=box.getBoundingClientRect(),q=boxes[i].getBoundingClientRect();burst(q.left-r.left+q.width/2,q.top-r.top+q.height/2)}
+      hint.innerHTML=`<b>Cabin ${i+1}</b> bumukas: <b>${peso(amt)}</b>!`;
+      setTimeout(()=>{boxes.forEach((b,j)=>{if(j===i)return;b.classList.add("dim")});openWin(row)},900);
+    }};
+  };
+  if(reduce){setTimeout(go,300);return}
+  setTimeout(()=>shufflePlates(10,go),400);
+}
+
+/* ---------- render ---------- */
+function setLive(txt,on){$("liveTxt").textContent=txt;$("live").classList.toggle("on",!!on)}
+const chk=(ok,label,have,need)=>`<div class="goal"><div class="kv"><span><b class="${ok?"ok":"bad"}">${ok?"✓":"○"}</b> ${label}</span><span class="${ok?"ok":""}">${peso(have)} / ${peso(need)}</span></div><div class="bar"><i style="width:${Math.min(100,need?have/need*100:100)}%"></i></div></div>`;
+const short=k=>new Date(k+"T00:00:00").toLocaleDateString("en-PH",{weekday:"short",month:"short",day:"numeric"});
+const wd=k=>new Date(k+"T00:00:00").toLocaleDateString("en-PH",{weekday:"short"});
+
+function render(){
+  if(!S)return;
+  const cur=S.cur;
+  $("rMinDep").textContent=peso(CONF.minDeposit);$("rCabins").textContent=CONF.cabins||N;$("rTurn").textContent=CONF.turnover+"×";$("rTurn2").textContent=CONF.turnover+"×";$("turnLbl").textContent=CONF.turnover+"×";
+  if(mode==="player"){
+    if(!S.exists){setLive("INVALID LINK",false);$("hint").textContent="Hindi valid ang link na ito. Humingi ng bagong link sa agent mo.";$("goalInfo").innerHTML='<p class="note" style="margin:0">Hindi valid ang link.</p>';boxes.forEach(b=>b.classList.add("dim"));return}
+    $("who").innerHTML=`Para kay <b>${esc(S.name)}</b> 🎉 <span class="gid">${esc(S.account)}</span>`;
+    if(S.expired){setLive("EXPIRED",false);$("hint").textContent="Expired na ang link na ito — ibang araw na. Humingi ng bagong link sa agent mo.";$("goalInfo").innerHTML='<p class="note" style="margin:0">Expired na ang link.</p>';boxes.forEach(b=>b.classList.add("dim"));return}
+  }
+  if(cur&&cur.status==="paid"&&!cur.seen&&phase==="idle"&&!popOn()){animateSpin(cur);return}
+  if(S.ready&&phase==="idle"&&!popOn()&&!busy&&$("agree").checked){start();return}
+  if(phase!=="idle")return;
+
+  armed=!cur||cur.status==="open";
+  stageEl.classList.toggle("armed",armed&&!cur);
+  if(cur&&cur.status==="paid")setLive("NAKUHA NA",true);
+  else if(S.ready)setLive("ABOT NA ANG GOAL",true);
+  else if(cur)setLive("GOAL IN PROGRESS",true);
+  else if(S.canPick)setLive("PUMILI NG CABIN",false);
+  else setLive("TAPOS NA NGAYON",false);
+  resetBoxes();
+  boxes.forEach((bx,i)=>bx.classList.toggle("mine",!!cur&&cur.status==="open"&&cur.cabin===i+1));
+  if(cur&&cur.status==="paid"){setWin(boxes[cur.cabin-1],lblHTML(cur.amount),"");boxes.forEach((b,j)=>{if(j!==cur.cabin-1)b.classList.add("dim")})}
+  const sb=$("startBtn"),showStart=!!cur&&cur.status==="open"&&!popOn();sb.hidden=!showStart;$("startPick").textContent=showStart?`Cabin ${cur.cabin} na ang pili mo`:"";
+  const hint=$("hint");
+  if(!popOn()){
+    if(cur&&cur.status==="paid")hint.innerHTML=`Nakuha mo ang <b>${peso(cur.amount)}</b> ngayong araw mula sa Cabin ${cur.cabin}. ${S.canPick?"Pumili ng cabin para sa panibagong ikot.":"Pumili ulit bukas."}`;
+    else if(cur&&S.ready)hint.innerHTML=`Abot na ang goal! I-check ang T&C at pindutin ang <b>SPIN</b>.`;
+    else if(cur&&S.demo)hint.innerHTML=`<b>Cabin ${cur.cabin}</b> ang pili mo. Sa demo, pindutin ang <b>SPIN</b> para makita ang ikot.`;
+    else if(cur){const miss=[];if(!S.depOk)miss.push(`mag-deposit pa ng ${peso(CONF.minDeposit-S.dep)}`);if(!S.betOk)miss.push(`mag-slots/casino pa ng ${peso((S.needAmt||0)-S.slot)}`);
+      hint.innerHTML=`<b>Cabin ${cur.cabin}</b> ang pili mo. Para umikot: ${miss.join(" at ")}.`}
+    else if(S.canPick)hint.innerHTML=`<b>Pumili ng cabin</b>. Pareho lang ang laban ng lahat.`;
+    else hint.innerHTML=`Tapos na ang ikot mo ngayong araw. Balik bukas.`;
+  }
+  const gi=$("goalInfo"),needAmt=S.needAmt||(CONF.minDeposit*CONF.turnover);
+  if(cur&&cur.status==="paid")gi.innerHTML=`<div class="kv"><span>Bonus ngayong araw</span><span class="ok">${peso(cur.amount)}</span></div><div class="kv"><span>Deposit · turnover noong umikot</span><span>${peso(cur.dep)} · ${peso(cur.slot)}</span></div><p class="note">Naitala na. Ipapadala ng agent mo ang reward pagkatapos ma-verify.</p>`;
+  else gi.innerHTML=`${chk(S.depOk,"Deposit ngayong araw (1-9PM)",S.dep,CONF.minDeposit)}${chk(S.betOk,"Turnover (3× ng deposit)",S.slot,needAmt)}<p class="note">Mag-deposit ng ${peso(CONF.minDeposit)} pataas (walang maximum) at abutin ang turnover target. Slots at casino lang ang bilang.</p>`;
+  $("dateLbl").textContent=S.serverTime?short(S.serverTime.slice(0,10)):"";
+  $("vBet").textContent=peso(S.slot);$("vOther").textContent=peso(S.other);$("vDep").textContent=peso(S.dep);
+  $("syncNote").textContent="Deposits na 1PM–9PM lang ang bilang. Deposits nagre-refresh tuwing ~5 min, bets tuwing ~30 min"+(S.syncedAt?" (huling bets sync "+String(S.syncedAt).slice(11,16)+")":"")+".";
+  let wk="",total=0,count=0;
+  for(const d of S.week||[]){let cls="",val="—";
+    if(d.amount>0){cls="paid";val=peso(d.amount);total+=d.amount;count++}
+    else if(d.amount===null){cls="pending";val="●"}
+    wk+=`<div class="${cls} ${S.serverTime&&d.day===S.serverTime.slice(0,10)?"today":""}" title="${short(d.day)}">${wd(d.day)}<b>${val}</b></div>`}
+  $("week").innerHTML=wk;$("weekTxt").textContent=`${count} bonus ngayong linggo · ${peso(total)}`;
+  const w=S.wager,pct=w.need?Math.min(100,w.done/w.need*100):0;
+  $("wager").innerHTML=`<div class="kv"><span>Bonus na may turnover pa</span><span class="warn">${peso(w.bonus)}</span></div><div class="kv"><span>Slots/casino mula nang umikot</span><span>${peso(w.done)} / ${peso(w.need)}</span></div><div class="kv"><span>Cleared na bonus</span><span class="ok">${peso(w.cleared)}</span></div>`;
+  $("wbar").style.width=pct+"%";
+  $("wNote").textContent=w.bonus?`Mag-slots/casino pa ng ${peso(Math.max(0,w.need-w.done))} para ma-clear ang bonus mo.`:"Walang bonus na naghihintay ng turnover.";
+  $("hist").innerHTML=(S.hist||[]).length?S.hist.map(x=>`<li><span>${short(x.day)} · Cabin ${x.cabin}${x.cleared?" · cleared":""}</span><span>+${peso(x.amount)}</span></li>`).join(""):`<li class="empty">Wala pang bonus. Pumili ng cabin para magsimula.</li>`;
+}
+
+/* ---------- win pop-up ---------- */
+let confettiRAF=null;
+function openWin(row){
+  const jp=$("jp");$("jpSub").textContent=(row.demo?"DEMO · ":"")+"Lucky Ferris Wheel · Cabin "+row.cabin;$("jpAmt").textContent=peso(row.amount);
+  document.querySelector(".jp-note").textContent=row.demo?"Demo lang ito — walang naitalang panalo. Sa totoong link, naitatala agad at ipinapadala ng agent ang reward pagkatapos ma-verify.":"Naitala na ang panalo mo. Ipapadala ng agent mo ang reward sa GCash pagkatapos ma-verify.";
+  $("jpClose").textContent=row.demo?"Ulitin ang demo":"Claim reward";jp.hidden=false;$("jpClose").focus();
+  const cv2=$("confetti"),c=cv2.getContext("2d"),d=devicePixelRatio||1,W=cv2.clientWidth,H=cv2.clientHeight;cv2.width=W*d;cv2.height=H*d;c.setTransform(d,0,0,d,0,0);
+  const cols=["#ffcf5a","#ff6b5b","#3fd4c0","#8f6bff","#ff8fb1","#ffffff"];
+  const ps=Array.from({length:140},()=>({x:W/2+(Math.random()-.5)*80,y:H*.42,vx:(Math.random()-.5)*14,vy:-Math.random()*14-4,r:4+Math.random()*5,c:cols[Math.floor(Math.random()*cols.length)],a:Math.random()*6,va:(Math.random()-.5)*.3}));
+  const s=performance.now();
+  (function fr(now){c.clearRect(0,0,W,H);ps.forEach(p=>{p.vy+=.28;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;c.save();c.translate(p.x,p.y);c.rotate(p.a);c.fillStyle=p.c;c.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);c.restore()});
+    if(now-s<4500&&!jp.hidden)confettiRAF=requestAnimationFrame(fr);else c.clearRect(0,0,W,H)})(s);
+  $("jpClose").onclick=async()=>{jp.hidden=true;cancelAnimationFrame(confettiRAF);if(mode==="player"&&row.id)await post("/api/seen/"+encodeURIComponent(code),{id:row.id});if(row.demo)demoPick=null;resetBoxes();phase="idle";refresh()};
+}
+$("startBtn").onclick=start;
+setInterval(()=>{$("clock").textContent=new Date().toLocaleString("en-PH",{timeZone:"Asia/Manila",weekday:"short",hour:"numeric",minute:"2-digit",second:"2-digit"})},1000);
+if(mode==="player"){setInterval(()=>{if(phase==="idle"&&!popOn()&&document.visibilityState==="visible")refresh()},8000);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refresh()})}
+
+/* ---------- link maker (agents) ---------- */
+let adminToken="";
+try{adminToken=sessionStorage.getItem("cg-admin-token")||""}catch(e){}
+let look=null,capState=null;
+function playerLink(){return look&&look.code?location.href.split("#")[0]+"#"+look.code:""}
+async function api(path,opts){
+  const r=await fetch(path,Object.assign({headers:{"Content-Type":"application/json","X-Admin-Token":adminToken}},opts||{}));
+  const j=await r.json().catch(()=>({}));
+  if(r.status===403){adminToken="";try{sessionStorage.removeItem("cg-admin-token")}catch(e){}location.reload()}
+  return {ok:r.ok,status:r.status,j};
+}
+function renderCap(){
+  const c=capState;if(!c)return;
+  $("capText").innerHTML="Ngayong araw: <b>"+peso(c.capUsed)+"</b> nagamit · <b>"+peso(c.capLeft)+"</b> natitira sa <b>"+peso(c.dailyCap)+"</b>"+(c.dailyCap!==c.defaultCap?" <small>(default "+peso(c.defaultCap)+")</small>":"")+(c.capped?" — <span style='color:var(--bad)'>NAABOT NA ang budget: walang bagong link o ikot</span>":"");
+  $("capInput").placeholder="hal. "+(c.dailyCap+5000);
+}
+function renderLookup(){
+  const tb=$("aTier"),ob=$("offerBox"),l=look;
+  $("linkField").hidden=!(l&&l.code);$("makeRow").hidden=!(l&&l.found&&!l.code);ob.hidden=!(l&&l.found);
+  if(!l){tb.className="tierbox";tb.innerHTML="I-type ang username at pindutin ang Check.";return}
+  if(!l.found){tb.className="tierbox bad";tb.innerHTML="<b>Hindi nakita</b> ang account <code>"+esc(l.account)+"</code>. I-check ang spelling — username ito, hindi real name.";return}
+  const c=l.cur;
+  const st=c?(c.status==="paid"?"<b>UMIKOT NA</b> — Cabin "+c.cabin+" · bonus <b>"+peso(c.amount)+"</b> ("+esc(c.spun_at||"")+")":(l.ready?"<b>ABOT NA ANG GOAL</b> — Cabin "+c.cabin+", iikot pag binuksan ng player ang link":"<b>Goal in progress</b> — Cabin "+c.cabin+" (turnover target "+peso(c.need)+")")):"<b>Wala pang napiling cabin</b>";
+  tb.className="tierbox"+(c||l.depOk?"":" bad");
+  tb.innerHTML=st+"<br>"+esc(l.account)+(l.name&&l.name!==l.account?" ("+esc(l.name)+")":"")+"<br>Deposit ngayon (1-9PM): <b>"+peso(l.dep)+"</b>"+(l.depOk?" ✓":" (kulang sa "+peso(CONF.minDeposit)+")")+" · Turnover: <b>"+peso(l.slot)+"</b>"+(c&&c.status==="open"?(l.betOk?" ✓":" / "+peso(l.needAmt||c.need)):"")+" · ibang laro "+peso(l.other)+(l.syncedAt?" <small>(bets sync "+esc(String(l.syncedAt).slice(11,16))+")</small>":"");
+  const w=l.wager||{};
+  const odds=CONF.prizes.map(p=>peso(p.amt)+" ("+p.p+"%)").join(" · ");
+  ob.innerHTML="<strong>Detalye</strong>"+(l.missing&&l.missing.length?"<p>Kulang pa: "+l.missing.map(esc).join(" at ")+"</p>":"")+"<p>Turnover: "+(w.bonus?"bonus <b>"+peso(w.bonus)+"</b> · "+peso(w.done)+" / "+peso(w.need)+" pa":"wala")+" · cleared "+peso(w.cleared||0)+"</p><p>Mga bonus: "+(l.hist&&l.hist.length?l.hist.slice(0,5).map(h=>esc(h.day)+" "+peso(h.amount)+(h.cleared?" ✓":"")).join(", "):"wala pa")+"</p><p class='small'>Server time "+esc(l.serverTime)+" · premyo (cosmetic ang cabin): "+odds+"</p>";
+  $("makeLink").disabled=!!l.capped;
+  $("plink").textContent=playerLink();
+}
+function flashBtn(btn,txt){const o=btn.textContent;btn.textContent=txt;setTimeout(()=>btn.textContent=o,1500)}
+async function copyText(t,btn){try{await navigator.clipboard.writeText(t);flashBtn(btn,"Copied")}catch(e){const r=document.createRange();r.selectNodeContents($("plink"));const s=getSelection();s.removeAllRanges();s.addRange(r);flashBtn(btn,"Selected")}}
+if(mode==="admin"){
+  $("admin").hidden=false;$("previewLabel").hidden=false;
+  async function loadCap(){const r=await api("/api/cap");if(r.ok){capState=r.j;renderCap()}}
+  async function doLookup(){const a=$("acct").value.trim();if(!a)return;$("aMsg").textContent="Hinahanap…";const r=await api("/api/lookup?account="+encodeURIComponent(a));$("aMsg").textContent=r.ok?"":(r.j.error||"Error");look=r.ok?r.j:null;renderLookup();loadCap()}
+  async function makeLink(fresh){if(!look||!look.found)return;$("aMsg").textContent="Gumagawa ng link…";const r=await api("/api/link",{method:"POST",body:JSON.stringify({account:look.account,fresh:!!fresh})});if(!r.ok){$("aMsg").textContent=r.j.msg||r.j.error||"Error";loadCap();return}look=Object.assign({found:true},r.j);renderLookup();$("aMsg").textContent=fresh?"Bagong link. Pareho pa rin ang goal — nakatali ito sa account, hindi sa link.":"Handa na ang link."}
+  async function setCap(){const v=parseInt($("capInput").value,10);if(!(v>=0)){$("capMsg").textContent="Ilagay ang bagong budget (whole number).";return}if(!confirm("Gawing "+peso(v)+" ang daily budget ngayong araw?"))return;const r=await api("/api/cap",{method:"POST",body:JSON.stringify({dailyCap:v})});$("capMsg").textContent=r.ok?"Na-update ang budget ngayong araw.":(r.j.msg||r.j.error||"Error");if(r.ok){capState=r.j;renderCap();$("capInput").value="";if(look&&look.found)doLookup()}}
+  function unlockAdmin(){
+    $("adminGate").hidden=true;$("adminBody").hidden=false;
+    $("lookupBtn").onclick=doLookup;$("acct").addEventListener("keydown",e=>{if(e.key==="Enter")doLookup()});
+    $("makeLink").onclick=()=>makeLink(false);
+    $("newLink").onclick=()=>makeLink(true);
+    $("capBtn").onclick=setCap;
+    $("copyLink").onclick=()=>copyText(playerLink(),$("copyLink"));
+    $("copyMsg").onclick=()=>{if(!playerLink()){$("aMsg").textContent="Gumawa muna ng link.";return}copyText(BRAND.script()+"\n\nI-play dito: "+playerLink(),$("copyMsg"))};
+    renderLookup();loadCap();
+  }
+  if(adminToken){unlockAdmin()}
+  else{
+    $("adminGate").innerHTML="<span>Kailangan ng password para dito. Tanungin ang supervisor para sa password.</span><div style='display:flex;gap:8px;margin-top:8px'><input class='inp' type='password' id='adminPass' placeholder='Password' autocomplete='off' style='max-width:200px'><button class='btn small' id='adminPassGo' type='button'>Unlock</button></div><p id='adminPassErr' style='color:var(--bad);margin:6px 0 0'></p>";
+    const tryUnlock=async()=>{
+      const r=await fetch("/api/admin-login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:$("adminPass").value})});
+      if(r.ok){const j=await r.json();adminToken=j.token;try{sessionStorage.setItem("cg-admin-token",adminToken)}catch(e){}unlockAdmin()}
+      else{$("adminPassErr").textContent="Mali ang password."}
+    };
+    $("adminPassGo").onclick=tryUnlock;
+    $("adminPass").addEventListener("keydown",e=>{if(e.key==="Enter")tryUnlock()});
+  }
+}
+
+/* ---------- boot ---------- */
+(async function boot(){
+  try{const r=await fetch("/api/config");if(r.ok)CONF=await r.json()}catch(e){}
+  if(CONF.cabins&&CONF.cabins!==N)buildGondolas(CONF.cabins);
+  if(mode!=="player"){$("demoTag").hidden=false;$("who").innerHTML=`Para kay <b>Juan</b> 🎉 <span class="gid">demo</span>`}
+  refresh();
+})();
+</script>
+</body>
+</html>
