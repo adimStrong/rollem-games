@@ -1,22 +1,28 @@
-"""Gopyesta · Lucky Ferris Wheel — backend-verified community game (replaces Palarong Pyesta, 2026-10-12).
+"""Gopyesta · Lucky Ferris Wheel v2 — fixed prize ladder (replaces the deposit-tiered cabin design, 2026-10-25).
 
 Reads the Gopyesta platform Postgres (deposits / users / bets_daily_category, filled by the
-gopyesta-retention pullers), checks the player's REAL deposit + slot turnover for the day,
-rolls every reward SERVER-SIDE, enforces the daily bonus budget, and records every win in the
-shared wins-ledger. Payout stays a manual GCash send tracked there (Paid / Revoke).
+gopyesta-retention pullers), checks the player's REAL deposit + slot/casino turnover for the
+day, rolls the reward SERVER-SIDE from a fixed prize ladder, enforces the daily bonus budget,
+and records every win in the shared wins-ledger. Payout stays a manual GCash send tracked
+there (Paid / Revoke).
 
-Mechanics (from the standalone "GoPyesta Lucky Ferris Wheel" page, verified here instead of in the browser):
-  * the player picks ONE of 6 cabins (WHEEL_CABINS); each cabin hides a reward tier (WHEEL_CAB_TIER, default alternating):
-      tier 1  slot bets ₱300 → ₱8–18 (cabins 1, 3, 5)      tier 2  slot bets ₱600 → ₱18–28 (cabins 2, 4, 6)
-    (the original 8-cabin / 4-tier design with ₱8,000 → ₱18–188 and ₱50,000 → ₱288–888 is one env change away:
-     WHEEL_CABINS=8  WHEEL_TIERS=[[300,8,18],[600,18,28],[8000,18,188],[50000,288,888]]  WHEEL_CAB_TIER=0,1,2,3,0,1,2,3)
-  * goal for the day (PH time): Success deposits totalling >= ₱100 AND valid bet on SLOTS (egame) >= the cabin's target
-  * the moment both are met the wheel spins: a random reward in the tier's range, drawn server-side, one round per day
-    (the cabin can still be changed while the round is open; round 2+ — if enabled — counts slot bets after the previous spin)
-  * the reward carries a 5× slot turnover before it counts as cleared (shown to player + agent; informational for payout)
-  * ₱10,000 bonus budget per day across all players (cg_settings per day, raisable by the admin)
+Mechanics (from the "GoPyesta Lucky Ferris Wheel" raw export, Oct 23 2026, adopted in full
+except the admin/turnover side — that stays on the platform's own database instead of the
+export's manual-entry / claude.ai-artifact-db flow, which doesn't work self-hosted anyway):
+  * fixed prize ladder for EVERY player, drawn server-side: ₱17 (85%) · ₱27 (10%) · ₱37 (5%)
+    · ₱77 (display-only jackpot, 0% — shown in the odds table, never actually awarded)
+  * eligible once today's Success deposits total >= MIN_DEPOSIT (₱100) made 1 PM-9 PM PH time
+    AND today's slot+casino valid bet >= TURNOVER_MULT (3x) the deposit total
+  * which of the 8 cabins the player taps is PURELY COSMETIC — it does not affect the odds or
+    the amount, only which gondola visually reveals the already-drawn prize (kept so the
+    session API shape — /api/pick then /api/spin — didn't need to change)
+  * 1 spin per day; the reward itself then needs a further TURNOVER_MULT x slot+casino
+    turnover (tracked the same way as before) before it counts as "cleared" for payout
+  * ₱10,000 bonus budget per day across all players (cg_settings per day, raisable by admin)
 
-Tables it OWNS in that database (created on boot): cg_sessions, cg_settings (shared with the previous game), fw_spins.
+Tables it OWNS in that database (created on boot, unchanged from v1): cg_sessions, cg_settings,
+fw_spins. `tier` is now always written as 0 (column kept, no DB migration needed) since there
+is no longer a tier-to-cabin mapping.
 """
 import hashlib
 import hmac
@@ -45,26 +51,24 @@ TZ = ZoneInfo(os.environ.get("TZ", "Asia/Manila"))
 # ---- mechanics (env-overridable so the numbers can be tuned without a code change) ----
 BRAND = "gopyesta"
 GAME_NAME = "Lucky Ferris Wheel"
-_DEFAULT_TIERS = [[300, 8, 18], [600, 18, 28]]
-TIERS = [{"bet": int(b), "min": int(lo), "max": int(hi)}
-         for b, lo, hi in json.loads(os.environ.get("WHEEL_TIERS") or json.dumps(_DEFAULT_TIERS))]
-N = int(os.environ.get("WHEEL_CABINS", "6"))
-CAB_TIER = [int(x) for x in os.environ.get("WHEEL_CAB_TIER", "").split(",") if x.strip().lstrip("-").isdigit()] \
-    or [i % len(TIERS) for i in range(N)]                      # cabin i (1-based) -> tier index, default alternating
-assert len(CAB_TIER) == N and all(0 <= t < len(TIERS) for t in CAB_TIER), "WHEEL_CAB_TIER must list one tier index per cabin"
-MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", "100"))          # deposits for the day must total at least this
-TURNOVER_MULT = float(os.environ.get("TURNOVER_MULT", "5"))      # reward × this in slot bets to "clear" (0 = none)
-WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame").split(",") if c.strip()]   # slots only
+_DEFAULT_PRIZES = [[17, 85], [27, 10], [37, 5], [77, 0]]
+PRIZES = [{"amt": int(a), "p": int(p)} for a, p in json.loads(os.environ.get("PRIZES") or json.dumps(_DEFAULT_PRIZES))]
+LIVE_PRIZES = [p for p in PRIZES if p["p"] > 0]
+assert LIVE_PRIZES, "PRIZES must include at least one prize with p > 0"
+N = int(os.environ.get("WHEEL_CABINS", "8"))        # cosmetic only — which gondola reveals the prize
+MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", "100"))         # deposits for the day must total at least this
+TURNOVER_MULT = float(os.environ.get("TURNOVER_MULT", "3"))     # eligibility gate AND post-win clearing multiplier
+WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame,casino").split(",") if c.strip()]
 DAILY_CAP = int(os.environ.get("DAILY_CAP", "10000"))
 ROUNDS_PER_DAY = int(os.environ.get("ROUNDS_PER_DAY", "1"))
-DEP_FROM = os.environ.get("DEP_FROM", "00:00")   # deposits counted from (inclusive, HH:MM)
-DEP_TO = os.environ.get("DEP_TO", "24:00")       # deposits counted until (exclusive)
+DEP_FROM = os.environ.get("DEP_FROM", "13:00")   # deposits counted from (inclusive, HH:MM)
+DEP_TO = os.environ.get("DEP_TO", "21:00")       # deposits counted until (exclusive)
 PLAY_UNTIL = os.environ.get("PLAY_UNTIL", "23:59")
-MIN_PRIZE = min(t["min"] for t in TIERS)
-MAX_PRIZE = max(t["max"] for t in TIERS)
+MIN_PRIZE = min(p["amt"] for p in LIVE_PRIZES)
+MAX_PRIZE = max(p["amt"] for p in PRIZES)
 
 CONFIG = {
-    "brand": BRAND, "game": GAME_NAME, "version": "fw1", "cabins": N, "cabTier": CAB_TIER, "tiers": TIERS,
+    "brand": BRAND, "game": GAME_NAME, "version": "fw2", "cabins": N, "prizes": PRIZES,
     "minDeposit": MIN_DEPOSIT, "turnover": TURNOVER_MULT, "wagerCats": WAGER_CATS, "dailyCap": DAILY_CAP,
     "roundsPerDay": ROUNDS_PER_DAY, "depFrom": DEP_FROM, "depTo": DEP_TO, "playUntil": PLAY_UNTIL, "maxPrize": MAX_PRIZE,
 }
@@ -158,6 +162,17 @@ def hm_of(t):
     return t.strftime("%H:%M")
 
 
+def pick_prize() -> int:
+    """Weighted random draw over the live (p > 0) prizes, matching the raw export's pickPrize()."""
+    tot = sum(p["p"] for p in LIVE_PRIZES)
+    r = secrets.randbelow(tot)
+    for p in LIVE_PRIZES:
+        r -= p["p"]
+        if r < 0:
+            return p["amt"]
+    return LIVE_PRIZES[-1]["amt"]
+
+
 def find_user(cur, account: str):
     cur.execute(
         "SELECT user_id, account, COALESCE(real_name,'') AS real_name "
@@ -230,7 +245,7 @@ def cap_info(cur, date: str):
 
 
 def pub_spin(r):
-    return {"id": r["id"], "day": r["biz_date"], "round_no": r["round_no"], "cabin": r["cabin"], "tier": r["tier"],
+    return {"id": r["id"], "day": r["biz_date"], "round_no": r["round_no"], "cabin": r["cabin"],
             "need": int(r["need"]), "status": r["status"], "amount": int(r["amount"] or 0), "seen": int(r["seen"] or 0),
             "dep": float(r["dep"] or 0), "slot": float(r["slot"] or 0),
             "spun_at": datetime.fromtimestamp(r["spun_at"] / 1000, TZ).strftime("%Y-%m-%d %H:%M") if r.get("spun_at") else None,
@@ -238,7 +253,7 @@ def pub_spin(r):
 
 
 def wager(cur, user_id: int):
-    """Bonus awaiting turnover: TURNOVER_MULT × the uncleared rewards, in slot bets made after the oldest one."""
+    """Bonus awaiting turnover: TURNOVER_MULT × the uncleared rewards, in slot+casino bets made after the oldest one."""
     cur.execute("SELECT * FROM fw_spins WHERE user_id=%s AND status='paid' ORDER BY spun_at", (user_id,))
     rows = [dict(r) for r in cur.fetchall()]
     cleared = sum(int(r["amount"]) for r in rows if r.get("cleared_at"))
@@ -269,13 +284,14 @@ def summary(cur, user, date: str):
     t = now()
     hm = hm_of(t)
     dep_ok = dep_total >= MIN_DEPOSIT
-    bet_ok = bool(cur_row) and slot >= float(cur_row["need"])
+    need_amt = max(MIN_DEPOSIT, dep_total) * TURNOVER_MULT   # eligibility gate: 3x today's deposit (not a per-cabin target)
+    bet_ok = slot >= need_amt
     play_open = hm <= PLAY_UNTIL
     missing = []
     if not dep_ok:
         missing.append("mag-deposit pa ng ₱%s" % f"{MIN_DEPOSIT - dep_total:,.0f}")
-    if cur_row and not bet_ok:
-        missing.append("mag-slots pa ng ₱%s" % f"{float(cur_row['need']) - slot:,.0f}")
+    if not bet_ok:
+        missing.append("mag-slots/casino pa ng ₱%s" % f"{need_amt - slot:,.0f}")
     wg = wager(cur, uid)   # may mark rows cleared -> fetch history after it
     cur.execute(
         "SELECT * FROM fw_spins WHERE user_id=%s AND status='paid' ORDER BY spun_at DESC LIMIT 30", (uid,))
@@ -302,6 +318,7 @@ def summary(cur, user, date: str):
         "cur": pub_spin(cur_row) if cur_row else None,
         "roundsUsed": len(rows),
         "canPick": (cur_row is not None and cur_row["status"] == "open") or len(rows) < ROUNDS_PER_DAY,
+        "needAmt": need_amt,
         "depOk": dep_ok,
         "betOk": bet_ok,
         "ready": bool(cur_row) and cur_row["status"] == "open" and dep_ok and bet_ok and play_open,
@@ -432,8 +449,8 @@ def config():
     return jsonify(CONFIG)
 
 
-_PUB = ("dep", "slot", "slotToday", "other", "syncedAt", "cur", "roundsUsed", "canPick", "depOk", "betOk", "ready",
-        "missing", "wager", "hist", "week", "capLeft", "capped", "windowOpen", "playOpen", "serverTime")
+_PUB = ("dep", "slot", "slotToday", "other", "syncedAt", "cur", "roundsUsed", "canPick", "needAmt", "depOk", "betOk",
+        "ready", "missing", "wager", "hist", "week", "capLeft", "capped", "windowOpen", "playOpen", "serverTime")
 
 
 def _pub(s):
@@ -467,7 +484,8 @@ def _locked_session(cur, code):
 
 @app.route("/api/pick/<code>", methods=["POST"])
 def pick(code):
-    """Lock cabin 1..8 for today (or change it while the round is still open)."""
+    """Pick cabin 1..N for today (purely cosmetic — doesn't change odds or the eligibility gate;
+    kept so the player can still choose which gondola will reveal the prize)."""
     payload = request.get_json(force=True, silent=True) or {}
     try:
         cabin = int(payload.get("cabin"))
@@ -488,18 +506,19 @@ def pick(code):
             return jsonify({"error": "expired", "msg": "Expired na ang link na ito (ibang araw na)."}), 409
         rows = spins_for(cur, sess["user_id"], date)
         cur_row = rows[-1] if rows else None
-        tier = CAB_TIER[cabin - 1]
-        need = TIERS[tier]["bet"]
+        user = {"user_id": sess["user_id"], "account": sess["account"], "real_name": sess["name"]}
+        s = summary(cur, user, date)
+        need_amt = int(round(s["needAmt"]))
         if cur_row and cur_row["status"] == "open":
-            cur.execute("UPDATE fw_spins SET cabin=%s, tier=%s, need=%s WHERE id=%s", (cabin, tier, need, cur_row["id"]))
+            cur.execute("UPDATE fw_spins SET cabin=%s, tier=0, need=%s WHERE id=%s", (cabin, need_amt, cur_row["id"]))
         elif len(rows) >= ROUNDS_PER_DAY:
             conn.rollback()
             return jsonify({"error": "done", "msg": "Tapos na ang ikot mo ngayong araw. Pumili ulit bukas."}), 409
         else:
             cur.execute(
                 "INSERT INTO fw_spins (code, user_id, account, biz_date, round_no, cabin, tier, need, status, created_at) "
-                "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,'open',%s)",
-                (code, sess["user_id"], sess["account"], date, len(rows) + 1, cabin, tier, need, ms()),
+                "VALUES (%s,%s,%s,%s,%s,%s,0,%s,'open',%s)",
+                (code, sess["user_id"], sess["account"], date, len(rows) + 1, cabin, need_amt, ms()),
             )
         out, _ = _session_state(cur, sess)
         conn.commit()
@@ -513,7 +532,8 @@ def pick(code):
 
 @app.route("/api/spin/<code>", methods=["POST"])
 def spin(code):
-    """START: spin now if today's goal is met. Server rolls the reward; the session row lock serialises spins."""
+    """START: spin now if today's goal is met. Server draws from the fixed prize ladder; the
+    session row lock serialises spins."""
     conn = db(autocommit=False)
     try:
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -539,8 +559,7 @@ def spin(code):
         if not s["ready"]:
             conn.rollback()
             return jsonify({"error": "locked", "msg": "Tapusin muna ang goal: " + " at ".join(s["missing"]) + ".", **out}), 409
-        t = TIERS[c["tier"]]
-        amount = t["min"] + secrets.randbelow(t["max"] - t["min"] + 1)
+        amount = pick_prize()
         if s["capUsed"] + amount > s["dailyCap"]:
             conn.rollback()
             return jsonify({"error": "cap", "msg": "Naabot na ang daily bonus budget. Subukan ulit bukas.", **out}), 409
