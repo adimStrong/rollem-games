@@ -49,7 +49,7 @@ tr:hover td{background:#1c2029}
 <body>
 <div class="wrap">
   <h1>Wins Ledger</h1>
-  <p class="sub">Every recorded win across all rollem-games community minigames.</p>
+  <p class="sub">Every recorded win across all rollem-games community minigames. I-export ang listahan (CSV) at ipadala sa Risk — sila na ang magdidistribute ng bonus manually.</p>
 
   <div class="panel gate" id="gate">
     <p style="margin:0 0 10px">Kailangan ng password para dito.</p>
@@ -75,10 +75,11 @@ tr:hover td{background:#1c2029}
       <select id="statusFilter">
         <option value="">All statuses</option>
         <option value="pending">Pending lang</option>
-        <option value="claimed">Paid lang</option>
+        <option value="claimed">Sent to Risk lang</option>
         <option value="revoked">Revoked lang</option>
       </select>
       <button id="refreshBtn" type="button">Refresh</button>
+      <button id="exportBtn" type="button">I-export CSV (para sa Risk)</button>
       <span class="sub" id="lastUpdated" style="margin:0"></span>
     </div>
     <div class="panel" style="overflow-x:auto">
@@ -119,12 +120,31 @@ async function loadWins(){
 
 async function act(id,action){
   let note="";
-  if(action==="claim"){note=prompt("Paid via GCash — reference no. / remarks (optional):","");if(note===null)return}
+  if(action==="claim"){note=prompt("Sent to Risk — batch ref / remarks (optional):","");if(note===null)return}
   if(action==="revoke"){note=prompt("Revoke — dahilan (hal. turnover not met, duplicate account):","");if(note===null)return;if(!note.trim()){alert("Kailangan ng dahilan.");return}}
   try{
     const r=await fetch("/api/wins/"+id+"/"+action,{method:"POST",headers:{"X-Admin-Token":adminToken||"","Content-Type":"application/json"},body:JSON.stringify({note:note||""})});
     if(r.ok)loadWins();
   }catch(e){}
+}
+
+async function exportCsv(){
+  const brand=$("brandFilter").value;
+  const status=$("statusFilter").value;
+  const params=[];
+  if(brand)params.push("brand="+encodeURIComponent(brand));
+  if(status)params.push("status="+encodeURIComponent(status));
+  const url="/api/wins/export.csv"+(params.length?"?"+params.join("&"):"");
+  try{
+    const r=await fetch(url,{headers:{"X-Admin-Token":adminToken||""}});
+    if(!r.ok){alert("Hindi ma-export (session expired?). I-refresh ang page.");return}
+    const blob=await r.blob();
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="wins-export.csv";
+    document.body.appendChild(a);a.click();a.remove();
+    URL.revokeObjectURL(a.href);
+  }catch(e){alert("Hindi ma-export. Subukan ulit.");}
 }
 function escQ(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
@@ -136,8 +156,8 @@ function render(wins){
     "<td>"+(w.player_name||"—")+"</td>"+
     "<td class='amt'>₱"+w.amount+"</td>"+
     "<td>"+(w.link?"<a class='link' href='"+w.link+"' target='_blank' rel='noopener'>"+w.code+"</a>":w.code)+"</td>"+
-    "<td>"+(w.revoked?"<span class='badge revoked'>Revoked</span>":w.claimed?"<span class='badge claimed'>Paid</span>":"<span class='badge pending'>Pending</span>")+(w.note?"<span class='note'>"+escQ(w.note)+"</span>":"")+"</td>"+
-    "<td>"+((w.claimed||w.revoked)?"<button class='unclaimBtn' data-id='"+w.id+"' data-act='unclaim'>Undo</button>":"<button class='claimBtn' data-id='"+w.id+"' data-act='claim'>Paid (GCash)</button><button class='revokeBtn' data-id='"+w.id+"' data-act='revoke'>Revoke</button>")+"</td></tr>"
+    "<td>"+(w.revoked?"<span class='badge revoked'>Revoked</span>":w.claimed?"<span class='badge claimed'>Sent to Risk</span>":"<span class='badge pending'>Pending</span>")+(w.note?"<span class='note'>"+escQ(w.note)+"</span>":"")+"</td>"+
+    "<td>"+((w.claimed||w.revoked)?"<button class='unclaimBtn' data-id='"+w.id+"' data-act='unclaim'>Undo</button>":"<button class='claimBtn' data-id='"+w.id+"' data-act='claim'>Sent to Risk</button><button class='revokeBtn' data-id='"+w.id+"' data-act='revoke'>Revoke</button>")+"</td></tr>"
   ).join("");
   $("emptyMsg").hidden=wins.length>0;
   const total=wins.filter(w=>!w.revoked).reduce((a,w)=>a+w.amount,0);
@@ -165,6 +185,7 @@ function reveal(){
   $("brandFilter").addEventListener("change",loadWins);
   $("statusFilter").addEventListener("change",loadWins);
   $("refreshBtn").addEventListener("click",loadWins);
+  $("exportBtn").addEventListener("click",exportCsv);
   loadWins();
   setInterval(loadWins,15000);
 }

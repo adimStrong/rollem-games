@@ -1,11 +1,13 @@
+import csv
 import hashlib
 import hmac
+import io
 import os
 import time
 
 import psycopg2
 import psycopg2.extras
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, Response, jsonify, request, send_from_directory
 
 app = Flask(__name__, static_folder=None)
 
@@ -139,9 +141,47 @@ def list_wins():
     return jsonify({"wins": rows})
 
 
+@app.route("/api/wins/export.csv", methods=["GET"])
+def export_wins_csv():
+    """CSV of wins (same brand/status filters as /api/wins) to hand to Risk for manual bonus distribution."""
+    if not require_admin():
+        return jsonify({"error": "forbidden"}), 403
+    brand = request.args.get("brand", "")
+    status = request.args.get("status", "")
+    clauses, params = [], []
+    if brand:
+        clauses.append("brand=%s")
+        params.append(brand)
+    if status == "pending":
+        clauses.append("claimed=FALSE AND revoked=FALSE")
+    elif status == "claimed":
+        clauses.append("claimed=TRUE")
+    elif status == "revoked":
+        clauses.append("revoked=TRUE")
+    where = ("WHERE " + " AND ".join(clauses)) if clauses else ""
+    with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute(f"SELECT * FROM wins {where} ORDER BY created_at DESC", params)
+        rows = cur.fetchall()
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(["id", "date_ph", "brand", "game", "player_name", "code", "amount", "link", "status", "note"])
+    for r in rows:
+        status_label = "revoked" if r["revoked"] else ("sent_to_risk" if r["claimed"] else "pending")
+        date_ph = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(r["created_at"] / 1000 + 8 * 3600))
+        writer.writerow([r["id"], date_ph, r["brand"], r["game"], r["player_name"], r["code"], r["amount"], r["link"], status_label, r["note"]])
+
+    filename = "wins-" + time.strftime("%Y%m%d-%H%M%S", time.gmtime(time.time() + 8 * 3600)) + ".csv"
+    return Response(
+        buf.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 @app.route("/api/wins/<int:win_id>/claim", methods=["POST"])
 def claim_win(win_id):
-    """Mark paid (e.g. GCash sent). Optional JSON {note}: reference no. / remarks."""
+    """Mark sent to Risk for manual bonus distribution (no more GCash send from here). Optional JSON {note}: batch ref / remarks."""
     if not require_admin():
         return jsonify({"error": "forbidden"}), 403
     payload = request.get_json(force=True, silent=True) or {}
