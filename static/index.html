@@ -78,6 +78,9 @@ tr:hover td{background:#1c2029}
         <option value="claimed">Sent to Risk lang</option>
         <option value="revoked">Revoked lang</option>
       </select>
+      <input type="date" id="dateFrom" title="Mula (petsa)">
+      <input type="date" id="dateTo" title="Hanggang (petsa)">
+      <button id="clearDatesBtn" type="button">Clear dates</button>
       <button id="refreshBtn" type="button">Refresh</button>
       <button id="exportBtn" type="button">I-export CSV (para sa Risk)</button>
       <span class="sub" id="lastUpdated" style="margin:0"></span>
@@ -102,13 +105,22 @@ function fmtDate(ms){
   return d.toLocaleString("en-PH",{year:"numeric",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
 }
 
-async function loadWins(){
-  $("loadingMsg").hidden=false;$("emptyMsg").hidden=true;
+function filterParams(){
   const brand=$("brandFilter").value;
   const status=$("statusFilter").value;
+  const dateFrom=$("dateFrom").value;
+  const dateTo=$("dateTo").value;
   const params=[];
   if(brand)params.push("brand="+encodeURIComponent(brand));
   if(status)params.push("status="+encodeURIComponent(status));
+  if(dateFrom)params.push("from="+encodeURIComponent(dateFrom));
+  if(dateTo)params.push("to="+encodeURIComponent(dateTo));
+  return params;
+}
+
+async function loadWins(){
+  $("loadingMsg").hidden=false;$("emptyMsg").hidden=true;
+  const params=filterParams();
   const url="/api/wins"+(params.length?"?"+params.join("&"):"");
   try{
     const r=await fetch(url,{headers:{"X-Admin-Token":adminToken||""}});
@@ -129,11 +141,7 @@ async function act(id,action){
 }
 
 async function exportCsv(){
-  const brand=$("brandFilter").value;
-  const status=$("statusFilter").value;
-  const params=[];
-  if(brand)params.push("brand="+encodeURIComponent(brand));
-  if(status)params.push("status="+encodeURIComponent(status));
+  const params=filterParams();
   const url="/api/wins/export.csv"+(params.length?"?"+params.join("&"):"");
   try{
     const r=await fetch(url,{headers:{"X-Admin-Token":adminToken||""}});
@@ -184,6 +192,9 @@ function reveal(){
   $("gate").hidden=true;$("body").hidden=false;
   $("brandFilter").addEventListener("change",loadWins);
   $("statusFilter").addEventListener("change",loadWins);
+  $("dateFrom").addEventListener("change",loadWins);
+  $("dateTo").addEventListener("change",loadWins);
+  $("clearDatesBtn").addEventListener("click",()=>{$("dateFrom").value="";$("dateTo").value="";loadWins();});
   $("refreshBtn").addEventListener("click",loadWins);
   $("exportBtn").addEventListener("click",exportCsv);
   loadWins();
