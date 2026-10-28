@@ -1,9 +1,11 @@
+import calendar
 import csv
 import hashlib
 import hmac
 import io
 import os
 import time
+from datetime import datetime, timedelta
 
 import psycopg2
 import psycopg2.extras
@@ -19,6 +21,36 @@ STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 VALID_AMOUNTS = {10, 27, 57, 17, 37, 77}  # 17/37/77 = Gopyesta Palarong Pyesta tiers
 # Gopyesta Lucky Ferris Wheel (2026-10-12) rolls a random P8-888 per spin, so gopyesta accepts any whole-peso amount in range
 WHEEL_RANGE = (1, 1000)
+
+
+def ph_date_ms(date_str: str, end: bool = False) -> int:
+    """Epoch ms for midnight of a YYYY-MM-DD PH calendar date (PH = UTC+8). end=True -> midnight of the NEXT day (exclusive upper bound)."""
+    d = datetime.strptime(date_str, "%Y-%m-%d")
+    if end:
+        d = d + timedelta(days=1)
+    utc_epoch_s = calendar.timegm(d.timetuple()) - 8 * 3600
+    return utc_epoch_s * 1000
+
+
+def date_range_clauses(args, clauses, params):
+    date_from = args.get("from", "")
+    date_to = args.get("to", "")
+    if date_from:
+        try:
+            from_ms = ph_date_ms(date_from)
+        except ValueError:
+            pass
+        else:
+            clauses.append("created_at >= %s")
+            params.append(from_ms)
+    if date_to:
+        try:
+            to_ms = ph_date_ms(date_to, end=True)
+        except ValueError:
+            pass
+        else:
+            clauses.append("created_at < %s")
+            params.append(to_ms)
 
 
 def amount_ok(brand: str, amount: int) -> bool:
@@ -133,6 +165,7 @@ def list_wins():
         clauses.append("claimed=TRUE")
     elif status == "revoked":
         clauses.append("revoked=TRUE")
+    date_range_clauses(request.args, clauses, params)
     where = ("WHERE " + " AND ".join(clauses)) if clauses else ""
     params.append(limit)
     with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
@@ -158,6 +191,7 @@ def export_wins_csv():
         clauses.append("claimed=TRUE")
     elif status == "revoked":
         clauses.append("revoked=TRUE")
+    date_range_clauses(request.args, clauses, params)
     where = ("WHERE " + " AND ".join(clauses)) if clauses else ""
     with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
         cur.execute(f"SELECT * FROM wins {where} ORDER BY created_at DESC", params)
