@@ -285,23 +285,31 @@ def summary(cur, user, date: str):
     other = sum(v for c, v in (cats or {}).items() if c not in WAGER_CATS)
     rows = spins_for(cur, uid, date)
     cur_row = rows[-1] if rows else None
-    # Baseline turnover already "spent" unlocking rounds so far. While cur_row is OPEN (in
-    # progress, not yet won), its own slot_base isn't set yet -- the right baseline is the
-    # round BEFORE it (rows[-2]). Once cur_row is PAID, it's the round most recently consumed,
-    # so the baseline for the NEXT round is cur_row's OWN slot_base (rows[-1]), not rows[-2] --
-    # using rows[-2] there double-counted turnover a paid round had already spent, which broke
-    # starting at round 3 (2026-10-29, found while adding unlimited spins/day).
+    # Baseline round that anchors the CURRENT/NEXT round's INCREMENTAL progress. While cur_row is
+    # OPEN (in progress, not yet won), it hasn't consumed anything yet -- the baseline is the
+    # round BEFORE it (rows[-2]). Once cur_row is PAID, it's the one most recently consumed, so
+    # IT is the baseline for whatever comes next -- using rows[-2] there double-counted a paid
+    # round's own consumption (broke starting at round 3, found 2026-10-29 adding unlimited
+    # spins/day). `dep` (not `need`) is what reconstructs the baseline's absolute cumulative
+    # target, since `need` itself is redefined below to be incremental, not cumulative.
     if cur_row is None:
-        base = 0.0
+        baseline = None
     elif cur_row["status"] == "open":
-        base = float(rows[-2]["slot_base"] or 0) if cur_row["round_no"] > 1 else 0.0
+        baseline = rows[-2] if cur_row["round_no"] > 1 else None
     else:
-        base = float(cur_row["slot_base"] or 0)
+        baseline = cur_row
+    base = float(baseline["slot_base"] or 0) if baseline else 0.0
+    prior_need = (max(MIN_DEPOSIT, float(baseline["dep"] or 0)) * TURNOVER_MULT) if baseline else 0.0
     slot = max(0.0, slot_today - base)
     t = now()
     hm = hm_of(t)
     dep_ok = dep_total >= MIN_DEPOSIT
-    need_amt = max(MIN_DEPOSIT, dep_total) * TURNOVER_MULT   # eligibility gate: 1x today's deposit (not a per-cabin target)
+    # THIS round's own incremental turnover target: the cumulative deposit-based target minus
+    # whatever the baseline round already required -- NOT the full cumulative figure, which would
+    # compare a RELATIVE `slot` against an ABSOLUTE target and demand far more than intended
+    # (found 2026-10-29 via a real player: round 1 needed ₱200, round 2 was wrongly requiring
+    # ₱625 absolute instead of ₱200 more on top of what round 1 already covered).
+    need_amt = max(0.0, max(MIN_DEPOSIT, dep_total) * TURNOVER_MULT - prior_need)
     bet_ok = slot >= need_amt
     play_open = hm <= PLAY_UNTIL
     missing = []
