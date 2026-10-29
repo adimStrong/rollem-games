@@ -405,7 +405,10 @@ def lookup():
 
 @app.route("/api/link", methods=["POST"])
 def make_link():
-    """Create (or reuse) today's player link for an account. `fresh: true` forces a new code.
+    """Create (or reuse) today's player link for an account. Auto-fresh: if the existing link's
+    latest round has already been spun (paid), a new code is issued automatically -- the goal is
+    tied to the account/day, not the code, so this is cosmetic, never resets progress. `fresh:
+    true` still forces a new code outright (e.g. even while a round is still open).
     Refused while today's budget is used up (admin can raise it with /api/cap)."""
     if not require_admin():
         return jsonify({"error": "forbidden"}), 403
@@ -428,7 +431,12 @@ def make_link():
                 (user["user_id"], date),
             )
             row = cur.fetchone()
-            code = row["code"] if row else None
+            existing_code = row["code"] if row else None
+            if existing_code:
+                rows = spins_for(cur, user["user_id"], date)
+                already_used = bool(rows) and rows[-1]["status"] == "paid"
+                if not already_used:
+                    code = existing_code
         if not code:
             code = clean_code(user["account"]) + "-" + secrets.token_hex(2)
             cur.execute(
