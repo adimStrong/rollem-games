@@ -11,7 +11,7 @@ except the admin/turnover side — that stays on the platform's own database ins
 export's manual-entry / claude.ai-artifact-db flow, which doesn't work self-hosted anyway):
   * fixed prize ladder for EVERY player, drawn server-side: ₱17 (85%) · ₱27 (10%) · ₱37 (5%)
     · ₱77 (display-only jackpot, 0% — shown in the odds table, never actually awarded)
-  * eligible once today's Success deposits total >= MIN_DEPOSIT (₱200) made 1 PM-9 PM PH time
+  * eligible once today's Success deposits total >= MIN_DEPOSIT (₱200) made 12 AM-9 PM PH time
     AND today's slot+casino valid bet >= TURNOVER_MULT (1x) the deposit total
   * which of the 8 cabins the player taps is PURELY COSMETIC — it does not affect the odds or
     the amount, only which gondola visually reveals the already-drawn prize (kept so the
@@ -61,9 +61,9 @@ TURNOVER_MULT = float(os.environ.get("TURNOVER_MULT", "1"))     # eligibility ga
 WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame,casino").split(",") if c.strip()]
 DAILY_CAP = int(os.environ.get("DAILY_CAP", "10000"))
 ROUNDS_PER_DAY = int(os.environ.get("ROUNDS_PER_DAY", "1"))
-DEP_FROM = os.environ.get("DEP_FROM", "13:00")   # deposits counted from (inclusive, HH:MM)
+DEP_FROM = os.environ.get("DEP_FROM", "00:00")   # deposits counted from (inclusive, HH:MM)
 DEP_TO = os.environ.get("DEP_TO", "21:00")       # deposits counted until (exclusive)
-PLAY_UNTIL = os.environ.get("PLAY_UNTIL", "23:59")
+PLAY_UNTIL = os.environ.get("PLAY_UNTIL", "21:00")
 MIN_PRIZE = min(p["amt"] for p in LIVE_PRIZES)
 MAX_PRIZE = max(p["amt"] for p in PRIZES)
 
