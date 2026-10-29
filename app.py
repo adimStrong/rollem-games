@@ -62,7 +62,7 @@ MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", "200"))         # deposits for t
 TURNOVER_MULT = float(os.environ.get("TURNOVER_MULT", "1"))     # eligibility gate AND post-win clearing multiplier
 WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame,casino").split(",") if c.strip()]
 DAILY_CAP = int(os.environ.get("DAILY_CAP", "10000"))
-ROUNDS_PER_DAY = int(os.environ.get("ROUNDS_PER_DAY", "1"))   # EMERGENCY REVERT 2026-10-29: incremental-need math hits 0 once a round's baseline catches up to dep_total even with NO new deposit, making every further round free -- reverted to 1 until a real fix ships. See rollem-games memory.
+ROUNDS_PER_DAY = int(os.environ.get("ROUNDS_PER_DAY", "999"))   # effectively unlimited -- each round STRICTLY requires its own new, unconsumed deposit (see canPick's need_amt>0 guard in summary() and the matching backend check in /api/pick); DAILY_CAP is the real limiter
 DEP_FROM = os.environ.get("DEP_FROM", "12:00")   # deposits counted from (inclusive, HH:MM)
 DEP_TO = os.environ.get("DEP_TO", "21:00")       # deposits counted until (exclusive)
 PLAY_UNTIL = os.environ.get("PLAY_UNTIL", "21:00")
@@ -342,7 +342,13 @@ def summary(cur, user, date: str):
         "syncedAt": synced,
         "cur": pub_spin(cur_row) if cur_row else None,
         "roundsUsed": len(rows),
-        "canPick": (cur_row is not None and cur_row["status"] == "open") or len(rows) < ROUNDS_PER_DAY,
+        # A NEW round (cur_row missing/paid) is only pickable when need_amt > 0 -- i.e. there is
+        # genuinely NEW, unconsumed deposit to fund it. need_amt hits exactly 0 whenever dep_total
+        # hasn't grown since the baseline round's own `dep` snapshot, which is the ordinary state
+        # right after winning any round -- without this guard EVERY further round is free with no
+        # new deposit at all (real incident 2026-10-29: 38 free rounds, ₱816, one player, ~10 min).
+        "canPick": (cur_row is not None and cur_row["status"] == "open")
+                   or (len(rows) < ROUNDS_PER_DAY and need_amt > 0),
         "needAmt": need_amt,
         "depOk": dep_ok,
         "betOk": bet_ok,
@@ -547,6 +553,13 @@ def pick(code):
         elif len(rows) >= ROUNDS_PER_DAY:
             conn.rollback()
             return jsonify({"error": "done", "msg": "Tapos na ang ikot mo ngayong araw. Pumili ulit bukas."}), 409
+        elif need_amt <= 0:
+            # Backend enforcement, not just the frontend/canPick hint: a round can only be created
+            # when there is a genuinely NEW, unconsumed deposit to fund it (need_amt > 0). This is
+            # the exact gate that was missing in the 2026-10-29 incident -- never rely on canPick
+            # alone, since this route can be called directly.
+            conn.rollback()
+            return jsonify({"error": "no_new_deposit", "msg": "Walang bagong deposit pa. Mag-deposit muna para sa susunod na ikot."}), 409
         else:
             cur.execute(
                 "INSERT INTO fw_spins (code, user_id, account, biz_date, round_no, cabin, tier, need, status, created_at) "
