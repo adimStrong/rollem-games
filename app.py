@@ -260,6 +260,40 @@ def revoke_win(win_id):
     return jsonify({"ok": True})
 
 
+@app.route("/api/wins/<int:win_id>", methods=["DELETE"])
+def delete_win(win_id):
+    """Hard-delete one erroneous row (e.g. test/dev data that leaked into production) --
+    distinct from revoke, which marks a real-but-voided win and keeps the row for audit."""
+    if not require_admin():
+        return jsonify({"error": "forbidden"}), 403
+    with db() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM wins WHERE id=%s", (win_id,))
+        if cur.rowcount == 0:
+            return jsonify({"error": "not found"}), 404
+    return jsonify({"ok": True})
+
+
+@app.route("/api/wins/delete-by-player", methods=["POST"])
+def delete_wins_by_player():
+    """Bulk hard-delete, JSON {player_name, brand}: for cleaning up test/dev data that leaked
+    into production (e.g. a local test run whose LEDGER_URL wasn't overridden). `brand` narrows
+    the match so a generic test name doesn't collide with a real player on another brand."""
+    if not require_admin():
+        return jsonify({"error": "forbidden"}), 403
+    payload = request.get_json(force=True, silent=True) or {}
+    player_name = str(payload.get("player_name", "")).strip()
+    brand = str(payload.get("brand", "")).strip()
+    if not player_name:
+        return jsonify({"error": "player_name required"}), 400
+    with db() as conn, conn.cursor() as cur:
+        if brand:
+            cur.execute("DELETE FROM wins WHERE player_name=%s AND brand=%s", (player_name, brand))
+        else:
+            cur.execute("DELETE FROM wins WHERE player_name=%s", (player_name,))
+        deleted = cur.rowcount
+    return jsonify({"ok": True, "deleted": deleted})
+
+
 @app.route("/")
 def index():
     return send_from_directory(STATIC_DIR, "index.html")
