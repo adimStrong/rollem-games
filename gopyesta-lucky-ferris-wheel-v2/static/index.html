@@ -216,7 +216,7 @@ h2{font:800 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
     <h2>Link maker · Lucky Ferris Wheel</h2>
     <p class="hintp" id="adminGate">Sinusuri ang access…</p>
     <div id="adminBody" hidden style="display:grid;gap:14px">
-      <p class="hintp">I-type ang <b>username, user ID, o in-game ID</b> ng player (hal. GPEjnwNa). Kukunin ng system mula sa database ang Success deposits (1PM&ndash;9PM) at slot/casino turnover niya ngayong araw. <b>Deposit na ₱100 pataas + turnover na 1&times; ng deposit = iikot ang gulong</b>, server ang nagde-decide ng premyo (₱17/₱27/₱37, bihira ₱77) at naitatala agad sa wins ledger. May 1&times; turnover pa ang bonus bago ma-clear.</p>
+      <p class="hintp">I-type ang <b>username, user ID, o in-game ID</b> ng player (hal. GPEjnwNa). Kukunin ng system mula sa database ang Success deposits (1PM&ndash;9PM) at slot/casino turnover niya ngayong araw. <b>Deposit na ₱200 pataas + turnover na 1&times; ng deposit = iikot ang gulong</b>, server ang nagde-decide ng premyo (₱17/₱27/₱37, bihira ₱77) at naitatala agad sa wins ledger. May 1&times; turnover pa ang bonus bago ma-clear.</p>
       <label class="field"><span>Player username, user ID, o in-game ID</span><div class="btnrow"><input class="inp" id="acct" type="text" autocomplete="off" spellcheck="false" placeholder="hal. juan123, 482910, o GPEjnwNa" style="flex:1;min-width:0"><button class="btn small" id="lookupBtn" type="button">Check</button></div></label>
       <div class="tierbox" id="aTier"></div>
       <div class="offerbox" id="offerBox" hidden></div>
@@ -290,7 +290,7 @@ h2{font:800 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
         <h2>Paano maglaro</h2>
         <ol class="rules">
           <li><b>Pumili ng cabin.</b> Bawat isa sa <b id="rCabins">8</b> cabins pareho lang ang laban — ang pagpili ay hindi nagbabago ng panalo, basta may napili bago mag-SPIN.</li>
-          <li><b>Abutin ang goal ngayong araw.</b> Deposit na <b id="rMinDep">₱100</b> pataas (1PM&ndash;9PM) at slots/casino turnover na <b id="rTurn2">1×</b> ng deposit mo, parehong ngayong araw (PH time).</li>
+          <li><b>Abutin ang goal ngayong araw.</b> Deposit na <b id="rMinDep">₱200</b> pataas (1PM&ndash;9PM) at slots/casino turnover na <b id="rTurn2">1×</b> ng deposit mo, parehong ngayong araw (PH time).</li>
           <li><b>Iikot nang mag-isa.</b> Pag-abot sa goal, iikot ang gulong at bubukas ang napili mong cabin — panalo ka ng <b>₱17, ₱27, o ₱37</b> (bihirang-bihira: ₱77). Mag-slots/casino pa ng <b id="rTurn">1×</b> ng bonus para ma-clear ito. Ipapadala ng agent mo ang reward pagkatapos ma-verify.</li>
         </ol>
         <label class="agree" id="agreeLbl" style="margin-top:12px"><input type="checkbox" id="agree"><span>Nabasa ko at sang-ayon ako sa <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button> ng Lucky Ferris Wheel.</span></label>
@@ -302,7 +302,7 @@ h2{font:800 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
         <ol>
           <li>Open to verified Gopyesta players aged 21 and above. Self-excluded, restricted, test or unverified accounts are not eligible.</li>
           <li>Each day (Philippine time) you may pick one of the 8 cabins on the Lucky Ferris Wheel; the cabin may be changed until the wheel spins. Which cabin is picked does not change the odds — all cabins share the same prize draw.</li>
-          <li>The wheel spins once your successful deposits made between 1 PM and 9 PM today total at least ₱100, and your valid bets on slot and casino games today reach at least 1× that deposit total. Deposits and bets are computed from the platform's records; pending, failed or reversed deposits do not count, and bets on other game types do not count toward the target. Bet records refresh periodically, so the wheel may spin up to about 30 minutes after the target is met.</li>
+          <li>The wheel spins once your successful deposits made between 1 PM and 9 PM today total at least ₱200, and your valid bets on slot and casino games today reach at least 1× that deposit total. Deposits and bets are computed from the platform's records; pending, failed or reversed deposits do not count, and bets on other game types do not count toward the target. Bet records refresh periodically, so the wheel may spin up to about 30 minutes after the target is met.</li>
           <li>The prize is drawn at random by the system the moment the wheel spins, from a fixed pool: ₱17 (85% chance), ₱27 (10% chance), ₱37 (5% chance). ₱77 is a display-only jackpot and is never actually awarded. Which cabin was picked does not change these odds.</li>
           <li>A bonus must be wagered 1× on slot and casino games before it is considered cleared. One spin per day; the goal does not carry over to the next day.</li>
           <li>Total bonus awarded under this promo is limited to a daily budget (₱10,000 unless announced otherwise) across all players. Once the budget is used up, no further links or spins are issued that day.</li>
@@ -335,7 +335,7 @@ const peso=v=>"₱"+Number(v||0).toLocaleString("en-PH",{maximumFractionDigits:0
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 function flash(msg){const t=document.createElement("div");t.className="flash";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
-let CONF={cabins:8,prizes:[{amt:17,p:85},{amt:27,p:10},{amt:37,p:5},{amt:77,p:0}],minDeposit:100,turnover:1,maxPrize:77,roundsPerDay:1};
+let CONF={cabins:8,prizes:[{amt:17,p:85},{amt:27,p:10},{amt:37,p:5},{amt:77,p:0}],minDeposit:200,turnover:1,maxPrize:77,roundsPerDay:1};
 const BRAND={key:"gopyesta",name:"Gopyesta",script:()=>"Hi po! Pasok na ang deposit mo kaya pwede ka nang sumakay sa Lucky Ferris Wheel 🎡 Pumili ng cabin, mag-deposit ng "+peso(CONF.minDeposit)+" pataas (1PM-9PM) at mag-slots/casino hanggang "+CONF.turnover+"× ng deposit mo — iikot ang gulong at panalo ka ng ₱17, ₱27, o ₱37!"};
 
 // ---------- player links ----------

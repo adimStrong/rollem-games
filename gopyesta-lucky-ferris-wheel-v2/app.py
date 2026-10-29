@@ -11,7 +11,7 @@ except the admin/turnover side — that stays on the platform's own database ins
 export's manual-entry / claude.ai-artifact-db flow, which doesn't work self-hosted anyway):
   * fixed prize ladder for EVERY player, drawn server-side: ₱17 (85%) · ₱27 (10%) · ₱37 (5%)
     · ₱77 (display-only jackpot, 0% — shown in the odds table, never actually awarded)
-  * eligible once today's Success deposits total >= MIN_DEPOSIT (₱100) made 1 PM-9 PM PH time
+  * eligible once today's Success deposits total >= MIN_DEPOSIT (₱200) made 1 PM-9 PM PH time
     AND today's slot+casino valid bet >= TURNOVER_MULT (1x) the deposit total
   * which of the 8 cabins the player taps is PURELY COSMETIC — it does not affect the odds or
     the amount, only which gondola visually reveals the already-drawn prize (kept so the
@@ -56,7 +56,7 @@ PRIZES = [{"amt": int(a), "p": int(p)} for a, p in json.loads(os.environ.get("PR
 LIVE_PRIZES = [p for p in PRIZES if p["p"] > 0]
 assert LIVE_PRIZES, "PRIZES must include at least one prize with p > 0"
 N = int(os.environ.get("WHEEL_CABINS", "8"))        # cosmetic only — which gondola reveals the prize
-MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", "100"))         # deposits for the day must total at least this
+MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", "200"))         # deposits for the day must total at least this
 TURNOVER_MULT = float(os.environ.get("TURNOVER_MULT", "1"))     # eligibility gate AND post-win clearing multiplier
 WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame,casino").split(",") if c.strip()]
 DAILY_CAP = int(os.environ.get("DAILY_CAP", "10000"))
