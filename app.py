@@ -16,8 +16,10 @@ export's manual-entry / claude.ai-artifact-db flow, which doesn't work self-host
   * which of the 8 cabins the player taps is PURELY COSMETIC — it does not affect the odds or
     the amount, only which gondola visually reveals the already-drawn prize (kept so the
     session API shape — /api/pick then /api/spin — didn't need to change)
-  * 1 spin per day; the reward itself then needs a further TURNOVER_MULT x slot+casino
-    turnover (tracked the same way as before) before it counts as "cleared" for payout
+  * unlimited spins per day (2026-10-29: was 1/day) — depositing again and clearing the
+    turnover gate again earns another spin; each spin's reward then needs a further
+    TURNOVER_MULT x slot+casino turnover (tracked the same way as before) before it counts
+    as "cleared" for payout; the real limiter on total spins/day is the daily bonus budget below
   * ₱10,000 bonus budget per day across all players (cg_settings per day, raisable by admin)
 
 Tables it OWNS in that database (created on boot, unchanged from v1): cg_sessions, cg_settings,
@@ -60,7 +62,7 @@ MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", "200"))         # deposits for t
 TURNOVER_MULT = float(os.environ.get("TURNOVER_MULT", "1"))     # eligibility gate AND post-win clearing multiplier
 WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame,casino").split(",") if c.strip()]
 DAILY_CAP = int(os.environ.get("DAILY_CAP", "10000"))
-ROUNDS_PER_DAY = int(os.environ.get("ROUNDS_PER_DAY", "1"))
+ROUNDS_PER_DAY = int(os.environ.get("ROUNDS_PER_DAY", "999"))   # effectively unlimited: each repeat deposit+turnover cycle earns another spin; DAILY_CAP is the real limiter
 DEP_FROM = os.environ.get("DEP_FROM", "12:00")   # deposits counted from (inclusive, HH:MM)
 DEP_TO = os.environ.get("DEP_TO", "21:00")       # deposits counted until (exclusive)
 PLAY_UNTIL = os.environ.get("PLAY_UNTIL", "21:00")
