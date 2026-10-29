@@ -174,10 +174,13 @@ def pick_prize() -> int:
 
 
 def find_user(cur, account: str):
+    """Look up by username OR numeric user ID (same dual lookup as gopyesta-member-verify)."""
+    q = account.strip()
     cur.execute(
         "SELECT user_id, account, COALESCE(real_name,'') AS real_name "
-        "FROM users WHERE LOWER(account)=LOWER(%s) AND COALESCE(is_test,0)=0 LIMIT 1",
-        (account.strip(),),
+        "FROM users WHERE COALESCE(is_test,0)=0 AND (LOWER(account)=LOWER(%s) OR CAST(user_id AS TEXT)=%s) "
+        "LIMIT 1",
+        (q, q),
     )
     return cur.fetchone()
 
