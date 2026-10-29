@@ -285,7 +285,18 @@ def summary(cur, user, date: str):
     other = sum(v for c, v in (cats or {}).items() if c not in WAGER_CATS)
     rows = spins_for(cur, uid, date)
     cur_row = rows[-1] if rows else None
-    base = float(rows[-2]["slot_base"] or 0) if cur_row and cur_row["round_no"] > 1 else 0.0
+    # Baseline turnover already "spent" unlocking rounds so far. While cur_row is OPEN (in
+    # progress, not yet won), its own slot_base isn't set yet -- the right baseline is the
+    # round BEFORE it (rows[-2]). Once cur_row is PAID, it's the round most recently consumed,
+    # so the baseline for the NEXT round is cur_row's OWN slot_base (rows[-1]), not rows[-2] --
+    # using rows[-2] there double-counted turnover a paid round had already spent, which broke
+    # starting at round 3 (2026-10-29, found while adding unlimited spins/day).
+    if cur_row is None:
+        base = 0.0
+    elif cur_row["status"] == "open":
+        base = float(rows[-2]["slot_base"] or 0) if cur_row["round_no"] > 1 else 0.0
+    else:
+        base = float(cur_row["slot_base"] or 0)
     slot = max(0.0, slot_today - base)
     t = now()
     hm = hm_of(t)
