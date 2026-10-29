@@ -12,7 +12,7 @@ export's manual-entry / claude.ai-artifact-db flow, which doesn't work self-host
   * fixed prize ladder for EVERY player, drawn server-side: ₱17 (85%) · ₱27 (10%) · ₱37 (5%)
     · ₱77 (display-only jackpot, 0% — shown in the odds table, never actually awarded)
   * eligible once today's Success deposits total >= MIN_DEPOSIT (₱100) made 1 PM-9 PM PH time
-    AND today's slot+casino valid bet >= TURNOVER_MULT (3x) the deposit total
+    AND today's slot+casino valid bet >= TURNOVER_MULT (1x) the deposit total
   * which of the 8 cabins the player taps is PURELY COSMETIC — it does not affect the odds or
     the amount, only which gondola visually reveals the already-drawn prize (kept so the
     session API shape — /api/pick then /api/spin — didn't need to change)
@@ -57,7 +57,7 @@ LIVE_PRIZES = [p for p in PRIZES if p["p"] > 0]
 assert LIVE_PRIZES, "PRIZES must include at least one prize with p > 0"
 N = int(os.environ.get("WHEEL_CABINS", "8"))        # cosmetic only — which gondola reveals the prize
 MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", "100"))         # deposits for the day must total at least this
-TURNOVER_MULT = float(os.environ.get("TURNOVER_MULT", "3"))     # eligibility gate AND post-win clearing multiplier
+TURNOVER_MULT = float(os.environ.get("TURNOVER_MULT", "1"))     # eligibility gate AND post-win clearing multiplier
 WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame,casino").split(",") if c.strip()]
 DAILY_CAP = int(os.environ.get("DAILY_CAP", "10000"))
 ROUNDS_PER_DAY = int(os.environ.get("ROUNDS_PER_DAY", "1"))
@@ -284,7 +284,7 @@ def summary(cur, user, date: str):
     t = now()
     hm = hm_of(t)
     dep_ok = dep_total >= MIN_DEPOSIT
-    need_amt = max(MIN_DEPOSIT, dep_total) * TURNOVER_MULT   # eligibility gate: 3x today's deposit (not a per-cabin target)
+    need_amt = max(MIN_DEPOSIT, dep_total) * TURNOVER_MULT   # eligibility gate: 1x today's deposit (not a per-cabin target)
     bet_ok = slot >= need_amt
     play_open = hm <= PLAY_UNTIL
     missing = []
