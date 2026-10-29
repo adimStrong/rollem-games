@@ -480,7 +480,7 @@ async function pick(i){
   if(mode!=="player"){demoPick=i;S=demoState();render();return}
   if(!S.exists||S.expired)return;
   const cur=S.cur;
-  if(cur&&cur.status==="paid"){flash("Tapos na ang ikot mo ngayong araw. Pumili ulit bukas.");return}
+  if(cur&&cur.status==="paid"&&!S.canPick){flash("Tapos na ang ikot mo ngayong araw. Pumili ulit bukas.");return}
   if(!S.canPick){flash("Wala nang pili ngayong araw.");return}
   if(cur&&cur.cabin===i+1)return;
   busy=true;const r=await post("/api/pick/"+encodeURIComponent(code),{cabin:i+1});busy=false;
@@ -540,16 +540,16 @@ function render(){
   if(S.ready&&phase==="idle"&&!popOn()&&!busy&&$("agree").checked){start();return}
   if(phase!=="idle")return;
 
-  armed=!cur||cur.status==="open";
-  stageEl.classList.toggle("armed",armed&&!cur);
-  if(cur&&cur.status==="paid")setLive("NAKUHA NA",true);
+  armed=!cur||cur.status==="open"||(cur.status==="paid"&&S.canPick);
+  stageEl.classList.toggle("armed",armed&&(!cur||cur.status==="paid"));
+  if(cur&&cur.status==="paid"&&!S.canPick)setLive("NAKUHA NA",true);
   else if(S.ready)setLive("ABOT NA ANG GOAL",true);
-  else if(cur)setLive("GOAL IN PROGRESS",true);
+  else if(cur&&cur.status==="open")setLive("GOAL IN PROGRESS",true);
   else if(S.canPick)setLive("PUMILI NG CABIN",false);
   else setLive("TAPOS NA NGAYON",false);
   resetBoxes();
   boxes.forEach((bx,i)=>bx.classList.toggle("mine",!!cur&&cur.status==="open"&&cur.cabin===i+1));
-  if(cur&&cur.status==="paid"){setWin(boxes[cur.cabin-1],lblHTML(cur.amount),"");boxes.forEach((b,j)=>{if(j!==cur.cabin-1)b.classList.add("dim")})}
+  if(cur&&cur.status==="paid"&&!S.canPick){setWin(boxes[cur.cabin-1],lblHTML(cur.amount),"");boxes.forEach((b,j)=>{if(j!==cur.cabin-1)b.classList.add("dim")})}
   const sb=$("startBtn"),showStart=!!cur&&cur.status==="open"&&!popOn();sb.hidden=!showStart;$("startPick").textContent=showStart?`Cabin ${cur.cabin} na ang pili mo`:"";
   const hint=$("hint");
   if(!popOn()){
@@ -561,8 +561,8 @@ function render(){
     else if(S.canPick)hint.innerHTML=`<b>Pumili ng cabin</b>. Pareho lang ang laban ng lahat.`;
     else hint.innerHTML=`Tapos na ang ikot mo ngayong araw. Balik bukas.`;
   }
-  const gi=$("goalInfo"),needAmt=S.needAmt||(CONF.minDeposit*CONF.turnover);
-  if(cur&&cur.status==="paid")gi.innerHTML=`<div class="kv"><span>Bonus ngayong araw</span><span class="ok">${peso(cur.amount)}</span></div><div class="kv"><span>Deposit · turnover noong umikot</span><span>${peso(cur.dep)} · ${peso(cur.slot)}</span></div><p class="note">Naitala na. Ipapadala ng agent mo ang reward pagkatapos ma-verify.</p>`;
+  const gi=$("goalInfo"),needAmt=S.needAmt!=null?S.needAmt:(CONF.minDeposit*CONF.turnover);
+  if(cur&&cur.status==="paid"&&!S.canPick)gi.innerHTML=`<div class="kv"><span>Bonus ngayong araw</span><span class="ok">${peso(cur.amount)}</span></div><div class="kv"><span>Deposit · turnover noong umikot</span><span>${peso(cur.dep)} · ${peso(cur.slot)}</span></div><p class="note">Naitala na. Ipapadala ng agent mo ang reward pagkatapos ma-verify.</p>`;
   else gi.innerHTML=`${chk(S.depOk,"Deposit ngayong araw (12PM-9PM)",S.dep,CONF.minDeposit)}${chk(S.betOk,"Turnover ("+CONF.turnover+"× ng deposit)",S.slot,needAmt)}<p class="note">Mag-deposit ng ${peso(CONF.minDeposit)} pataas (walang maximum) at abutin ang turnover target. Slots at casino lang ang bilang.</p>`;
   $("dateLbl").textContent=S.serverTime?short(S.serverTime.slice(0,10)):"";
   $("vBet").textContent=peso(S.slot);$("vOther").textContent=peso(S.other);$("vDep").textContent=peso(S.dep);
