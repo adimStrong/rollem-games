@@ -524,6 +524,34 @@ def cap():
         return jsonify({"ok": True, "date": date, "defaultCap": DAILY_CAP, **cap_info(cur, date)})
 
 
+@app.route("/api/links-today", methods=["GET"])
+def links_today():
+    """Admin overview: every player with a link today, how many links were issued to them, and
+    how many rounds they've actually played -- answers "how many link issue and which player"
+    without having to Check each account one at a time."""
+    if not require_admin():
+        return jsonify({"error": "forbidden"}), 403
+    date = today()
+    with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute(
+            "SELECT user_id, account, MAX(name) AS name, COUNT(*) AS links, MAX(created_at) AS last_link_at "
+            "FROM cg_sessions WHERE biz_date=%s GROUP BY user_id, account", (date,))
+        players = {r["user_id"]: dict(r) for r in cur.fetchall()}
+        cur.execute(
+            "SELECT user_id, COUNT(*) AS rounds, COALESCE(SUM(amount) FILTER (WHERE status='paid'),0) AS won "
+            "FROM fw_spins WHERE biz_date=%s GROUP BY user_id", (date,))
+        for r in cur.fetchall():
+            if r["user_id"] in players:
+                players[r["user_id"]]["rounds"] = int(r["rounds"])
+                players[r["user_id"]]["won"] = int(r["won"])
+    rows = list(players.values())
+    for r in rows:
+        r.setdefault("rounds", 0)
+        r.setdefault("won", 0)
+    rows.sort(key=lambda r: r["last_link_at"], reverse=True)
+    return jsonify({"date": date, "players": rows})
+
+
 @app.route("/api/stop", methods=["GET", "POST"])
 def stop_switch():
     """Global emergency stop — GET: current state. POST {stopped, note}: halt (or resume) ALL
