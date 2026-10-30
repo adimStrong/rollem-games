@@ -53,7 +53,7 @@ LEDGER_URL = os.environ.get("LEDGER_URL", "https://wins-ledger-production.up.rai
 # deposit/turnover data. NO real value ships in source -- it's set directly as a Railway env
 # var so it never lands in git history. Empty means the feature is off (see the explicit
 # `not REPORT_SHARE_TOKEN` guards below -- an empty token must never match an empty request arg).
-REPORT_SHARE_TOKEN = os.environ.get("REPORT_SHARE_TOKEN", "")
+REPORT_SHARE_TOKEN = os.environ.get("REPORT_SHARE_TOKEN", "")  # noqa: reload trigger
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 TZ = ZoneInfo(os.environ.get("TZ", "Asia/Manila"))
 
