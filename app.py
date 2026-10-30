@@ -560,10 +560,34 @@ def links_today():
             if r["user_id"] in players:
                 players[r["user_id"]]["rounds"] = int(r["rounds"])
                 players[r["user_id"]]["won"] = int(r["won"])
+        # Deposit amount/count -- same DEP_FROM/DEP_TO time-of-day window the wheel itself counts
+        # (window_deposits()), so this matches what each player's own goal progress showed.
+        cur.execute(
+            "SELECT user_id, COALESCE(SUM(amount),0) AS dep_amount, COUNT(*) AS dep_count "
+            "FROM deposits WHERE biz_date BETWEEN %s AND %s AND order_status='Success' "
+            "AND substr(created_at,12,5) >= %s AND substr(created_at,12,5) < %s "
+            "GROUP BY user_id", (date_from, date_to, DEP_FROM, DEP_TO))
+        for r in cur.fetchall():
+            if r["user_id"] in players:
+                players[r["user_id"]]["depAmount"] = float(r["dep_amount"])
+                players[r["user_id"]]["depCount"] = int(r["dep_count"])
+        # Turnover/bet count -- WAGER_CATS only (egame,casino), matching what the wheel gates on.
+        cur.execute(
+            "SELECT user_id, COALESCE(SUM(valid_bet),0) AS turnover, COALESCE(SUM(bet_count),0) AS bet_count "
+            "FROM bets_daily_category WHERE biz_date BETWEEN %s AND %s AND category = ANY(%s) "
+            "GROUP BY user_id", (date_from, date_to, WAGER_CATS))
+        for r in cur.fetchall():
+            if r["user_id"] in players:
+                players[r["user_id"]]["turnover"] = float(r["turnover"])
+                players[r["user_id"]]["betCount"] = int(r["bet_count"])
     rows = list(players.values())
     for r in rows:
         r.setdefault("rounds", 0)
         r.setdefault("won", 0)
+        r.setdefault("depAmount", 0)
+        r.setdefault("depCount", 0)
+        r.setdefault("turnover", 0)
+        r.setdefault("betCount", 0)
     rows.sort(key=lambda r: r["last_link_at"], reverse=True)
     return jsonify({"from": date_from, "to": date_to, "players": rows})
 
