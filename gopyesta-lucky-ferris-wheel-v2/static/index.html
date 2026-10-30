@@ -234,7 +234,7 @@ h2{font:800 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
   <p class="preview-label" id="previewLabel" hidden>Preview ng player view</p>
 
   <header>
-    <div><img class="logo" src="logo.png" alt="GoPyesta"><div class="brand" style="font-size:22px;margin-top:4px">Lucky Ferris Wheel<small>Halloween Edition · Pumili ng cabin · Ikot · Panalo</small></div></div>
+    <div><img class="logo" src="logo.png" alt="GoPyesta"><div class="brand" style="font-size:22px;margin-top:4px">Lucky Ferris Wheel</div></div>
     <div class="who" id="who"></div>
   </header>
   <p class="demo" id="demoTag" hidden>DEMO · pumili ng cabin at pindutin ang SPIN para subukan · kailangan ng link mula sa agent mo para sa totoong premyo</p>
@@ -253,71 +253,6 @@ h2{font:800 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
       <div class="spinrow"><button class="btn start" id="startBtn" hidden>SPIN</button></div>
       <div class="hint" id="hint"></div>
     </section>
-
-    <aside class="stack">
-      <div class="card">
-        <h2>Ang goal mo ngayong araw</h2>
-        <div id="goalInfo"></div>
-      </div>
-
-      <div class="card">
-        <h2>Laro ngayong araw · <span id="dateLbl"></span></h2>
-        <div class="today">
-          <div class="stat"><div class="k">Deposit (12PM-9PM)</div><div class="v" id="vDep">₱0</div></div>
-          <div class="stat"><div class="k">Slots/casino</div><div class="v" id="vBet">₱0</div></div>
-          <div class="stat"><div class="k">Ibang laro</div><div class="v" id="vOther" style="color:var(--mute)">₱0</div></div>
-        </div>
-        <p class="note" id="syncNote">Deposits na 12PM&ndash;9PM lang ang bilang. Deposits nagre-refresh tuwing ~5 min, bets tuwing ~30 min.</p>
-      </div>
-
-      <div class="card">
-        <h2>Linggong ito · Lun hanggang Lin</h2>
-        <div class="week" id="week"></div>
-        <div class="next" id="weekTxt"></div>
-      </div>
-
-      <div class="card">
-        <h2>Bonus turnover · <span id="turnLbl">1×</span> slots/casino</h2>
-        <div id="wager"></div>
-        <div class="bar"><i id="wbar"></i></div>
-        <p class="note" id="wNote"></p>
-      </div>
-
-      <div class="card">
-        <h2>Bonus history</h2>
-        <ul class="hist" id="hist"></ul>
-      </div>
-
-      <div class="card">
-        <h2>Paano maglaro</h2>
-        <ol class="rules">
-          <li><b>Pumili ng cabin.</b> Bawat isa sa <b id="rCabins">8</b> cabins pareho lang ang laban — ang pagpili ay hindi nagbabago ng panalo, basta may napili bago mag-SPIN.</li>
-          <li><b>Abutin ang goal ngayong araw.</b> Deposit na <b id="rMinDep">₱200</b> pataas (12PM&ndash;9PM) at slots/casino turnover na <b id="rTurn2">1×</b> ng deposit mo, parehong ngayong araw (PH time).</li>
-          <li><b>Iikot nang mag-isa.</b> Pag-abot sa goal, iikot ang gulong at bubukas ang napili mong cabin — panalo ka ng <b>₱17, ₱27, o ₱37</b> (bihirang-bihira: ₱177). Mag-slots/casino pa ng <b id="rTurn">1×</b> ng bonus para ma-clear ito. Ipapadala ng agent mo ang reward pagkatapos ma-verify.</li>
-          <li><b>Pwede ulit.</b> Mag-deposit ulit at abutin ulit ang goal para sa isa pang ikot, kung may budget pa ngayong araw.</li>
-        </ol>
-        <label class="agree" id="agreeLbl" style="margin-top:12px"><input type="checkbox" id="agree"><span>Nabasa ko at sang-ayon ako sa <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button> ng Lucky Ferris Wheel.</span></label>
-      </div>
-
-      <details class="tnc" id="tnc">
-        <summary>Lucky Ferris Wheel Terms &amp; Conditions</summary>
-        <h3>Terms &amp; Conditions</h3>
-        <ol>
-          <li>Open to verified Gopyesta players aged 21 and above. Self-excluded, restricted, test or unverified accounts are not eligible.</li>
-          <li>Each day (Philippine time) you may pick one of the 8 cabins on the Lucky Ferris Wheel; the cabin may be changed until the wheel spins. Which cabin is picked does not change the odds — all cabins share the same prize draw.</li>
-          <li>The wheel spins once your successful deposits made between 12 PM and 9 PM today total at least ₱200, and your valid bets on slot and casino games today reach at least 1× that deposit total. Deposits and bets are computed from the platform's records; pending, failed or reversed deposits do not count, and bets on other game types do not count toward the target. Bet records refresh periodically, so the wheel may spin up to about 30 minutes after the target is met.</li>
-          <li>The prize is drawn at random by the system the moment the wheel spins, from a fixed pool: ₱17 (85% chance), ₱27 (10% chance), ₱37 (5% chance), ₱177 (0.01% chance, a rare jackpot). Which cabin was picked does not change these odds.</li>
-          <li>A bonus must be wagered 1× on slot and casino games before it is considered cleared. Depositing again and reaching the deposit+turnover goal again earns another spin the same day, subject to the daily budget below; an unmet goal does not carry over to the next day.</li>
-          <li>Total bonus awarded under this promo is limited to a daily budget (₱10,000 unless announced otherwise) across all players. Once the budget is used up, no further links or spins are issued that day.</li>
-          <li>Each result is recorded by the system the moment it is drawn and is final. Refreshing the page, reopening the link or using another device does not give another spin.</li>
-          <li>Rewards are sent manually by your agent (e.g. via GCash) after verification, within the time your agent announces. Gopyesta may withhold or revoke a reward where the deposit is reversed or the promo is abused.</li>
-          <li>Multiple or linked accounts, or any attempt to abuse this promo, void the reward and may lead to action on the account.</li>
-          <li>Gopyesta may change, suspend or end this promo at any time. Gopyesta management's decision on any dispute is final.</li>
-          <li>Play responsibly. Set limits on your deposits and time, and ask for help if gambling stops being fun.</li>
-        </ol>
-        <p class="small">By ticking the agreement box and playing, you accept these Terms &amp; Conditions.</p>
-      </details>
-    </aside>
   </div>
 </div>
 
@@ -460,10 +395,7 @@ function swapPlates(i,j,cb){
   setTimeout(()=>{f1.remove();f2.remove();boxes[i].classList.remove("lift");boxes[j].classList.remove("lift");cb()},SWAP_MS)}
 
 /* ---------- consent ---------- */
-try{$("agree").checked=localStorage.getItem(BRAND.key+"-fw-tnc")==="yes"}catch(e){}
-$("agree").addEventListener("change",()=>{try{localStorage.setItem(BRAND.key+"-fw-tnc",$("agree").checked?"yes":"no")}catch(e){}if(S)render()});
-$("tncLink").onclick=e=>{e.preventDefault();$("tnc").open=true;$("tnc").scrollIntoView({behavior:"smooth",block:"start"})};
-function needAgree(){if($("agree").checked)return false;const l=$("agreeLbl");l.classList.remove("nudge");void l.offsetWidth;l.classList.add("nudge");flash("I-check muna ang T&C sa ibaba.");l.scrollIntoView({behavior:"smooth",block:"center"});return true}
+function needAgree(){return false}
 
 /* ---------- server-driven game flow ---------- */
 async function post(path,body){const r=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})});const j=await r.json().catch(()=>({}));return{status:r.status,...j}}
@@ -532,15 +464,14 @@ const wd=k=>new Date(k+"T00:00:00").toLocaleDateString("en-PH",{weekday:"short"}
 function render(){
   if(!S)return;
   const cur=S.cur;
-  $("rMinDep").textContent=peso(CONF.minDeposit);$("rCabins").textContent=CONF.cabins||N;$("rTurn").textContent=CONF.turnover+"×";$("rTurn2").textContent=CONF.turnover+"×";$("turnLbl").textContent=CONF.turnover+"×";
   if(mode==="player"){
-    if(!S.exists){setLive("INVALID LINK",false);$("hint").textContent="Hindi valid ang link na ito. Humingi ng bagong link sa agent mo.";$("goalInfo").innerHTML='<p class="note" style="margin:0">Hindi valid ang link.</p>';boxes.forEach(b=>b.classList.add("dim"));return}
+    if(!S.exists){setLive("INVALID LINK",false);$("hint").textContent="Hindi valid ang link na ito. Humingi ng bagong link sa agent mo.";boxes.forEach(b=>b.classList.add("dim"));return}
     $("who").innerHTML=`Para kay <b>${esc(S.name)}</b> 🎉 <span class="gid">${esc(S.account)}</span>`;
-    if(S.expired){setLive("EXPIRED",false);$("hint").textContent="Expired na ang link na ito — ibang araw na. Humingi ng bagong link sa agent mo.";$("goalInfo").innerHTML='<p class="note" style="margin:0">Expired na ang link.</p>';boxes.forEach(b=>b.classList.add("dim"));return}
-    if(S.stopped){setLive("PAUSED",false);$("hint").textContent="Pansamantalang hinarang ang wheel. Subukan ulit mamaya o tanungin ang agent mo.";$("goalInfo").innerHTML='<p class="note" style="margin:0">Pansamantalang hinarang ang wheel.</p>';boxes.forEach(b=>b.classList.add("dim"));return}
+    if(S.expired){setLive("EXPIRED",false);$("hint").textContent="Expired na ang link na ito — ibang araw na. Humingi ng bagong link sa agent mo.";boxes.forEach(b=>b.classList.add("dim"));return}
+    if(S.stopped){setLive("PAUSED",false);$("hint").textContent="Pansamantalang hinarang ang wheel. Subukan ulit mamaya o tanungin ang agent mo.";boxes.forEach(b=>b.classList.add("dim"));return}
   }
   if(cur&&cur.status==="paid"&&!cur.seen&&phase==="idle"&&!popOn()){animateSpin(cur);return}
-  if(S.ready&&phase==="idle"&&!popOn()&&!busy&&$("agree").checked){start();return}
+  if(S.ready&&phase==="idle"&&!popOn()&&!busy){start();return}
   if(phase!=="idle")return;
 
   armed=!cur||cur.status==="open"||(cur.status==="paid"&&S.canPick);
@@ -557,30 +488,13 @@ function render(){
   const hint=$("hint");
   if(!popOn()){
     if(cur&&cur.status==="paid")hint.innerHTML=`Nakuha mo ang <b>${peso(cur.amount)}</b> ngayong araw mula sa Cabin ${cur.cabin}. ${S.canPick?"Pumili ng cabin para sa panibagong ikot.":"Pumili ulit bukas."}`;
-    else if(cur&&S.ready)hint.innerHTML=`Abot na ang goal! I-check ang T&C at pindutin ang <b>SPIN</b>.`;
+    else if(cur&&S.ready)hint.innerHTML=`Abot na ang goal! Pindutin ang <b>SPIN</b>.`;
     else if(cur&&S.demo)hint.innerHTML=`<b>Cabin ${cur.cabin}</b> ang pili mo. Sa demo, pindutin ang <b>SPIN</b> para makita ang ikot.`;
     else if(cur){const miss=[];if(!S.depOk)miss.push(`mag-deposit pa ng ${peso(CONF.minDeposit-S.dep)}`);if(!S.betOk)miss.push(`mag-slots/casino pa ng ${peso((S.needAmt||0)-S.slot)}`);
       hint.innerHTML=`<b>Cabin ${cur.cabin}</b> ang pili mo. Para umikot: ${miss.join(" at ")}.`}
     else if(S.canPick)hint.innerHTML=`<b>Pumili ng cabin</b>. Pareho lang ang laban ng lahat.`;
     else hint.innerHTML=`Tapos na ang ikot mo ngayong araw. Balik bukas.`;
   }
-  const gi=$("goalInfo"),needAmt=S.needAmt!=null?S.needAmt:(CONF.minDeposit*CONF.turnover);
-  if(cur&&cur.status==="paid"&&!S.canPick)gi.innerHTML=`<div class="kv"><span>Bonus ngayong araw</span><span class="ok">${peso(cur.amount)}</span></div><div class="kv"><span>Deposit · turnover noong umikot</span><span>${peso(cur.dep)} · ${peso(cur.slot)}</span></div><p class="note">Naitala na. Ipapadala ng agent mo ang reward pagkatapos ma-verify.</p>`;
-  else gi.innerHTML=`${chk(S.depOk,"Deposit ngayong araw (12PM-9PM)",S.dep,CONF.minDeposit)}${chk(S.betOk,"Turnover ("+CONF.turnover+"× ng deposit)",S.slot,needAmt)}<p class="note">Mag-deposit ng ${peso(CONF.minDeposit)} pataas (walang maximum) at abutin ang turnover target. Slots at casino lang ang bilang.</p>`;
-  $("dateLbl").textContent=S.serverTime?short(S.serverTime.slice(0,10)):"";
-  $("vBet").textContent=peso(S.slot);$("vOther").textContent=peso(S.other);$("vDep").textContent=peso(S.dep);
-  $("syncNote").textContent="Deposits na 12PM–9PM lang ang bilang. Deposits nagre-refresh tuwing ~5 min, bets tuwing ~30 min"+(S.syncedAt?" (huling bets sync "+String(S.syncedAt).slice(11,16)+")":"")+".";
-  let wk="",total=0,count=0;
-  for(const d of S.week||[]){let cls="",val="—";
-    if(d.amount>0){cls="paid";val=peso(d.amount);total+=d.amount;count++}
-    else if(d.amount===null){cls="pending";val="●"}
-    wk+=`<div class="${cls} ${S.serverTime&&d.day===S.serverTime.slice(0,10)?"today":""}" title="${short(d.day)}">${wd(d.day)}<b>${val}</b></div>`}
-  $("week").innerHTML=wk;$("weekTxt").textContent=`${count} bonus ngayong linggo · ${peso(total)}`;
-  const w=S.wager,pct=w.need?Math.min(100,w.done/w.need*100):0;
-  $("wager").innerHTML=`<div class="kv"><span>Bonus na may turnover pa</span><span class="warn">${peso(w.bonus)}</span></div><div class="kv"><span>Slots/casino mula nang umikot</span><span>${peso(w.done)} / ${peso(w.need)}</span></div><div class="kv"><span>Cleared na bonus</span><span class="ok">${peso(w.cleared)}</span></div>`;
-  $("wbar").style.width=pct+"%";
-  $("wNote").textContent=w.bonus?`Mag-slots/casino pa ng ${peso(Math.max(0,w.need-w.done))} para ma-clear ang bonus mo.`:"Walang bonus na naghihintay ng turnover.";
-  $("hist").innerHTML=(S.hist||[]).length?S.hist.map(x=>`<li><span>${short(x.day)} · Cabin ${x.cabin}${x.cleared?" · cleared":""}</span><span>+${peso(x.amount)}</span></li>`).join(""):`<li class="empty">Wala pang bonus. Pumili ng cabin para magsimula.</li>`;
 }
 
 /* ---------- win pop-up ---------- */
