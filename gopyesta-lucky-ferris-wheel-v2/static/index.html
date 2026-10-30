@@ -273,7 +273,7 @@ const peso=v=>"₱"+Number(v||0).toLocaleString("en-PH",{maximumFractionDigits:0
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 function flash(msg){const t=document.createElement("div");t.className="flash";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
-let CONF={cabins:8,prizes:[{amt:17,p:85},{amt:27,p:10},{amt:37,p:5},{amt:177,p:0.01}],minDeposit:200,turnover:1,maxPrize:177,roundsPerDay:999};
+let CONF={cabins:8,prizes:[{amt:17,p:95},{amt:27,p:5},{amt:37,p:0},{amt:77,p:0},{amt:177,p:0},{amt:777,p:0}],minDeposit:200,turnover:1,maxPrize:777,roundsPerDay:999};
 const BRAND={key:"gopyesta",name:"Gopyesta",script:()=>`🎡 COMMUNITY GAME — LUCKY FERRIS WHEEL
 
 🕛 Event Hours: 12:00 PM–9:00 PM
@@ -391,6 +391,10 @@ function resetBoxes(){boxes.forEach(b=>b.classList.remove("picked","dim","mine",
 function setWin(b,html,cls,delay){b.classList.remove("flip","open");b.querySelector(".win").innerHTML=html;b.style.setProperty("--fd",(delay||0)+"s");if(cls){void b.offsetWidth;b.classList.add(cls)}}
 function hideAll(anim){resetBoxes();boxes.forEach((b,i)=>{setWin(b,winHTML(),anim?"flip":"",anim?i*.04:0);b.setAttribute("aria-label",`Cabin ${i+1}: hidden bonus`)})}
 const lblHTML=v=>`<span class="lbl${v>=177?" big":""}">${peso(v)}</span>`;
+/* full paytable (17/27/37/77/177/777, including the display-only 0%-odds tiers) cycled across
+   however many cabins there are, so every cabin shows one of these numbers once revealed --
+   purely cosmetic, same as cabin PICK being cosmetic: the real amount always comes from the server */
+function ladderAmt(i){const list=(CONF.prizes&&CONF.prizes.length)?CONF.prizes:[{amt:17},{amt:27},{amt:37},{amt:77},{amt:177},{amt:777}];return list[i%list.length].amt}
 const popOn=()=>!$("jp").hidden;
 
 /* shuffle: hidden "?" plates lift off and swap between two gondolas (cosmetic — the real cabin was already chosen) */
@@ -463,7 +467,7 @@ function animateSpin(row){
       resetBoxes();boxes[i].classList.add("picked");setWin(boxes[i],lblHTML(amt),"open");
       {const r=box.getBoundingClientRect(),q=boxes[i].getBoundingClientRect();burst(q.left-r.left+q.width/2,q.top-r.top+q.height/2)}
       hint.innerHTML=`<b>Cabin ${i+1}</b> bumukas: <b>${peso(amt)}</b>!`;
-      setTimeout(()=>{boxes.forEach((b,j)=>{if(j===i)return;b.classList.add("dim")});openWin(row)},900);
+      setTimeout(()=>{boxes.forEach((b,j)=>{if(j===i)return;b.classList.add("dim");setWin(b,lblHTML(ladderAmt(j)),"flip",Math.abs(j-i)*.03)});openWin(row)},900);
     }};
   };
   if(reduce){setTimeout(go,300);return}
@@ -498,7 +502,7 @@ function render(){
   else setLive("TAPOS NA NGAYON",false);
   resetBoxes();
   boxes.forEach((bx,i)=>bx.classList.toggle("mine",!!cur&&cur.status==="open"&&cur.cabin===i+1));
-  if(cur&&cur.status==="paid"&&!S.canPick){setWin(boxes[cur.cabin-1],lblHTML(cur.amount),"");boxes.forEach((b,j)=>{if(j!==cur.cabin-1)b.classList.add("dim")})}
+  if(cur&&cur.status==="paid"&&!S.canPick){setWin(boxes[cur.cabin-1],lblHTML(cur.amount),"");boxes.forEach((b,j)=>{if(j!==cur.cabin-1){b.classList.add("dim");setWin(b,lblHTML(ladderAmt(j)),"")}})}
   const sb=$("startBtn"),showStart=!!cur&&cur.status==="open"&&!popOn();sb.hidden=!showStart;$("startPick").textContent=showStart?`Cabin ${cur.cabin} na ang pili mo`:"";
   const hint=$("hint");
   if(!popOn()){

@@ -9,8 +9,9 @@ there (Paid / Revoke).
 Mechanics (from the "GoPyesta Lucky Ferris Wheel" raw export, Oct 23 2026, adopted in full
 except the admin/turnover side — that stays on the platform's own database instead of the
 export's manual-entry / claude.ai-artifact-db flow, which doesn't work self-hosted anyway):
-  * fixed prize ladder for EVERY player, drawn server-side: ₱17 (85%) · ₱27 (10%) · ₱37 (5%)
-    · ₱177 (rare jackpot, 0.01% — 2026-10-30: real/awardable, was a 0%-never-awarded ₱77 display-only entry before)
+  * fixed prize ladder for EVERY player, drawn server-side: ₱17 (95%) · ₱27 (5%) — ₱37/₱77/₱177/₱777
+    are shown on the cabins as display-only tiers (2026-10-30: changed from 85/10/5/0.01%) but are
+    never actually drawn (0% weight, same "shown but never awarded" pattern as the old ₱77 display tier)
   * eligible once today's Success deposits total >= MIN_DEPOSIT (₱200) made 12 PM-9 PM PH time
     AND today's slot+casino valid bet >= TURNOVER_MULT (1x) the deposit total
   * which of the 8 cabins the player taps is PURELY COSMETIC — it does not affect the odds or
@@ -61,7 +62,7 @@ TZ = ZoneInfo(os.environ.get("TZ", "Asia/Manila"))
 BRAND = "gopyesta"
 GAME_NAME = "Lucky Ferris Wheel"
 PRIZE_WEIGHT_SCALE = 10000  # each weight = intended percent * this, so dividing back out gives an EXACT display percent (e.g. 0.01%) with no float rounding anywhere
-_DEFAULT_PRIZES = [[17, 850000], [27, 100000], [37, 50000], [177, 100]]  # 85% / 10% / 5% / 0.01% -- 177 is a real, rare jackpot now (was a 0%, never-awarded display-only 77 before)
+_DEFAULT_PRIZES = [[17, 950000], [27, 50000], [37, 0], [77, 0], [177, 0], [777, 0]]  # 2026-10-30: 95%/5%, with 37/77/177/777 kept in the ladder at 0% -- display-only tiers the frontend shows on the cabins but pick_prize() (LIVE_PRIZES, p>0 only) can never actually draw
 PRIZES = [{"amt": int(a), "p": int(p)} for a, p in json.loads(os.environ.get("PRIZES") or json.dumps(_DEFAULT_PRIZES))]
 LIVE_PRIZES = [p for p in PRIZES if p["p"] > 0]
 assert LIVE_PRIZES, "PRIZES must include at least one prize with p > 0"
