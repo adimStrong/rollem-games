@@ -274,7 +274,22 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 function flash(msg){const t=document.createElement("div");t.className="flash";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
 let CONF={cabins:8,prizes:[{amt:17,p:85},{amt:27,p:10},{amt:37,p:5},{amt:177,p:0.01}],minDeposit:200,turnover:1,maxPrize:177,roundsPerDay:999};
-const BRAND={key:"gopyesta",name:"Gopyesta",script:()=>"Hi po! Pasok na ang deposit mo kaya pwede ka nang sumakay sa Lucky Ferris Wheel 🎡 Pumili ng cabin, mag-deposit ng "+peso(CONF.minDeposit)+" pataas (12PM-9PM) at mag-slots/casino hanggang "+CONF.turnover+"× ng deposit mo — iikot ang gulong at panalo ka ng ₱17, ₱27, o ₱37, bihirang-bihira pataas ng ₱777!"};
+const BRAND={key:"gopyesta",name:"Gopyesta",script:()=>`🎡 COMMUNITY GAME — LUCKY FERRIS WHEEL
+
+🕛 Event Hours: 12:00 PM–9:00 PM
+
+HOW TO JOIN
+
+• Every ₱200 deposit = 1 FREE SPIN
+• Only slot games qualify for this promotion.
+• FREE SPIN will unlock once you complete the 1× turnover requirement.
+• Request your Lucky Ferris Wheel link and use your spins within the event hours 12:00 - 9:00 PM
+
+🎁 BONUS DISTRIBUTION
+Bonus rewards will be distributed the following day at 1:00 PM.
+
+📌 TERMS & CONDITIONS
+Players must request their spin link and use their spins between 12:00 PM and 9:00 PM. Failure to request a link or use the spins before the event ends will invalidate bonus eligibility. Unused spins cannot be claimed or used after the event.`};
 
 // ---------- player links ----------
 // #admin = link maker; #<account>-<hex> = a server-side session for one account/day; anything else = demo
@@ -595,7 +610,7 @@ if(mode==="admin"){
     $("stopBtn").onclick=toggleStop;
     $("linksRefreshBtn").onclick=loadLinksToday;
     $("copyLink").onclick=()=>copyText(playerLink(),$("copyLink"));
-    $("copyMsg").onclick=()=>{if(!playerLink()){$("aMsg").textContent="Gumawa muna ng link.";return}copyText(BRAND.script()+"\n\nI-play dito: "+playerLink(),$("copyMsg"))};
+    $("copyMsg").onclick=()=>{if(!playerLink()){$("aMsg").textContent="Gumawa muna ng link.";return}copyText(BRAND.script()+"\n\n🔗 Play here: "+playerLink(),$("copyMsg"))};
     renderLookup();loadCap();loadLinksToday();
   }
   if(adminToken){unlockAdmin()}
