@@ -150,6 +150,17 @@ def init_db():
         )
         cur.execute("CREATE INDEX IF NOT EXISTS fw_spins_date_idx ON fw_spins (biz_date, status)")
         cur.execute("CREATE INDEX IF NOT EXISTS fw_spins_user_idx ON fw_spins (user_id, status)")
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS fw_kill_switch (
+                id INTEGER PRIMARY KEY DEFAULT 1,
+                stopped BOOLEAN NOT NULL DEFAULT FALSE,
+                note TEXT NOT NULL DEFAULT '',
+                updated_at BIGINT
+            )
+            """
+        )
+        cur.execute("INSERT INTO fw_kill_switch (id, stopped) VALUES (1, FALSE) ON CONFLICT (id) DO NOTHING")
 
 
 def clean_code(s: str) -> str:
@@ -247,7 +258,17 @@ def cap_info(cur, date: str):
     cap = daily_cap_for(cur, date)
     used = cap_used(cur, date)
     left = max(0, cap - used)
-    return {"dailyCap": cap, "capUsed": used, "capLeft": left, "capped": left < MIN_PRIZE}
+    stopped, stop_note = kill_switch_status(cur)
+    return {"dailyCap": cap, "capUsed": used, "capLeft": left, "capped": left < MIN_PRIZE,
+            "stopped": stopped, "stopNote": stop_note}
+
+
+def kill_switch_status(cur):
+    """Global emergency stop — independent of daily_cap/biz_date, survives past midnight.
+    Added 2026-10-29 after a live exploit incident so admin can halt ALL play instantly."""
+    cur.execute("SELECT stopped, note FROM fw_kill_switch WHERE id=1")
+    r = cur.fetchone()
+    return (bool(r["stopped"]), r["note"] or "") if r else (False, "")
 
 
 def pub_spin(r):
@@ -423,6 +444,9 @@ def make_link():
     fresh = bool(payload.get("fresh"))
     date = today()
     with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        stopped, stop_note = kill_switch_status(cur)
+        if stopped:
+            return jsonify({"error": "stopped", "msg": "Hinarang ang wheel ngayon" + (f" ({stop_note})" if stop_note else "") + " — hindi makakagawa ng bagong link."}), 409
         user = find_user(cur, account)
         if not user:
             return jsonify({"error": "account not found"}), 404
@@ -482,6 +506,28 @@ def cap():
         return jsonify({"ok": True, "date": date, "defaultCap": DAILY_CAP, **cap_info(cur, date)})
 
 
+@app.route("/api/stop", methods=["GET", "POST"])
+def stop_switch():
+    """Global emergency stop — GET: current state. POST {stopped, note}: halt (or resume) ALL
+    play instantly across every player/link, independent of date. Blocks /api/link, /api/pick,
+    /api/spin. Added 2026-10-29 after a live exploit incident so staff have a one-click kill
+    switch rather than needing a code deploy to stop active abuse."""
+    if not require_admin():
+        return jsonify({"error": "forbidden"}), 403
+    with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        if request.method == "POST":
+            payload = request.get_json(force=True, silent=True) or {}
+            stopped = bool(payload.get("stopped"))
+            note = str(payload.get("note", ""))[:200]
+            cur.execute(
+                "INSERT INTO fw_kill_switch (id, stopped, note, updated_at) VALUES (1,%s,%s,%s) "
+                "ON CONFLICT (id) DO UPDATE SET stopped=EXCLUDED.stopped, note=EXCLUDED.note, updated_at=EXCLUDED.updated_at",
+                (stopped, note, ms()),
+            )
+        s, n = kill_switch_status(cur)
+        return jsonify({"ok": True, "stopped": s, "stopNote": n})
+
+
 # ---------------------------------------------------------------- player API
 @app.route("/api/config", methods=["GET"])
 def config():
@@ -489,7 +535,8 @@ def config():
 
 
 _PUB = ("dep", "slot", "slotToday", "other", "syncedAt", "cur", "roundsUsed", "canPick", "needAmt", "depOk", "betOk",
-        "ready", "missing", "wager", "hist", "week", "capLeft", "capped", "windowOpen", "playOpen", "serverTime")
+        "ready", "missing", "wager", "hist", "week", "capLeft", "capped", "windowOpen", "playOpen", "serverTime",
+        "stopped", "stopNote")
 
 
 def _pub(s):
@@ -543,6 +590,10 @@ def pick(code):
         if sess["biz_date"] != date:
             conn.rollback()
             return jsonify({"error": "expired", "msg": "Expired na ang link na ito (ibang araw na)."}), 409
+        stopped, stop_note = kill_switch_status(cur)
+        if stopped:
+            conn.rollback()
+            return jsonify({"error": "stopped", "msg": "Hinarang ang wheel ngayon" + (f" ({stop_note})" if stop_note else "") + "."}), 409
         rows = spins_for(cur, sess["user_id"], date)
         cur_row = rows[-1] if rows else None
         user = {"user_id": sess["user_id"], "account": sess["account"], "real_name": sess["name"]}
@@ -591,6 +642,10 @@ def spin(code):
         if sess["biz_date"] != date:
             conn.rollback()
             return jsonify({"error": "expired", "msg": "Expired na ang link na ito (ibang araw na)."}), 409
+        stopped, stop_note = kill_switch_status(cur)
+        if stopped:
+            conn.rollback()
+            return jsonify({"error": "stopped", "msg": "Hinarang ang wheel ngayon" + (f" ({stop_note})" if stop_note else "") + "."}), 409
         out, s = _session_state(cur, sess)
         c = s["cur"]
         if not c:

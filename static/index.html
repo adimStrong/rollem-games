@@ -227,6 +227,7 @@ h2{font:800 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
       </div>
       <p class="hintp" id="aMsg"></p>
       <div class="offerbox" id="capBox"><strong>Daily budget</strong><p id="capText">…</p><div class="btnrow"><div class="money" style="flex:1;min-width:0"><span>₱</span><input class="inp" id="capInput" type="number" min="0" step="100" inputmode="numeric" placeholder="bagong budget ngayong araw"></div><button class="btn small ghost" id="capBtn" type="button">Dagdag budget</button></div><p class="hintp" id="capMsg"></p></div>
+      <div class="offerbox" id="stopBox" style="border-color:var(--bad)"><strong>Emergency stop</strong><p id="stopText">…</p><div class="btnrow"><button class="btn small" id="stopBtn" type="button" style="background:var(--bad)">STOP ALL</button></div><p class="hintp" id="stopMsg">Haharangin agad ang lahat ng bagong link, pick, at spin — lahat ng player, hanggang i-resume.</p></div>
     </div>
   </section>
   <p class="preview-label" id="previewLabel" hidden>Preview ng player view</p>
@@ -535,6 +536,7 @@ function render(){
     if(!S.exists){setLive("INVALID LINK",false);$("hint").textContent="Hindi valid ang link na ito. Humingi ng bagong link sa agent mo.";$("goalInfo").innerHTML='<p class="note" style="margin:0">Hindi valid ang link.</p>';boxes.forEach(b=>b.classList.add("dim"));return}
     $("who").innerHTML=`Para kay <b>${esc(S.name)}</b> 🎉 <span class="gid">${esc(S.account)}</span>`;
     if(S.expired){setLive("EXPIRED",false);$("hint").textContent="Expired na ang link na ito — ibang araw na. Humingi ng bagong link sa agent mo.";$("goalInfo").innerHTML='<p class="note" style="margin:0">Expired na ang link.</p>';boxes.forEach(b=>b.classList.add("dim"));return}
+    if(S.stopped){setLive("PAUSED",false);$("hint").textContent="Pansamantalang hinarang ang wheel. Subukan ulit mamaya o tanungin ang agent mo.";$("goalInfo").innerHTML='<p class="note" style="margin:0">Pansamantalang hinarang ang wheel.</p>';boxes.forEach(b=>b.classList.add("dim"));return}
   }
   if(cur&&cur.status==="paid"&&!cur.seen&&phase==="idle"&&!popOn()){animateSpin(cur);return}
   if(S.ready&&phase==="idle"&&!popOn()&&!busy&&$("agree").checked){start();return}
@@ -613,6 +615,28 @@ function renderCap(){
   const c=capState;if(!c)return;
   $("capText").innerHTML="Ngayong araw: <b>"+peso(c.capUsed)+"</b> nagamit · <b>"+peso(c.capLeft)+"</b> natitira sa <b>"+peso(c.dailyCap)+"</b>"+(c.dailyCap!==c.defaultCap?" <small>(default "+peso(c.defaultCap)+")</small>":"")+(c.capped?" — <span style='color:var(--bad)'>NAABOT NA ang budget: walang bagong link o ikot</span>":"");
   $("capInput").placeholder="hal. "+(c.dailyCap+5000);
+  renderStop();
+}
+function renderStop(){
+  const c=capState;if(!c)return;
+  const btn=$("stopBtn");
+  if(c.stopped){
+    $("stopText").innerHTML="<span style='color:var(--bad)'><b>HINARANG NGAYON</b></span>"+(c.stopNote?" — "+esc(c.stopNote):"")+". Walang makakagawa ng link, pick, o spin.";
+    btn.textContent="RESUME";btn.style.background="var(--ok)";
+  }else{
+    $("stopText").innerHTML="Live ang wheel ngayon.";
+    btn.textContent="STOP ALL";btn.style.background="var(--bad)";
+  }
+}
+async function toggleStop(){
+  const c=capState;const goingStop=!(c&&c.stopped);
+  const msg=goingStop?"Harangin AGAD ang lahat ng link/pick/spin para sa LAHAT ng player?":"I-resume ang wheel para sa lahat ng player?";
+  if(!confirm(msg))return;
+  let note="";
+  if(goingStop){note=prompt("Dahilan (opsyonal, makikita sa ibang admin):","")||""}
+  const r=await api("/api/stop",{method:"POST",body:JSON.stringify({stopped:goingStop,note})});
+  if(!r.ok){alert(r.j.msg||r.j.error||"Error");return}
+  capState=Object.assign(capState||{},r.j);renderStop();
 }
 function renderLookup(){
   const tb=$("aTier"),ob=$("offerBox"),l=look;
@@ -643,6 +667,7 @@ if(mode==="admin"){
     $("makeLink").onclick=()=>makeLink(false);
     $("newLink").onclick=()=>makeLink(true);
     $("capBtn").onclick=setCap;
+    $("stopBtn").onclick=toggleStop;
     $("copyLink").onclick=()=>copyText(playerLink(),$("copyLink"));
     $("copyMsg").onclick=()=>{if(!playerLink()){$("aMsg").textContent="Gumawa muna ng link.";return}copyText(BRAND.script()+"\n\nI-play dito: "+playerLink(),$("copyMsg"))};
     renderLookup();loadCap();
