@@ -47,6 +47,13 @@ DATABASE_URL = os.environ["DATABASE_URL"]
 ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
 SECRET_KEY = os.environ["SECRET_KEY"]
 LEDGER_URL = os.environ.get("LEDGER_URL", "https://wins-ledger-production.up.railway.app/api/win")
+# 2026-10-30: shareable, no-password mirror of /report -- this is the secret unguessable URL
+# segment that stands in for the admin login, so the link can be handed out without handing
+# out the admin password. Treat it like a credential: whoever has the link can see player
+# deposit/turnover data. NO real value ships in source -- it's set directly as a Railway env
+# var so it never lands in git history. Empty means the feature is off (see the explicit
+# `not REPORT_SHARE_TOKEN` guards below -- an empty token must never match an empty request arg).
+REPORT_SHARE_TOKEN = os.environ.get("REPORT_SHARE_TOKEN", "")
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 TZ = ZoneInfo(os.environ.get("TZ", "Asia/Manila"))
 
@@ -100,6 +107,17 @@ def admin_token() -> str:
 
 def require_admin() -> bool:
     return hmac.compare_digest(request.headers.get("X-Admin-Token", ""), admin_token())
+
+
+def require_admin_or_share_token() -> bool:
+    """Same as require_admin(), but also accepts ?token=<REPORT_SHARE_TOKEN> as an alternate
+    credential -- used ONLY by /api/links-today so the no-password public report mirror can
+    read it without the admin password. Every other admin route stays require_admin()-only."""
+    if require_admin():
+        return True
+    if not REPORT_SHARE_TOKEN:  # feature off -- never let an empty arg match an empty token
+        return False
+    return hmac.compare_digest(request.args.get("token", ""), REPORT_SHARE_TOKEN)
 
 
 def db(autocommit=True):
@@ -538,8 +556,9 @@ def links_today():
     default today-today), how many links were issued to them, and how many rounds they've
     actually played -- answers "how many link issue and which player" without having to Check
     each account one at a time. Bad/missing from/to silently fall back to today, same contract
-    as the wins-ledger's date filter."""
-    if not require_admin():
+    as the wins-ledger's date filter. Accepts either the admin token OR the public report's
+    share token (see require_admin_or_share_token)."""
+    if not require_admin_or_share_token():
         return jsonify({"error": "forbidden"}), 403
     t = today()
     date_from = request.args.get("from") or t
@@ -571,15 +590,14 @@ def links_today():
             if r["user_id"] in players:
                 players[r["user_id"]]["depAmount"] = float(r["dep_amount"])
                 players[r["user_id"]]["depCount"] = int(r["dep_count"])
-        # Turnover/bet count -- WAGER_CATS only (egame,casino), matching what the wheel gates on.
+        # Turnover -- WAGER_CATS only (egame,casino), matching what the wheel gates on.
         cur.execute(
-            "SELECT user_id, COALESCE(SUM(valid_bet),0) AS turnover, COALESCE(SUM(bet_count),0) AS bet_count "
+            "SELECT user_id, COALESCE(SUM(valid_bet),0) AS turnover "
             "FROM bets_daily_category WHERE biz_date BETWEEN %s AND %s AND category = ANY(%s) "
             "GROUP BY user_id", (date_from, date_to, WAGER_CATS))
         for r in cur.fetchall():
             if r["user_id"] in players:
                 players[r["user_id"]]["turnover"] = float(r["turnover"])
-                players[r["user_id"]]["betCount"] = int(r["bet_count"])
     rows = list(players.values())
     for r in rows:
         r.setdefault("rounds", 0)
@@ -587,7 +605,6 @@ def links_today():
         r.setdefault("depAmount", 0)
         r.setdefault("depCount", 0)
         r.setdefault("turnover", 0)
-        r.setdefault("betCount", 0)
     rows.sort(key=lambda r: r["last_link_at"], reverse=True)
     return jsonify({"from": date_from, "to": date_to, "players": rows})
 
@@ -797,6 +814,18 @@ def dev_report():
     """Dedicated dev-facing report page (separate from /#admin) -- links issued + winnings per
     player, any date range. Added 2026-10-30 at the dev team's request."""
     resp = send_from_directory(STATIC_DIR, "report.html", max_age=0)
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return resp
+
+
+@app.route("/report/<token>")
+def dev_report_public(token):
+    """Shareable, no-password mirror of /report -- the path segment IS the credential (a long
+    random secret, see REPORT_SHARE_TOKEN), so this works for anyone with the link with no admin
+    login. Auto-refreshes client-side. Added 2026-10-30 at the dev team's request."""
+    if not REPORT_SHARE_TOKEN or not hmac.compare_digest(token, REPORT_SHARE_TOKEN):
+        return jsonify({"error": "not_found"}), 404
+    resp = send_from_directory(STATIC_DIR, "report-public.html", max_age=0)
     resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     return resp
 
