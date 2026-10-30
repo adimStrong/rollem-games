@@ -524,22 +524,38 @@ def cap():
         return jsonify({"ok": True, "date": date, "defaultCap": DAILY_CAP, **cap_info(cur, date)})
 
 
+def _valid_iso_date(s: str) -> bool:
+    try:
+        datetime.strptime(s, "%Y-%m-%d")
+        return True
+    except (TypeError, ValueError):
+        return False
+
+
 @app.route("/api/links-today", methods=["GET"])
 def links_today():
-    """Admin overview: every player with a link today, how many links were issued to them, and
-    how many rounds they've actually played -- answers "how many link issue and which player"
-    without having to Check each account one at a time."""
+    """Admin overview: every player with a link in [from,to] (both inclusive, PH calendar dates,
+    default today-today), how many links were issued to them, and how many rounds they've
+    actually played -- answers "how many link issue and which player" without having to Check
+    each account one at a time. Bad/missing from/to silently fall back to today, same contract
+    as the wins-ledger's date filter."""
     if not require_admin():
         return jsonify({"error": "forbidden"}), 403
-    date = today()
+    t = today()
+    date_from = request.args.get("from") or t
+    date_to = request.args.get("to") or t
+    if not _valid_iso_date(date_from):
+        date_from = t
+    if not _valid_iso_date(date_to):
+        date_to = t
     with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
         cur.execute(
             "SELECT user_id, account, MAX(name) AS name, COUNT(*) AS links, MAX(created_at) AS last_link_at "
-            "FROM cg_sessions WHERE biz_date=%s GROUP BY user_id, account", (date,))
+            "FROM cg_sessions WHERE biz_date BETWEEN %s AND %s GROUP BY user_id, account", (date_from, date_to))
         players = {r["user_id"]: dict(r) for r in cur.fetchall()}
         cur.execute(
             "SELECT user_id, COUNT(*) AS rounds, COALESCE(SUM(amount) FILTER (WHERE status='paid'),0) AS won "
-            "FROM fw_spins WHERE biz_date=%s GROUP BY user_id", (date,))
+            "FROM fw_spins WHERE biz_date BETWEEN %s AND %s GROUP BY user_id", (date_from, date_to))
         for r in cur.fetchall():
             if r["user_id"] in players:
                 players[r["user_id"]]["rounds"] = int(r["rounds"])
@@ -549,7 +565,7 @@ def links_today():
         r.setdefault("rounds", 0)
         r.setdefault("won", 0)
     rows.sort(key=lambda r: r["last_link_at"], reverse=True)
-    return jsonify({"date": date, "players": rows})
+    return jsonify({"from": date_from, "to": date_to, "players": rows})
 
 
 @app.route("/api/stop", methods=["GET", "POST"])
@@ -750,6 +766,15 @@ def index():
 @app.route("/health")
 def health():
     return jsonify({"ok": True, "game": GAME_NAME, "time": now().isoformat()})
+
+
+@app.route("/report")
+def dev_report():
+    """Dedicated dev-facing report page (separate from /#admin) -- links issued + winnings per
+    player, any date range. Added 2026-10-30 at the dev team's request."""
+    resp = send_from_directory(STATIC_DIR, "report.html", max_age=0)
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return resp
 
 
 @app.route("/<path:path>")
