@@ -228,6 +228,7 @@ h2{font:800 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
       <p class="hintp" id="aMsg"></p>
       <div class="offerbox" id="capBox"><strong>Daily budget</strong><p id="capText">…</p><div class="btnrow"><div class="money" style="flex:1;min-width:0"><span>₱</span><input class="inp" id="capInput" type="number" min="0" step="100" inputmode="numeric" placeholder="bagong budget ngayong araw"></div><button class="btn small ghost" id="capBtn" type="button">Dagdag budget</button></div><p class="hintp" id="capMsg"></p></div>
       <div class="offerbox" id="stopBox" style="border-color:var(--bad)"><strong>Emergency stop</strong><p id="stopText">…</p><div class="btnrow"><button class="btn small" id="stopBtn" type="button" style="background:var(--bad)">STOP ALL</button></div><p class="hintp" id="stopMsg">Haharangin agad ang lahat ng bagong link, pick, at spin — lahat ng player, hanggang i-resume.</p></div>
+      <div class="offerbox" id="linksTodayBox"><div class="btnrow" style="justify-content:space-between"><strong>Mga link ngayong araw</strong><button class="btn small ghost" id="linksRefreshBtn" type="button">I-refresh</button></div><div id="linksTodayList"><p class="hintp">Naglo-load…</p></div></div>
     </div>
   </section>
   <p class="preview-label" id="previewLabel" hidden>Preview ng player view</p>
@@ -638,6 +639,16 @@ async function toggleStop(){
   if(!r.ok){alert(r.j.msg||r.j.error||"Error");return}
   capState=Object.assign(capState||{},r.j);renderStop();
 }
+async function loadLinksToday(){
+  const el=$("linksTodayList");el.innerHTML="<p class=\"hintp\">Naglo-load…</p>";
+  const r=await api("/api/links-today");
+  if(!r.ok){el.innerHTML="<p class=\"hintp\">Error: "+esc(r.j.msg||r.j.error||"")+"</p>";return}
+  const players=r.j.players||[];
+  if(!players.length){el.innerHTML="<p class=\"hintp\">Walang link na ginawa ngayong araw.</p>";return}
+  el.innerHTML="<table style=\"width:100%;border-collapse:collapse;font-size:13px\"><tr style=\"text-align:left;color:var(--mute)\"><th style=\"padding:4px 6px\">Player</th><th style=\"padding:4px 6px\">Links</th><th style=\"padding:4px 6px\">Ikot</th><th style=\"padding:4px 6px\">Nanalo</th><th style=\"padding:4px 6px\">Huling link</th></tr>"
+    +players.map(p=>"<tr style=\"border-top:1px solid var(--line)\"><td style=\"padding:4px 6px\"><button type=\"button\" class=\"linkbtn\" data-acct=\""+esc(p.account)+"\" onclick=\"$('acct').value=this.dataset.acct;doLookup();window.scrollTo(0,0)\">"+esc(p.account)+"</button>"+(p.name&&p.name!==p.account?" <small>("+esc(p.name)+")</small>":"")+"</td><td style=\"padding:4px 6px\">"+p.links+"</td><td style=\"padding:4px 6px\">"+p.rounds+"</td><td style=\"padding:4px 6px\">"+peso(p.won)+"</td><td style=\"padding:4px 6px\">"+esc(new Date(Number(p.last_link_at)).toLocaleTimeString("en-PH",{hour:"2-digit",minute:"2-digit"}))+"</td></tr>").join("")
+    +"</table>";
+}
 function renderLookup(){
   const tb=$("aTier"),ob=$("offerBox"),l=look;
   $("linkField").hidden=!(l&&l.code);$("makeRow").hidden=!(l&&l.found&&!l.code);ob.hidden=!(l&&l.found);
@@ -659,7 +670,7 @@ if(mode==="admin"){
   $("admin").hidden=false;$("previewLabel").hidden=false;
   async function loadCap(){const r=await api("/api/cap");if(r.ok){capState=r.j;renderCap()}}
   async function doLookup(){const a=$("acct").value.trim();if(!a)return;$("aMsg").textContent="Hinahanap…";const r=await api("/api/lookup?account="+encodeURIComponent(a));$("aMsg").textContent=r.ok?"":(r.j.error||"Error");look=r.ok?r.j:null;renderLookup();loadCap()}
-  async function makeLink(fresh){if(!look||!look.found)return;$("aMsg").textContent="Gumagawa ng link…";const r=await api("/api/link",{method:"POST",body:JSON.stringify({account:look.account,fresh:!!fresh})});if(!r.ok){$("aMsg").textContent=r.j.msg||r.j.error||"Error";loadCap();return}look=Object.assign({found:true},r.j);renderLookup();$("aMsg").textContent=fresh?"Bagong link. Pareho pa rin ang goal — nakatali ito sa account, hindi sa link.":"Handa na ang link."}
+  async function makeLink(fresh){if(!look||!look.found)return;$("aMsg").textContent="Gumagawa ng link…";const r=await api("/api/link",{method:"POST",body:JSON.stringify({account:look.account,fresh:!!fresh})});if(!r.ok){$("aMsg").textContent=r.j.msg||r.j.error||"Error";loadCap();return}look=Object.assign({found:true},r.j);renderLookup();loadLinksToday();$("aMsg").textContent=fresh?"Bagong link. Pareho pa rin ang goal — nakatali ito sa account, hindi sa link.":"Handa na ang link."}
   async function setCap(){const v=parseInt($("capInput").value,10);if(!(v>=0)){$("capMsg").textContent="Ilagay ang bagong budget (whole number).";return}if(!confirm("Gawing "+peso(v)+" ang daily budget ngayong araw?"))return;const r=await api("/api/cap",{method:"POST",body:JSON.stringify({dailyCap:v})});$("capMsg").textContent=r.ok?"Na-update ang budget ngayong araw.":(r.j.msg||r.j.error||"Error");if(r.ok){capState=r.j;renderCap();$("capInput").value="";if(look&&look.found)doLookup()}}
   function unlockAdmin(){
     $("adminGate").hidden=true;$("adminBody").hidden=false;
@@ -668,9 +679,10 @@ if(mode==="admin"){
     $("newLink").onclick=()=>makeLink(true);
     $("capBtn").onclick=setCap;
     $("stopBtn").onclick=toggleStop;
+    $("linksRefreshBtn").onclick=loadLinksToday;
     $("copyLink").onclick=()=>copyText(playerLink(),$("copyLink"));
     $("copyMsg").onclick=()=>{if(!playerLink()){$("aMsg").textContent="Gumawa muna ng link.";return}copyText(BRAND.script()+"\n\nI-play dito: "+playerLink(),$("copyMsg"))};
-    renderLookup();loadCap();
+    renderLookup();loadCap();loadLinksToday();
   }
   if(adminToken){unlockAdmin()}
   else{
