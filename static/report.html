@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lucky Ferris Wheel — Links &amp; Winnings Report</title>
+<style>
+:root{--bg:#120a1e;--panel:#1c1030;--line:#3a2a55;--ink:#f3eefc;--mute:#a996c7;--bulb:#ffcf5a;--ok:#49d17a;--bad:#ff5d7a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:16px}
+.wrap{max-width:960px;margin:0 auto}
+h1{font-size:18px;margin:0 0 4px}
+.sub{color:var(--mute);font-size:13px;margin:0 0 20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:4px}
+input{font:600 15px/1 inherit;background:rgba(0,0,0,.35);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+.field{flex:1;min-width:140px}
+button{font:700 13px/1 inherit;background:var(--bulb);color:#241405;border:none;border-radius:8px;padding:10px 16px;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:disabled{opacity:.5;cursor:default}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:4px}
+th{text-align:left;color:var(--mute);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.05)}
+tr:hover td{background:rgba(255,255,255,.03)}
+.err{color:var(--bad)}
+.hint{color:var(--mute);font-size:12.5px;margin-top:8px}
+#gate{max-width:360px;margin:60px auto}
+.totals{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;font-size:13px;color:var(--mute)}
+.totals b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap" id="gate">
+  <div class="card">
+    <h1>Admin login</h1>
+    <p class="sub">Lucky Ferris Wheel — dev report</p>
+    <label for="pw">Password</label>
+    <input id="pw" type="password" autocomplete="current-password">
+    <div class="btnrow" style="margin-top:12px"><button id="loginBtn">Log in</button></div>
+    <p class="hint err" id="loginErr"></p>
+  </div>
+</div>
+
+<div class="wrap" id="main" hidden>
+  <h1>Links &amp; Winnings Report</h1>
+  <p class="sub">Every player who was issued a wheel link in the selected range, how many links, how many rounds, how much won.</p>
+  <div class="card">
+    <div class="btnrow">
+      <div class="field"><label for="from">From</label><input id="from" type="date"></div>
+      <div class="field"><label for="to">To</label><input id="to" type="date"></div>
+      <button id="loadBtn">Load</button>
+      <button class="ghost" id="todayBtn" type="button">Today</button>
+    </div>
+  </div>
+  <div class="card" id="resultCard">
+    <p class="hint" id="status">Naglo-load…</p>
+    <div class="totals" id="totals" hidden></div>
+    <table id="tbl" hidden>
+      <thead><tr><th>Player</th><th>Links</th><th>Rounds</th><th>Won</th><th>Last link</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let token="";
+try{token=sessionStorage.getItem("cg-admin-token")||""}catch(e){}
+
+function peso(v){return "₱"+Number(v||0).toLocaleString("en-PH",{maximumFractionDigits:0})}
+function todayStr(){
+  const d=new Date();
+  return d.toLocaleDateString("en-CA",{timeZone:"Asia/Manila"}); // en-CA gives YYYY-MM-DD
+}
+
+async function api(path,opts){
+  const r=await fetch(path,Object.assign({headers:{"Content-Type":"application/json","X-Admin-Token":token}},opts||{}));
+  const j=await r.json().catch(()=>({}));
+  return {ok:r.ok,status:r.status,j};
+}
+
+async function login(){
+  const pw=$("pw").value;
+  if(!pw)return;
+  $("loginErr").textContent="";
+  const r=await fetch("/api/admin-login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok){$("loginErr").textContent=j.error||"Mali ang password.";return}
+  token=j.token;
+  try{sessionStorage.setItem("cg-admin-token",token)}catch(e){}
+  showMain();
+}
+
+async function load(){
+  const from=$("from").value||todayStr(),to=$("to").value||todayStr();
+  $("status").textContent="Naglo-load…";$("status").className="hint";
+  $("tbl").hidden=true;$("totals").hidden=true;
+  const r=await api("/api/links-today?from="+encodeURIComponent(from)+"&to="+encodeURIComponent(to));
+  if(r.status===403){
+    token="";try{sessionStorage.removeItem("cg-admin-token")}catch(e){}
+    showGate();return;
+  }
+  if(!r.ok){$("status").textContent=r.j.msg||r.j.error||"Error";$("status").className="hint err";return}
+  const players=r.j.players||[];
+  if(!players.length){$("status").textContent="Walang link sa petsang ito.";return}
+  $("status").textContent="";
+  const totalLinks=players.reduce((s,p)=>s+p.links,0);
+  const totalRounds=players.reduce((s,p)=>s+p.rounds,0);
+  const totalWon=players.reduce((s,p)=>s+p.won,0);
+  $("totals").hidden=false;
+  $("totals").innerHTML="<span><b>"+players.length+"</b> players</span><span><b>"+totalLinks+"</b> links</span><span><b>"+totalRounds+"</b> rounds</span><span><b>"+peso(totalWon)+"</b> total won</span>";
+  $("tbody").innerHTML=players.map(p=>{
+    const t=p.last_link_at?new Date(Number(p.last_link_at)).toLocaleString("en-PH",{timeZone:"Asia/Manila",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}):"";
+    const name=p.name&&p.name!==p.account?" <span style='color:var(--mute)'>("+esc(p.name)+")</span>":"";
+    return "<tr><td>"+esc(p.account)+name+"</td><td>"+p.links+"</td><td>"+p.rounds+"</td><td>"+peso(p.won)+"</td><td>"+esc(t)+"</td></tr>";
+  }).join("");
+  $("tbl").hidden=false;
+}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+function showGate(){$("gate").hidden=false;$("main").hidden=true}
+function showMain(){
+  $("gate").hidden=true;$("main").hidden=false;
+  const t=todayStr();
+  if(!$("from").value)$("from").value=t;
+  if(!$("to").value)$("to").value=t;
+  load();
+}
+
+$("loginBtn").onclick=login;
+$("pw").addEventListener("keydown",e=>{if(e.key==="Enter")login()});
+$("loadBtn").onclick=load;
+$("todayBtn").onclick=()=>{const t=todayStr();$("from").value=t;$("to").value=t;load()};
+
+if(token)showMain();else showGate();
+</script>
+</body>
+</html>
