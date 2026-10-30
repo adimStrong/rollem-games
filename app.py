@@ -71,7 +71,7 @@ MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", "200"))         # deposits for t
 TURNOVER_MULT = float(os.environ.get("TURNOVER_MULT", "1"))     # eligibility gate AND post-win clearing multiplier
 WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame,casino").split(",") if c.strip()]
 DAILY_CAP = int(os.environ.get("DAILY_CAP", "10000"))
-ROUNDS_PER_DAY = int(os.environ.get("ROUNDS_PER_DAY", "999"))   # effectively unlimited -- each round STRICTLY requires its own new, unconsumed deposit (see canPick's need_amt>0 guard in summary() and the matching backend check in /api/pick); DAILY_CAP is the real limiter
+ROUNDS_PER_DAY = int(os.environ.get("ROUNDS_PER_DAY", "5"))   # 2026-10-30: max 5 claims/spins per player per day -- each round STRICTLY also requires its own new, unconsumed deposit (see canPick's need_amt>0 guard in summary() and the matching backend check in /api/pick); this is enforced BOTH in canPick (UI hint) and as a hard block in /api/pick (elif len(rows)>=ROUNDS_PER_DAY)
 DEP_FROM = os.environ.get("DEP_FROM", "12:00")   # deposits counted from (inclusive, HH:MM)
 DEP_TO = os.environ.get("DEP_TO", "21:00")       # deposits counted until (exclusive)
 PLAY_UNTIL = os.environ.get("PLAY_UNTIL", "21:00")
