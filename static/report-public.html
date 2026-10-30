@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lucky Ferris Wheel — Links &amp; Winnings Report</title>
+<style>
+:root{--bg:#120a1e;--panel:#1c1030;--line:#3a2a55;--ink:#f3eefc;--mute:#a996c7;--bulb:#ffcf5a;--ok:#49d17a;--bad:#ff5d7a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:16px}
+.wrap{max-width:960px;margin:0 auto}
+h1{font-size:18px;margin:0 0 4px}
+.sub{color:var(--mute);font-size:13px;margin:0 0 20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:4px}
+input{font:600 15px/1 inherit;background:rgba(0,0,0,.35);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+.field{flex:1;min-width:140px}
+button{font:700 13px/1 inherit;background:var(--bulb);color:#241405;border:none;border-radius:8px;padding:10px 16px;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:disabled{opacity:.5;cursor:default}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:4px}
+th{text-align:left;color:var(--mute);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.05)}
+tr:hover td{background:rgba(255,255,255,.03)}
+.err{color:var(--bad)}
+.hint{color:var(--mute);font-size:12.5px;margin-top:8px}
+.totals{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;font-size:13px;color:var(--mute)}
+.totals b{color:var(--ink)}
+.live{display:inline-flex;align-items:center;gap:6px;color:var(--ok);font-size:12px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+<div class="wrap" id="main">
+  <h1>Links &amp; Winnings Report</h1>
+  <p class="sub">Every player who was issued a wheel link in the selected range, how many links, how many rounds, how much won. <span class="live" id="liveTag"><span class="dot"></span>auto-updating</span></p>
+  <div class="card">
+    <div class="btnrow">
+      <div class="field"><label for="from">From</label><input id="from" type="date"></div>
+      <div class="field"><label for="to">To</label><input id="to" type="date"></div>
+      <button id="loadBtn">Load</button>
+      <button class="ghost" id="todayBtn" type="button">Today</button>
+    </div>
+  </div>
+  <div class="card" id="resultCard">
+    <p class="hint" id="status">Naglo-load…</p>
+    <div class="totals" id="totals" hidden></div>
+    <table id="tbl" hidden>
+      <thead><tr><th>Player</th><th>Links</th><th>Rounds</th><th>Won</th><th>Deposit</th><th>Dep. count</th><th>Turnover</th><th>Last link</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <p class="hint" id="updatedAt"></p>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const TOKEN=location.pathname.split("/").filter(Boolean).pop();
+const REFRESH_MS=30000;
+
+function peso(v){return "₱"+Number(v||0).toLocaleString("en-PH",{maximumFractionDigits:0})}
+function todayStr(){
+  const d=new Date();
+  return d.toLocaleDateString("en-CA",{timeZone:"Asia/Manila"}); // en-CA gives YYYY-MM-DD
+}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+async function load(){
+  const from=$("from").value||todayStr(),to=$("to").value||todayStr();
+  $("status").textContent="Naglo-load…";$("status").className="hint";
+  const url="/api/links-today?token="+encodeURIComponent(TOKEN)+"&from="+encodeURIComponent(from)+"&to="+encodeURIComponent(to);
+  let r,j;
+  try{
+    r=await fetch(url);
+    j=await r.json().catch(()=>({}));
+  }catch(e){
+    $("status").textContent="Connection error.";$("status").className="hint err";return;
+  }
+  if(!r.ok){
+    $("tbl").hidden=true;$("totals").hidden=true;
+    $("status").textContent=j.msg||j.error||"Error";$("status").className="hint err";
+    $("liveTag").hidden=true;
+    return;
+  }
+  const players=j.players||[];
+  if(!players.length){
+    $("tbl").hidden=true;$("totals").hidden=true;
+    $("status").textContent="Walang link sa petsang ito.";$("status").className="hint";
+    $("updatedAt").textContent="Last checked: "+new Date().toLocaleTimeString("en-PH",{timeZone:"Asia/Manila"});
+    return;
+  }
+  $("status").textContent="";
+  const totalLinks=players.reduce((s,p)=>s+p.links,0);
+  const totalRounds=players.reduce((s,p)=>s+p.rounds,0);
+  const totalWon=players.reduce((s,p)=>s+p.won,0);
+  const totalDep=players.reduce((s,p)=>s+(p.depAmount||0),0);
+  const totalTurnover=players.reduce((s,p)=>s+(p.turnover||0),0);
+  $("totals").hidden=false;
+  $("totals").innerHTML="<span><b>"+players.length+"</b> players</span><span><b>"+totalLinks+"</b> links</span><span><b>"+totalRounds+"</b> rounds</span><span><b>"+peso(totalWon)+"</b> total won</span><span><b>"+peso(totalDep)+"</b> total deposit</span><span><b>"+peso(totalTurnover)+"</b> total turnover</span>";
+  $("tbody").innerHTML=players.map(p=>{
+    const t=p.last_link_at?new Date(Number(p.last_link_at)).toLocaleString("en-PH",{timeZone:"Asia/Manila",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}):"";
+    const name=p.name&&p.name!==p.account?" <span style='color:var(--mute)'>("+esc(p.name)+")</span>":"";
+    return "<tr><td>"+esc(p.account)+name+"</td><td>"+p.links+"</td><td>"+p.rounds+"</td><td>"+peso(p.won)+"</td><td>"+peso(p.depAmount)+"</td><td>"+(p.depCount||0)+"</td><td>"+peso(p.turnover)+"</td><td>"+esc(t)+"</td></tr>";
+  }).join("");
+  $("tbl").hidden=false;
+  $("updatedAt").textContent="Last updated: "+new Date().toLocaleTimeString("en-PH",{timeZone:"Asia/Manila"});
+}
+
+$("loadBtn").onclick=load;
+$("todayBtn").onclick=()=>{const t=todayStr();$("from").value=t;$("to").value=t;load()};
+
+const t=todayStr();
+$("from").value=t;
+$("to").value=t;
+load();
+setInterval(load,REFRESH_MS);
+</script>
+</body>
+</html>
