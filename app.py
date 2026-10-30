@@ -252,6 +252,14 @@ def spins_for(cur, user_id: int, date: str):
     return [dict(r) for r in cur.fetchall()]
 
 
+def links_issued_today(cur, user_id: int, date: str) -> int:
+    """How many times a link/code was generated for this player today -- distinct from
+    roundsUsed (each spin), since the auto-fresh-link behavior issues a new code once the
+    existing one's round has been spun, even before the next round is created/won."""
+    cur.execute("SELECT COUNT(*) AS n FROM cg_sessions WHERE user_id=%s AND biz_date=%s", (user_id, date))
+    return int(cur.fetchone()["n"])
+
+
 def daily_cap_for(cur, date: str) -> int:
     cur.execute("SELECT daily_cap FROM cg_settings WHERE biz_date=%s", (date,))
     r = cur.fetchone()
@@ -372,6 +380,7 @@ def summary(cur, user, date: str):
         "syncedAt": synced,
         "cur": pub_spin(cur_row) if cur_row else None,
         "roundsUsed": len(rows),
+        "linksIssued": links_issued_today(cur, uid, date),
         # A NEW round (cur_row missing/paid) is only pickable when need_amt > 0 -- i.e. there is
         # genuinely NEW, unconsumed deposit to fund it. need_amt hits exactly 0 whenever dep_total
         # hasn't grown since the baseline round's own `dep` snapshot, which is the ordinary state
