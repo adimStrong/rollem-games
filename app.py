@@ -575,6 +575,13 @@ def links_today():
             "SELECT user_id, account, MAX(name) AS name, COUNT(*) AS links, MAX(created_at) AS last_link_at "
             "FROM cg_sessions WHERE biz_date BETWEEN %s AND %s GROUP BY user_id, account", (date_from, date_to))
         players = {r["user_id"]: dict(r) for r in cur.fetchall()}
+        # In-game ID shown next to the username -- same "GP"+referral_code format find_user()
+        # accepts for lookup, so staff can search by whichever one they were given.
+        if players:
+            cur.execute("SELECT user_id, referral_code FROM users WHERE user_id = ANY(%s)", (list(players.keys()),))
+            for r in cur.fetchall():
+                if r["user_id"] in players:
+                    players[r["user_id"]]["gpId"] = "GP" + r["referral_code"] if r["referral_code"] else ""
         cur.execute(
             "SELECT user_id, COUNT(*) AS rounds, COALESCE(SUM(amount) FILTER (WHERE status='paid'),0) AS won "
             "FROM fw_spins WHERE biz_date BETWEEN %s AND %s GROUP BY user_id", (date_from, date_to))
@@ -608,6 +615,7 @@ def links_today():
         r.setdefault("depAmount", 0)
         r.setdefault("depCount", 0)
         r.setdefault("turnover", 0)
+        r.setdefault("gpId", "")
     rows.sort(key=lambda r: r["last_link_at"], reverse=True)
     return jsonify({"from": date_from, "to": date_to, "players": rows})
 
