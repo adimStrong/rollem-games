@@ -1,7 +1,7 @@
 """Gopyesta · Lucky Ferris Wheel v2 — fixed prize ladder (replaces the deposit-tiered cabin design, 2026-10-25).
 
 Reads the Gopyesta platform Postgres (deposits / users / bets_daily_category, filled by the
-gopyesta-retention pullers), checks the player's REAL deposit + slot/casino turnover for the
+gopyesta-retention pullers), checks the player's REAL deposit + slot turnover for the
 day, rolls the reward SERVER-SIDE from a fixed prize ladder, enforces the daily bonus budget,
 and records every win in the shared wins-ledger. Payout stays a manual GCash send tracked
 there (Paid / Revoke).
@@ -13,14 +13,16 @@ export's manual-entry / claude.ai-artifact-db flow, which doesn't work self-host
     are shown on the cabins as display-only tiers (2026-10-30: changed from 85/10/5/0.01%) but are
     never actually drawn (0% weight, same "shown but never awarded" pattern as the old ₱77 display tier)
   * eligible once today's Success deposits total >= MIN_DEPOSIT (₱200) made 12 PM-9 PM PH time
-    AND today's slot+casino valid bet >= TURNOVER_MULT (1x) the deposit total
+    AND today's slot (WAGER_CATS, "egame" only as of 2026-10-31 -- was egame+casino) valid bet
+    >= TURNOVER_MULT (1x) the deposit total ("Only slot games qualify" per the player-facing text)
   * which of the 8 cabins the player taps is PURELY COSMETIC — it does not affect the odds or
     the amount, only which gondola visually reveals the already-drawn prize (kept so the
     session API shape — /api/pick then /api/spin — didn't need to change)
-  * unlimited spins per day (2026-10-29: was 1/day) — depositing again and clearing the
-    turnover gate again earns another spin; each spin's reward then needs a further
-    TURNOVER_MULT x slot+casino turnover (tracked the same way as before) before it counts
-    as "cleared" for payout; the real limiter on total spins/day is the daily bonus budget below
+  * up to ROUNDS_PER_DAY spins per day (2026-10-31: capped at 5; was unlimited 2026-10-29 to
+    2026-10-30) — depositing again and clearing the turnover gate again earns another spin,
+    each needing its own fresh/unconsumed deposit; each spin's reward then needs a further
+    TURNOVER_MULT x slot turnover (tracked the same way as before) before it counts as
+    "cleared" for payout; the daily bonus budget below is a separate, additional limiter
   * ₱10,000 bonus budget per day across all players (cg_settings per day, raisable by admin)
 
 Tables it OWNS in that database (created on boot, unchanged from v1): cg_sessions, cg_settings,
@@ -69,7 +71,7 @@ assert LIVE_PRIZES, "PRIZES must include at least one prize with p > 0"
 N = int(os.environ.get("WHEEL_CABINS", "8"))        # cosmetic only — which gondola reveals the prize
 MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", "200"))         # deposits for the day must total at least this
 TURNOVER_MULT = float(os.environ.get("TURNOVER_MULT", "1"))     # eligibility gate AND post-win clearing multiplier
-WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame,casino").split(",") if c.strip()]
+WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame").split(",") if c.strip()]  # 2026-10-31: slot games ("egame") only -- the canned/sidebar text says "Only slot games qualify"; casino was removed to match it exactly
 DAILY_CAP = int(os.environ.get("DAILY_CAP", "10000"))
 ROUNDS_PER_DAY = int(os.environ.get("ROUNDS_PER_DAY", "5"))   # 2026-10-30: max 5 claims/spins per player per day -- each round STRICTLY also requires its own new, unconsumed deposit (see canPick's need_amt>0 guard in summary() and the matching backend check in /api/pick); this is enforced BOTH in canPick (UI hint) and as a hard block in /api/pick (elif len(rows)>=ROUNDS_PER_DAY)
 DEP_FROM = os.environ.get("DEP_FROM", "12:00")   # deposits counted from (inclusive, HH:MM)
