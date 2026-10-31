@@ -572,7 +572,7 @@ def links_today():
         date_to = t
     with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
         cur.execute(
-            "SELECT user_id, account, MAX(name) AS name, COUNT(*) AS links, MAX(created_at) AS last_link_at "
+            "SELECT user_id, account, MAX(name) AS name, MAX(created_at) AS last_link_at "
             "FROM cg_sessions WHERE biz_date BETWEEN %s AND %s GROUP BY user_id, account", (date_from, date_to))
         players = {r["user_id"]: dict(r) for r in cur.fetchall()}
         # In-game ID shown next to the username -- same "GP"+referral_code format find_user()
@@ -582,11 +582,17 @@ def links_today():
             for r in cur.fetchall():
                 if r["user_id"] in players:
                     players[r["user_id"]]["gpId"] = "GP" + r["referral_code"] if r["referral_code"] else ""
+        # "Links" = DISTINCT codes actually used for a round (fw_spins.code), NOT every code
+        # cg_sessions ever issued -- a staff "Bagong link" click that was never spun shouldn't
+        # inflate the count. 2026-10-31: changed so Links lines up with Rounds for the normal
+        # flow (each paid round auto-issues a fresh code before the next pick).
         cur.execute(
-            "SELECT user_id, COUNT(*) AS rounds, COALESCE(SUM(amount) FILTER (WHERE status='paid'),0) AS won "
+            "SELECT user_id, COUNT(DISTINCT code) AS links, COUNT(*) AS rounds, "
+            "COALESCE(SUM(amount) FILTER (WHERE status='paid'),0) AS won "
             "FROM fw_spins WHERE biz_date BETWEEN %s AND %s GROUP BY user_id", (date_from, date_to))
         for r in cur.fetchall():
             if r["user_id"] in players:
+                players[r["user_id"]]["links"] = int(r["links"])
                 players[r["user_id"]]["rounds"] = int(r["rounds"])
                 players[r["user_id"]]["won"] = int(r["won"])
         # Deposit amount/count -- same DEP_FROM/DEP_TO time-of-day window the wheel itself counts
@@ -610,6 +616,7 @@ def links_today():
                 players[r["user_id"]]["turnover"] = float(r["turnover"])
     rows = list(players.values())
     for r in rows:
+        r.setdefault("links", 0)
         r.setdefault("rounds", 0)
         r.setdefault("won", 0)
         r.setdefault("depAmount", 0)
