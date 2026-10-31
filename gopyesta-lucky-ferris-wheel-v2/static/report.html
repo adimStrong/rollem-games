@@ -115,7 +115,8 @@ async function load(){
   $("tbody").innerHTML=players.map(p=>{
     const t=p.last_link_at?new Date(Number(p.last_link_at)).toLocaleString("en-PH",{timeZone:"Asia/Manila",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}):"";
     const name=p.name&&p.name!==p.account?" <span style='color:var(--mute)'>("+esc(p.name)+")</span>":"";
-    return "<tr><td>"+esc(p.account)+name+"</td><td>"+p.links+"</td><td>"+p.rounds+"</td><td>"+peso(p.won)+"</td><td>"+peso(p.depAmount)+"</td><td>"+(p.depCount||0)+"</td><td>"+peso(p.turnover)+"</td><td>"+(p.betCount||0)+"</td><td>"+esc(t)+"</td></tr>";
+    const gid=p.gpId?" <span style='color:var(--mute)'>"+esc(p.gpId)+"</span>":"";
+    return "<tr><td>"+esc(p.account)+gid+name+"</td><td>"+p.links+"</td><td>"+p.rounds+"</td><td>"+peso(p.won)+"</td><td>"+peso(p.depAmount)+"</td><td>"+(p.depCount||0)+"</td><td>"+peso(p.turnover)+"</td><td>"+esc(t)+"</td></tr>";
   }).join("");
   $("tbl").hidden=false;
 }
