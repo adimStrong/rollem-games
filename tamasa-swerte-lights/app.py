@@ -58,7 +58,7 @@ DEP_TO = os.environ.get("DEP_TO", "21:00")       # deposits counted until (exclu
 PLAY_FROM = os.environ.get("PLAY_FROM", DEP_FROM)
 PLAY_UNTIL = os.environ.get("PLAY_UNTIL", "21:00")
 # prize ladder: [[pesos, weight], ...]; weight 0 = display-only tier that is never drawn
-_DEFAULT_PRIZES = "[[7,90],[17,10],[27,0],[57,0],[77,0]]"
+_DEFAULT_PRIZES = "[[7,90],[17,10],[27,0],[57,0],[77,0],[777,0]]"  # 777 = display-only top rung (JD 2026-11-06, like the wheel)
 PRIZES = [{"amt": float(a), "w": float(w)} for a, w in json.loads(os.environ.get("PRIZES") or _DEFAULT_PRIZES)]
 LIVE_PRIZES = [p for p in PRIZES if p["w"] > 0]
 assert LIVE_PRIZES, "PRIZES must include at least one prize with weight > 0"
