@@ -1372,12 +1372,12 @@ function lockReason(){
   return {cheer:"Not ready yet.",note:(S.missing||[]).join(" · ")||"Please wait a moment."}}
 function buildView(){
   renderMech();
-  $("demoTag").hidden=mode!=="demo";
-  $("resetBtn").hidden=mode!=="demo";
+  $("demoTag").hidden=mode==="player";
+  $("resetBtn").hidden=mode==="player";
   $("win").hidden=true;$("summary").hidden=true;$("cheer").textContent="";busy=false;$("resetBtn").disabled=false;$("who").hidden=true;
   GAME.stop();
   $("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));
-  if(mode==="demo"){
+  if(mode!=="player"){
     N=DEMO_N;$("range").innerHTML="Open clams, find pearls · <b>demo</b> · "+N+" plays";GAME.build($("play"));
     const P=demoPlays,last=P[P.length-1];
     if(last&&!last.end){cur=last;runRound();return}
@@ -1409,12 +1409,12 @@ function buildView(){
 function runRound(){
   busy=true;$("resetBtn").disabled=true;$("resetBtn").hidden=true;setGo(false);$("note").textContent="Tap a clam to open it · COLLECT appears after your first pearl";
   $("count").hidden=false;$("count").textContent="Play "+cur.no+" of "+N;
-  GAME.play(cur,{save:savePlan,done:()=>{busy=false;$("resetBtn").disabled=false;$("resetBtn").hidden=mode!=="demo";savePlan();showResult(true)}});
+  GAME.play(cur,{save:savePlan,done:()=>{busy=false;$("resetBtn").disabled=false;$("resetBtn").hidden=mode==="player";savePlan();showResult(true)}});
 }
 function scrollStage(){const st=$("play").querySelector(".pstage");if(st&&st.scrollIntoView&&!reduce())try{st.scrollIntoView({block:"center",behavior:"smooth"})}catch(e){}}
 async function start(){
   if(busy)return;if(needAgree())return;
-  if(mode==="demo"){if(demoPlays.length>=N)return;const d=drawPlay();
+  if(mode!=="player"){if(demoPlays.length>=N)return;const d=drawPlay();
     cur={no:demoPlays.length+1,step:d.step,amount:NUMS[d.step],vals:d.vals,perm:d.perm,taps:[],end:null,at:Date.now(),seen:false};demoPlays.push(cur);scrollStage();runRound();return}
   if(mode!=="player"||!S||!S.ready)return;
   busy=true;setGo(false);cheer("Diving in…");
@@ -1438,7 +1438,7 @@ function showResult(celebrate){
 }
 async function nextRound(){
   const pl=cur;if(!pl)return;
-  if(mode==="demo"){pl.seen=true;cur=null;if(demoPlays.length>=N){showSummary();return}buildView();return}
+  if(mode!=="player"){pl.seen=true;cur=null;if(demoPlays.length>=N){showSummary();return}buildView();return}
   if(!pl.seen){pl.seen=true;try{await post("/api/seen/"+encodeURIComponent(code),{id:pl.id})}catch(e){}}
   cur=null;await refresh(true);
 }
@@ -1453,7 +1453,7 @@ function showSummary(){
   $("note").textContent=mode==="player"&&S.playsUsed>=CONF.maxPlays?"You used all "+CONF.maxPlays+" plays for today. Come back tomorrow!":mode==="player"?"All plays from today's deposit are used. Deposit again ("+php(CONF.perPlay)+" = 1 play) and this page unlocks your next play.":"Demo over. Press Reset to try again.";
 }
 $("goBtn").onclick=()=>{if(busy)return;if(cur&&cur.end&&!cur.seen&&!$("win").hidden){nextRound();return}start()};
-$("resetBtn").onclick=()=>{if(busy||mode!=="demo")return;demoPlays=[];cur=null;buildView()};
+$("resetBtn").onclick=()=>{if(busy||mode==="player")return;demoPlays=[];cur=null;buildView()};
 $("showCard").onclick=()=>{const P=playList();const pl=cur&&cur.end?cur:P[P.length-1];if(pl)openWin(pl,true)};
 
 // ---------- win pop-up: oyster jewel box ----------
@@ -1461,14 +1461,14 @@ let confettiRAF=null,cardPl=null;
 function openWin(pl,quiet){
   const amt=amtOf(pl),big=pl.step===1;cardPl=pl;
   const jp=$("jp"),a=$("jpAmt");jp.classList.toggle("big",big);
-  $("jpTitle").textContent="YOU WON!";$("jpSub").textContent=(mode==="demo"?"DEMO · ":"")+BRAND.game+" · "+labelOf(pl);
+  $("jpTitle").textContent="YOU WON!";$("jpSub").textContent=(mode!=="player"?"DEMO · ":"")+BRAND.game+" · "+labelOf(pl);
   $("jpPearl").innerHTML=GAME.jewel(pl.step);
   const when=typeof pl.at==="number"?new Date(pl.at).toLocaleString("en-PH",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"}):String(pl.at||"");
-  const ref=mode==="demo"?"DEMO-"+pl.no:(code+"-"+pl.no).toUpperCase();
-  const rows=[["Player",mode==="demo"?"DEMO":(S?S.account:"")],["Promo","POTS Pearl Mine Bonus"],["Deposit",mode==="demo"?"—":php(S?S.dep:0)],["Play",pl.no+" of "+N],
+  const ref=mode!=="player"?"DEMO-"+pl.no:(code+"-"+pl.no).toUpperCase();
+  const rows=[["Player",mode!=="player"?"DEMO":(S?S.account:"")],["Promo","POTS Pearl Mine Bonus"],["Deposit",mode!=="player"?"—":php(S?S.dep:0)],["Play",pl.no+" of "+N],
     ["Pearls found",String(pl.vals.length)],["Pearls",pl.vals.map(c2).join(" + ")],["Total",c2(amt*100)],["Date",when],["Ref code",ref]];
   const dl=$("jpTicket");dl.innerHTML="";rows.forEach(([k,v])=>{dl.appendChild(el("dt","",k));const d=el("dd",k==="Ref code"?"ref":"");d.textContent=v;dl.appendChild(d)});
-  document.querySelector(".jp-note").textContent=mode==="demo"?"Demo only — nothing is recorded. Ask your agent for a real link to win a real bonus.":"Your win is recorded. Your agent credits the bonus the following day at 1:00 PM after verification.";
+  document.querySelector(".jp-note").textContent=mode!=="player"?"Demo only — nothing is recorded. Ask your agent for a real link to win a real bonus.":"Your win is recorded. Your agent credits the bonus the following day at 1:00 PM after verification.";
   jp.hidden=false;try{$("jpClose").focus({preventScroll:true})}catch(e){}
   if(quiet||reduce()){a.textContent=php(amt);return}
   fanfare(big);

@@ -7,8 +7,9 @@ player up in the POTS888 database (pots-retention Postgres), deposits + slot tur
 prize drawn server-side (₱7 90% / ₱17 10%; ₱27/₱57/₱77 display-only), ₱10,000 shared daily budget,
 STOP ALL switch, wins posted to the wins-ledger, `/report` + no-password `/report/<token>` mirror.
 
-Two actions were refused by the auto-mode permission classifier and need YOU to run them (same as the
-wheel's history):
+STATUS 2026-11-06 ~20:10 PHT: steps 1 and 2 are DONE (vars set with skip-deploys; wins-ledger 2c9fb09, pots 66f3895
+and main 73b7e88 pushed → Railway autodeploy). Only step 3 (the Task Scheduler registration) was still refused by
+the auto-mode classifier — run it yourself:
 
 ## 1. Railway variables on the `pots` service (no deploy yet)
 ```
