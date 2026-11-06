@@ -162,13 +162,13 @@ function render(wins){
     "<tr><td>"+fmtDate(w.created_at)+"</td>"+
     "<td><span class='brand-tag'>"+(BRAND_LABEL[w.brand]||w.brand)+"</span></td>"+
     "<td>"+(w.player_name||"—")+"</td>"+
-    "<td class='amt'>₱"+w.amount+"</td>"+
+    "<td class='amt'>₱"+(w.amount%1?Number(w.amount).toFixed(2):w.amount)+"</td>"+
     "<td>"+(w.link?"<a class='link' href='"+w.link+"' target='_blank' rel='noopener'>"+w.code+"</a>":w.code)+"</td>"+
     "<td>"+(w.revoked?"<span class='badge revoked'>Revoked</span>":w.claimed?"<span class='badge claimed'>Sent to Risk</span>":"<span class='badge pending'>Pending</span>")+(w.note?"<span class='note'>"+escQ(w.note)+"</span>":"")+"</td>"+
     "<td>"+((w.claimed||w.revoked)?"<button class='unclaimBtn' data-id='"+w.id+"' data-act='unclaim'>Undo</button>":"<button class='claimBtn' data-id='"+w.id+"' data-act='claim'>Sent to Risk</button><button class='revokeBtn' data-id='"+w.id+"' data-act='revoke'>Revoke</button>")+"</td></tr>"
   ).join("");
   $("emptyMsg").hidden=wins.length>0;
-  const total=wins.filter(w=>!w.revoked).reduce((a,w)=>a+w.amount,0);
+  const total=Math.round(wins.filter(w=>!w.revoked).reduce((a,w)=>a+w.amount,0)*100)/100;
   const pending=wins.filter(w=>!w.claimed&&!w.revoked).length;
   const revoked=wins.filter(w=>w.revoked).length;
   const byBrand={};

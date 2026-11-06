@@ -53,10 +53,11 @@ def date_range_clauses(args, clauses, params):
             params.append(to_ms)
 
 
-RANGE_BRANDS = {"gopyesta", "pots"}  # pots (2026-11-06): Pearl Mine server-drawn ladder P7/P17 -- 7 is not in VALID_AMOUNTS
+RANGE_BRANDS = {"gopyesta", "pots", "tamasa"}  # pots (2026-11-06): Pearl Mine server-drawn ladder P7/P17 -- 7 is not in VALID_AMOUNTS
+# tamasa (2026-11-07): Swerte Lights pays P8.20 / P16.50 (centavo prizes), so `amount` is a decimal (DOUBLE PRECISION) from now on
 
 
-def amount_ok(brand: str, amount: int) -> bool:
+def amount_ok(brand: str, amount: float) -> bool:
     if amount in VALID_AMOUNTS:
         return True
     return brand in RANGE_BRANDS and WHEEL_RANGE[0] <= amount <= WHEEL_RANGE[1]
@@ -105,6 +106,11 @@ def init_db():
         cur.execute("ALTER TABLE wins ADD COLUMN IF NOT EXISTS revoked BOOLEAN NOT NULL DEFAULT FALSE")
         cur.execute("ALTER TABLE wins ADD COLUMN IF NOT EXISTS revoked_at BIGINT")
         cur.execute("ALTER TABLE wins ADD COLUMN IF NOT EXISTS note TEXT NOT NULL DEFAULT ''")
+        # centavo prizes (tamasa Swerte Lights P8.20/P16.50): widen amount once; integers stored before stay exact
+        cur.execute("SELECT data_type FROM information_schema.columns WHERE table_name='wins' AND column_name='amount'")
+        row = cur.fetchone()
+        if row and row[0] != "double precision":
+            cur.execute("ALTER TABLE wins ALTER COLUMN amount TYPE DOUBLE PRECISION")
         cur.execute("CREATE INDEX IF NOT EXISTS wins_created_at_idx ON wins (created_at DESC)")
         cur.execute("CREATE INDEX IF NOT EXISTS wins_brand_idx ON wins (brand)")
         cur.execute("CREATE INDEX IF NOT EXISTS wins_claimed_idx ON wins (claimed)")
@@ -135,8 +141,12 @@ def record_win():
     code = str(payload.get("code", ""))[:80]
     link = str(payload.get("link", ""))[:300]
     try:
-        amount = int(payload.get("amount"))
-    except (TypeError, ValueError):
+        amount = round(float(payload.get("amount")), 2)
+        if amount != amount or amount in (float("inf"), float("-inf")):
+            raise ValueError
+        if amount == int(amount):
+            amount = int(amount)   # whole-peso prizes keep their integer form (every brand before tamasa)
+    except (TypeError, ValueError, OverflowError):
         return jsonify({"error": "bad amount"}), 400
 
     if brand not in VALID_BRANDS or not amount_ok(brand, amount) or not code:
