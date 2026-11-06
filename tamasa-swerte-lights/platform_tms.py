@@ -1,86 +1,62 @@
-"""TamasaPH platform adapter — reads tms-sync's tables in the `tms-members-db` Railway Postgres
-(C:\\Users\\us\\tms-sync\\db.py + pull_player_daily.py):
-  tms_members(member_id, username, fullname, ...)            roster
-  tms_transactions(member_id, ts TIMESTAMP, trans_type 'Deposit', status, amount)   approved deposits
-  tms_player_daily(member_id, date DATE, turnover, winloss, extracted_at)           per-player DAILY stake
-CAVEAT (known, 2026-11-06): tms_player_daily.turnover is the member report's TOTAL stake for the day —
-the Laravel back office has no per-category split in that report, so "slot only" cannot be enforced
-from this table alone; WAGER_CATS is ignored here. The per-link job tms_link_turnover_sync.py refreshes
-today's row for linked players only.
+"""TamasaPH platform adapter — reads the tamasa-retention Postgres (Railway project tamasa-retention, service
+tms-postgres), which C:\\Users\\us\\Tamasa\\tamasa-retention fills from the TMS Cash Console (tms.adm666.com) in the
+SAME Gobetplay/POTS schema the Pearl Mine adapter reads:
+  users(user_id, account, real_name, user_type, is_test, referral_code=NULL)     roster
+  deposits(order_num, user_id, amount, order_status 'Success' (= console Approved), created_at Manila-local TEXT, biz_date)
+  bets_daily(user_id, biz_date, game_type 'ALL', valid_bet)   member report stake per player per day — the sync loop
+                                                               re-pulls today + yesterday for EVERY active player every 10 min
+  bets_daily_category(user_id, biz_date, category 'all', valid_bet, updated_at)
+                                                               written only for today's LINKED players by link_turnover.py
+                                                               (inside the same loop, every few minutes) — fresher, with a sync time
+The console has no per-game-category split (slot vs casino), so WAGER_CATS for this platform is ['all']: every game counts.
+Turnover used = the fresher of the two tables (both are cumulative-for-the-day stake from the same member report).
 """
-import os
+import psycopg2
 
-TMS_DEP_STATUS = os.environ.get("TMS_DEP_STATUS", "approved")   # LOWER(status) LIKE '<this>%'
-PLATFORM_NOTE = "TamasaPH (tms-members-db) · turnover = tms_player_daily (kabuuang stake ng araw, walang per-category split)"
+from platform_pots import ensure_schema, find_user, window_deposits  # same tables, same semantics  # noqa: F401
 
-
-def ensure_schema(cur):
-    cur.execute(
-        """
-        CREATE TABLE IF NOT EXISTS tms_player_daily (
-            member_id BIGINT, date DATE, username TEXT,
-            turnover NUMERIC(22,2), winloss NUMERIC(22,2),
-            deposit NUMERIC(20,2), withdraw NUMERIC(20,2),
-            deposit_count INTEGER, withdraw_count INTEGER,
-            extracted_at TIMESTAMP,
-            PRIMARY KEY (member_id, date)
-        )
-        """
-    )
+PLATFORM_NOTE = "TamasaPH (tamasa-retention DB) · turnover = member-report stake (LAHAT ng laro) na nire-refresh ng sync loop"
+WAGER_VERB = "mag-bet"   # Taglish gate reason: "mag-bet pa ng ₱X" (any game counts)
 
 
-def find_user(cur, account: str):
-    q = account.strip()
-    cur.execute(
-        "SELECT member_id, username, COALESCE(fullname,'') AS fullname FROM tms_members "
-        "WHERE LOWER(username)=LOWER(%s) OR CAST(member_id AS TEXT)=%s "
-        "ORDER BY (LOWER(username)=LOWER(%s)) DESC LIMIT 1",
-        (q, q, q),
-    )
+def _daily(cur, user_id, date):
+    cur.execute("SELECT COALESCE(SUM(valid_bet),0) AS v FROM bets_daily WHERE user_id=%s AND biz_date=%s AND game_type='ALL'",
+                (user_id, date))
     r = cur.fetchone()
-    if not r:
-        return None
-    return {"user_id": int(r["member_id"]), "account": r["username"], "real_name": r["fullname"], "game_id": ""}
-
-
-def window_deposits(cur, user_id, date, dep_from, dep_to):
-    cur.execute(
-        "SELECT amount, to_char(ts,'HH24:MI') AS hm FROM tms_transactions "
-        "WHERE member_id=%s AND trans_type='Deposit' AND LOWER(COALESCE(status,'')) LIKE %s "
-        "AND ts::date = %s::date AND to_char(ts,'HH24:MI') >= %s AND to_char(ts,'HH24:MI') < %s ORDER BY ts",
-        (user_id, TMS_DEP_STATUS.lower() + "%", date, dep_from, dep_to),
-    )
-    return [{"amount": float(r["amount"] or 0), "at": r["hm"]} for r in cur.fetchall()]
+    return float(r["v"] or 0) if r else 0.0
 
 
 def slot_turnover(cur, user_id, date, cats):
-    cur.execute("SELECT COALESCE(turnover,0) AS t, extracted_at FROM tms_player_daily WHERE member_id=%s AND date=%s::date",
-                (user_id, date))
-    r = cur.fetchone()
-    if not r:
-        return 0.0, 0.0, None
-    synced = r["extracted_at"].strftime("%Y-%m-%d %H:%M:%S") if r["extracted_at"] else None
-    return float(r["t"] or 0), 0.0, synced
+    """(turnover today, other-category turnover (always 0 here), latest link-sync time or None)."""
+    linked, synced = None, None
+    try:
+        cur.execute("SELECT COALESCE(valid_bet,0) AS valid_bet, updated_at FROM bets_daily_category "
+                    "WHERE user_id=%s AND biz_date=%s AND category='all'", (user_id, date))
+        r = cur.fetchone()
+        if r:
+            linked, synced = float(r["valid_bet"] or 0), (r["updated_at"] or None)
+    except psycopg2.Error:
+        pass
+    daily = _daily(cur, user_id, date)
+    return max(daily, linked or 0.0), 0.0, synced
 
 
 def slot_bets_from(cur, user_id, date_from, cats):
-    cur.execute("SELECT COALESCE(SUM(turnover),0) AS v FROM tms_player_daily WHERE member_id=%s AND date >= %s::date",
+    cur.execute("SELECT COALESCE(SUM(valid_bet),0) AS v FROM bets_daily WHERE user_id=%s AND biz_date >= %s AND game_type='ALL'",
                 (user_id, date_from))
     return float(cur.fetchone()["v"] or 0)
 
 
 def enrich_players(cur, players, date_from, date_to, dep_from, dep_to, cats):
     ids = list(players.keys())
-    cur.execute(
-        "SELECT member_id, COALESCE(SUM(amount),0) AS dep_amount, COUNT(*) AS dep_count FROM tms_transactions "
-        "WHERE member_id = ANY(%s) AND trans_type='Deposit' AND LOWER(COALESCE(status,'')) LIKE %s "
-        "AND ts::date BETWEEN %s::date AND %s::date AND to_char(ts,'HH24:MI') >= %s AND to_char(ts,'HH24:MI') < %s GROUP BY member_id",
-        (ids, TMS_DEP_STATUS.lower() + "%", date_from, date_to, dep_from, dep_to),
-    )
+    cur.execute("SELECT user_id, COALESCE(SUM(amount),0) AS dep_amount, COUNT(*) AS dep_count FROM deposits "
+                "WHERE user_id = ANY(%s) AND biz_date BETWEEN %s AND %s AND order_status='Success' "
+                "AND substr(created_at,12,5) >= %s AND substr(created_at,12,5) < %s GROUP BY user_id",
+                (ids, date_from, date_to, dep_from, dep_to))
     for r in cur.fetchall():
-        players[r["member_id"]].update(depAmount=float(r["dep_amount"]), depCount=int(r["dep_count"]))
-    cur.execute("SELECT member_id, COALESCE(SUM(turnover),0) AS turnover FROM tms_player_daily "
-                "WHERE member_id = ANY(%s) AND date BETWEEN %s::date AND %s::date GROUP BY member_id",
+        players[r["user_id"]].update(depAmount=float(r["dep_amount"]), depCount=int(r["dep_count"]))
+    cur.execute("SELECT user_id, COALESCE(SUM(valid_bet),0) AS turnover FROM bets_daily "
+                "WHERE user_id = ANY(%s) AND biz_date BETWEEN %s AND %s AND game_type='ALL' GROUP BY user_id",
                 (ids, date_from, date_to))
     for r in cur.fetchall():
-        players[r["member_id"]]["turnover"] = float(r["turnover"])
+        players[r["user_id"]]["turnover"] = float(r["turnover"])

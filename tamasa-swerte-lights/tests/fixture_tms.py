@@ -1,11 +1,14 @@
-"""Seed a throwaway Postgres with Tamasa-shaped tables (tms-sync db.py / pull_player_daily.py) + today's rows.
+"""Seed a throwaway Postgres with TamasaPH-shaped tables (tamasa-retention = Gobetplay/POTS schema subset) + today's rows.
 Usage: python tests/fixture_tms.py [dsn]   (default postgresql://postgres:cgtest@localhost:55442/cg)
-PER_PLAY=200, TURNOVER_MULT=1, window 13:00-21:00:
-  juan123  dep 400 @13:30 (+300 @10:00 outside window, +999 Pending) -> 2 plays; turnover 400 -> play1 (200) & play2 (400) unlocked
-  maria_x  dep 200 @14:00 -> 1 play; turnover 100 -> locked
-  pedro    dep 2000 @16:00 -> 10 -> capped at 5; turnover 5000
-  uitest1  dep 600 @15:00 -> 3 plays; turnover 600 -> all unlocked
-  nodep    no deposit
+PER_PLAY=200, TURNOVER_MULT=1, WAGER_CATS=all, window 13:00-21:00. Turnover = the fresher of bets_daily (game_type ALL,
+loop-refreshed) and bets_daily_category (category 'all', link-sync refreshed):
+  juan123  (1001) dep 400 @13:30 (+300 @10:00 outside window, +999 Failed) -> 2 plays; bets_daily 350 but link row 400 -> 400:
+           play1 (need 200) & play2 (need 400) unlocked
+  maria_x  (1002) dep 200 @14:00 -> 1 play; bets_daily 100, no link row -> turnover-locked
+  tester   (1003) is_test=1 -> never found
+  pedro    (1004) dep 2000 @16:00 -> 10 -> capped at MAX_PLAYS 5; bets 5000 -> all unlocked (drives the cap test)
+  uitest1  (1005) dep 600 @15:00 -> 3 plays; bets_daily 600 only (fallback path, syncedAt null) -> all 3 unlocked (UI test)
+  nodep    (1006) no deposit today -> 0 plays
 """
 import sys
 from datetime import datetime
@@ -19,29 +22,42 @@ dsn = sys.argv[1] if len(sys.argv) > 1 else "postgresql://postgres:cgtest@localh
 c = psycopg2.connect(dsn)
 c.autocommit = True
 cur = c.cursor()
-cur.execute("DROP TABLE IF EXISTS tms_members, tms_transactions, tms_player_daily, cg_sessions, cg_settings, cg_plays, cg_kill_switch")
-cur.execute("CREATE TABLE tms_members (member_id BIGINT PRIMARY KEY, username TEXT, fullname TEXT)")
-cur.execute("""CREATE TABLE tms_transactions (txn_id BIGINT PRIMARY KEY, ts TIMESTAMP, member_id BIGINT, username TEXT,
-  trans_type TEXT, status TEXT, amount NUMERIC(20,4))""")
-cur.execute("""CREATE TABLE tms_player_daily (member_id BIGINT, date DATE, username TEXT, turnover NUMERIC(22,2), winloss NUMERIC(22,2),
-  deposit NUMERIC(20,2), withdraw NUMERIC(20,2), deposit_count INTEGER, withdraw_count INTEGER, extracted_at TIMESTAMP,
-  PRIMARY KEY (member_id, date))""")
-cur.executemany("INSERT INTO tms_members VALUES (%s,%s,%s)", [
-    (1001, "juan123", "Juan Dela Cruz"), (1002, "maria_x", ""), (1004, "pedro", "Pedro P"), (1005, "uitest1", "UI Tester"), (1006, "nodep", "No Deposit")])
-T = lambda n, mid, acct, amt, st, hm, typ="Deposit", d=today: (n, f"{d} {hm}:00", mid, acct, typ, st, amt)
-cur.executemany("INSERT INTO tms_transactions VALUES (%s,%s,%s,%s,%s,%s,%s)", [
-    T(1, 1001, "juan123", 400, "Approved", "13:30"),
-    T(2, 1001, "juan123", 300, "Approved", "10:00"),      # outside window
-    T(3, 1001, "juan123", 999, "Pending", "16:00"),       # not approved
-    T(4, 1001, "juan123", 500, "Approved", "17:00", "Withdrawal"),  # not a deposit
-    T(5, 1002, "maria_x", 200, "Approved", "14:00"),
-    T(7, 1004, "pedro", 2000, "Approved", "16:00"),
-    T(8, 1005, "uitest1", 600, "Approved", "15:00"),
+cur.execute("DROP TABLE IF EXISTS users, deposits, bets_daily, bets_daily_category, cg_sessions, cg_settings, cg_plays, cg_kill_switch")
+cur.execute("""CREATE TABLE users (user_id INTEGER PRIMARY KEY, account TEXT, referral_code TEXT, real_name TEXT,
+  user_type TEXT, is_test INTEGER DEFAULT 0)""")
+cur.execute("""CREATE TABLE deposits (order_num TEXT PRIMARY KEY, user_id INTEGER, user_account TEXT,
+  amount DOUBLE PRECISION NOT NULL, order_status TEXT, created_at TEXT NOT NULL, biz_date TEXT NOT NULL)""")
+cur.execute("""CREATE TABLE bets_daily (user_id INTEGER, biz_date TEXT, game_type TEXT, valid_bet DOUBLE PRECISION,
+  win_loss DOUBLE PRECISION, bet_count INTEGER, PRIMARY KEY (user_id, biz_date, game_type))""")
+cur.execute("""CREATE TABLE bets_daily_category (user_id BIGINT NOT NULL, biz_date TEXT NOT NULL, category TEXT NOT NULL,
+  valid_bet DOUBLE PRECISION DEFAULT 0, bet_amount DOUBLE PRECISION DEFAULT 0, win_loss DOUBLE PRECISION DEFAULT 0,
+  bet_count INTEGER DEFAULT 0, updated_at TEXT, PRIMARY KEY (user_id, biz_date, category))""")
+cur.executemany("INSERT INTO users VALUES (%s,%s,%s,%s,%s,%s)", [
+    (1001, "juan123", None, "Juan Dela Cruz", "Normal Account", 0),
+    (1002, "maria_x", None, "", "Normal Account", 0),
+    (1003, "tester", None, "QA", "Test Account", 1),
+    (1004, "pedro", None, "Pedro P", "Normal Account", 0),
+    (1005, "uitest1", None, "UI Tester", "Normal Account", 0),
+    (1006, "nodep", None, "No Deposit", "Normal Account", 0),
 ])
-cur.executemany("INSERT INTO tms_player_daily VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", [
-    (1001, today, "juan123", 400, -20, 400, 0, 1, 0, f"{today} 16:05:00"),
-    (1002, today, "maria_x", 100, -5, 200, 0, 1, 0, f"{today} 16:05:00"),
-    (1004, today, "pedro", 5000, -100, 2000, 0, 1, 0, f"{today} 16:05:00"),
-    (1005, today, "uitest1", 600, -30, 600, 0, 1, 0, f"{today} 16:05:00"),
+D = lambda n, uid, acct, amt, st, hm, d=today: (n, uid, acct, amt, st, f"{d} {hm}:00", d)
+cur.executemany("INSERT INTO deposits VALUES (%s,%s,%s,%s,%s,%s,%s)", [
+    D("o1", 1001, "juan123", 400, "Success", "13:30"),
+    D("o2", 1001, "juan123", 300, "Success", "10:00"),   # outside window (before 13:00)
+    D("o3", 1001, "juan123", 999, "Failed", "16:00"),    # not Success
+    D("o4", 1001, "juan123", 200, "Success", "21:00"),   # exactly 21:00 -> excluded (window end exclusive)
+    D("o5", 1002, "maria_x", 200, "Success", "14:00"),
+    D("o6", 1003, "tester", 1000, "Success", "14:00"),
+    D("o7", 1004, "pedro", 2000, "Success", "16:00"),
+    D("o8", 1005, "uitest1", 600, "Success", "15:00"),
+])
+cur.executemany("INSERT INTO bets_daily VALUES (%s,%s,%s,%s,%s,%s)", [
+    (1001, today, "ALL", 350, -20, 0),
+    (1002, today, "ALL", 100, -5, 0),
+    (1004, today, "ALL", 5000, -100, 0),
+    (1005, today, "ALL", 600, -30, 0),
+])
+cur.executemany("INSERT INTO bets_daily_category VALUES (%s,%s,%s,%s,%s,%s,%s,%s)", [
+    (1001, today, "all", 400, 400, -25, 0, f"{today} 16:05:00"),   # fresher than bets_daily's 350
 ])
 print("seeded TMS fixture for", today, "at", dsn)

@@ -155,23 +155,31 @@ try:
         wilds += 1 if w else 0
     lo = counts.get(700 if PLATFORM == "pots" else 820, 0) / 4000
     check("odds ~90% low prize", 0.85 < lo < 0.95, f"{lo:.3f} {counts}")
-    check("never draws display tiers", all(a in {int(x * 100) for x in AMOUNTS} for a in counts), str(counts))
+    check("never draws display tiers", all(a in {round(x * 100) for x in AMOUNTS} for a in counts), str(counts))
     if PLATFORM == "tms":
         check("wild rate ~5%", 0.03 < wilds / 4000 < 0.07, wilds)
 except Exception as e:  # noqa: BLE001
     check("odds check ran", False, repr(e))
 
-# ---- cap: pedro has 5 plays; set cap so only 1 fits
+# ---- cap: pedro has 5 plays; set cap so the biggest prize fits once but never all 5 plays. The server draws first and
+# refuses with "cap" when the drawn amount no longer fits, so play until the refusal and check the budget was honoured.
 st, j = req("GET", "/api/cap", token=TOKEN)
 used = j["capUsed"]
-st, j = req("POST", "/api/cap", {"dailyCap": used + (10 if PLATFORM == "pots" else 10)}, token=TOKEN)
+room = max(AMOUNTS)
+st, j = req("POST", "/api/cap", {"dailyCap": used + room}, token=TOKEN)
 check("cap set", st == 200 and j.get("ok"), str(j)[:120])
 st, j = req("POST", "/api/link", {"account": "pedro"}, token=TOKEN)
 pcode = j["code"]
-st, p = req("POST", "/api/play/" + pcode)
-check("pedro play 1 within cap", st == 200, str(p)[:160])
-st, p = req("POST", "/api/play/" + pcode)
-check("pedro play 2 cap refused", st == 409 and p.get("error") == "cap", str(p)[:160])
+paid = []
+last = None
+for _ in range(6):
+    st, p = req("POST", "/api/play/" + pcode)
+    if st != 200:
+        last = (st, p)
+        break
+    paid.append(p["play"]["amount"])
+check("pedro played within cap", 1 <= len(paid) < 5 and sum(paid) <= room + 1e-6, str(paid))
+check("pedro cap refused once full", last is not None and last[0] == 409 and last[1].get("error") == "cap", str(last)[:160])
 st, j = req("POST", "/api/link", {"account": "nodep", "fresh": True}, token=TOKEN)
 check("link maker refuses when capped", st == 409 and j.get("error") == "cap", str(j)[:120])
 st, j = req("POST", "/api/cap", {"dailyCap": 1}, token=TOKEN)
@@ -190,7 +198,7 @@ check("session shows stopped", j.get("stopped") is True and j.get("ready") is Fa
 st, j = req("POST", "/api/stop", {"stopped": False}, token=TOKEN)
 check("stop off", j.get("stopped") is False)
 st, p = req("POST", "/api/play/" + pcode)
-check("pedro play 2 after resume", st == 200 and p["play"]["play_no"] == 2, str(p)[:120])
+check("pedro next play after resume", st == 200 and p["play"]["play_no"] == len(paid) + 1, str(p)[:120])
 
 # ---- links today
 st, j = req("GET", "/api/links-today", token=TOKEN)
