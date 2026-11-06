@@ -1,603 +1,1235 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Tamasa Triple Tama</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TamasaPH Swerte Lights</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Baloo+2:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: Tamasa wordmark on oxblood, one centered slot booth. Player view = Triple Tama slot; admin view (#admin) = control card above a live preview. Single dark look by choice, same as Roll It. */
+/* Layout: TamasaPH logo on top, one centered black-and-red casino booth. Player view = Swerte Lights; admin view (#admin) = link maker above a live preview. Single dark look by choice. */
 :root{
-  --night:#140406; --booth:#26090d; --plank:#310c12; --line:#5c1f27;
-  --gold:#ffc53d; --paper:#fbf1e6; --muted:#d0a9a4;
-  --accent:#ff4d4d; --accent-ink:#2a0306; --bad:#ffb3a8;
-  --display:"Bungee", Impact, "Arial Black", sans-serif;
-  --body:"Barlow", "Segoe UI", system-ui, sans-serif;
+  --night:#000;
+  --dusk:#0b0b0b;
+  --dusk2:#141414;
+  --booth:#0f0f0f;
+  --plank:#141210;
+  --ink:#1a0800;
+  --line:#3a3122;
+  --flame:#e0141e;
+  --mango:#ffd400;
+  --sea:#ffd400;
+  --blue:#e0141e;
+  --chalk:#ffffff;
+  --paper:#fff8e8;
+  --muted:#bdb5a6;
+  --gold:#ffd400;
+  --gold2:#d9a400;
+  --accent:#e0141e;
+  --accent-ink:#fff;
+  --bad:#ff9a92;
+  --glow:rgba(255,212,0,.5);
+  --display:"Lilita One", Impact, "Arial Black", sans-serif;
+  --body:"Baloo 2", "Segoe UI", system-ui, sans-serif;
   --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-body{background:var(--night);color:var(--paper);font-family:var(--body);font-size:15px;line-height:1.5;margin:0;padding-inline:16px;padding-block:24px}
-.stack{width:100%;max-width:520px;margin:0 auto;display:grid;gap:18px}
-
-.mark{text-align:center;display:grid;gap:2px;justify-items:center}
-.mark .logo{display:block;width:min(240px,70%);height:auto;image-rendering:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.45))}
-.mark h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,8vw,40px);line-height:1;margin:6px 0 0;letter-spacing:1px;color:var(--gold);text-shadow:0 3px 0 #7a1010}
-.mark p{margin:0;font:600 11px var(--body);letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
-
-.booth{position:relative;background:var(--plank);border-radius:20px;padding:26px 18px 22px;text-align:center;display:grid;gap:16px;overflow:hidden;border-top:6px solid var(--accent)}
-.booth::before{content:"";position:absolute;inset:6px 0 auto;height:1px;background:repeating-linear-gradient(90deg,var(--gold) 0 6px,transparent 6px 12px);opacity:.45}
-.brand{font:600 12px var(--body);letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin:0}
-h2.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,36px);line-height:1.05;margin:4px 0 0;text-wrap:balance}
+html,body{overflow-x:hidden}
+body{color:var(--paper);font-family:var(--body);font-size:15px;line-height:1.5;margin:0;padding-inline:16px;padding-block:24px;
+  background:radial-gradient(60% 38% at 50% 0%,rgba(224,20,30,.30),transparent 70%),radial-gradient(45% 30% at 0% 60%,rgba(224,20,30,.10),transparent 70%),radial-gradient(45% 30% at 100% 40%,rgba(255,212,0,.07),transparent 70%),radial-gradient(130% 90% at 50% 40%,#0d0d0d,#000 75%) fixed;background-color:#000}
+.stack{width:100%;max-width:580px;margin:0 auto;display:grid;gap:18px;position:relative}
+.stack>*,#adminBody>*,.field,.formula,.fin>*{min-width:0}
+.stack{grid-template-columns:minmax(0,1fr)}
+#adminBody{grid-template-columns:minmax(0,1fr)}
+.mark{display:grid;justify-items:center;gap:6px;text-align:center}
+.mark .logo{display:flex;align-items:center;justify-content:center;gap:10px;max-width:100%}
+.mark .logo img{display:block;width:auto;filter:drop-shadow(0 4px 12px rgba(0,0,0,.5))}
+.mark .logo .lg{height:clamp(72px,21vw,96px);max-width:calc(100vw - 48px)}
+.mark p{margin:0;font:700 11px var(--body);letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
+.booth{position:relative;border-radius:22px;padding:54px 16px 22px;text-align:center;display:grid;gap:14px;overflow:hidden;border-top:6px solid var(--flame);border-radius:20px}
+.eyebrow{font:700 12px var(--body);letter-spacing:2px;text-transform:uppercase;color:#ff4f4f;margin:0}
+h1.game{font-family:var(--display);font-weight:400;font-size:clamp(34px,10vw,50px);line-height:1;margin:4px 0 0;text-wrap:balance;color:var(--gold);letter-spacing:1px;-webkit-text-stroke:1.5px #7a5200;paint-order:stroke fill;text-shadow:0 3px 0 #000,0 5px 0 #a00a12,0 0 26px rgba(224,20,30,.55)}
 .range{margin:6px 0 0;color:var(--muted);font-size:14px}
-.range b{color:var(--gold);font-family:var(--mono)}
-.ladder{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:0;padding:0;list-style:none}
-.ladder li{font:700 12px var(--mono);padding:4px 9px;border-radius:999px;border:1px solid var(--line);color:var(--paper);font-variant-numeric:tabular-nums}
-.ladder li.top{border-color:var(--gold);color:var(--gold)}
-.cheer{font-family:var(--display);font-weight:400;font-size:clamp(18px,5vw,24px);color:var(--gold);min-height:1.35em;margin:0}
+.range b{color:var(--mango)}
+.count{justify-self:center;margin:0;font:800 13px var(--body);letter-spacing:1.5px;text-transform:uppercase;color:var(--ink);background:var(--sea);border-radius:999px;padding:3px 14px 1px}
+.cheer{font-family:var(--display);font-weight:400;font-size:clamp(18px,5vw,24px);color:var(--mango);min-height:1.35em;margin:0;line-height:1.2}
 .cheer.pop{animation:pop .35s ease-out}
 @keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
-.play{display:grid;justify-items:center;gap:10px}
-
-/* Triple Tama: coin toss */
-.toss{position:relative;width:100%;height:300px;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#3b2f24 0%,#5a4632 45%,#6e5a42 100%);box-shadow:inset 0 0 0 2px var(--line)}
-.toss .legs{position:absolute;left:0;right:0;top:-6px;width:100%;height:150px;opacity:.95}
-.toss .ground{position:absolute;left:0;right:0;bottom:0;height:175px;background:
- radial-gradient(ellipse at 50% 75%,rgba(235,225,205,.45),transparent 60%),
- radial-gradient(circle at 20% 30%,rgba(0,0,0,.12) 1px,transparent 1.5px) 0 0/9px 9px,
- radial-gradient(circle at 70% 60%,rgba(255,255,255,.08) 1px,transparent 1.5px) 0 0/13px 11px,
- linear-gradient(180deg,#6b5640,#8a7458 40%,#b8a888);box-shadow:0 -8px 14px rgba(0,0,0,.25)}
-.toss .stand{position:absolute;left:4%;bottom:60px;width:52px;height:110px;opacity:.9}
-.stone{position:absolute;left:12%;right:12%;bottom:16px;height:116px}
-.stone .side{position:absolute;left:0;right:0;bottom:0;height:80px;border-radius:0 0 50% 50%/0 0 30% 30%;background:
- radial-gradient(ellipse at 30% 60%,rgba(255,255,255,.18),transparent 40%),
- radial-gradient(circle at 70% 40%,rgba(0,0,0,.25) 2px,transparent 3px) 0 0/23px 19px,
- linear-gradient(90deg,#1e4f8f,#3a78c4 35%,#2f66ad 65%,#163e72);box-shadow:0 10px 14px rgba(0,0,0,.45)}
-.stone .side::after{content:"";position:absolute;left:58%;top:40%;width:30px;height:14px;border-radius:40%;background:#7d7f84;opacity:.8}
-.stone .top{position:absolute;left:0;right:0;top:0;height:76px;border-radius:50%;background:#8a8e94 center/cover;box-shadow:inset 0 -4px 8px rgba(0,0,0,.35),inset 0 3px 4px rgba(255,255,255,.25),0 0 0 2px #6f737a}
-.toss .shadow{position:absolute;bottom:72px;width:52px;height:10px;margin-left:-26px;border-radius:50%;background:rgba(20,20,24,.6);filter:blur(2px);opacity:.55;z-index:2}
-.coinwrap{position:absolute;bottom:78px;width:58px;height:58px;margin-left:-29px;perspective:400px;z-index:3}
-.coin{position:relative;width:100%;height:100%;transform-style:preserve-3d}
-.coin .face{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;box-shadow:0 0 0 2px #a8780e,0 0 0 3.5px #6b4a08}
-.coin .face svg{width:100%;height:100%;display:block}
-.coin .face.kara{transform:translateZ(1.5px)}
-.coin .face.krus{transform:rotateX(180deg) translateZ(1.5px)}
-.hand{position:absolute;left:-46px;bottom:146px;width:224px;z-index:4;line-height:0;transform-origin:10% 80%;filter:drop-shadow(0 8px 8px rgba(0,0,0,.35))}
-.hand svg *{transform-box:fill-box}
-.hand .fingers{transform-origin:0% 50%}
-.hand .thumb{transform-origin:0% 100%}
-.hand svg{width:100%;height:auto;display:block}
-.toss::after{content:"SLOW-MO";position:absolute;inset:0;z-index:5;display:grid;place-items:end center;padding-bottom:12px;font:400 15px var(--display);letter-spacing:4px;color:rgba(255,255,255,.85);background:radial-gradient(ellipse at 50% 60%,transparent 35%,rgba(0,0,0,.65) 100%);opacity:0;transition:opacity .35s;pointer-events:none}
-.toss.slowmo::after{opacity:1}
-.toss.slowmo .table{filter:saturate(.5) brightness(.75);transition:filter .35s}
-.coinwrap.hero{z-index:6}
-.coinwrap.hero .coin{filter:drop-shadow(0 0 10px rgba(255,220,120,.85))}
-.ulit{position:absolute;left:50%;top:50%;z-index:6;transform:translate(-50%,-50%);padding:8px 16px;border-radius:12px;font:400 20px var(--display);letter-spacing:1px;white-space:nowrap;opacity:0;pointer-events:none;color:#fff;background:rgba(0,0,0,.7);box-shadow:0 0 0 2px rgba(255,255,255,.4)}
-.ulit.pop{opacity:1;animation:upop .4s cubic-bezier(.2,1.6,.4,1)}
-@keyframes upop{from{transform:translate(-50%,-50%) scale(.4);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
-.ulit.mix{background:rgba(120,90,10,.85);color:#fff3c4}
-.ulit.win{background:rgba(20,110,50,.9);box-shadow:0 0 0 2px #7ef0a2,0 0 24px rgba(62,207,106,.6)}
-.ulit.lose{background:rgba(140,20,30,.9);box-shadow:0 0 0 2px #ffb0b0}
-.tally{position:absolute;left:10px;right:10px;top:10px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;z-index:4}
-.slot{display:grid;justify-items:center;gap:1px;padding:5px 4px;border-radius:10px;background:rgba(0,0,0,.35);border:1px solid var(--line);line-height:1.15;min-width:0}
-.slot b{font:400 15px var(--display);color:var(--paper)}
-.slot small{font:700 11px var(--mono);color:var(--muted)}
-.slot em{font-size:9.5px;font-style:normal;color:var(--muted)}
-.slot.ok{border-color:#3ecf6a;background:rgba(62,207,106,.16)}
-.slot.ok small{color:#7ef0a2}
-.slot.no{border-color:#ff6b6b;background:rgba(255,107,107,.12)}
-.slot.no small{color:#ffb0b0}
-.slot.ok,.slot.no{animation:pop .35s ease-out}
-.calls{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
-.call{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 10px;border-radius:14px;border:2px solid var(--line);background:linear-gradient(180deg,#3a0f15,#26090d);color:var(--gold);font:400 24px var(--display);letter-spacing:1px;cursor:pointer}
-.call .mini{width:38px;height:38px;border-radius:50%;line-height:0;box-shadow:0 0 0 2px #a8780e}
-.call .mini svg{width:100%;height:100%}
-.call.on{border-color:var(--gold);box-shadow:0 0 16px rgba(255,197,61,.5);background:linear-gradient(180deg,#5a1820,#3a0f15)}
-.call:disabled{opacity:.45;cursor:default}
-.call.on:disabled{opacity:1}
-@media (prefers-reduced-motion:reduce){.slot.ok,.slot.no,.ulit.pop{animation:none}}
-.btn{font:700 18px var(--body);letter-spacing:.3px;padding:15px 22px;border-radius:12px;border:0;cursor:pointer;background:var(--accent);color:var(--accent-ink);width:100%}
+.play{display:grid;justify-items:center;gap:12px;position:relative}
+.btn{font:800 18px var(--body);letter-spacing:.3px;padding:13px 22px 11px;border-radius:14px;border:0;cursor:pointer;background:linear-gradient(180deg,#ff3b3b,#e0141e 55%,#b00c14);color:var(--accent-ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 0 1px #5a0006;width:100%}
 .btn:disabled,.btn[aria-disabled="true"]{opacity:.5;cursor:default}
-.btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
-.btn.ghost{background:transparent;color:var(--paper);border:1px solid var(--line);font-size:16px}
-.btn.small{width:auto;font-size:14px;padding:10px 14px}
+.btn:focus-visible,.linkbtn:focus-visible,.chip:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--mango);outline-offset:3px}
+.btn.ghost{background:transparent;color:var(--paper);border:1px solid #5a4a26;font-size:16px}
+.btn.small{width:auto;font-size:14px;padding:9px 14px 7px}
 .acts{display:flex;gap:10px}
 .acts .btn{flex:1}
-.acts .btn.ghost{flex:0 0 auto;width:auto;padding:15px 20px}
+.acts .btn.ghost{flex:0 0 auto;width:auto;padding:13px 20px 11px}
 .acts .btn[hidden]+.btn.ghost{flex:1}
 .agree{display:flex;align-items:flex-start;gap:10px;text-align:left;font-size:14px;cursor:pointer;line-height:1.4}
-.agree input{width:20px;height:20px;flex:none;margin:0;accent-color:var(--accent)}
+.agree input{width:20px;height:20px;flex:none;margin:0;accent-color:var(--flame)}
 .agree.nudge{animation:nudge .4s}
 @keyframes nudge{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-.linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--gold);text-decoration:underline;cursor:pointer}
-.win{display:grid;gap:4px}
+.linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--mango);text-decoration:underline;cursor:pointer}
+.win{display:grid;gap:2px;justify-items:center}
 .win small{font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted)}
-.win strong{font-family:var(--display);font-weight:400;font-size:clamp(40px,12vw,56px);color:var(--gold);line-height:1}
+.win strong{font-family:var(--display);font-weight:400;font-size:clamp(40px,12vw,56px);color:var(--mango);line-height:1}
 .win p{margin:0;font-size:14px}
-.note{margin:0;font-size:12px;color:var(--muted)}
-.wait{color:var(--muted);font-size:14px}
-.soundbtn{position:absolute;top:14px;right:14px;z-index:2;background:transparent;border:1px solid var(--line);color:var(--muted);font:600 12px var(--body);border-radius:999px;padding:5px 11px;cursor:pointer}
-.soundbtn[aria-pressed="true"]{color:var(--paper);border-color:var(--accent)}
-
+.summary{display:grid;gap:8px;justify-items:center;padding:16px;border-radius:16px;background:rgba(0,0,0,.25);border:1px dashed rgba(255,212,0,.5)}
+.summary h2{margin:0;font-family:var(--display);font-weight:400;font-size:22px;color:var(--chalk)}
+.summary strong{font-family:var(--display);font-weight:400;font-size:clamp(44px,13vw,60px);line-height:1;color:var(--mango)}
+.summary ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.summary li{font:700 13px var(--body);background:var(--plank);border:1px solid var(--line);border-radius:999px;padding:3px 11px 1px}
+.summary p{margin:0;font-size:13px;color:var(--muted);max-width:40ch}
+.note{margin:0;font-size:13px;color:var(--muted);max-width:44ch;justify-self:center}
+.demo{margin:0;font-size:12px;font-weight:700;color:var(--ink);background:var(--mango);border-radius:999px;padding:3px 12px 1px;justify-self:center}
+.soundbtn{position:absolute;top:14px;right:14px;z-index:3;background:rgba(0,0,0,.2);border:1px solid var(--line);color:var(--muted);font:700 12px var(--body);border-radius:999px;padding:4px 11px 2px;cursor:pointer}
+.soundbtn[aria-pressed="true"]{color:var(--paper);border-color:var(--sea)}
 /* admin */
-.panel{background:var(--booth);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:14px}
-.panel h2{font-family:var(--display);font-weight:400;font-size:20px;margin:0}
+.panel{background:linear-gradient(180deg,#141414,#0a0a0a);border:1px solid var(--line);border-top:3px solid var(--flame);border-radius:16px;padding:18px;display:grid;gap:14px}
+.panel h2{font-family:var(--display);font-weight:400;font-size:22px;margin:0}
 .hint{margin:0;color:var(--muted);font-size:13px}
-.field{display:grid;gap:6px;text-align:left}
-.field>span{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);font-weight:600}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{font:600 14px var(--body);color:var(--paper);background:var(--plank);border:1px solid var(--line);padding:8px 13px;border-radius:999px;cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.chip:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.field{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;text-align:left}
+.field>span{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);font-weight:700}
 .money{display:flex;align-items:center;gap:8px}
 .money span{font-family:var(--mono);color:var(--muted)}
-.money input,.code input{font:700 18px var(--mono);background:var(--plank);color:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
+.inp{font:700 18px var(--mono);background:var(--plank);color:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
 .tierbox{border-radius:12px;padding:12px 14px;background:rgba(0,0,0,.25);font-size:14px}
-.tierbox b{color:var(--gold)}
+.tierbox b{color:var(--mango)}
 .tierbox.bad b{color:var(--bad)}
 .linkrow{display:flex;gap:8px;align-items:center}
 .linkrow code{flex:1;min-width:0;font:500 12px var(--mono);background:var(--plank);border:1px solid var(--line);border-radius:8px;padding:10px;overflow-x:auto;white-space:nowrap}
-.sync{font:600 12px var(--mono);letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
-.sync.on{color:var(--accent)}
-.preview-label{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:center;margin:0}
-
-/* win pop-up */
-.jp{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(12,2,3,.82);backdrop-filter:blur(3px);overflow:hidden}
-.jp canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.jp-card{position:relative;width:min(420px,100%);text-align:center;border-radius:22px;padding:30px 22px 22px;background:radial-gradient(120% 90% at 50% 0%,#6a1520 0%,#310c12 60%,#26090d 100%);border:2px solid var(--accent);box-shadow:0 0 80px rgba(255,77,77,.35);display:grid;gap:10px;animation:jpIn .55s cubic-bezier(.2,1.4,.4,1)}
-.jp.big .jp-card{border-color:var(--gold);box-shadow:0 0 0 6px rgba(255,197,61,.12),0 0 80px rgba(255,197,61,.4)}
-@keyframes jpIn{0%{transform:scale(.4) rotate(-6deg);opacity:0}100%{transform:scale(1);opacity:1}}
-.jp-title{font-family:var(--display);font-weight:400;font-size:clamp(34px,10vw,50px);line-height:1;margin:0;color:var(--paper)}
-.jp.big .jp-title{color:var(--gold);animation:jpPulse 1s ease-in-out infinite alternate}
-@keyframes jpPulse{to{transform:scale(1.06)}}
-.jp-sub{font:700 14px var(--mono);letter-spacing:2px;margin:0}
-.jp-label{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:6px 0 0}
-.jp-amt{font-family:var(--display);font-weight:400;font-size:clamp(46px,14vw,68px);line-height:1;color:#fff;margin:0;text-shadow:0 4px 0 #8a1520}
-.jp-note{margin:0;font-size:14px}
-
-.tnc{background:var(--booth);border:1px solid var(--line);border-radius:16px;padding:0 18px;text-align:left}
-.tnc summary{cursor:pointer;padding:15px 0;font-weight:700}
-.tnc h3{font-family:var(--display);font-weight:400;font-size:17px;margin:0 0 10px}
-.tnc ol{margin:0 0 12px;padding-left:20px;display:grid;gap:9px;font-size:13.5px;max-width:65ch}
-.tnc li::marker{color:var(--muted);font-family:var(--mono);font-size:12px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px}
+.formula{border-radius:12px;padding:12px 14px;border:1px solid var(--line);background:rgba(0,0,0,.25);display:grid;gap:10px;text-align:left}
+.formula h3{font-family:var(--display);font-weight:400;font-size:18px;margin:0;color:var(--mango)}
+.formula .fin{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.formula table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
+.formula td,.formula th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.formula td:first-child,.formula th:first-child{text-align:left}
+.formula th{color:var(--muted);font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase}
+.formula tr.sum td{font-weight:800;color:var(--mango)}
+.formula .fsub{margin:4px 0 -4px;font:800 11px var(--body);letter-spacing:1.6px;text-transform:uppercase;color:#ff4f4f}
+#fSum b{color:var(--mango)}
+#fSum td{white-space:normal}#fSum td:last-child{text-align:right}
 .tblwrap{overflow-x:auto}
-.tnc table{border-collapse:collapse;margin:6px 0 2px;font-size:12.5px;font-variant-numeric:tabular-nums}
-.tnc td,.tnc th{border-bottom:1px solid var(--line);padding:4px 10px 4px 0;text-align:left;white-space:nowrap}
-.tnc th{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:1px;text-transform:uppercase}
-.tnc .small{font-size:12px;color:var(--muted);margin:0 0 16px}
-@media (prefers-reduced-motion:reduce){.cheer.pop,.env.open,.jp-card,.jp.big .jp-title,.agree.nudge{animation:none}.env{transition:none}}
-</style>
+.preview-label{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);font-weight:700;text-align:center;margin:0}
+/* win pop-up: mango prize ticket with spinning peso coin, ribbon title, receipt rows for the agent */
+@property --ring{syntax:'<angle>';inherits:false;initial-value:0deg}
+.jp{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:56px 16px 16px;background:radial-gradient(60% 50% at 50% 45%,rgba(110,8,14,.55),rgba(0,0,0,.92));backdrop-filter:blur(4px);overflow:auto}
+.jp canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
+.jp-burst{position:fixed;left:50%;top:50%;width:160vmax;height:160vmax;translate:-50% -50%;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg,rgba(255,212,0,.16) 0 6deg,transparent 6deg 16deg);
+  -webkit-mask-image:radial-gradient(closest-side,#000 8%,transparent 55%);mask-image:radial-gradient(closest-side,#000 8%,transparent 55%);animation:burst 24s linear infinite}
+.jp.big .jp-burst{background:repeating-conic-gradient(from 0deg,rgba(255,210,120,.34) 0 6deg,rgba(224,20,30,.14) 6deg 11deg,transparent 11deg 16deg);animation-duration:12s}
+@keyframes burst{to{rotate:360deg}}
+.jp-card{position:relative;z-index:1;width:min(400px,100%);text-align:center;border-radius:24px;padding:58px 20px 20px;
+  background:radial-gradient(120% 60% at 50% 0%,#4a0a10 0%,#1c0608 52%,#070707 100%);
+  box-shadow:0 30px 80px rgba(0,0,0,.65),0 0 60px rgba(224,20,30,.2);display:grid;gap:10px;animation:jpIn .6s cubic-bezier(.2,1.4,.4,1)}
+.jp-card::before{content:"";position:absolute;inset:-3px;border-radius:27px;padding:3px;pointer-events:none;
+  background:conic-gradient(from var(--ring),#ffd400,#fff8e8 12%,#e0141e 25%,#8a6a00 45%,#fff3a0 60%,#e0141e 78%,#ffd400);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);animation:ring 4s linear infinite}
+.jp.big .jp-card{box-shadow:0 30px 80px rgba(0,0,0,.65),0 0 90px var(--glow)}
+.jp.big .jp-card::before{animation-duration:1.6s}
+@keyframes ring{to{--ring:360deg}}
+@keyframes jpIn{0%{transform:scale(.4) translateY(30px);opacity:0}100%{transform:scale(1);opacity:1}}
+.jp-coin{position:absolute;left:50%;top:-46px;width:92px;height:92px;margin-left:-46px;perspective:400px}
+.jp-coin i{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6cf,#ffc95e 45%,#c27a12 80%);
+  box-shadow:inset 0 0 0 4px #e09a1e,inset 0 0 0 7px #fff1c8,0 8px 24px rgba(0,0,0,.5),0 0 30px var(--glow);display:grid;place-items:center;animation:coin 3.2s ease-in-out infinite;
+  font:400 46px/1 var(--display);color:#7a4306;font-style:normal;text-shadow:0 2px 0 #fff1c8}
+@keyframes coin{0%,62%{transform:rotateY(0)}80%{transform:rotateY(360deg)}100%{transform:rotateY(360deg)}}
+.jp-logo{display:block;height:60px;width:auto;max-width:62%;margin:-4px auto -2px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.7))}
+.jp-ribbon{position:relative;justify-self:center;margin:4px 0 0;padding:8px 26px 6px;background:linear-gradient(180deg,#ff5a52,#e0141e 45%,#a00a12);color:#fff;
+  font-family:var(--display);font-weight:400;font-size:clamp(28px,8.5vw,40px);line-height:1;letter-spacing:.5px;box-shadow:0 6px 0 #7a0008,0 10px 20px rgba(0,0,0,.4)}
+.jp-ribbon::before,.jp-ribbon::after{content:"";position:absolute;top:10px;width:22px;height:100%;background:#7a0008;z-index:-1}
+.jp-ribbon::before{left:-16px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,40% 50%)}
+.jp-ribbon::after{right:-16px;clip-path:polygon(0 0,100% 0,60% 50%,100% 100%,0 100%)}
+.jp.big .jp-ribbon{background:linear-gradient(180deg,#fff1c8,#ffd400 45%,#e08a12);color:#4a2400;box-shadow:0 6px 0 #8a5206,0 10px 20px rgba(0,0,0,.4);animation:jpPulse .9s ease-in-out infinite alternate}
+.jp.big .jp-ribbon::before,.jp.big .jp-ribbon::after{background:#c27a12}
+@keyframes jpPulse{to{transform:scale(1.06)}}
+.jp-sub{justify-self:center;margin:8px 0 0;font:700 12px var(--mono);letter-spacing:1px;color:var(--gold);background:rgba(255,212,0,.10);border:1px solid rgba(255,212,0,.4);padding:4px 12px;border-radius:999px}
+.jp-label{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin:6px 0 -4px}
+.jp-amt{font-family:var(--display);font-weight:400;font-size:clamp(56px,17vw,80px);line-height:1;margin:0;
+  background:linear-gradient(100deg,#e08a12 0%,#fff6cf 18%,#ffd400 32%,#e08a12 50%,#fff6cf 68%,#ffd400 82%,#e08a12 100%) 0 0/200% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 #6b3a04) drop-shadow(0 0 18px rgba(255,212,0,.35));animation:shine 2.4s linear infinite}
+@keyframes shine{to{background-position:-200% 0}}
+.jp-ticket{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;text-align:left;margin:4px 0 0;padding:12px 14px;border-radius:12px;background:rgba(0,0,0,.3);border:1px dashed rgba(255,212,0,.45);font-size:12px}
+.jp-ticket dt{color:var(--muted);letter-spacing:.5px}
+.jp-ticket dd{margin:0;font:700 12px var(--mono);color:var(--paper);text-align:right;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.jp-ticket dd.ref{color:var(--mango);letter-spacing:1px}
+.jp-note{margin:0;font-size:13px;color:var(--paper);display:flex;gap:8px;align-items:center;justify-content:center;text-align:left;line-height:1.35}
+.jp-note svg{flex:none;width:18px;height:18px}
+.jp-claim{position:relative;overflow:hidden;background:linear-gradient(180deg,#fff1c8,#ffd400 40%,#e08a12);color:#4a2400;box-shadow:0 5px 0 #8a5206,0 10px 22px rgba(0,0,0,.4);font-size:19px}
+.jp-claim::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-20deg);animation:sweep 2.2s ease-in-out infinite}
+@keyframes sweep{60%,100%{left:130%}}
+.jp-claim:active{transform:translateY(3px);box-shadow:0 2px 0 #8a5206}
+@media (prefers-reduced-motion:reduce){.jp-burst,.jp-card::before,.jp-coin i,.jp-amt,.jp-claim::after{animation:none}}
+/* T&C modal */
+.modal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.8);backdrop-filter:blur(3px)}
+.modal-card{width:min(560px,100%);max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow:auto;background:var(--booth);border:1px solid var(--line);border-radius:18px;padding:20px 18px 18px;text-align:left;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.modal-card h2{font-family:var(--display);font-weight:400;font-size:24px;margin:0 0 12px;color:var(--chalk)}
+.modal-card ol{margin:0 0 12px;padding-left:22px;display:grid;gap:9px;font-size:13.5px;max-width:65ch}
+.modal-card li::marker{color:var(--mango);font-family:var(--mono);font-size:12px}
+.modal-card .small{font-size:12px;color:var(--muted);margin:0 0 14px}
+.modal-card .btnrow .btn{flex:1}
+.tncbtn{justify-self:center;width:auto}
+/* mechanics */
+.mech{background:linear-gradient(180deg,#141414,#0a0a0a);border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:16px;padding:18px;display:grid;gap:12px}
+.mech h2{font-family:var(--display);font-weight:400;font-size:24px;margin:0;color:var(--paper)}
+.mech-sub{margin:0;color:#ff4f4f;font-weight:800;font-size:13px;letter-spacing:1px;text-transform:uppercase}
+.mech ol{margin:0;padding-left:22px;display:grid;gap:8px;font-size:14px;max-width:65ch}
+.mech li::marker{color:var(--mango);font-family:var(--mono);font-weight:700}
+.mech li b{color:var(--mango)}
+.mech h3{margin:6px 0 0;font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted)}
 
+/* game: Swerte Lights. A black-lacquer fruit machine with gold trim: one red LED display, a ring of 24 lamp cells around a TamasaPH dice panel, and a strip of 8 symbol lamps */
+.play:has(.cab){margin-inline:-8px}
+.cab{position:relative;width:100%;max-width:470px;margin:0 auto;padding:19px 12px 14px;border-radius:18px;display:grid;gap:11px;user-select:none;-webkit-user-select:none;touch-action:manipulation;
+  background:
+    linear-gradient(115deg,transparent 0 30%,rgba(255,255,255,.07) 38%,transparent 46%),
+    radial-gradient(90% 40% at 50% 0%,rgba(224,20,30,.28),transparent 70%),
+    radial-gradient(80% 30% at 50% 100%,rgba(255,212,0,.08),transparent 70%),
+    linear-gradient(180deg,#2a2a2a 0%,#121212 22%,#0a0a0a 70%,#020202 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.18),inset 0 -3px 0 rgba(0,0,0,.6),inset 0 0 0 3px #000,inset 0 0 0 5px #d9a400,inset 0 0 0 6px #fff3a0,inset 0 0 0 7px #8a6a00,inset 0 0 0 9px #000,inset 0 0 0 10px #a00a12,0 0 0 1px #3a2a00,0 16px 34px rgba(0,0,0,.7),0 0 40px rgba(224,20,30,.18)}
+.cab .screw{position:absolute;width:8px;height:8px;margin:3px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff3c8,#c99a3e 55%,#6b4a12);box-shadow:0 1px 1px rgba(0,0,0,.6);z-index:1}
+.cab .screw::after{content:"";position:absolute;left:1px;right:1px;top:3.5px;height:1px;background:#5a3d0c;transform:rotate(35deg)}
+.cab .s1{left:9px;top:9px}.cab .s2{right:9px;top:9px}.cab .s3{left:9px;bottom:9px}.cab .s4{right:9px;bottom:9px}
+/* one BONUS WIN display across the top panel (the CREDIT display was removed; plays left are on the "Play X of N" pill) */
+.leds{display:grid;grid-template-columns:minmax(0,1fr);justify-items:center;padding:0 14px}
+.led{display:grid;gap:4px;text-align:center;width:min(100%,340px)}
+.led>span{font:800 11px/1.2 var(--body);letter-spacing:3px;color:#ffd400;text-shadow:0 1px 0 #000}
+.led .seg{display:flex;justify-content:center;align-items:center;background:linear-gradient(180deg,#1a0404,#0d0202);border-radius:9px;padding:8px 18px 7px;min-width:0;
+  box-shadow:inset 0 3px 8px #000,0 0 0 2px #000,0 0 0 4px #d9a400,0 0 0 5px #000;overflow:hidden}
+.led .seg svg{display:block;height:clamp(34px,10vw,48px);width:auto;max-width:100%;overflow:visible}
+.led .seg .off{fill:#2c0705}
+.led .seg .on{fill:#ff3a2e;filter:drop-shadow(0 0 1.5px rgba(255,70,50,.95)) drop-shadow(0 0 5px rgba(255,40,30,.6))}
+.led .seg.bump .on{animation:ledBump .18s ease-out}
+@keyframes ledBump{0%{filter:brightness(1.8)}100%{filter:none}}
+.board{position:relative;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:repeat(7,auto);gap:4px;padding:6px;border-radius:12px;
+  background:radial-gradient(circle at 50% 50%,#1c1c1c,#060606);box-shadow:inset 0 0 0 2px #000,0 0 0 3px #e6b800,0 0 0 5px #1a1400,inset 0 0 18px rgba(0,0,0,.85)}
+.cell{position:relative;aspect-ratio:1;border-radius:7px;background:linear-gradient(180deg,#ffffff,#e9e6df);box-shadow:inset 0 -2px 0 rgba(0,0,0,.16),inset 0 0 0 1px rgba(0,0,0,.45);transition:background .1s,box-shadow .1s}
+.cell svg{position:absolute;left:9%;top:17%;width:74%;height:74%;overflow:visible}
+.lamp{position:absolute;right:5%;top:5%;width:23%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#a85050,#5e1010 58%,#2e0505);box-shadow:inset 0 0 0 1px rgba(0,0,0,.55),0 1px 0 rgba(255,255,255,.4)}
+.lit-lamp,.cell.on .lamp,.cell.t1 .lamp,.bet.on .lamp,.bet.win .lamp{background:radial-gradient(circle at 35% 30%,#fff3ea,#ff5040 42%,#c8120a);box-shadow:0 0 6px 2px rgba(255,60,40,.95),0 0 0 1px #7a0a05}
+.cell.on{background:radial-gradient(circle at 50% 55%,#fff,#fff0a8 55%,#ffc24d);box-shadow:0 0 0 2px #fff6c8,0 0 14px 5px rgba(255,214,90,.9);z-index:2}
+.cell.t1{background:linear-gradient(180deg,#fff7dc,#ffe6a6)}
+.cell.t1 .lamp{opacity:.7}
+.cell.t2 .lamp{background:radial-gradient(circle at 35% 30%,#ffb0a0,#b8261a 55%,#5a0a06)}
+.cell.win{animation:cellWin .3s steps(1) 7}
+@keyframes cellWin{50%{background:#fff;box-shadow:0 0 0 3px #e0141e,0 0 24px 9px rgba(224,20,30,.85)}}
+/* idle attract: lamps glow softly in two alternating groups */
+.board.idle .cell .lamp{animation:attract 1.4s steps(1) infinite}
+.board.idle .cell:nth-child(even) .lamp{animation-delay:-.7s}
+@keyframes attract{50%{background:radial-gradient(circle at 35% 30%,#ffc8bc,#d23a2c 50%,#7a1008);box-shadow:0 0 4px 1px rgba(255,60,40,.6)}}
+.board.jack .cell .lamp{animation:jackLamp .36s steps(1) infinite}
+.board.jack .cell:nth-child(even) .lamp{animation-delay:-.18s}
+@keyframes jackLamp{50%{background:radial-gradient(circle at 35% 30%,#fff3ea,#ff5040 42%,#c8120a);box-shadow:0 0 8px 3px rgba(255,60,40,.95)}}
+.center{grid-column:2/7;grid-row:2/7;position:relative;border-radius:9px;overflow:hidden;box-shadow:inset 0 0 0 2px rgba(0,0,0,.6),0 0 0 2px #e6b800;background:#0a0a0a}
+.center .bulbs{animation:bulbs 1.1s steps(1) infinite}
+.center .bulbs.b2{animation-delay:-.55s}
+@keyframes bulbs{50%{fill:#ff3b30}}
+.center>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.center .rays{transform-box:fill-box;transform-origin:center;animation:raySpin 22s linear infinite}
+@keyframes raySpin{to{transform:rotate(360deg)}}
+.center .shine{animation:twinkle 1.8s ease-in-out infinite alternate}
+@keyframes twinkle{to{opacity:.25}}
+.jflash{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:3;background:radial-gradient(closest-side,rgba(40,10,0,.55),transparent)}
+.jflash b{font:400 clamp(30px,10vw,52px)/1 var(--display);letter-spacing:1px;color:#fff1c8;-webkit-text-stroke:2px #8a2a06;text-shadow:0 4px 0 #8a2a06,0 0 22px rgba(255,200,80,.95);animation:jflash .3s steps(1) infinite;rotate:-6deg}
+@keyframes jflash{50%{color:#ffd23f;scale:1.08}}
+.strip{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;padding:8px 8px 9px;border-radius:11px;background:linear-gradient(180deg,#1a1a1a,#060606);box-shadow:inset 0 2px 7px #000,0 0 0 2px #d9a400,0 0 0 3px #000}
+.bet .pv{font:800 10px/1.1 "Baloo 2",system-ui,sans-serif;color:#ffd400;text-shadow:0 1px 0 #000;letter-spacing:-.2px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.bet[data-sym="seven"] .pv{color:#ff5a4e}
+.paynote{margin:6px 0 0;text-align:center;font:700 11px/1.3 "Baloo 2",system-ui,sans-serif;color:#f3e7c0;opacity:.9}
+.paynote b{color:#ffd400}
+@media (max-width:420px){.bet .pv{font-size:8.6px}}
+/* (group highlight class is "lit", not "win": .win is the result panel class) */
+/* strip grouped: JACKPOT (77 ₱177 · BAR BAR ₱77, display only) | ₱16.50 (kundol, star, bell) | ₱8.20 (BAR, cherry, apple, orange); in a WILD round each key shows its wild value and a thin bracket under each group carries the group total */
+.strip{display:flex;align-items:flex-start;gap:9px;padding:8px 7px 6px}
+.sgrp{flex:var(--n) 1 0;min-width:0;display:grid;gap:3px}
+.sgrp .keys{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:4px}
+.sgrp .brk{display:block;height:5px;margin:1px 2px 0;border:1.5px solid rgba(255,212,0,.6);border-top:0;border-radius:0 0 5px 5px}
+.sgrp .gl{font:800 10px/1.1 "Baloo 2",system-ui,sans-serif;letter-spacing:.6px;color:#ffe9a8;text-align:center;white-space:nowrap;text-shadow:0 1px 0 #000;font-variant-numeric:tabular-nums}
+.sgrp.lit .brk{border-color:#fff3a0;box-shadow:0 3px 8px -2px rgba(255,214,90,.9)}
+.sgrp.lit .gl{color:#fff;text-shadow:0 0 8px rgba(255,214,90,.95),0 1px 0 #000}
+/* normal spins show each symbol's normal prize; during a WILD round the strip switches to the wild values (they add up to the group total) */
+.pv .pw,.paynote .pw{display:none}
+.strip.wildvals .pv .pn{display:none}.strip.wildvals .pv .pw{display:inline}
+.strip.wildvals~.paynote .pn{display:none}.strip.wildvals~.paynote .pw{display:inline}
+.sgrp .brk,.sgrp .gl{visibility:hidden}.strip.wildvals .sgrp .brk,.strip.wildvals .sgrp .gl{visibility:visible}
+.strip.wildvals .pv{color:#ffe58a;text-shadow:0 0 6px rgba(255,212,0,.7)}
+/* JACKPOT group: same value in both modes, label always on, no sum bracket */
+.strip .sgrp.jpg .brk{visibility:hidden}.strip .sgrp.jpg .gl{visibility:visible;color:#ffd400;letter-spacing:1.4px;text-shadow:0 0 8px rgba(255,90,60,.9),0 1px 0 #000}
+.strip .sgrp.jpg .bet .pv{color:#ff6a4e;font-weight:900;font-size:11px;text-shadow:0 0 7px rgba(255,80,50,.75),0 1px 0 #000}
+@media (max-width:420px){.strip .sgrp.jpg .bet .pv{font-size:9.6px}}
+@media (max-width:420px){.strip{gap:6px;padding:7px 5px 6px}.sgrp .keys{gap:3px}.sgrp .gl{font-size:9px;letter-spacing:.3px}.bet .pv{letter-spacing:-.45px}}
+.bet{display:grid;justify-items:center;gap:4px}
+.bet .lamp{position:static;width:30%;max-width:11px}
+.bet .key{width:100%;aspect-ratio:1;border-radius:7px;display:grid;place-items:center;background:linear-gradient(180deg,#ffffff,#e3e0d8);box-shadow:0 3px 0 #8a6a00,inset 0 0 0 1px rgba(0,0,0,.45);transition:transform .08s}
+.bet .key svg{width:80%;height:80%;overflow:visible}
+.bet.on .key{background:linear-gradient(180deg,#fff,#ffe58a);transform:translateY(2px);box-shadow:0 1px 0 #8a6a00,0 0 10px 2px rgba(255,214,90,.8)}
+.bet.win .key{background:radial-gradient(circle,#fff,#ffe58a 60%,#ffd400);box-shadow:0 3px 0 #8a6a00,0 0 14px 4px rgba(255,214,90,.95);animation:betWin .8s ease-in-out infinite alternate}
+@keyframes betWin{to{filter:brightness(1.15);transform:scale(1.07)}}
+.cab .plate{justify-self:center;margin:-2px 0 -3px;font:400 13px/1 var(--display);letter-spacing:3px;color:#ffd400;text-shadow:0 1px 0 #000,0 0 8px rgba(255,190,90,.4)}
+/* chunky arcade START button */
+.acts{justify-content:center}
+.btn.startbtn{flex:0 1 300px;font-family:var(--display);font-weight:400;font-size:32px;letter-spacing:4px;padding:15px 22px 11px;border-radius:999px;color:#fff;text-shadow:0 2px 0 #7a0a05;
+  background:radial-gradient(120% 95% at 50% 18%,#ff9e8e,#ff3b30 46%,#b3130b);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.5),inset 0 -3px 0 rgba(0,0,0,.25),0 7px 0 #7a0a05,0 0 0 4px #000,0 0 0 6px #d9a400,0 16px 28px rgba(0,0,0,.45);
+  animation:startPulse 1s ease-in-out infinite alternate;transition:transform .07s,box-shadow .07s}
+.btn.startbtn:active,.btn.startbtn.pressed{transform:translateY(6px);box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 1px 0 #7a0a05,0 0 0 4px #000,0 0 0 6px #d9a400,0 6px 12px rgba(0,0,0,.4);animation:none}
+@keyframes startPulse{to{filter:brightness(1.14) drop-shadow(0 0 10px rgba(255,80,60,.55))}}
+.acts .btn.startbtn+.btn.ghost{flex:0 0 auto}
+/* WILD cells: black tile, spinning gold star burst, gold WILD lettering with a red outline, gold/red pulsing glow */
+.cell.wild{background:radial-gradient(circle at 50% 42%,#3a3a3a,#141414 62%,#000);box-shadow:inset 0 0 0 1px rgba(255,230,140,.75),0 0 0 2px #ffd400,0 0 9px 2px rgba(255,190,60,.65);animation:wildGlow 1.5s ease-in-out infinite alternate;z-index:1}
+.cell.wild svg{left:0;top:0;width:100%;height:100%}
+.cell.wild .lamp{display:none}
+.cell.wild .wb{transform-box:fill-box;transform-origin:center;animation:raySpin 10s linear infinite}
+@keyframes wildGlow{to{box-shadow:inset 0 0 0 1px rgba(255,230,140,.95),0 0 0 2px #ff2a2a,0 0 16px 5px rgba(255,40,40,.75)}}
+.cell.wild.on{background:radial-gradient(circle at 50% 45%,#fff,#fff3a0 45%,#ffd400);box-shadow:0 0 0 2px #fff6c8,0 0 16px 6px rgba(255,214,90,.95);z-index:2}
+.cell.wild.wildon{animation:wildLand .26s steps(1) infinite;z-index:3}
+@keyframes wildLand{50%{background:radial-gradient(circle,#fff,#ffe58a 50%,#ff2a2a);box-shadow:0 0 0 3px #fff,0 0 28px 12px rgba(255,60,50,.95)}}
+.cell.hit{z-index:3;background:radial-gradient(circle at 50% 55%,#fff,#ffe58a 55%,#ffd400);box-shadow:0 0 0 2px #ff2a2a,0 0 14px 5px rgba(255,40,40,.85);animation:hitPop .45s ease-out}
+@keyframes hitPop{0%{transform:scale(1.35)}100%{transform:none}}
+.cell .pill{position:absolute;left:50%;bottom:-4px;translate:-50% 0;z-index:5;white-space:nowrap;font:400 clamp(11px,3.1vw,15px)/1 var(--display);letter-spacing:.3px;padding:4px 7px 2px;border-radius:999px;color:#4a2400;background:linear-gradient(180deg,#fff6cf,#ffd400);box-shadow:0 0 0 2px #6a0008,0 4px 10px rgba(0,0,0,.5);animation:pillUp .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pillUp{0%{transform:translateY(10px) scale(.4);opacity:0}100%{transform:none;opacity:1}}
+.jflash.wild{background:radial-gradient(closest-side,rgba(30,2,2,.8),rgba(30,2,2,.3) 75%,transparent)}
+.jflash.wild b{-webkit-text-stroke:2px #5a0006;text-shadow:0 4px 0 #5a0006,0 0 24px rgba(255,40,40,.95);animation:wildTxt .45s steps(1) infinite}
+@keyframes wildTxt{0%{color:#ffe14d;scale:1}33%{color:#ff2a2a;scale:1.1}66%{color:#ffd400;scale:1.04}}
+.strip.allblink .bet .lamp{animation:jackLamp .36s steps(1) infinite}
+.strip.allblink .bet:nth-child(even) .lamp{animation-delay:-.18s}
+.wtot{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:4px;pointer-events:none;z-index:4;background:radial-gradient(closest-side,rgba(30,2,2,.88),rgba(30,2,2,.45) 75%,transparent)}
+.wtot small{font:400 clamp(15px,4.6vw,22px)/1 var(--display);letter-spacing:2px;color:#fff;text-shadow:0 2px 0 #6a0008,0 0 10px rgba(255,40,40,.9)}
+.wtot b{font:400 clamp(34px,11vw,58px)/1 var(--display);color:#ffe58a;-webkit-text-stroke:2px #7a3d04;text-shadow:0 4px 0 #7a3d04,0 0 22px rgba(255,200,80,.9);animation:pop .4s ease-out}
+.wtot .wrays{position:absolute;left:50%;top:50%;width:170%;aspect-ratio:1;translate:-50% -50%;z-index:-1;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg,rgba(255,214,90,.5) 0 7deg,rgba(255,40,40,.18) 7deg 10deg,transparent 10deg 18deg);
+  -webkit-mask-image:radial-gradient(closest-side,#000 18%,transparent 68%);mask-image:radial-gradient(closest-side,#000 18%,transparent 68%);animation:raySpin 7s linear infinite}
+.wtot{isolation:isolate}
+.wtot b{animation:wtotIn .6s cubic-bezier(.2,1.6,.4,1)}
+@keyframes wtotIn{0%{transform:scale(2.4);opacity:0}100%{transform:none;opacity:1}}
+/* wild v2: ₱777 tease, streak trail, speed lines, REVERSE flash, slow-mo spotlight + heartbeat, hit slam with shock ring and coin burst */
+.jflash{place-content:center;gap:12px}
+.jflash .tease{justify-self:center;font:400 clamp(13px,3.9vw,19px)/1 var(--display);font-style:normal;letter-spacing:1.5px;white-space:nowrap;color:#4a2400;padding:7px 13px 5px;border-radius:9px;
+  background:linear-gradient(180deg,#fff6cf,#ffd23f 50%,#f0a00a);box-shadow:0 0 0 2px #6a0008,0 0 0 4px #ffd400,0 0 0 6px #6a0008,0 0 24px 4px rgba(255,210,80,.85);animation:tease .5s steps(1) infinite}
+.jflash .tease u{text-decoration:none;color:#c8102e;font-size:1.25em;animation:teaseU .5s steps(1) infinite}
+@keyframes teaseU{50%{color:#ffd400}}
+@keyframes tease{50%{background:linear-gradient(180deg,#ff5a52,#e0141e 50%,#a00a12);color:#fff;box-shadow:0 0 0 2px #6a0008,0 0 0 4px #ffd400,0 0 0 6px #6a0008,0 0 30px 6px rgba(255,40,40,.9)}}
+.board.wildrun .cell.on{background:radial-gradient(circle at 50% 50%,#fff,#fff6c8 40%,#ffe14d);box-shadow:0 0 0 2px #fff,0 0 18px 7px rgba(255,236,120,.95),0 0 34px 10px rgba(255,40,40,.55);z-index:4}
+.board.wildrun .cell.t1{background:radial-gradient(circle at 50% 55%,#fff,#ff8a80 55%,#ff2a2a);box-shadow:0 0 12px 4px rgba(255,40,40,.85);z-index:3}
+.board.wildrun .cell.t2{background:linear-gradient(180deg,#ffe3e0,#ffb0a8);box-shadow:0 0 9px 2px rgba(255,40,40,.6);z-index:2}
+.board.wildrun .cell.t3{background:linear-gradient(180deg,#fffbe0,#ffe680);box-shadow:0 0 8px 2px rgba(255,212,0,.55)}
+.board.wildrun .cell.t4{background:linear-gradient(180deg,#fffdf0,#fff1b0);box-shadow:0 0 5px 1px rgba(255,212,0,.35)}
+.board.wildrun .cell.t1 svg,.board.wildrun .cell.t2 svg{filter:blur(.6px)}
+.center .spd{position:absolute;left:50%;top:50%;width:150%;aspect-ratio:1;translate:-50% -50%;pointer-events:none;z-index:1;opacity:0;transition:opacity .2s;mix-blend-mode:screen;
+  background:repeating-conic-gradient(from 0deg,rgba(255,250,220,.65) 0 1.4deg,transparent 1.4deg 9deg,rgba(255,212,0,.5) 9deg 10.2deg,transparent 10.2deg 18deg);
+  -webkit-mask-image:radial-gradient(closest-side,transparent 26%,#000 72%);mask-image:radial-gradient(closest-side,transparent 26%,#000 72%);animation:raySpin .7s linear infinite}
+.board.whip .center .spd{opacity:.9}
+.board.whip.ccw .center .spd{animation-direction:reverse}
+.board.whip .center>svg{filter:saturate(1.2) brightness(.8)}
+.rev{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:4px;pointer-events:none;z-index:4;background:radial-gradient(closest-side,rgba(20,0,0,.7),transparent);opacity:0}
+.rev svg{width:clamp(58px,17vw,86px);height:auto;filter:drop-shadow(0 0 6px #ff2a2a) drop-shadow(0 0 14px #ffd400)}
+.rev.ccw svg{transform:scaleX(-1)}
+.rev b{font:400 clamp(18px,5.6vw,28px)/1 var(--display);letter-spacing:2px;color:#fff;-webkit-text-stroke:1.5px #5a0006;text-shadow:0 3px 0 #5a0006,0 0 16px #ffd400}
+.rev.go{animation:revIn .64s ease-out forwards}
+.rev.go svg{animation:revSpin .64s cubic-bezier(.2,.8,.2,1)}
+@keyframes revIn{0%{opacity:0;transform:scale(1.7)}18%{opacity:1;transform:scale(1)}75%{opacity:1}100%{opacity:0;transform:scale(.92)}}
+@keyframes revSpin{from{rotate:-220deg}to{rotate:0deg}}
+.board.rewind{animation:rewindFx .4s ease-out}
+@keyframes rewindFx{0%{filter:brightness(1.6) contrast(1.15)}100%{filter:none}}
+.board.rewind .center>svg{animation:rewindTv .4s steps(4)}
+@keyframes rewindTv{0%{filter:brightness(1.5) saturate(1.3) hue-rotate(-18deg)}50%{filter:brightness(.8) saturate(1.1) hue-rotate(-8deg)}100%{filter:none}}
+.board{transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.cab{transition:box-shadow .45s}
+.cab.slowmo{box-shadow:inset 0 2px 0 rgba(255,255,255,.18),inset 0 -3px 0 rgba(0,0,0,.6),inset 0 0 0 3px #000,inset 0 0 0 5px #d9a400,inset 0 0 0 6px #fff3a0,inset 0 0 0 7px #8a6a00,inset 0 0 0 9px #000,inset 0 0 0 10px #a00a12,0 0 0 100vmax rgba(0,0,0,.66),0 0 60px 20px rgba(224,20,30,.4)}
+.cab.slowmo .board{transform:scale(1.035)}
+.board .cell{transition:background .1s,box-shadow .1s,filter .3s}
+.board.slowmo .cell:not(.on):not(.hit){filter:saturate(.35) brightness(.55)}
+.board.slowmo .center>svg{filter:saturate(.4) brightness(.45);transition:filter .3s}
+.board.wildrun .cell.on{transition:none}
+.board.slowmo .cell.on{transform:scale(1.14);z-index:5;filter:none;animation:none;background:radial-gradient(circle at 50% 50%,#fff,#fff6c8 45%,#ffe14d);box-shadow:0 0 0 3px #fff,0 0 22px 9px rgba(255,236,120,.95),0 0 44px 14px rgba(255,40,40,.6)}
+/* SLOW-MO label removed (owner request) */.board.slowmo .center::after{display:none!important}
+.board.slowmo .center::after{content:"SLOW-MO";position:absolute;left:50%;bottom:9%;translate:-50% 0;font:400 clamp(11px,3.2vw,15px)/1 var(--display);letter-spacing:3px;color:#ffe680;padding:5px 10px 3px;border-radius:999px;border:1px solid rgba(255,40,40,.7);background:rgba(30,0,0,.55);z-index:4}
+.board.slowmo .center::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(closest-side,transparent 40%,rgba(0,0,0,.75))}
+.board.beat .center{animation:beat .34s ease-out}
+@keyframes beat{0%{transform:scale(1)}18%{transform:scale(1.035)}40%{transform:scale(.995)}60%{transform:scale(1.02)}100%{transform:scale(1)}}
+.cell.slam{animation:slam .6s cubic-bezier(.2,1.6,.4,1)!important;z-index:6}
+@keyframes slam{0%{transform:scale(2);filter:brightness(2.4)}35%{transform:scale(.86)}100%{transform:none;filter:none}}
+.cell.slam::after{content:"";position:absolute;inset:-5px;border-radius:12px;border:3px solid #fff6c8;box-shadow:0 0 18px 6px rgba(255,40,40,.9);animation:shock .6s ease-out forwards;pointer-events:none}
+@keyframes shock{0%{transform:scale(.6);opacity:1}100%{transform:scale(2.6);opacity:0}}
+.cell .cn{position:absolute;left:50%;top:50%;width:13px;height:13px;margin:-6.5px;border-radius:50%;z-index:7;pointer-events:none;
+  background:radial-gradient(circle at 35% 30%,#fff6cf,#ffc95e 50%,#c27a12);box-shadow:0 0 0 1px #8a5206,0 0 6px rgba(255,200,80,.8);animation:cn .9s cubic-bezier(.15,.7,.3,1) forwards}
+@keyframes cn{0%{transform:translate(0,0) scale(.4);opacity:1}70%{opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1) rotateY(540deg);opacity:0}}
+.board.shake{animation:shake .32s}
+@keyframes shake{20%{translate:4px -3px}40%{translate:-4px 2px}60%{translate:3px 2px}80%{translate:-2px -1px}}
+.cell.hit .pill{z-index:8}
+.play:has(.cab.slowmo){z-index:3}
+@media (prefers-reduced-motion:reduce){.cab *,.cab{animation:none!important;transition:none!important}.btn.startbtn{animation:none}.rev{opacity:1}}
+
+/* booth backdrop: black stage, red spotlight from the top, gold floor glow, faint dice pattern, drifting gold/red light (canvas) */
+.booth{background:
+  radial-gradient(70% 32% at 50% 0%,rgba(224,20,30,.30),transparent 72%),
+  radial-gradient(60% 30% at 50% 40%,rgba(255,212,0,.08),transparent 72%),
+  radial-gradient(120% 60% at 50% 100%,rgba(0,0,0,.6),transparent 70%),
+  url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='88' height='88' viewBox='0 0 88 88'><g fill='none' stroke='%23ffd400' stroke-opacity='.06' stroke-width='1.2'><rect x='8' y='10' width='22' height='22' rx='5' transform='rotate(-14 19 21)'/><rect x='54' y='52' width='20' height='20' rx='5' transform='rotate(18 64 62)'/></g><g fill='%23ffffff' fill-opacity='.05'><circle cx='14' cy='16' r='1.8'/><circle cx='19' cy='21' r='1.8'/><circle cx='24' cy='26' r='1.8'/><circle cx='60' cy='58' r='1.6'/><circle cx='68' cy='66' r='1.6'/></g></svg>") 0 0/88px 88px,
+  linear-gradient(180deg,#161616 0%,#0b0b0b 45%,#050505 100%);
+  box-shadow:inset 0 0 60px rgba(0,0,0,.6),0 0 0 1px #2a2416,0 18px 40px rgba(0,0,0,.6)}
+.boothfx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.booth>*:not(.boothfx):not(.soundbtn){position:relative;z-index:1}
+
+@media (prefers-reduced-motion:reduce){.cheer.pop,.jp-card,.jp.big .jp-ribbon,.agree.nudge,.reveal,.reveal::before,.reveal .jtag{animation:none}}
+
+/* Themed animated backdrop (same as TamasaPH Teks Showdown): black stage, sweeping red and gold spotlights, faint floating dice, gold sparkles, rising embers */
+.bgfx{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.bgfx>*{position:absolute}
+.bgfx::before{content:"";position:absolute;inset:0;background:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1.5px) 0 0/22px 22px;-webkit-mask:radial-gradient(80% 70% at 50% 30%,#000,transparent);mask:radial-gradient(80% 70% at 50% 30%,#000,transparent)}
+.bgfx::after{content:"";position:absolute;left:0;right:0;bottom:0;height:28vh;background:linear-gradient(180deg,transparent,rgba(224,20,30,.08) 60%,rgba(0,0,0,.6))}
+.bgfx .beam{top:-6vh;width:46vw;min-width:260px;height:115vh;transform-origin:50% 0;-webkit-mask:linear-gradient(180deg,#000,transparent 85%);mask:linear-gradient(180deg,#000,transparent 85%);clip-path:polygon(44% 0,56% 0,100% 100%,0 100%);animation:beamSway var(--t,14s) ease-in-out infinite alternate}
+.bgfx .beam.b1{left:-8vw;background:linear-gradient(180deg,rgba(224,20,30,.22),rgba(224,20,30,.04));--r0:-24deg;--r1:-8deg}
+.bgfx .beam.b2{right:-8vw;background:linear-gradient(180deg,rgba(255,212,0,.13),rgba(255,212,0,.02));--r0:22deg;--r1:6deg;--t:17s}
+@keyframes beamSway{from{rotate:var(--r0)}to{rotate:var(--r1)}}
+.bgfx .glow{left:50%;bottom:-12vh;width:140vw;height:50vh;translate:-50% 0;border-radius:50%;background:radial-gradient(closest-side,rgba(224,20,30,.20),rgba(255,212,0,.05) 60%,transparent);animation:breathe 6s ease-in-out infinite alternate}
+@keyframes breathe{to{opacity:.6;scale:1.04}}
+.bgfx .dz{width:var(--w);height:var(--w);border-radius:22%;background:radial-gradient(circle at 28% 28%,#fff 0 8%,transparent 9.5%),radial-gradient(circle at 50% 50%,#fff 0 8%,transparent 9.5%),radial-gradient(circle at 72% 72%,#fff 0 8%,transparent 9.5%),linear-gradient(145deg,var(--c),var(--c2));box-shadow:0 0 0 2px #000,0 0 0 4px var(--gold),0 14px 30px rgba(0,0,0,.6);opacity:var(--o);filter:blur(var(--b));animation:bgf var(--t) ease-in-out infinite alternate;animation-delay:var(--d)}
+@keyframes bgf{from{transform:translateY(0) rotate(var(--r0))}to{transform:translateY(-22px) rotate(var(--r1))}}
+.bgfx .sp{width:6px;height:6px;background:var(--gold);clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);scale:var(--k,1.6);opacity:0;animation:tw var(--t,3.4s) ease-in-out infinite;animation-delay:var(--d,0s)}
+.bgfx .st{width:2px;height:2px;border-radius:50%;background:#fff;opacity:.4}
+.bgfx .fl{bottom:-10px;width:4px;height:4px;border-radius:50%;background:var(--c,#ffd400);box-shadow:0 0 8px 2px var(--g,rgba(255,212,0,.6));opacity:0;animation:rise var(--t,12s) linear infinite;animation-delay:var(--d,0s)}
+@keyframes tw{0%,100%{opacity:0}50%{opacity:.9}}
+@keyframes rise{0%{transform:translate(0,0);opacity:0}10%{opacity:.8}100%{transform:translate(var(--dx,20px),-70vh);opacity:0}}
+@media (prefers-reduced-motion:reduce){.bgfx *,.bgfx::before,.bgfx::after{animation:none!important}.bgfx .sp{opacity:.6}}
+</style>
+<style>
+/* server-driven build additions (the first rule replaces the artifact shell's base sheet the export relied on) */
+[hidden]:not([hidden=until-found i]){display:none!important}img{max-width:100%}
+.who{color:var(--gold);font-size:14px;margin:4px 0 0}
+.offerbox{border-radius:12px;padding:12px 14px;border:1px solid var(--line);background:rgba(0,0,0,.25);font-size:14px;text-align:left}
+.offerbox strong{color:var(--mango)}.offerbox p{margin:6px 0 0}.offerbox .small{font-size:12px;color:var(--muted)}
+.ltbl{width:100%;border-collapse:collapse;font-size:13px}.ltbl th{text-align:left;color:var(--muted);font-weight:600;padding:4px 6px}.ltbl td{padding:4px 6px;border-top:1px solid var(--line)}
+#goBtn:disabled{cursor:not-allowed;opacity:.55}
+</style>
+</head>
+<body>
+<div class="bgfx" id="bgfx" aria-hidden="true">
+  <div class="beam b1"></div>
+  <div class="beam b2"></div>
+  <div class="glow"></div>
+  <i class="dz" style="left:4%;top:12%;--w:36px;--c:#3a3a3a;--c2:#050505;--o:0.27;--b:2.5px;--t:11s;--d:-8s;--r0:-22deg;--r1:-17deg"></i>
+  <i class="dz" style="left:89%;top:9%;--w:40px;--c:#ff4a42;--c2:#8a0008;--o:0.22;--b:1px;--t:10s;--d:-3s;--r0:22deg;--r1:8deg"></i>
+  <i class="dz" style="left:8%;top:46%;--w:34px;--c:#ff4a42;--c2:#8a0008;--o:0.25;--b:0px;--t:8s;--d:-2s;--r0:-17deg;--r1:-6deg"></i>
+  <i class="dz" style="left:86%;top:38%;--w:42px;--c:#3a3a3a;--c2:#050505;--o:0.28;--b:0px;--t:7s;--d:-4s;--r0:9deg;--r1:20deg"></i>
+  <i class="dz" style="left:3%;top:78%;--w:31px;--c:#ff4a42;--c2:#8a0008;--o:0.27;--b:2.5px;--t:11s;--d:-8s;--r0:-5deg;--r1:-15deg"></i>
+  <i class="dz" style="left:92%;top:72%;--w:38px;--c:#3a3a3a;--c2:#050505;--o:0.24;--b:0px;--t:7s;--d:-4s;--r0:-13deg;--r1:14deg"></i>
+  <i class="dz" style="left:22%;top:88%;--w:30px;--c:#3a3a3a;--c2:#050505;--o:0.22;--b:1.5px;--t:9s;--d:-5s;--r0:-19deg;--r1:-4deg"></i>
+  <i class="dz" style="left:75%;top:90%;--w:32px;--c:#ff4a42;--c2:#8a0008;--o:0.3;--b:1.5px;--t:9s;--d:-9s;--r0:24deg;--r1:18deg"></i>
+</div>
 <div class="stack">
   <section class="panel" id="admin" hidden>
-    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap">
-      <h2>Game control</h2><span class="sync" id="sync">Not saved</span>
-    </div>
-    <div id="adminGate">
-      <p class="hint">Kailangan ng password para dito. Tanungin ang supervisor para sa password.</p>
-      <div class="linkrow"><input id="adminPass" type="password" autocomplete="off" style="font-weight:700;flex:1;min-width:0"><button class="btn small" id="adminUnlockBtn" type="button">Unlock</button></div>
-      <p class="hint" id="adminGateErr"></p>
-    </div>
-    <div id="adminBody" hidden>
-      <p class="hint">Bawat pagbabago dito ay makikita agad sa player link.</p>
-      <label class="field code"><span>Pangalan ng Player</span><input id="pname" type="text" autocomplete="off" spellcheck="false"></label>
-      <label class="field"><span>Deposit amount</span><div class="money"><span>₱</span><input id="deposit" type="number" min="0" step="1" inputmode="numeric"></div></label>
+    <h2>Link maker · Swerte Lights</h2>
+    <p class="hint" id="adminGate">Checking access…</p>
+    <div id="adminBody" hidden style="display:grid;gap:14px">
+      <p class="hint">Type the player's <b>username, user ID, or game ID</b>. The system reads their Success deposits (<span class="hrs">1:00 PM–9:00 PM</span>) and turnover for today straight from the TamasaPH database. <b>Every <span class="perplay">₱200</span> deposit = 1 play (max <span class="maxplays">5</span>/day); each play unlocks after 1× turnover on <span class="wgame">any game</span>.</b> The server draws the prize (₱8.20 / ₱16.50, with a WILD round on some plays) and records it in the wins ledger at once.</p>
+      <label class="field"><span>Player username, user ID, or game ID</span><div class="btnrow"><input class="inp" id="acct" type="text" autocomplete="off" spellcheck="false" placeholder="e.g. juan123 or 482910" style="flex:1;min-width:0"><button class="btn small" id="lookupBtn" type="button">Check</button></div></label>
       <div class="tierbox" id="aTier"></div>
-      <button class="btn ghost" id="aGenerate" type="button" style="width:100%">Generate link for this name</button>
-      <div class="field"><span>Player link</span>
-        <div class="linkrow"><code id="plink"></code><button class="btn small" id="copyBtn" type="button">Copy</button></div>
+      <div class="offerbox" id="offerBox" hidden></div>
+      <div class="btnrow" id="makeRow" hidden><button class="btn small" id="makeLink" type="button">Make link</button></div>
+      <div class="field" id="linkField" hidden><span>Player link</span>
+        <div class="linkrow"><code id="plink"></code></div>
+        <div class="btnrow"><button class="btn small" id="copyLink" type="button">Copy link</button><button class="btn small" id="copyMsg" type="button">Copy message + link</button><button class="btn small ghost" id="newLink" type="button">New link</button></div>
       </div>
-      <button class="btn ghost" id="aReset" type="button">Reset player's game</button>
       <p class="hint" id="aMsg"></p>
+      <div class="offerbox" id="capBox"><strong>Daily budget</strong><p id="capText">…</p><div class="btnrow"><div class="money" style="flex:1;min-width:0"><span>₱</span><input class="inp" id="capInput" type="number" min="0" step="100" inputmode="numeric" placeholder="new budget for today"></div><button class="btn small ghost" id="capBtn" type="button">Raise budget</button></div><p class="hint" id="capMsg"></p></div>
+      <div class="offerbox" id="stopBox" style="border-color:var(--bad)"><strong>Emergency stop</strong><p id="stopText">…</p><div class="btnrow"><button class="btn small" id="stopBtn" type="button" style="background:var(--bad);color:#fff">STOP ALL</button></div><p class="hint" id="stopMsg">Blocks every new link and play for all players until resumed.</p></div>
+      <div class="offerbox" id="linksTodayBox"><div class="btnrow" style="justify-content:space-between"><strong>Links today</strong><button class="btn small ghost" id="linksRefreshBtn" type="button">Refresh</button></div><div id="linksTodayList"><p class="hint">Loading…</p></div></div>
     </div>
   </section>
-  <p class="preview-label" id="previewLabel" hidden>Live preview ng player view</p>
-
+  <p class="preview-label" id="previewLabel" hidden>Player view preview</p>
   <header class="mark">
-    <img class="logo" src="data:image/png;base64,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" alt="Tamasa">
-    <p>Community Games — mga premyo hanggang ₱777!</p>
+    <div class="logo"><img class="lg" id="wordmark" src="logo.png" alt="TamasaPH" width="410" height="217"></div>
+    <p>Community Games</p>
   </header>
 
   <main class="booth" id="booth" aria-live="polite">
+    <canvas class="boothfx" id="boothfx" aria-hidden="true"></canvas>
     <button class="soundbtn" id="soundBtn" type="button" aria-pressed="true">Sound on</button>
     <div>
-      <p class="brand" id="brand">Tamasa</p>
-      <h2 class="game" id="gameTitle">TRIPLE TAMA</h2>
+      <p class="eyebrow" id="eyebrow">TamasaPH · Lucky Lights Bonus</p>
+      <h1 class="game" id="gameTitle">SWERTE LIGHTS</h1>
       <p class="range" id="range"></p>
+      <p class="who" id="who" hidden></p>
     </div>
-        <p class="cheer" id="cheer"></p>
+    <p class="count" id="count" hidden></p>
+    <p class="demo" id="demoTag" hidden>DEMO · run the lights for fun — you need a link from your agent to win a real bonus</p>
+    <p class="cheer" id="cheer"></p>
     <div class="play" id="play"></div>
-    <label class="agree" id="agreeLbl"><input type="checkbox" id="agree"><span>Nabasa ko at sang-ayon ako sa <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button> ng Triple Tama.</span></label>
-    <div class="acts" id="acts"><button class="btn" id="goBtn" type="button">Pumili muna: Kara o Krus</button><button class="btn ghost" id="resetBtn" type="button">Reset</button></div>
+    <label class="agree" id="agreeLbl"><input type="checkbox" id="agree"><span>I have read and agree to the Swerte Lights <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button>.</span></label>
+    <div class="acts"><button class="btn startbtn" id="goBtn" type="button" hidden>START</button><button class="btn ghost" id="resetBtn" type="button" hidden>Reset</button></div>
     <div class="win" id="win" hidden>
-      <small>Bonus mo</small>
+      <small>Your bonus</small>
       <strong id="amt"></strong>
       <p id="winNote"></p>
+      <button type="button" class="linkbtn" id="showCard">Show reward card</button>
+    </div>
+    <div class="summary" id="summary" hidden>
+      <h2>All plays used!</h2>
+      <small class="hint">Total bonus won</small>
+      <strong id="sumAmt"></strong>
+      <ul id="sumList"></ul>
+      <p>Your wins are recorded automatically. The bonus is credited the following day at 1:00 PM.</p>
     </div>
     <p class="note" id="note"></p>
   </main>
 
+  <section class="mech" id="mech" aria-labelledby="mechTitle">
+    <h2 id="mechTitle">Mechanics</h2>
+    <p class="mech-sub">TamasaPH Lucky Lights Bonus · Community</p>
+    <ol id="mechSteps"></ol>
+    <h3>How to play</h3>
+    <ol id="howSteps"></ol>
+    <button class="btn small ghost tncbtn" id="tncBtn" type="button">Read the Terms &amp; Conditions</button>
+  </section>
+
   <div class="jp" id="jp" role="dialog" aria-modal="true" aria-labelledby="jpTitle" hidden>
+    <div class="jp-burst"></div>
     <canvas id="confetti"></canvas>
     <div class="jp-card">
-      <p class="jp-title" id="jpTitle">YOU WON!</p>
+      <div class="jp-coin" aria-hidden="true"><i>₱</i></div>
+      <img class="jp-logo" id="jpLogo" alt="TamasaPH">
+      <p class="jp-ribbon" id="jpTitle">YOU WON!</p>
       <p class="jp-sub" id="jpSub"></p>
-      <p class="jp-label">Reward mo</p>
+      <p class="jp-label">Your reward</p>
       <p class="jp-amt" id="jpAmt"></p>
-      <p class="jp-note">I-screenshot ito at i-send sa agent mo para ma-credit ang reward.</p>
-      <button class="btn" id="jpClose" type="button">Claim reward</button>
+      <dl class="jp-ticket" id="jpTicket"></dl>
+      <p class="jp-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>Your win is recorded. The bonus is credited the following day at 1:00 PM after verification.</span></p>
+      <button class="btn jp-claim" id="jpClose" type="button">Claim reward</button>
     </div>
   </div>
 
-  <details class="tnc" id="tnc">
-    <summary>Triple Tama Terms &amp; Conditions</summary>
-    <h3>Terms &amp; Conditions</h3>
-    <ol>
-      <li>Open to verified Tamasa players aged 21 and above. Self-excluded, restricted or unverified accounts are not eligible.</li>
-      <li>A game is unlocked by a qualifying deposit of at least ₱200, made after you are contacted by a Tamasa agent, and within 72 hours of that contact. Pending, failed or reversed deposits do not qualify.</li>
-      <li>The prize pool is fixed: ₱10, ₱27, or ₱57, shown on the game page. You call Kara or Krus and three coins are tossed; if the three coins do not all match, they are tossed again automatically. When all three match, you win ₱27 if they show your call or the ₱10 consolation if they do not — matching on the very first toss is the ₱57 Triple Tama jackpot, the rarest result.</li>
-      <li>One toss sequence per qualifying deposit.</li>
-      <li>Results are random and final once the coins are tossed. Refreshing the page, reopening the link or using another device does not give another turn. Only the result confirmed by your agent counts.</li>
-      <li>Send a screenshot of your result to your agent. The bonus is credited after the agent verifies your deposit and result, within the time your agent announces.</li>
-      <li>The bonus is subject to the turnover requirement set by Tamasa before it can be withdrawn.</li>
-      <li>One claim per player per promo cycle. Multiple or linked accounts, or any attempt to abuse this promo, void the bonus and may lead to action on the account.</li>
-      <li>Tamasa may change, suspend or end this promo at any time. Tamasa management's decision on any dispute is final.</li>
-      <li>Play responsibly. Set limits on your deposits and time, and ask for help if gambling stops being fun.</li>
-    </ol>
-    <p class="small">By ticking the agreement box and playing, you accept these Terms &amp; Conditions.</p>
-  </details>
+  <div class="modal" id="tnc" role="dialog" aria-modal="true" aria-labelledby="tncTitle" hidden>
+    <div class="modal-card">
+      <h2 id="tncTitle">Swerte Lights Terms &amp; Conditions</h2>
+      <ol>
+        <li>Open to verified TamasaPH players aged 21 and above. Self-excluded, restricted or unverified accounts are not eligible.</li>
+        <li>Every ₱200 of verified deposit made between 1:00 PM and 9:00 PM gives 1 play (for example ₱400 = 2 plays), up to 5 plays per player per day. Your plays are on the personal link from your agent; your deposits are checked automatically from your account. Pending, failed or reversed deposits do not qualify.</li>
+        <li>Each play unlocks only once your turnover for the day reaches 1× the deposit for that play (₱200 deposit → ₱200 in bets, ₱400 → ₱400, and so on). Bets on any game count. Turnover is read from your account and refreshes every few minutes.</li>
+        <li>The promo runs daily from 1:00 PM to 9:00 PM. Total bonus paid by this promo is capped at ₱15,000 per day for all players; once the cap is reached, new plays wait for the next day.</li>
+        <li>Each play's bonus is set at random by the system the moment you press START: ₱8.20 or ₱16.50. In Swerte Lights the light runs around the board and stops on a symbol of your prize group. On some plays the light lands on WILD and then hits every symbol of one group once; the hits add up to the same prizes. Where the light stops makes no difference to the amount. 77 (₱177), BAR BAR (₱77) and the ₱777 wild tease are display-only and can never be won or collected. This is an animated promo game only, not a bet.</li>
+        <li>Results are final once you press START. Refreshing the page, reopening the link or using another device does not give extra plays or a new bonus; an unclaimed play is shown again as it was.</li>
+        <li>Every win is recorded automatically. The bonus is credited the following day at 1:00 PM after verification and must be wagered 1× (1× wagering) before it can be withdrawn.</li>
+        <li>One claim per play. Multiple or linked accounts or any attempt to abuse this promo void the bonus and may lead to action on the account.</li>
+        <li>TamasaPH may change, suspend or end this promo at any time. TamasaPH management's decision on any dispute is final.</li>
+        <li>Play responsibly. Set limits on your deposits and time, and ask for help if gambling stops being fun.</li>
+      </ol>
+      <p class="small">By ticking the agreement box and playing, you accept these Terms &amp; Conditions.</p>
+      <div class="btnrow"><button class="btn small ghost" id="tncClose" type="button">Close</button><button class="btn small" id="tncAgree" type="button">I agree</button></div>
+    </div>
+  </div>
 </div>
-
 <script>
-// ---------- deposit gate & flat prize pool ----------
-const MIN_DEPOSIT=200;
-const PRIZES=[10,27,57]; // peso amounts, ascending
-const WEIGHTS=[4,95,1]; // % chance matching PRIZES index-for-index, sums to 100
-function qualifies(d){return d>=MIN_DEPOSIT}
-function php(n){return "₱"+Number(n).toLocaleString()}
-function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296}
-function drawStep(){let r=rnd()*100;for(let i=0;i<WEIGHTS.length;i++){r-=WEIGHTS[i];if(r<0)return i}return 0}
-function shuffle(a){for(let k=a.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+// ---------- brand ----------
+// Server-driven build (2026-11-07): the admin looks the player up in the TamasaPH platform database, deposits and turnover
+// are read live, and the prize is drawn by the server (POST /api/play). See API.md. Nothing is decided in this browser.
+let CONF={brand:"tamasa",brandLabel:"TamasaPH",game:"Swerte Lights",perPlay:200,maxPlays:5,turnover:1,dailyCap:15000,depFrom:"13:00",depTo:"21:00",playFrom:"13:00",playUntil:"21:00",
+  prizes:[{amt:8.2,p:90},{amt:16.5,p:10}],wildRate:0.05,wildPrizes:[{amt:8.2,p:95},{amt:16.5,p:5},{amt:777,p:0}],wagerCats:["all"]};
+function hm12(s){const [h,m]=String(s||"00:00").split(":").map(Number);const ap=h>=12?"PM":"AM",hh=((h+11)%12)+1;return hh+":"+String(m||0).padStart(2,"0")+" "+ap}
+function hours(){return hm12(CONF.depFrom)+"–"+hm12(CONF.depTo)}
+// "all" in wagerCats = bets on any game count toward the turnover requirement; otherwise only slot games
+const anyGame=()=>(CONF.wagerCats||[]).some(c=>String(c).toLowerCase()==="all");
+const wagerLabel=()=>anyGame()?"turnover":"slot turnover";
+const wagerRule=()=>anyGame()?"Bets on any game count.":"Only slot games qualify.";
+const BRAND={key:"tamasa-lights",name:"TamasaPH",game:"Swerte Lights",confetti:["#e0141e","#ffd400","#ffffff","#ff4a42","#f5c400"],confettiBig:["#ffd400","#fff3a0","#d9a400","#e0141e","#ffffff"],
+  script:()=>`💡 COMMUNITY GAME — SWERTE LIGHTS
 
-const LABELS=["Talo","Panalo","Triple Tama"];
+🕐 Event Hours: ${hours()}
+
+HOW TO JOIN
+
+• Every ${php(CONF.perPlay)} deposit = 1 FREE PLAY
+• Maximum of ${CONF.maxPlays} FREE PLAYS per player per day.
+• ${anyGame()?"Bets on any game count toward the turnover requirement.":"Only slot games qualify for this promotion."}
+• Each FREE PLAY unlocks once you complete the ${CONF.turnover}× turnover requirement.
+• Request your Swerte Lights link and use your plays within the event hours ${hours()}
+
+🎁 BONUS DISTRIBUTION
+Bonus rewards will be distributed the following day at 1:00 PM.
+
+📌 TERMS & CONDITIONS
+Players must request their game link and use their plays between ${hours()}. Failure to request a link or use the plays before the event ends will invalidate bonus eligibility. Unused plays cannot be claimed or used after the event.`};
+// ---------- shared helpers ----------
 const $=id=>document.getElementById(id);
+// prize groups of the light board. The SYMBOL values are fixed by the board art (each group's symbols add up exactly to its
+// prize, asserted at load), so these stay constants; the DRAW itself happens on the server. The demo draws locally with the
+// same weights, which are refreshed from /api/config at boot.
+const PRIZES=[8.2,16.5];let WEIGHTS=[90,10]; // ₱8.20 group (BAR/cherry/apple/orange) 90%, ₱16.50 group (kundol/star/bell) 10%
+const SYMVAL={bar:250,cherry:220,apple:180,orange:170,kundol:600,star:550,bell:500};
+const JPVAL={seven:177,barbar:77}; // display-only jackpots on the strip: never a stop, never a wild hit
+const CATNAME=["₱8.20 group","₱16.50 group"];
+const BIG=1; // the ₱16.50 group gets the big celebration
+let WILD_RATE=.05;const WILD_PRIZES=[...PRIZES,777];let WILD_WEIGHTS=[95,5,0];const WILD_BIG=1; // ₱777 = display-only tease, never drawn
+function syncOdds(){ // demo-only weights, matched to the server's config by amount (so the demo draws like the real game)
+  const pick=(list,amt)=>{const e=(list||[]).find(p=>Math.abs(Number(p.amt)-amt)<.005);return e?Number(e.p)||0:null};
+  const w=PRIZES.map(a=>pick(CONF.prizes,a));if(w.every(x=>x!=null)&&w.some(x=>x>0))WEIGHTS=w;
+  const ww=WILD_PRIZES.map(a=>pick(CONF.wildPrizes,a));if(ww.every(x=>x!=null)&&ww.some(x=>x>0))WILD_WEIGHTS=ww;
+  if(typeof CONF.wildRate==="number")WILD_RATE=Math.max(0,Math.min(1,CONF.wildRate));
+}
+function php(n){n=Number(n);return "₱"+(Number.isInteger(n)?n.toLocaleString("en-US"):n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}))}
+function php2(n){return "₱"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296}
+function drawFrom(W){let r=rnd()*W.reduce((a,b)=>a+b,0);for(let i=0;i<W.length;i++){r-=W[i];if(r<0)return i}return 0} // a 0-weight entry can never be drawn
+function drawPrize(){return drawFrom(WEIGHTS)}
+function drawWild(){return drawFrom(WILD_WEIGHTS)}
+// a play's bonus in pesos is ALWAYS the server's amount (demo: the local draw); the board layout is cosmetic
+const amtOf=p=>Number(p.amount);
+const bigOf=p=>p.wild?p.wprize>=WILD_BIG:p.prize===BIG;
+const reduce=()=>{try{return matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){return false}};
 function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
-
-// ---------- link parsing ----------
-// #admin / #admin-<code> = control panel; #<code> = player view (default "demo")
-function cleanCode(c){return (c||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,32)||"demo"}
-const rawHash=decodeURIComponent(location.hash.slice(1)).toLowerCase();
-const isAdmin=rawHash==="admin"||rawHash.startsWith("admin-");
-const code=cleanCode(isAdmin?rawHash.slice(6):rawHash);
-
-let cfg={name:"",deposit:100,game:"slot",resetAt:0};
-let live=false;
-function storeKey(){return "tamasa-slot:"+code+":"+(cfg.resetAt||0)+":"+cfg.deposit+":"+cfg.game}
-function loadSaved(){try{return JSON.parse(localStorage.getItem(storeKey())||"null")}catch(e){return null}}
-function persist(state){try{localStorage.setItem(storeKey(),JSON.stringify(state))}catch(e){}}
-
-// ---------- sound (synthesized) ----------
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+// ---------- player links ----------
+// #admin = link maker; #<account>-<hex> = a server-side session for one account/day (made by the link maker); anything else = demo
+let raw="";try{raw=decodeURIComponent(location.hash.slice(1)).toLowerCase()}catch(e){raw=""}
+const mode=raw==="admin"?"admin":/^[a-z0-9]{1,32}-[a-z0-9]{2,8}$/.test(raw)?"player":"demo";
+const code=mode==="player"?raw:"";
+// ---------- sound ----------
 let actx=null,soundOn=true;
-try{soundOn=localStorage.getItem("tamasa-sound")!=="off"}catch(e){}
+try{soundOn=localStorage.getItem(BRAND.key+"-sound")!=="off"}catch(e){}
 function audio(){if(!soundOn)return null;if(!actx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;actx=new AC()}if(actx.state==="suspended")actx.resume();return actx}
 function beep(f,dur,vol,type,delay){const a=audio();if(!a)return;const t=a.currentTime+(delay||0),o=a.createOscillator(),g=a.createGain();o.type=type||"triangle";o.frequency.value=f;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);o.connect(g).connect(a.destination);o.start(t);o.stop(t+dur+.02)}
-function tick(){beep(1800+rnd()*300,.04,.08,"square")}
-function noise(dur,vol,freq){const a=audio();if(!a)return;const n=Math.floor(a.sampleRate*dur),b=a.createBuffer(1,n,a.sampleRate),ch=b.getChannelData(0);for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type="bandpass";f.frequency.value=freq||1200;const g=a.createGain();g.gain.value=vol;s.connect(f).connect(g).connect(a.destination);s.start()}
-function whoosh(sec){const a=audio();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type="sine";o.frequency.setValueAtTime(320,a.currentTime);o.frequency.linearRampToValueAtTime(120,a.currentTime+sec);g.gain.setValueAtTime(0,a.currentTime);g.gain.linearRampToValueAtTime(.08,a.currentTime+.3);g.gain.linearRampToValueAtTime(0,a.currentTime+sec);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+sec+.05)}
+function noise(dur,vol,freq,delay){const a=audio();if(!a)return;const n=Math.floor(a.sampleRate*dur),b=a.createBuffer(1,n,a.sampleRate),ch=b.getChannelData(0);for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type="bandpass";f.frequency.value=freq||1200;const g=a.createGain();g.gain.value=vol;s.connect(f).connect(g).connect(a.destination);s.start(a.currentTime+(delay||0))}
 function fanfare(big){(big?[523.25,659.25,783.99,1046.5,1318.5,1568]:[659.25,783.99,1046.5]).forEach((f,i)=>beep(f,.5,big?.07:.12,big?"square":"triangle",i*.11))}
+function tick(slow){if(slow){beep(1500,.035,.09,"square");beep(750,.05,.05,"triangle")}else beep(1900,.018,.035,"square")}
+function bonusChime(big){[880,1174.7,1568,2093].forEach((f,i)=>beep(f,.22,.1,"square",i*.07));if(big){[1046.5,1318.5,1568,2093,2637].forEach((f,i)=>beep(f,.3,.07,"square",.35+i*.09));noise(.6,.15,3000,.3)}}
+// wild round: rising siren whoop, and a coin ding for each wild hit
+function siren(){const a=audio();if(!a)return;[0,.36,.72].forEach((d,k)=>{const t=a.currentTime+d,o=a.createOscillator(),g=a.createGain();o.type="sawtooth";o.frequency.setValueAtTime(300+k*90,t);o.frequency.exponentialRampToValueAtTime(1400+k*220,t+.32);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.07,t+.05);g.gain.exponentialRampToValueAtTime(.001,t+.35);o.connect(g).connect(a.destination);o.start(t);o.stop(t+.4)});noise(.5,.1,2500,.1)}
+function coin(){beep(1318.5,.07,.1,"square");beep(1975.5,.28,.09,"square",.07)}
+// tape-rewind zip when the light reverses, a heartbeat for the slow-mo crawl, and a heavy slam on each wild hit
+function rewindSnd(){const a=audio();if(!a)return;const t=a.currentTime;[[2400,140,"sawtooth",.05],[1500,80,"square",.03]].forEach(([f0,f1,ty,v])=>{const o=a.createOscillator(),g=a.createGain();o.type=ty;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+.26);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);o.connect(g).connect(a.destination);o.start(t);o.stop(t+.32)});noise(.28,.08,3500)}
+function heart(){beep(68,.13,.35,"sine");beep(52,.16,.26,"sine",.12)}
+function slamSnd(){beep(95,.32,.35,"sine");beep(190,.12,.12,"square");noise(.3,.22,600);coin()}
+function cheerSnd(big){noise(.9,.18,900,.05);noise(.8,.12,1600,.12);fanfare(big)}
 function paintSound(){$("soundBtn").textContent=soundOn?"Sound on":"Sound off";$("soundBtn").setAttribute("aria-pressed",soundOn)}
-$("soundBtn").onclick=()=>{soundOn=!soundOn;try{localStorage.setItem("tamasa-sound",soundOn?"on":"off")}catch(e){}if(!soundOn&&actx)actx.suspend();paintSound()};
+$("soundBtn").onclick=()=>{soundOn=!soundOn;try{localStorage.setItem(BRAND.key+"-sound",soundOn?"on":"off")}catch(e){}if(!soundOn&&actx)actx.suspend();paintSound()};
 paintSound();
-
-function cheer(text){const el=$("cheer");el.textContent=text;el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop")}
-const reduce=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
-function needAgree(){if($("agree").checked)return false;const l=$("agreeLbl");l.classList.remove("nudge");void l.offsetWidth;l.classList.add("nudge");cheer("I-check muna ang T&C.");return true}
-
-// ---------- game state ----------
-let busy=false,viewKey="",state=null;
-const ctx={
-  get state(){return state},
-  start(extra){state=Object.assign({step:drawStep()},extra||{});persist(state);return state},
-  setBusy(v){busy=v;$("resetBtn").disabled=v},isBusy(){return busy},
-  agreed(){return !needAgree()},
-  done(){busy=false;$("resetBtn").disabled=false;finishView(true)}
-};
-
-function buildView(){
-  const q=qualifies(cfg.deposit);
-  $("brand").textContent=cfg.name?cfg.name+" · Tamasa":"Tamasa";
-  $("gameTitle").textContent=GAME.title;
-  $("play").innerHTML="";$("win").hidden=true;$("cheer").textContent="";$("note").textContent="";
-  $("goBtn").textContent=GAME.btn;$("resetBtn").disabled=false;
-  if(!q){$("range").innerHTML="<span class='wait'>Hinihintay pa ang qualified na deposit.</span>";$("goBtn").disabled=true;return}
-  $("range").innerHTML="Mga premyo hanggang <b>₱777</b>!";
-  $("note").textContent=GAME.note;
-  $("goBtn").disabled=false;$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));
-  state=loadSaved();
-  GAME.build($("play"),ctx);
-  if(state&&state.step!=null){GAME.finish(ctx);finishView(false)}
-}
-function refreshView(){const k=storeKey();if(k===viewKey||busy)return;viewKey=k;buildView()}
-
-function finishView(celebrate){
-  const amt=PRIZES[state.step],big=state.step===PRIZES.length-1;
-  $("amt").textContent=php(amt);$("winNote").textContent=LABELS[state.step]+(big?" · Jackpot!":"");
-  $("win").hidden=false;$("goBtn").disabled=true;$("goBtn").textContent="Nalaro mo na";
-  if(!isAdmin)$("resetBtn").disabled=true;
-  if(celebrate){postWin(amt);setTimeout(()=>openWin(amt,big),450)}
-}
-function postWin(amt){try{fetch("https://wins-ledger-production.up.railway.app/api/win",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({brand:"tamasa",game:"Triple Tama",name:cfg.name||"",code:code,amount:amt,link:location.href})}).catch(()=>{})}catch(e){}}
-function startRound(extra){state=Object.assign({step:drawStep()},extra||{});persist(state);return state}
-
-// ---------- Triple Tama: coin toss ----------
+function cheer(text){const c=$("cheer");c.textContent=text;c.classList.remove("pop");void c.offsetWidth;c.classList.add("pop")}
+function needAgree(){if($("agree").checked)return false;const l=$("agreeLbl");l.classList.remove("nudge");void l.offsetWidth;l.classList.add("nudge");cheer("Please tick the T&C box first.");return true}
+// ---------- game ----------
+// Swerte Lights: a perya fruit machine. A light runs clockwise around 24 lamp cells, slows down and stops on a symbol of the prize tier that was drawn first
 const GAME=(()=>{
-  const N=3,FACE={kara:"KARA",krus:"KRUS"},XS=[0.34,0.5,0.66],DUR=2400,SLOW=3200;
-  let box,coins=[],wraps=[],shadows=[],slots=[],btns=[],hand,call=null,anims=[];
-  const KARA="<svg viewBox='0 0 100 100' aria-hidden='true'><circle cx='50' cy='50' r='47' fill='url(#kg)'/><circle cx='50' cy='50' r='40' fill='none' stroke='#9a6a10' stroke-width='2' stroke-dasharray='2 3'/>"+
-    "<path d='M45 24 C56 20 66 27 66 38 C66 42 68 45 70 47 L66 49 C66 53 64 57 60 59 L60 66 C60 70 54 73 46 73 L38 73 C38 64 36 58 34 52 C30 42 35 29 45 24 Z' fill='#b07a16' stroke='#7a520a' stroke-width='1.5'/>"+
-    "<path d='M48 30 C54 29 58 33 58 38' stroke='#ffe9a0' stroke-width='2' fill='none' opacity='.7'/><text x='50' y='88' text-anchor='middle' font-size='9' font-weight='700' fill='#7a520a' font-family='JetBrains Mono,monospace'>KARA</text></svg>";
-  const KRUS="<svg viewBox='0 0 100 100' aria-hidden='true'><circle cx='50' cy='50' r='47' fill='url(#kg)'/><circle cx='50' cy='50' r='40' fill='none' stroke='#9a6a10' stroke-width='2' stroke-dasharray='2 3'/>"+
-    "<path d='M44 20 L56 20 L54 40 L74 38 L74 50 L54 48 L56 70 L44 70 L46 48 L26 50 L26 38 L46 40 Z' fill='#b07a16' stroke='#7a520a' stroke-width='1.5' stroke-linejoin='round'/>"+
-    "<circle cx='50' cy='44' r='5' fill='#ffe08a' stroke='#7a520a' stroke-width='1.2'/><text x='50' y='88' text-anchor='middle' font-size='9' font-weight='700' fill='#7a520a' font-family='JetBrains Mono,monospace'>KRUS</text></svg>";
-  const DEFS="<svg width='0' height='0' style='position:absolute' aria-hidden='true'><defs><radialGradient id='kg' cx='35%' cy='30%' r='75%'><stop offset='0' stop-color='#fff3b8'/><stop offset='.45' stop-color='#f2c24a'/><stop offset='1' stop-color='#b8860b'/></radialGradient></defs></svg>";
-  const HAND=(()=>{const O="#7a4a2a",sk="url(#skn)";
-    const fing=(y,len,bend,w)=>{const x0=184,x1=x0+len*.55,x2=x0+len;
-      const d="M"+x0+" "+y+" C"+x1+" "+(y-bend*.3)+" "+(x2-6)+" "+(y-bend)+" "+x2+" "+(y-bend-2);
-      return "<path d='"+d+"' stroke='"+O+"' stroke-width='"+(w+2.4)+"' fill='none' stroke-linecap='round'/><path d='"+d+"' stroke='"+sk+"' stroke-width='"+w+"' fill='none' stroke-linecap='round'/>"+
-        "<ellipse cx='"+(x2-2)+"' cy='"+(y-bend-2.6)+"' rx='3.6' ry='2.2' fill='#f3d2bd' stroke='#c99a80' stroke-width='.6'/>"+
-        "<path d='M"+(x0+len*.45)+" "+(y-bend*.25-3)+" q2 3 0 6' stroke='#b98463' stroke-width='.9' fill='none'/>"};
-    return "<svg viewBox='0 0 240 140' aria-hidden='true'><defs>"+
-      "<linearGradient id='skn' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#f2c7a2'/><stop offset='.55' stop-color='#dca27a'/><stop offset='1' stop-color='#b97c56'/></linearGradient>"+
-      "<radialGradient id='plm' cx='55%' cy='35%' r='70%'><stop offset='0' stop-color='#f6d2b4'/><stop offset='.6' stop-color='#e2ab84'/><stop offset='1' stop-color='#c08460'/></radialGradient>"+
-      "<linearGradient id='slv' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#e0283a'/><stop offset='1' stop-color='#8e0f1d'/></linearGradient></defs>"+
-      "<path d='M60 70 Q86 64 110 68 L114 106 Q88 112 62 106 Z' fill='url(#skn)' stroke='"+O+"' stroke-width='1.4'/>"+
-      "<path d='M74 76 Q88 74 100 76' stroke='#c08460' stroke-width='1' fill='none' opacity='.7'/>"+
-      "<g class='palmg'><path d='M100 70 C122 58 160 56 182 62 C194 66 199 78 194 90 C188 102 160 108 130 106 L104 106 Z' fill='url(#plm)' stroke='"+O+"' stroke-width='1.6' stroke-linejoin='round'/>"+
-      "<path d='M118 84 C136 78 158 78 176 74 M122 94 C140 90 160 92 180 86 M140 68 C146 78 150 90 150 102' stroke='#b9805c' stroke-width='1.1' fill='none' opacity='.75'/>"+
-      "<g class='fingers'>"+fing(66,40,8,9.5)+fing(75,44,7,10)+fing(84,42,6,10)+fing(93,36,5,9)+"</g>"+
-      "<g class='thumb'><path d='M118 72 C122 56 138 46 154 46' stroke='"+O+"' stroke-width='14.5' fill='none' stroke-linecap='round'/><path d='M118 72 C122 56 138 46 154 46' stroke='url(#skn)' stroke-width='12' fill='none' stroke-linecap='round'/>"+
-      "<ellipse cx='154' cy='45.6' rx='4.4' ry='2.8' fill='#f3d2bd' stroke='#c99a80' stroke-width='.6'/><path d='M136 50 q3 3 1 7' stroke='#b98463' stroke-width='.9' fill='none'/></g></g>"+
-      "<path d='M0 140 L0 64 Q30 52 72 62 L80 140 Z' fill='url(#slv)' stroke='#5a0a12' stroke-width='1.6'/>"+
-      "<path d='M14 70 Q30 92 22 120 M44 66 Q56 90 50 128' stroke='rgba(0,0,0,.25)' stroke-width='2' fill='none'/><path d='M66 63 L74 140' stroke='#fff' stroke-width='5'/><path d='M72 62 L80 140' stroke='#8e0f1d' stroke-width='3'/></svg>"})();
-  let CONC=null;
-  function concrete(w,h){
-    if(CONC)return CONC;
-    const cv=document.createElement("canvas");cv.width=w;cv.height=h;const g=cv.getContext("2d"),img=g.createImageData(w,h),d=img.data;
-    const N=64,grid=new Float32Array((N+1)*(N+1));for(let i=0;i<grid.length;i++)grid[i]=Math.random();
-    for(let i=0;i<=N;i++){grid[i*(N+1)+N]=grid[i*(N+1)];grid[N*(N+1)+i]=grid[i]}
-    const sm=t=>t*t*(3-2*t);
-    const vn=(x,y)=>{const X=Math.floor(x),Y=Math.floor(y),xi=((X%N)+N)%N,yi=((Y%N)+N)%N,u=sm(x-X),v=sm(y-Y),a=grid[yi*(N+1)+xi],b=grid[yi*(N+1)+xi+1],c=grid[(yi+1)*(N+1)+xi],e=grid[(yi+1)*(N+1)+xi+1];return a+(b-a)*u+(c-a)*v+(a-b-c+e)*u*v};
-    const turb=(x,y)=>{let t=0,f=1,a=1;for(let o=0;o<4;o++){t+=vn(x*f,y*f)*a;f*=2;a/=2}return t};
-    for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-      const cloud=turb(x/60,y/30),grain=(Math.random()-.5)*26,pit=Math.random()<.006?-45:0,worn=Math.pow(Math.max(0,1-Math.hypot((x-w/2)/(w*.32),(y-h/2)/(h*.36))),2)*22;
-      const v=128+cloud*32+grain+pit+worn,k=(y*w+x)*4;d[k]=v+2;d[k+1]=v+3;d[k+2]=v+6;d[k+3]=255}
-    g.putImageData(img,0,0);CONC=cv.toDataURL("image/jpeg",.85);return CONC;
+  function starPath(cx,cy,R,r){let d="";for(let k=0;k<10;k++){const a=-Math.PI/2+k*Math.PI/5,q=k%2?r:R;d+=(k?"L":"M")+(cx+Math.cos(a)*q).toFixed(2)+" "+(cy+Math.sin(a)*q).toFixed(2)}return d+"Z"}
+  function burstPath(cx,cy,R,r,n){let d="";for(let k=0;k<2*n;k++){const a=-Math.PI/2+k*Math.PI/n,q=k%2?r:R;d+=(k?"L":"M")+(cx+Math.cos(a)*q).toFixed(2)+" "+(cy+Math.sin(a)*q).toFixed(2)}return d+"Z"}
+  const TXT="font-family:&quot;Lilita One&quot;,Impact,&quot;Arial Black&quot;,sans-serif";
+  // symbol art (viewBox 0 0 40 40), original drawings
+  const ART={
+    orange:"<circle cx='20' cy='22' r='14' fill='url(#gOr)' stroke='#b35300' stroke-width='1.4'/>"+
+      "<g fill='#c86400' opacity='.35'><circle cx='25' cy='26' r='.9'/><circle cx='22' cy='30' r='.9'/><circle cx='27' cy='21' r='.9'/><circle cx='16' cy='28' r='.9'/></g>"+
+      "<ellipse cx='14.5' cy='17' rx='4' ry='2.3' fill='#fff' opacity='.6' transform='rotate(-35 14.5 17)'/>"+
+      "<path d='M20 8.5 C22.5 4.5 27.5 3.8 31 5.8 C28 9.3 23.5 10.2 20 8.5Z' fill='#43b04f' stroke='#1f6b2a' stroke-width='1'/><circle cx='20' cy='8.6' r='1.5' fill='#5a3a10'/>",
+    apple:"<path d='M20 13 C16 9 6.5 10 6.5 20 C6.5 29 12.5 35.5 17 35.5 C18.5 35.5 19 34.5 20 34.5 C21 34.5 21.5 35.5 23 35.5 C27.5 35.5 33.5 29 33.5 20 C33.5 10 24 9 20 13Z' fill='url(#gAp)' stroke='#7a0a10' stroke-width='1.4'/>"+
+      "<ellipse cx='13' cy='19' rx='2.6' ry='4.6' fill='#fff' opacity='.5' transform='rotate(18 13 19)'/>"+
+      "<path d='M20 13.5 C19.8 10 20.8 7 23 4.5' fill='none' stroke='#5a3410' stroke-width='2' stroke-linecap='round'/>"+
+      "<path d='M21.5 9 C24.5 4.6 29.5 4.6 32 6.6 C29 10.4 24.6 10.6 21.5 9Z' fill='#43b04f' stroke='#1f6b2a' stroke-width='1'/>",
+    kundol:"<g transform='rotate(-18 20 21)'>"+
+      "<ellipse cx='20.5' cy='22.4' rx='16.6' ry='11.6' fill='#000' opacity='.2'/>"+
+      "<ellipse cx='20' cy='21' rx='16.6' ry='11.6' fill='url(#gKd)' stroke='#2a4628' stroke-width='1.3'/>"+
+      "<ellipse cx='20' cy='21' rx='16.6' ry='11.6' fill='url(#gKb)'/>"+
+      "<g fill='#eef4e8' opacity='.55'><ellipse cx='12' cy='17.5' rx='3.4' ry='1.8'/><ellipse cx='24' cy='15' rx='4' ry='1.6'/><ellipse cx='28.5' cy='24' rx='3' ry='1.7'/><ellipse cx='16' cy='26.5' rx='3.2' ry='1.5'/></g>"+
+      "<g fill='#fbfdf8'><circle cx='8.5' cy='21' r='.9'/><circle cx='12.5' cy='25' r='.8'/><circle cx='15.5' cy='14.4' r='.8'/><circle cx='19.5' cy='29' r='.8'/><circle cx='21' cy='19' r='.7'/><circle cx='26' cy='19.5' r='.9'/><circle cx='30' cy='15.8' r='.8'/><circle cx='32.5' cy='22' r='.8'/><circle cx='24.5' cy='27.6' r='.8'/><circle cx='17.5' cy='22.5' r='.6'/></g>"+
+      "<ellipse cx='14.5' cy='14.8' rx='6.5' ry='2.2' fill='#fff' opacity='.5' transform='rotate(-8 14.5 14.8)'/>"+
+      "<path d='M35.6 18.4 C37 17.6 38.2 16.6 38.8 15 L40.6 16.8 C40 18.8 38.6 20.2 36.6 21.4Z' fill='#7a6528' stroke='#3e3210' stroke-width='.7' stroke-linejoin='round'/></g>",
+    cherry:"<path d='M14 24 C15 15 19 9 27 5' fill='none' stroke='#3f7a1f' stroke-width='2' stroke-linecap='round'/>"+
+      "<path d='M27 24 C26 16 26 10 27 5' fill='none' stroke='#3f7a1f' stroke-width='2' stroke-linecap='round'/>"+
+      "<path d='M27 5 C31 2 36 3 37 7 C33 9.5 29 8.5 27 5Z' fill='#43b04f' stroke='#1f6b2a' stroke-width='1'/>"+
+      "<circle cx='13' cy='28' r='7.5' fill='url(#gCh)' stroke='#7a0d12' stroke-width='1.3'/><circle cx='27.5' cy='28.5' r='7.5' fill='url(#gCh)' stroke='#7a0d12' stroke-width='1.3'/>"+
+      "<ellipse cx='10.5' cy='25.5' rx='2' ry='3' fill='#fff' opacity='.6' transform='rotate(25 10.5 25.5)'/><ellipse cx='25' cy='26' rx='2' ry='3' fill='#fff' opacity='.6' transform='rotate(25 25 26)'/>",
+    bell:"<circle cx='20' cy='5.5' r='2.2' fill='#e0a01e' stroke='#8a5a00' stroke-width='1'/>"+
+      "<path d='M20 7 C13 7 11 12.5 11 18.5 C11 24 9.2 26.4 6.6 29.4 L33.4 29.4 C30.8 26.4 29 24 29 18.5 C29 12.5 27 7 20 7Z' fill='url(#gBl)' stroke='#8a5a00' stroke-width='1.4'/>"+
+      "<rect x='5' y='28.6' width='30' height='4.6' rx='2.3' fill='#e9a925' stroke='#8a5a00' stroke-width='1.2'/><circle cx='20' cy='35.2' r='2.8' fill='#c27a12' stroke='#8a5a00' stroke-width='1'/>"+
+      "<path d='M15 12 C13.6 15 13.4 19.5 13.6 24' fill='none' stroke='#fff8d6' stroke-width='2.2' stroke-linecap='round' opacity='.75'/>",
+    star:"<path d='"+starPath(13,23,11.5,5)+"' fill='url(#gSt)' stroke='#a85e06' stroke-width='1.3' stroke-linejoin='round'/>"+
+      "<path d='"+starPath(27,16.5,11.5,5)+"' fill='url(#gSt)' stroke='#a85e06' stroke-width='1.3' stroke-linejoin='round'/>"+
+      "<circle cx='24.5' cy='13' r='1.6' fill='#fff' opacity='.8'/>",
+    bar:"<rect x='2.5' y='12' width='35' height='16' rx='3.5' fill='#0d0d0d' stroke='#ffd400' stroke-width='1.8'/>"+
+      "<text x='20' y='24.6' text-anchor='middle' style='"+TXT+";font-size:12.5px;letter-spacing:1px' fill='#fff8e8'>BAR</text>",
+    barbar:"<rect x='3.5' y='3.5' width='33' height='14.5' rx='3' fill='#c8102e' stroke='#4a0410' stroke-width='1.6'/>"+
+      "<text x='20' y='14.7' text-anchor='middle' style='"+TXT+";font-size:11px;letter-spacing:1px' fill='#fff8e8'>BAR</text>"+
+      "<rect x='3.5' y='22' width='33' height='14.5' rx='3' fill='#c8102e' stroke='#4a0410' stroke-width='1.6'/>"+
+      "<text x='20' y='33.2' text-anchor='middle' style='"+TXT+";font-size:11px;letter-spacing:1px' fill='#fff8e8'>BAR</text>",
+    seven:"<g transform='skewX(-9) translate(3 0)'><text x='20' y='33' text-anchor='middle' style='"+TXT+";font-size:30px;letter-spacing:-1px;paint-order:stroke' stroke='#4a0410' stroke-width='4' stroke-linejoin='round' fill='url(#gSv)'>77</text></g>",
+    wild:"<path class='wb' d='"+burstPath(20,20,19.5,12.5,12)+"' fill='url(#gWb)' stroke='#a85e06' stroke-width='.7' stroke-linejoin='round'/>"+
+      "<circle cx='20' cy='20' r='11.5' fill='#000' opacity='.82'/><circle cx='20' cy='20' r='11.5' fill='none' stroke='#e0141e' stroke-width='1'/>"+
+      "<text x='20' y='25.2' text-anchor='middle' style='"+TXT+";font-size:15px;letter-spacing:.2px;paint-order:stroke' stroke='#a00a12' stroke-width='3.4' stroke-linejoin='round' fill='url(#gWr)'>WILD</text>"+
+      "<path d='M33 6 l1 2.6 2.6 1 -2.6 1 -1 2.6 -1 -2.6 -2.6 -1 2.6 -1Z' fill='#fff'/><path d='M7 30 l.8 2 2 .8 -2 .8 -.8 2 -.8 -2 -2 -.8 2 -.8Z' fill='#fff' opacity='.85'/>"
+  };
+  const TIER={bar:0,cherry:0,apple:0,orange:0,kundol:1,star:1,bell:1}; // "wild", "seven" (77) and "barbar" are deliberately not in TIER: never a prize stop, never a wild hit
+  // the 24-cell ring, clockwise from the top-left corner (13 × ₱8.20 group, 6 × ₱16.50 group, 77 + BAR BAR display jackpots, 3 WILD)
+  // WILD cells: index 3 (top row, 4th), 9 (right column, 4th row), 21 (left column, 4th row)
+  const RING=["orange","bell","bar","wild","cherry","star","barbar", /* top-right corner: BAR BAR (display jackpot ₱77) */
+    "cherry","kundol","wild","bell","orange",
+    "apple","cherry","star","seven","orange","kundol","cherry",
+    "bar","apple","wild","bar","apple"];
+  const WILDS=RING.map((s,i)=>s==="wild"?i:-1).filter(i=>i>=0);
+  const isPrizeCell=i=>TIER[RING[i]]!=null;
+  // load-time check: every prize symbol has a value and each group's values sum exactly to its prize (₱8.20 / ₱16.50); 77, BAR BAR and WILD are never prize symbols
+  Object.keys(TIER).forEach(s=>{if(!Number.isInteger(SYMVAL[s])||SYMVAL[s]<=0)throw new Error("SYMVAL missing for "+s)});
+  PRIZES.forEach((p,t)=>{const sum=Object.keys(TIER).filter(s=>TIER[s]===t).reduce((a,s)=>a+SYMVAL[s],0);if(sum!==Math.round(p*100))throw new Error("SYMVAL for "+CATNAME[t]+" sums to "+sum+", not "+Math.round(p*100))});
+  Object.keys(JPVAL).concat("wild").forEach(s=>{if(TIER[s]!=null||SYMVAL[s]!=null)throw new Error(s+" must never be a stop or a wild hit")});
+  if(Object.keys(SYMVAL).some(s=>TIER[s]==null))throw new Error("SYMVAL has a symbol outside the groups");
+  const pick=a=>a[Math.floor(rnd()*a.length)];
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+  // bottom lamps, grouped: JACKPOT (77 ₱177 · BAR BAR ₱77, display only) | ₱16.50 (kundol, star, bell) | ₱8.20 (BAR, cherry, apple, orange)
+  const SGRP=[["jp",["seven","barbar"]],[1,["kundol","star","bell"]],[0,["bar","cherry","apple","orange"]]];
+  const STRIP=SGRP.flatMap(g=>g[1]);
+  const stripOf=s=>STRIP.indexOf(s);
+  const grpOn=t=>{const g=strip&&strip.querySelector(".sgrp[data-t='"+t+"']");if(g)g.classList.add("lit")};
+  const NC=RING.length;
+  function rc(i){if(i<7)return [1,i+1];if(i<12)return [i-5,7];if(i<19)return [7,19-i];return [25-i,1]}
+  let cab,board,strip,wtot,rv,tease,cells=[],bets=[],bonusEl,jfl,timers=[],pos=0,anim=false,chaser=null;
+  const T=(fn,ms)=>{const t=setTimeout(fn,ms);timers.push(t);return t};
+  const sym=s=>"<svg viewBox='0 0 40 40' aria-hidden='true'>"+ART[s]+"</svg>";
+  const NAME={wild:"WILD",orange:"orange",apple:"apple",kundol:"kundol",cherry:"cherry",bell:"bell",star:"double star",bar:"BAR",barbar:"BAR BAR",seven:"lucky 77"};
+  function defs(){return "<svg width='0' height='0' style='position:absolute' aria-hidden='true'><defs>"+
+    "<radialGradient id='gOr' cx='.38' cy='.34' r='.75'><stop offset='0' stop-color='#ffe08a'/><stop offset='.45' stop-color='#ffa024'/><stop offset='1' stop-color='#e2620a'/></radialGradient>"+
+    "<radialGradient id='gAp' cx='.36' cy='.36' r='.75'><stop offset='0' stop-color='#ff8a7a'/><stop offset='.5' stop-color='#e8202c'/><stop offset='1' stop-color='#9a0a16'/></radialGradient>"+
+    "<linearGradient id='gKd' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#94bf7e'/><stop offset='.5' stop-color='#5a904c'/><stop offset='1' stop-color='#2f5a30'/></linearGradient>"+
+    "<radialGradient id='gKb' cx='.42' cy='.3' r='.75'><stop offset='0' stop-color='#f4f9ee' stop-opacity='.55'/><stop offset='.6' stop-color='#e2ecdc' stop-opacity='.24'/><stop offset='1' stop-color='#e2ecdc' stop-opacity='.08'/></radialGradient>"+
+    "<radialGradient id='gCh' cx='.35' cy='.3' r='.8'><stop offset='0' stop-color='#ff6b6b'/><stop offset='.6' stop-color='#e01b24'/><stop offset='1' stop-color='#8e0b12'/></radialGradient><linearGradient id='gMg' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#ffe46a'/><stop offset='.55' stop-color='#ffb21f'/><stop offset='1' stop-color='#f07a1a'/></linearGradient>"+
+    "<linearGradient id='gBl' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='#ffe48a'/><stop offset='.45' stop-color='#ffc533'/><stop offset='1' stop-color='#d98c0a'/></linearGradient>"+
+    "<radialGradient id='gSt' cx='.4' cy='.35' r='.7'><stop offset='0' stop-color='#fff6b0'/><stop offset='.5' stop-color='#ffd23f'/><stop offset='1' stop-color='#f0a00a'/></radialGradient>"+
+    "<radialGradient id='gWb' cx='.5' cy='.5' r='.5'><stop offset='0' stop-color='#fff6c0'/><stop offset='.5' stop-color='#ffd400'/><stop offset='1' stop-color='#d98a00'/></radialGradient>"+
+    "<linearGradient id='gWr' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#fffbd0'/><stop offset='.45' stop-color='#ffd400'/><stop offset='1' stop-color='#f59a00'/></linearGradient>"+
+    "<linearGradient id='gSv' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#ff7a5c'/><stop offset='.5' stop-color='#ff2a1e'/><stop offset='1' stop-color='#b80a0a'/></linearGradient>"+
+    "</defs></svg>"}
+  // centre panel: night casino, gold sunburst and marquee ring, a glossy red die and a black die like the TamasaPH logo (original art)
+  function scene(){
+    let rays="";for(let k=0;k<18;k++){rays+="<path d='M-4.4 -36 L0 -96 L4.4 -36Z' fill='"+(k%2?"#ffe680":"#ffb800")+"' opacity='"+(k%2?.55:.8)+"' transform='rotate("+(k*20)+")'/>"}
+    let bulbs=["",""];for(let k=0;k<28;k++){const a=k/28*Math.PI*2,x=(Math.cos(a)*62).toFixed(2),y=(Math.sin(a)*62).toFixed(2);bulbs[k%2]+="<circle cx='"+x+"' cy='"+y+"' r='2.3'/>"}
+    const pip=(x,y,r)=>"<circle cx='"+x+"' cy='"+y+"' r='"+r+"'/>";
+    // black die (behind, right): six
+    const blk="<g transform='translate(130 86) rotate(16)'>"+
+      "<rect x='-24' y='-20' width='50' height='50' rx='11' fill='#000' opacity='.55' transform='translate(4 6)'/>"+
+      "<rect x='-25' y='-25' width='50' height='50' rx='11' fill='url(#dKs)' transform='translate(3 4)'/>"+
+      "<rect x='-25' y='-25' width='50' height='50' rx='11' fill='url(#dBk)' stroke='#ffd400' stroke-width='2.2'/>"+
+      "<g fill='url(#dPw)'>"+pip(-11,-12,4.4)+pip(-11,0,4.4)+pip(-11,12,4.4)+pip(11,-12,4.4)+pip(11,0,4.4)+pip(11,12,4.4)+"</g>"+
+      "<path d='M-19 -14 C-19 -21 -14 -21 -6 -21 L14 -21 C6 -16 -8 -13 -19 -7Z' fill='#fff' opacity='.22'/></g>";
+    // red die (front, left): five
+    const red="<g transform='translate(80 100) rotate(-13)'>"+
+      "<rect x='-31' y='-26' width='62' height='62' rx='13' fill='#000' opacity='.55' transform='translate(5 8)'/>"+
+      "<rect x='-31' y='-31' width='62' height='62' rx='13' fill='url(#dRs)' transform='translate(4 5)'/>"+
+      "<rect x='-31' y='-31' width='62' height='62' rx='13' fill='url(#dRd)' stroke='#ffd400' stroke-width='2.6'/>"+
+      "<g fill='url(#dPw)'>"+pip(-15,-15,5.4)+pip(15,-15,5.4)+pip(0,0,5.4)+pip(-15,15,5.4)+pip(15,15,5.4)+"</g>"+
+      "<path d='M-25 -18 C-25 -27 -19 -27 -9 -27 L18 -27 C8 -20 -10 -16 -25 -8Z' fill='#fff' opacity='.42'/>"+
+      "<circle cx='21' cy='22' r='2.4' fill='#fff' opacity='.35'/></g>";
+    return "<svg viewBox='0 0 200 200' preserveAspectRatio='xMidYMid slice' role='img' aria-label='A glossy red die and a black die in a golden sunburst over a casino at night'>"+
+      "<defs><linearGradient id='cSky' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#050505'/><stop offset='.55' stop-color='#1a0204'/><stop offset='1' stop-color='#3a0508'/></linearGradient>"+
+      "<radialGradient id='cGlow' cx='.5' cy='.5' r='.5'><stop offset='0' stop-color='#ffe680' stop-opacity='.95'/><stop offset='.35' stop-color='#ffb800' stop-opacity='.45'/><stop offset='.7' stop-color='#e0141e' stop-opacity='.25'/><stop offset='1' stop-color='#e0141e' stop-opacity='0'/></radialGradient>"+
+      "<radialGradient id='dRd' cx='.32' cy='.26' r='.9'><stop offset='0' stop-color='#ff8a7a'/><stop offset='.35' stop-color='#ff2a22'/><stop offset='.8' stop-color='#c00a12'/><stop offset='1' stop-color='#7a0008'/></radialGradient>"+
+      "<linearGradient id='dRs' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#a00a12'/><stop offset='1' stop-color='#4a0004'/></linearGradient>"+
+      "<radialGradient id='dBk' cx='.3' cy='.25' r='.95'><stop offset='0' stop-color='#5a5a5a'/><stop offset='.4' stop-color='#1e1e1e'/><stop offset='1' stop-color='#000'/></radialGradient>"+
+      "<linearGradient id='dKs' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#2a2a2a'/><stop offset='1' stop-color='#000'/></linearGradient>"+
+      "<radialGradient id='dPw' cx='.4' cy='.35' r='.7'><stop offset='0' stop-color='#fff'/><stop offset='1' stop-color='#d8d8d8'/></radialGradient>"+
+      "<linearGradient id='cFl' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#2a0306'/><stop offset='1' stop-color='#070101'/></linearGradient></defs>"+
+      "<rect width='200' height='200' fill='url(#cSky)'/>"+
+      // side neon spotlights
+      "<path d='M-10 -10 L22 -10 L92 200 L40 200Z' fill='#e0141e' opacity='.14'/><path d='M178 -10 L210 -10 L160 200 L108 200Z' fill='#ffd400' opacity='.08'/>"+
+      // casino skyline silhouettes with lit windows
+      "<g fill='#0a0a0a'><path d='M0 200 L0 132 L14 132 L14 120 L30 120 L30 138 L44 138 L44 200Z'/><path d='M156 200 L156 136 L168 136 L168 116 L186 116 L186 128 L200 128 L200 200Z'/></g>"+
+      "<g fill='#ffd400' opacity='.75'><rect x='18' y='126' width='3' height='3'/><rect x='24' y='126' width='3' height='3'/><rect x='18' y='134' width='3' height='3'/><rect x='5' y='140' width='3' height='3'/><rect x='34' y='146' width='3' height='3'/><rect x='172' y='122' width='3' height='3'/><rect x='178' y='122' width='3' height='3'/><rect x='178' y='130' width='3' height='3'/><rect x='190' y='136' width='3' height='3'/><rect x='160' y='144' width='3' height='3'/></g>"+
+      "<g fill='#e0141e' opacity='.85'><rect x='24' y='134' width='3' height='3'/><rect x='10' y='150' width='3' height='3'/><rect x='172' y='130' width='3' height='3'/><rect x='186' y='146' width='3' height='3'/></g>"+
+      // gold sunburst
+      "<circle cx='100' cy='92' r='86' fill='url(#cGlow)'/>"+
+      "<g transform='translate(100 92)'><g class='rays'>"+rays+"</g>"+
+        // marquee ring with chasing bulbs
+        "<circle r='62' fill='none' stroke='#000' stroke-width='9' opacity='.55'/><circle r='62' fill='none' stroke='#e0141e' stroke-width='6'/><circle r='62' fill='none' stroke='#ffd400' stroke-width='1.2' stroke-dasharray='1 0'/>"+
+        "<g class='bulbs' fill='#fff6c0'>"+bulbs[0]+"</g><g class='bulbs b2' fill='#fff6c0'>"+bulbs[1]+"</g></g>"+
+      // stage floor with reflections
+      "<path d='M0 200 L0 168 C40 160 160 160 200 168 L200 200Z' fill='url(#cFl)'/>"+
+      "<path d='M0 168 C40 160 160 160 200 168' fill='none' stroke='#ffd400' stroke-width='1.2' opacity='.7'/>"+
+      "<ellipse cx='100' cy='172' rx='62' ry='7' fill='#e0141e' opacity='.35'/><ellipse cx='100' cy='170' rx='40' ry='4' fill='#ffd400' opacity='.3'/>"+
+      blk+red+
+      // gold chips at the front
+      "<g transform='translate(150 168)'><ellipse rx='14' ry='5' fill='#7a5200'/><ellipse cy='-3' rx='14' ry='5' fill='#ffd400' stroke='#8a6a00' stroke-width='1'/><ellipse cy='-3' rx='8' ry='2.8' fill='none' stroke='#fff3a0' stroke-width='1' stroke-dasharray='2 2'/></g>"+
+      "<g transform='translate(36 172)'><ellipse rx='12' ry='4.4' fill='#5a0006'/><ellipse cy='-3' rx='12' ry='4.4' fill='#e0141e' stroke='#7a0008' stroke-width='1'/><ellipse cy='-3' rx='7' ry='2.4' fill='none' stroke='#fff' stroke-width='1' stroke-dasharray='2 2' opacity='.8'/></g>"+
+      // sparkles
+      "<g fill='#fff' class='shine'><path d='M164 56 l1.8 4.4 4.4 1.8 -4.4 1.8 -1.8 4.4 -1.8 -4.4 -4.4 -1.8 4.4 -1.8Z'/><path d='M34 52 l1.3 3.2 3.2 1.3 -3.2 1.3 -1.3 3.2 -1.3 -3.2 -3.2 -1.3 3.2 -1.3Z'/><path d='M150 150 l1 2.5 2.5 1 -2.5 1 -1 2.5 -1 -2.5 -2.5 -1 2.5 -1Z'/></g>"+
+      "</svg>"}
+  function lightOff(){cells.forEach(c=>{c.classList.remove("on","t1","t2","t3","t4","win","hit","wildon","slam");c.querySelectorAll(".pill,.cn").forEach(p=>p.remove())});bets.forEach(b=>b.classList.remove("on","win"));if(strip)strip.querySelectorAll(".sgrp").forEach(g=>g.classList.remove("lit"))}
+  function pill(i,c){const p=el("span","pill");p.textContent="+"+php2(c/100);cells[i].append(p)}
+  function markHit(i,c){cells[i].classList.add("hit");pill(i,c);const sb=bets[stripOf(RING[i])];if(sb)sb.classList.add("win");grpOn(TIER[RING[i]])}
+  function head(i,trail){cells.forEach(c=>c.classList.remove("on","t1","t2"));cells[i].classList.add("on");
+    if(trail){cells[(i+NC-1)%NC].classList.add("t1");cells[(i+NC-2)%NC].classList.add("t2")}}
+  // red 7-segment LED digits drawn as SVG (no web font needed)
+  const SEGS={"0":"abcdef","1":"bc","2":"abged","3":"abgcd","4":"fgbc","5":"afgcd","6":"afgedc","7":"abc","8":"abcdefg","9":"abcdfg"," ":""};
+  const hs=(x0,x1,y)=>{const h=1.15;return "M"+x0+" "+y+"L"+(x0+h)+" "+(y-h)+"L"+(x1-h)+" "+(y-h)+"L"+x1+" "+y+"L"+(x1-h)+" "+(y+h)+"L"+(x0+h)+" "+(y+h)+"Z"};
+  const vs=(x,y0,y1)=>{const h=1.15;return "M"+x+" "+y0+"L"+(x+h)+" "+(y0+h)+"L"+(x+h)+" "+(y1-h)+"L"+x+" "+y1+"L"+(x-h)+" "+(y1-h)+"L"+(x-h)+" "+(y0+h)+"Z"};
+  const SEGP={a:hs(1.7,9.3,1.2),g:hs(1.7,9.3,9),d:hs(1.7,9.3,16.8),f:vs(1,1.9,8.3),b:vs(10,1.9,8.3),e:vs(1,9.7,16.1),c:vs(10,9.7,16.1)};
+  function segSvg(chars,dpAt){let on="",off="";
+    chars.forEach((ch,k)=>{const ox=k*14;for(const sg of "abcdefg"){const d="<path transform='translate("+ox+" 0)' d='"+SEGP[sg]+"'/>";if((SEGS[ch]||"").includes(sg))on+=d;else off+=d}
+      const dp="<circle cx='"+(ox+12.6)+"' cy='16.8' r='1.3'/>";if(k===dpAt)on+=dp;else off+=dp});
+    return "<svg viewBox='-1 -1 "+(chars.length*14+1)+" 20' aria-hidden='true'><g transform='skewX(-7) translate(2.4 0)'><g class='off'>"+off+"</g><g class='on'>"+on+"</g></g></svg>"}
+  function setBonus(v,bump){v=Number(v);const t=v.toFixed(2).replace(".","").padStart(5," ").slice(-5);
+    bonusEl.innerHTML=segSvg([...t],2);bonusEl.dataset.v=v.toFixed(2);bonusEl.setAttribute("aria-label","Bonus win "+v.toFixed(2));
+    if(bump){bonusEl.classList.remove("bump");void bonusEl.offsetWidth;bonusEl.classList.add("bump")}}
+  // ---- the wild round (presentation only; the hits, partials and total were drawn and saved before the lights ran) ----
+  // WILD! flash + ₱777 tease, then for each hit: high-speed whip with a streak trail, brake + REVERSE (rewind zip), and a slow-mo crawl that slams onto the hit
+  const SLOWMO=[200,280,380,500,650,850],FIN=11; // last 6 steps before a hit crawl (slowed down on request); the final run into a hit is at least FIN cells
+  function whead(i,dir,trail){cells.forEach(c=>c.classList.remove("on","t1","t2","t3","t4"));cells[i].classList.add("on");
+    for(let k=1;k<=trail;k++)cells[((i-dir*k)%NC+NC)%NC].classList.add("t"+k)}
+  function fxRev(dir){ /* the "REVERSE!" overlay is no longer shown (owner request); the light still changes direction */
+    board.classList.remove("rewind");void board.offsetWidth;board.classList.add("rewind");rewindSnd();T(()=>{board.classList.remove("rewind")},640)}
+  function coins(i,n){for(let k=0;k<n;k++){const a=k/n*Math.PI*2+Math.random()*.5,r=34+Math.random()*36,s=el("i","cn");
+    s.style.setProperty("--dx",(Math.cos(a)*r).toFixed(0)+"px");s.style.setProperty("--dy",(Math.sin(a)*r-12).toFixed(0)+"px");s.style.animationDelay=(Math.random()*.08).toFixed(2)+"s";cells[i].append(s);T(()=>s.remove(),1100)}}
+  // route to one hit: segments of alternating direction; the last segment ends on the hit. Built backwards from the hit so the light lands exactly
+  function pathTo(from,target,dir0,revs,min0){
+    const dirs=[];for(let k=0,d=dir0;k<=revs;k++,d=-d)dirs.push(d);let best=null;
+    for(let tr=0;tr<(revs?30:1);tr++){const lens=dirs.map((_,k)=>k===revs?FIN:6+Math.floor(Math.random()*15));
+      let e=target;for(let k=revs;k>=1;k--)e=((e-dirs[k]*lens[k])%NC+NC)%NC;
+      let L0=(((e-from)*dirs[0])%NC+NC)%NC;const mn=revs?min0:Math.max(min0,FIN);while(L0<mn)L0+=NC;lens[0]=L0;
+      if(!best||L0<best.lens[0])best={dirs,lens}}
+    return best}
+  function segDelays(len,k,final,hn){const base=Math.max(34,[62,50,42][Math.min(k,2)]-hn*3),ds=[];
+    for(let s=0;s<len;s++){const r=len-s;let d=base;if(k>0&&s<2)d=Math.round(base*(s?1.3:1.9)); // kick-off after a reversal
+      if(!final){if(r<=3)d=[150,100,65][r-1]}            // brake before reversing
+      else if(r<=6)d=SLOWMO[6-r];else if(r<=8)d=r===7?120:75; // ease into slow-mo
+      ds.push(d)}return ds}
+  function wildRound(w,done){
+    const R=reduce(),big=w.wprize>=WILD_BIG;let run=0,h=0,dir=1;
+    cells[pos].classList.add("wildon");board.classList.add("jack","wildrun");strip.classList.add("allblink","wildvals");
+    jfl.firstChild.textContent="WILD!";jfl.classList.add("wild");tease.hidden=false;jfl.hidden=false;siren();cheer("WILD! The lights go wild…");
+    const runPath=(p,hn,onHit)=>{let k=0,s=0,ds=[];
+      const seg=()=>{const d=p.dirs[k];ds=segDelays(p.lens[k],k,k===p.dirs.length-1,hn);s=0;board.dataset.dir=d>0?"cw":"ccw";board.classList.toggle("ccw",d<0);board.classList.add("whip");T(stp,ds[0])};
+      const stp=()=>{const d=p.dirs[k],fin=k===p.dirs.length-1,dl=ds[s],slow=fin&&p.lens[k]-s<=6;pos=((pos+d)%NC+NC)%NC;
+        if(slow&&!cab.classList.contains("slowmo")){cab.classList.add("slowmo");board.classList.add("slowmo");board.classList.remove("whip")}
+        whead(pos,d,slow?0:dl<70?4:dl<120?2:0);
+        if(slow){heart();tick(true);board.classList.remove("beat");void board.offsetWidth;board.classList.add("beat")}else tick(dl>=100);
+        s++;if(s<ds.length){T(stp,ds[s]);return}
+        if(fin){onHit();return}
+        board.classList.remove("whip");k++;fxRev(p.dirs[k]);T(seg,200)}; // brake, REVERSE
+      seg()};
+    const slamHit=()=>{const i=w.hits[h],part=w.parts[h];cab.classList.remove("slowmo");board.classList.remove("slowmo","whip","beat");
+      cells.forEach(c=>c.classList.remove("t1","t2","t3","t4"));cells[i].classList.add("on");markHit(i,part);
+      if(!R){cells[i].classList.add("slam");T(()=>cells[i].classList.remove("slam"),700);coins(i,12);board.classList.remove("shake");void board.offsetWidth;board.classList.add("shake")}
+      slamSnd();cheer("WILD HIT "+(h+1)+" · "+G.label(i)+" +"+php2(part/100));
+      const from=run;run+=part;const n=R?1:10;let j=0;const up=()=>{j++;setBonus((from+Math.round(part*j/n))/100,true);if(j<n)T(up,32)};up();
+      h++;if(h<w.hits.length)T(nextHit,R?250:400);else T(total,R?300:550)};
+    const nextHit=()=>{const target=w.hits[h];if(R){pos=target;slamHit();return}
+      const revs=h===0?(Math.random()<.5?1:2):h===1?0:1,d0=h===0?1:-dir; // first: whip clockwise then reverse once or twice; later hits speed off reversed
+      const p=pathTo(pos,target,d0,revs,h===0?12:7);dir=p.dirs[p.dirs.length-1];
+      if(h>0){fxRev(d0);T(()=>runPath(p,h,slamHit),200)}else runPath(p,h,slamHit)};
+    const total=()=>{board.classList.remove("ccw","whip");cells.forEach(c=>c.classList.remove("on","t1","t2","t3","t4"));
+      wtot.querySelector("b").textContent=php2(run/100);wtot.hidden=false;setBonus(run/100);bonusChime(big);board.classList.add("jack");strip.classList.add("allblink");
+      if(!R)w.hits.forEach(i=>coins(i,8));
+      cheer((big?"BIG WILD! ":"WILD TOTAL ")+php2(run/100));
+      T(()=>{anim=false;board.classList.remove("jack","wildrun");strip.classList.remove("allblink");done()},R?600:1100)};
+    T(()=>{jfl.hidden=true;tease.hidden=true;jfl.classList.remove("wild");cells[pos].classList.remove("wildon");board.classList.remove("jack");strip.classList.remove("allblink");nextHit()},R?500:1000);
   }
-  const LEGS=(()=>{const P=[[18,"#5c6066","#c58b62","#2f6fd1"],[78,"#1e2228","#8a5a3a","#d23b3b"],[140,"#6b5e48","#b97e56","#2f6fd1"],[262,"#3a4f78","#9a6544","#222222"],[322,"#7a7f86","#c58b62","#2f9e5a"],[380,"#2a2a2e","#a8704a","#d23b3b"]];
-    return "<svg class='legs' viewBox='0 0 420 170' preserveAspectRatio='xMidYMax slice' aria-hidden='true'>"+P.map(([x,sh,sk,sl],k)=>{const y=k%2?6:0;return "<g transform='translate("+x+","+y+")'>"+
-      "<path d='M0 0 L50 0 L52 70 L28 74 L25 40 L22 74 L-2 70 Z' fill='"+sh+"' stroke='rgba(0,0,0,.35)'/><path d='M6 30 L18 30 L18 44 L6 44 Z' fill='rgba(0,0,0,.18)'/>"+
-      "<path d='M3 70 L19 72 L18 140 L6 140 Z' fill='"+sk+"'/><path d='M30 72 L47 70 L46 140 L33 140 Z' fill='"+sk+"'/>"+
-      "<path d='M0 140 L22 140 L24 150 L-4 150 Z' fill='"+sl+"'/><path d='M30 140 L52 140 L56 150 L28 150 Z' fill='"+sl+"'/></g>"}).join("")+"</svg>"})();
-  const STAND="<svg class='stand' viewBox='0 0 80 160' aria-hidden='true'><path d='M8 158 L40 6 L72 158 M20 100 L60 100 M40 6 L40 158' stroke='#8fa3b8' stroke-width='3.5' fill='none' stroke-linecap='round'/><path d='M14 130 L66 130' stroke='#8fa3b8' stroke-width='3'/></svg>";
-  function other(f){return f==="kara"?"krus":"kara"}
-  function face(i,f){coins[i].style.transform="rotateX("+(f==="krus"?180:0)+"deg)"}
-  function showFace(i,r){const s=slots[i];s.className="slot";s.innerHTML="<b>"+FACE[r]+"</b><small>Barya "+(i+1)+"</small>"}
-  function mark(i,c,r){const s=slots[i],ok=c===r;s.className="slot "+(ok?"ok":"no");s.innerHTML="<b>"+FACE[r]+"</b><small>"+(ok?"TAMA":"MALI")+"</small><em>Barya "+(i+1)+"</em>"}
-  function lock(v){btns.forEach(b=>b.disabled=v)}
-  function A(elm,frames,opt){const a=elm.animate(frames,opt);anims.push(a);return a}
-  function palm(i){const W=box.clientWidth;return {dx:100-W*XS[i]+(i-1)*15,dy:-126+Math.abs(i-1)*3}}
-  function rest(){wraps.forEach((w,i)=>{const p=palm(i);w.style.transform="translate("+p.dx+"px,"+p.dy+"px) scale(.62)"});shadows.forEach(sh=>{sh.style.opacity=0})}
-  function plan(p,slow,nb,spin){
-    const tf=(x,y,sc)=>"translate("+x.toFixed(1)+"px,"+y.toFixed(1)+"px) scale("+sc+")";
-    const path=[{transform:tf(p.dx,p.dy,.62),offset:0},{transform:tf(p.dx,p.dy+10,.62),offset:slow?.04:.08}];
-    const rot=[{transform:"rotateX(0deg)",offset:0},{transform:"rotateX(0deg)",offset:slow?.04:.1}];
-    let tL;
-    if(slow){path.push({transform:tf(p.dx*.4,-200,1.15),offset:.18,easing:"ease-in"},{transform:tf(p.dx*.1,-110,1.25),offset:.36,easing:"linear"},{transform:tf(0,-40,1.2),offset:.68,easing:"ease-in"});tL=.74;
-      rot.push({transform:"rotateX("+(spin*.55)+"deg)",offset:.36,easing:"ease-out"})}
-    else{path.push({transform:tf(p.dx*.5,-150-rnd()*30,1.05),offset:.3,easing:"ease-in"});tL=.52}
-    path.push({transform:tf(0,0,1),offset:tL,easing:"ease-out"});rot.push({transform:"rotateX("+spin+"deg)",offset:tL});
-    const H=[34,16,6].slice(0,nb),lands=[tL];let t=tL,x=0,ang=spin;const left=1-tL-.04,wsum=H.reduce((a,h)=>a+Math.sqrt(h),0);
-    H.forEach((h,k)=>{const span=left*Math.sqrt(h)/wsum,dxb=(rnd()-.5)*12;x+=dxb;
-      path.push({transform:tf(x-dxb/2,-h,1),offset:t+span/2,easing:"ease-in"},{transform:tf(x,0,1),offset:t+span,easing:"ease-out"});
-      ang+=k<nb-1?360:0;rot.push({transform:"rotateX("+(k<nb-1?ang-180:ang+10)+"deg)"+(k===nb-1?" rotateY(12deg)":""),offset:t+span/2},{transform:"rotateX("+ang+"deg)",offset:t+span});
-      t+=span;lands.push(t)});
-    path.push({transform:tf(x,0,1),offset:1});rot.push({transform:"rotateX("+(ang-5)+"deg) rotateY(-7deg)",offset:Math.min(.99,t+.02)},{transform:"rotateX("+ang+"deg)",offset:1});
-    return {path,rot,lands,x};
-  }
-  function tossAll(res,hero,ctx){
-    return new Promise(done=>{
-      hand.classList.add("show");hand.style.transform="";
-      A(hand,[{transform:"translate(0,0) rotate(0)"},{transform:"translate(-6px,10px) rotate(6deg)",offset:.1},{transform:"translate(22px,-40px) rotate(-22deg)",offset:.2},{transform:"translate(14px,-26px) rotate(-14deg)",offset:.3},{transform:"translate(-240px,30px) rotate(10deg)",offset:.55},{transform:"translate(-240px,30px) rotate(10deg)"}],{duration:DUR,easing:"ease-in-out",fill:"forwards"});
-      setTimeout(()=>noise(.12,.4,1600),DUR*.18);
-      const fg=hand.querySelector('.fingers'),th=hand.querySelector('.thumb');if(fg){A(fg,[{transform:'rotate(0)'},{transform:'rotate(8deg)',offset:.12},{transform:'rotate(-24deg)',offset:.2},{transform:'rotate(-6deg)',offset:.32},{transform:'rotate(0)'}],{duration:DUR,easing:'ease-in-out'});A(th,[{transform:'rotate(0)'},{transform:'rotate(6deg)',offset:.12},{transform:'rotate(-14deg)',offset:.2},{transform:'rotate(0)',offset:.34},{transform:'rotate(0)'}],{duration:DUR,easing:'ease-in-out'})}
-      let landed=0;
-      res.forEach((r,i)=>{
-        const slow=i===hero,d=i*80,dur=slow?SLOW:DUR,nb=2+Math.floor(rnd()*2);
-        const spin=(slow?9:5+i+Math.floor(rnd()*2))*360+(r==="krus"?180:0);
-        const pl=plan(palm(i),slow,nb,spin);
-        A(wraps[i],pl.path,{duration:dur,delay:d,easing:"linear",fill:"forwards"});
-        A(coins[i],pl.rot,{duration:dur,delay:d,easing:"linear",fill:"forwards"});
-        const sh=[{transform:"translateX(0) scale(.2)",opacity:0,offset:0},{transform:"translateX(0) scale(.2)",opacity:0,offset:slow?.5:.3},{transform:"translateX(0) scale(1)",opacity:.55,offset:pl.lands[0]}];
-        for(let k=1;k<pl.lands.length;k++){const a=pl.lands[k-1],b=pl.lands[k];sh.push({transform:"scale(.75)",opacity:.38,offset:(a+b)/2},{transform:"scale(1)",opacity:.55,offset:b})}
-        sh.push({transform:"translateX("+pl.x.toFixed(1)+"px) scale(1)",opacity:.55,offset:1});
-        A(shadows[i],sh,{duration:dur,delay:d,fill:"forwards"});
-        pl.lands.forEach((o,k)=>setTimeout(()=>{const v=Math.max(.15,.6-k*.17);noise(.04,v,6000+i*400);beep(2900+i*240,.1,.05*v/.6,"sine")},d+dur*o));
-        if(slow){
-          setTimeout(()=>{box.classList.add("slowmo");cheer("Slow-mo…");whoosh(dur*0.4/1000)},d+dur*0.34);
-          setTimeout(()=>box.classList.remove("slowmo"),d+dur*pl.lands[0]);
-          wraps[i].classList.add("hero");
-        }
-        setTimeout(()=>{face(i,r);showFace(i,r);
-          if(++landed===N){anims.forEach(a=>a.cancel());anims=[];hand.style.transform="translate(-240px,30px)";wraps.forEach(w=>{w.style.transform="";w.classList.remove("hero")});shadows.forEach(sh=>{sh.style.opacity=.55;sh.style.transform=""});done()}},d+dur+30);
-      });
-    });
-  }
-  function banner(t,cls){const b=box.querySelector(".ulit");b.textContent=t;b.className="ulit "+(cls||"");void b.offsetWidth;b.classList.add("pop")}
-  function hideBanner(){const b=box.querySelector(".ulit");if(b)b.className="ulit"}
-  function mixed(){let r;do{r=[0,1,2].map(()=>rnd()<.5?"kara":"krus")}while(r[0]===r[1]&&r[1]===r[2]);return r}
-  const G={label:"Triple Tama",title:"TRIPLE TAMA",btn:"Pumili muna: Kara o Krus",
-    how:["I-check ang T&C box.","Pumili ng KARA o KRUS.","Pindutin ang Ihagis. Ihahagis ang tatlong barya sa bato.","Kapag hindi pare-pareho ang tatlong barya, walang panalo at kusang ihahagis ulit.","Kapag pare-pareho ang tatlo: PANALO kung tugma sa hula mo, TALO kung hindi (may consolation pa rin). TRIPLE TAMA ang jackpot kapag pare-parehong tugma sa unang hagis pa lang.","Hindi pantay ang tsansa: pinakamadalang ang Triple Tama, at hindi nakakaapekto kung Kara o Krus ang pipiliin mo."],
-    note:"Pumili ng KARA o KRUS at ihagis ang tatlong barya. Kailangang pare-pareho ang tatlo; kapag hindi, kusang ihahagis ulit.",
-    build(play,ctx){
-      coins=[];wraps=[];shadows=[];slots=[];btns=[];anims=[];
-      box=el("div","toss",DEFS+LEGS+"<div class='ground'></div>"+STAND+"<div class='stone'><div class='side'></div><div class='top'></div></div><div class='tally'></div><div class='ulit'></div>");
-      try{box.querySelector('.stone .top').style.backgroundImage="radial-gradient(ellipse at 50% 35%,rgba(255,255,255,.18),transparent 60%),url("+concrete(420,120)+")"}catch(e){}
-      const tally=box.querySelector(".tally");
-      for(let i=0;i<N;i++){
-        const s=el("div","slot","<b>Barya "+(i+1)+"</b><small>?</small>");tally.appendChild(s);slots.push(s);
-        const sh=el("div","shadow");sh.style.left=(XS[i]*100)+"%";box.appendChild(sh);shadows.push(sh);
-        const w=el("div","coinwrap","<div class='coin'><div class='face kara'>"+KARA+"</div><div class='face krus'>"+KRUS+"</div></div>");w.style.left=(XS[i]*100)+"%";box.appendChild(w);wraps.push(w);coins.push(w.firstChild);
-      }
-      hand=el("div","hand",HAND);box.appendChild(hand);
-      const calls=el("div","calls");
-      ["kara","krus"].forEach(f=>{const b=el("button","call "+f,"<span class='mini'>"+(f==="kara"?KARA:KRUS)+"</span>"+FACE[f]);b.type="button";b.onclick=()=>G.pick(f,ctx);calls.appendChild(b);btns.push(b)});
-      play.append(box,calls);
-      $("goBtn").disabled=!call;
-      if(call){btns.forEach(b=>b.classList.toggle("on",b.classList.contains(call)));$("goBtn").textContent="Ihagis ang 3 barya"}
-      requestAnimationFrame(rest);
+  const G={
+    title:"SWERTE LIGHTS",
+    ring:RING,tier:TIER,wilds:WILDS,symval:SYMVAL,strip:STRIP,jpval:JPVAL,
+    label(i){const n=NAME[RING[i]]||"";return n.charAt(0).toUpperCase()+n.slice(1)},
+    // result line for a normal stop, e.g. "Cherry — ₱8.20"
+    result(i){const t=TIER[RING[i]];return t==null?"":G.label(i)+" — "+php2(PRIZES[t])},
+    // pick a random ring cell whose symbol belongs to the drawn prize tier
+    cellFor(prize){ // pick a symbol of the tier evenly first, then one of its cells (avoid repeating the last stop) — so the symbols rotate, not mostly one kind
+    const syms=[...new Set(RING.filter(s=>TIER[s]!=null&&TIER[s]===prize))],sym=syms[Math.floor(rnd()*syms.length)];
+    const last=(plays().slice(-1)[0]||{}).cell;let ok=[];RING.forEach((s,i)=>{if(s===sym&&i!==last)ok.push(i)});
+    if(!ok.length)RING.forEach((s,i)=>{if(s===sym)ok.push(i)});const c=ok[Math.floor(rnd()*ok.length)];lastStop=c;return c},
+    // wild layout for an already-drawn wild GROUP t: which WILD cell the light stops on, then one hit on EVERY symbol of that group, each once
+    // (₱8.20 group: BAR, cherry, apple, orange = 4 hits; ₱16.50 group: kundol, star, bell = 3 hits). Each part is that symbol's own value, so the hits sum exactly to the group prize.
+    wildPlan(t){
+      const wildCell=pick(WILDS),syms=[...new Set(RING.filter(s=>TIER[s]===t))],cellsOf=s=>RING.map((x,i)=>x===s?i:-1).filter(i=>i>=0);
+      const apart=(hs,i)=>hs.every(h=>{const d=Math.abs(h-i);return Math.min(d,NC-d)>=2}); // prefer hits that are not ring neighbours, so their +₱ pills never overlap
+      let hits=null;
+      for(let tr=0;tr<80&&!hits;tr++){const hs=[];for(const s of shuffle(syms.slice())){const ok=cellsOf(s).filter(i=>apart(hs,i));if(!ok.length)break;hs.push(pick(ok))}if(hs.length===syms.length)hits=hs}
+      if(!hits)hits=syms.map(s=>pick(cellsOf(s))); // safety net only: the ring always allows a non-adjacent set today
+      hits=shuffle(hits);
+      return {wildCell,hits,parts:hits.map(i=>SYMVAL[RING[i]])}},
+    build(play){
+      timers.forEach(clearTimeout);timers=[];if(chaser)clearInterval(chaser);chaser=null;anim=false;
+      cab=el("div","cab");
+      let ring="";RING.forEach((s,i)=>{const [r,c]=rc(i);ring+="<div class='cell"+(s==="wild"?" wild":"")+"' data-i='"+i+"' data-sym='"+s+"' style='grid-row:"+r+";grid-column:"+c+"' role='img' aria-label='"+NAME[s]+"'>"+sym(s)+"<i class='lamp'></i></div>"});
+      const revArrow="<svg viewBox='0 0 60 60' aria-hidden='true'><path d='M48 30a18 18 0 1 1-6-13.4' fill='none' stroke='#fff' stroke-width='6.5' stroke-linecap='round'/><path d='M47.6 22.4L45.6 10.6L35.6 19.4Z' fill='#fff' stroke='#fff' stroke-width='2' stroke-linejoin='round'/></svg>";
+      cab.innerHTML=defs()+"<i class='screw s1'></i><i class='screw s2'></i><i class='screw s3'></i><i class='screw s4'></i>"+
+        "<div class='leds'><div class='led'><span>★ BONUS WIN ★</span><div class='seg' id='ledBonus' role='img'></div></div></div>"+
+        "<div class='board idle' role='group' aria-label='Light board with 24 symbols'>"+ring+"<div class='center'>"+scene()+"<i class='spd' aria-hidden='true'></i>"+
+        "<div class='jflash' hidden><b>BIG WIN!</b><i class='tease' hidden>WILD JACKPOT <u>₱777</u></i></div>"+
+        "<div class='rev' hidden aria-hidden='true'>"+revArrow+"<b>REVERSE!</b></div>"+
+        "<div class='wtot' hidden><i class='wrays' aria-hidden='true'></i><small>WILD TOTAL</small><b></b></div></div></div>"+
+        "<div class='strip' aria-label='Value per symbol, grouped by prize'>"+SGRP.map(([t,ss])=>{const jp=t==="jp";
+          return "<div class='sgrp"+(jp?" jpg":"")+"' data-t='"+t+"' style='--n:"+ss.length+"' role='group' aria-label='"+(jp?"Jackpots":CATNAME[t]+", total "+php2(PRIZES[t]))+"'><div class='keys'>"+
+            ss.map(s=>{const pn=jp?php(JPVAL[s]):php2(PRIZES[TIER[s]]),pw=jp?pn:php2(SYMVAL[s]/100); // jackpots show the same value in normal and wild mode
+              return "<div class='bet' data-sym='"+s+"' aria-label='"+NAME[s]+" "+pn+(jp?" jackpot":"")+"'><i class='lamp'></i><div class='key'>"+sym(s)+"</div><div class='pv'><span class='pn'>"+pn+"</span><span class='pw'>"+pw+"</span></div></div>"}).join("")+
+            "</div><i class='brk' aria-hidden='true'></i><div class='gl'>"+(jp?"JACKPOT":php2(PRIZES[t]))+"</div></div>"}).join("")+"</div>"+
+        "<p class='paynote'><span class='pn'>Stop on a symbol: win its prize · Land on <b>WILD</b> for the wild bonus</span><span class='pw'><b>WILD values</b>: the light hits the whole group — its values add up to the group total</span></p>"+
+        "<p class='plate' aria-hidden='true'>TAMASAPH · SWERTE LIGHTS</p>";
+      play.innerHTML="";play.append(cab);
+      board=cab.querySelector(".board");cells=[...cab.querySelectorAll(".cell")];bets=[...cab.querySelectorAll(".bet")];
+      bonusEl=cab.querySelector("#ledBonus");jfl=cab.querySelector(".jflash");tease=cab.querySelector(".tease");rv=cab.querySelector(".rev");
+      strip=cab.querySelector(".strip");wtot=cab.querySelector(".wtot");
+      setBonus(0);
     },
-    pick(f,ctx){
-      if(ctx.isBusy()||(ctx.state&&ctx.state.step!=null))return;if(!ctx.agreed())return;
-      call=f;btns.forEach(b=>b.classList.toggle("on",b.classList.contains(f)));
-      $("goBtn").disabled=false;$("goBtn").textContent="Ihagis ang 3 barya";cheer("Hula mo: "+FACE[f]);beep(f==="kara"?600:500,.1,.1);
+    get position(){return pos},
+    get running(){return anim},
+    run(target,prize,done,wild,amtv){
+      anim=true;if(strip)strip.classList.remove("wildvals");board.classList.remove("idle","jack","wildrun","whip","ccw","slowmo","shake","beat","rewind");cab.classList.remove("slowmo");strip.classList.remove("allblink");
+      jfl.hidden=true;jfl.classList.remove("wild");jfl.firstChild.textContent="BIG WIN!";tease.hidden=true;rv.hidden=true;wtot.hidden=true;lightOff();
+      const dist=(target-pos+NC)%NC,big=prize===BIG,seq=[];
+      if(reduce()){const n=dist||NC;for(let k=0;k<n;k++)seq.push(40)}
+      else{const n=wild?dist+(dist<12?NC:0):3*NC+dist,SLOW=wild?12:16,K=wild?240:340; // a wild play runs under ~1.5 laps and brakes quicker, so the whole wild round stays ~13 s
+        for(let k=0;k<n;k++){let d=k<6?140-k*14:55;const rem=n-k;if(rem<=SLOW){const t=(SLOW-rem+1)/SLOW;d=Math.max(d,30+K*t*t)}seq.push(d)}
+        seq[n-2]+=170;seq[n-1]+=320} // final creep for suspense
+      let k=0,chase=0;
+      chaser=reduce()?null:setInterval(()=>{bets.forEach((b,j)=>b.classList.toggle("on",j===chase%bets.length));chase++},95);
+      const step=()=>{
+        pos=(pos+1)%NC;const d=seq[k];head(pos,d<80);
+        if(d<80)tick(false);else tick(true);
+        k++;
+        if(k<seq.length){T(step,seq[k]);return}
+        // stopped on the target cell
+        if(chaser)clearInterval(chaser);chaser=null;bets.forEach(b=>b.classList.remove("on"));
+        if(wild){wildRound(wild,done);return}
+        const c=cells[pos],sb=bets[stripOf(RING[pos])];c.classList.add("win");if(sb)sb.classList.add("win");grpOn(TIER[RING[pos]]);
+        bonusChime(big);cheer((big?"BIG WIN! ":"")+G.result(pos));
+        if(big){board.classList.add("jack");jfl.hidden=false}
+        const amt=amtv!=null?Number(amtv):PRIZES[prize],steps=reduce()?1:20;let j=0;
+        const up=()=>{j++;setBonus(Math.round(amt*100*j/steps)/100,true);if(j%4===0)beep(900+j*30,.04,.04,"square");if(j<steps)T(up,45)};T(up,120);
+        T(()=>{anim=false;if(big){board.classList.remove("jack");jfl.hidden=true}done()},big?2400:1500);
+      };
+      T(step,seq[0]);
     },
-    go(ctx){
-      if(ctx.isBusy()||(ctx.state&&ctx.state.step!=null))return;
-      if(!call){cheer("Pumili muna: Kara o Krus");return}
-      if(!ctx.agreed())return;
-      // step 0 = Talo (all three show the other face), 1 = Panalo after a re-toss, 2 = Triple Tama on the first toss
-      const step=drawStep();
-      const m=step===2?0:step===1?1+(rnd()<.35?1:0):(rnd()<.35?0:1+(rnd()<.3?1:0));
-      const fin=step===0?other(call):call,tosses=[];
-      for(let k=0;k<m;k++)tosses.push(mixed());
-      tosses.push([fin,fin,fin]);
-      ctx.start({step,call,tosses});
-      ctx.setBusy(true);lock(true);$("goBtn").disabled=true;
-      if(reduce()){wraps.forEach(w=>w.style.transform="");shadows.forEach(sh=>sh.style.opacity=.55);hand.style.transform="translate(-240px,30px)";tosses[tosses.length-1].forEach((r,i)=>face(i,r));G.reveal(ctx);ctx.done();return}
-      G.run(0,ctx);
-    },
-    run(k,ctx){
-      const st=ctx.state,last=k===st.tosses.length-1;
-      hideBanner();slots.forEach((sl,i)=>{sl.className="slot";sl.innerHTML="<b>Barya "+(i+1)+"</b><small>?</small>"});
-      rest();cheer(k?"Hagis "+(k+1)+"…":"Ihahagis na…");
-      const go=()=>tossAll(st.tosses[k],last?Math.floor(rnd()*N):-1,ctx).then(()=>{
-        if(!last){banner("HINDI PARE-PAREHO · ULIT!","mix");cheer("Hindi pare-pareho, ulit ang hagis!");beep(330,.25,.1,"square");beep(262,.3,.1,"square",.25);setTimeout(()=>G.run(k+1,ctx),1700)}
-        else{G.reveal(ctx);setTimeout(()=>ctx.done(),600)}
-      });
-      if(k){hand.style.transform="translate(-240px,30px)";const a=hand.animate([{transform:"translate(-240px,30px)"},{transform:"translate(0,0)"}],{duration:450,easing:"ease-out"});anims.push(a);setTimeout(go,480)}else go();
-    },
-    reveal(ctx){
-      const st=ctx.state,fin=st.tosses[st.tosses.length-1],win=st.step>=1;
-      fin.forEach((r,i)=>{mark(i,st.call,r);if(win)setTimeout(()=>beep(880+i*110,.14,.1,"triangle"),i*160)});
-      banner(st.step===2?"TRIPLE TAMA!":win?"PANALO · "+FACE[fin[0]]+" LAHAT":"TALO · "+FACE[fin[0]]+" LAHAT",win?"win":"lose");
-      cheer(st.step===2?"TRIPLE TAMA! Sa unang hagis pa lang!":win?"Panalo! Pare-parehong "+FACE[fin[0]]+".":"Talo, pare-parehong "+FACE[fin[0]]+". May consolation ka pa rin.");
-      btns.forEach(b=>b.classList.toggle("on",b.classList.contains(st.call)));
-    },
-    stop(){anims.forEach(a=>a.cancel());anims=[]},
-    finish(ctx){const st=ctx.state;if(!st.tosses)return;wraps.forEach(w=>w.style.transform="");shadows.forEach(sh=>sh.style.opacity=.55);hand.style.transform="translate(-240px,30px)";st.tosses[st.tosses.length-1].forEach((r,i)=>face(i,r));G.reveal(ctx);lock(true)}
+    finish(i,prize,rec){if(!(i>=0&&i<NC))i=0;pos=i;board.classList.remove("idle");lightOff();cells[i].classList.add("on");
+      if(rec&&rec.wild&&Array.isArray(rec.hits)&&Array.isArray(rec.parts)){ // restore the saved wild layout exactly (no re-roll)
+        let tot=0;rec.hits.forEach((h,k)=>{if(h>=0&&h<NC){markHit(h,rec.parts[k]);tot+=rec.parts[k]}});
+        wtot.querySelector("b").textContent=php2(tot/100);wtot.hidden=false;setBonus(tot/100);return}
+      const sb=bets[stripOf(RING[i])];if(sb)sb.classList.add("win");grpOn(TIER[RING[i]]);setBonus(rec&&rec.amount!=null?Number(rec.amount):PRIZES[prize])},
+    stop(){timers.forEach(clearTimeout);timers=[];if(chaser)clearInterval(chaser);chaser=null;anim=false}
   };
   return G;
 })();
-
-$("goBtn").onclick=()=>{if(GAME.go)GAME.go(ctx)};
-$("resetBtn").onclick=()=>{if(busy)return;if(!isAdmin&&state&&state.step!=null)return;try{localStorage.removeItem(storeKey())}catch(e){}state=null;if(GAME.stop)GAME.stop();viewKey="";refreshView();$("goBtn").focus()};
+// ---------- booth backdrop: drifting gold/red lights, twinkles and confetti ----------
+(()=>{
+  const cv=$("boothfx");let c=null;try{c=cv.getContext&&cv.getContext("2d")}catch(e){}if(!c)return;
+  const booth=$("booth");let W=0,H=0,items=[],last=0;
+  const COLS=["255,212,0","224,20,30","255,212,0","255,90,60"];
+  function size(){const d=Math.min(2,window.devicePixelRatio||1);W=booth.clientWidth;H=booth.clientHeight;cv.width=W*d;cv.height=H*d;c.setTransform(d,0,0,d,0,0);seed()}
+  function mk(kind,y){const r=Math.random;
+    if(kind==="b")return {k:"b",x:r()*W,y:y??r()*H,rad:6+r()*22,vy:-(.08+r()*.22),vx:(r()-.5)*.1,a:.05+r()*.11,ph:r()*6,col:COLS[Math.floor(r()*4)]};
+    if(kind==="t")return {k:"t",x:r()*W,y:r()*H,s:2+r()*4,ph:r()*6,sp:.02+r()*.04};
+    return {k:"c",x:r()*W,y:y??r()*H,s:4+r()*4,vy:.15+r()*.3,vx:(r()-.5)*.2,rot:r()*6,vr:(r()-.5)*.03,a:.12+r()*.14,col:COLS[Math.floor(r()*4)]}}
+  function seed(){const n=Math.round(W*H/9000);items=[];for(let i=0;i<n;i++)items.push(mk("b"));for(let i=0;i<n*.6;i++)items.push(mk("t"));for(let i=0;i<n*.4;i++)items.push(mk("c"))}
+  function draw(t){c.clearRect(0,0,W,H);
+    for(const p of items){
+      if(p.k==="b"){p.y+=p.vy;p.x+=p.vx;if(p.y<-p.rad){Object.assign(p,mk("b",H+p.rad))}
+        const g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,p.rad),al=p.a*(.7+.3*Math.sin(t/900+p.ph));g.addColorStop(0,"rgba("+p.col+","+al+")");g.addColorStop(1,"rgba("+p.col+",0)");c.fillStyle=g;c.beginPath();c.arc(p.x,p.y,p.rad,0,7);c.fill()}
+      else if(p.k==="t"){const tw=Math.max(0,Math.sin(t*p.sp/16+p.ph));if(tw<.05)continue;const s=p.s*tw;c.globalAlpha=tw*.8;c.fillStyle="#fff3a0";
+        c.beginPath();c.moveTo(p.x,p.y-s*2);c.lineTo(p.x+s*.35,p.y-s*.35);c.lineTo(p.x+s*2,p.y);c.lineTo(p.x+s*.35,p.y+s*.35);c.lineTo(p.x,p.y+s*2);c.lineTo(p.x-s*.35,p.y+s*.35);c.lineTo(p.x-s*2,p.y);c.lineTo(p.x-s*.35,p.y-s*.35);c.closePath();c.fill();c.globalAlpha=1}
+      else{p.y+=p.vy;p.x+=p.vx+Math.sin(t/1500+p.rot)*.15;p.rot+=p.vr;if(p.y>H+20){Object.assign(p,mk("c",-20))}
+        c.save();c.translate(p.x,p.y);c.rotate(p.rot);c.globalAlpha=p.a;c.fillStyle="rgb("+p.col+")";c.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);c.restore();c.globalAlpha=1}}}
+  function loop(t){if(t-last>32){draw(t);last=t}requestAnimationFrame(loop)}
+  size();if("ResizeObserver" in window)new ResizeObserver(size).observe(booth);else addEventListener("resize",size);
+  if(reduce())draw(0);else requestAnimationFrame(loop);
+})();
+// page backdrop: faint stars, gold sparkles and rising gold/red embers
+(()=>{const b=$("bgfx"),r=Math.random;let h="";
+  for(let k=0;k<26;k++)h+="<i class='st' style='left:"+(r()*100).toFixed(1)+"%;top:"+(r()*60).toFixed(1)+"%;opacity:"+(.15+r()*.35).toFixed(2)+"'></i>";
+  for(let k=0;k<22;k++)h+="<i class='sp' style='left:"+(r()*100).toFixed(1)+"%;top:"+(5+r()*70).toFixed(1)+"%;--d:-"+(r()*4).toFixed(1)+"s;--t:"+(2.6+r()*2.4).toFixed(1)+"s;--k:"+(1+r()*1.6).toFixed(1)+"'></i>";
+  for(let k=0;k<14;k++){const red=k%3===0;h+="<i class='fl' style='left:"+(r()*100).toFixed(1)+"%;--d:-"+(r()*14).toFixed(1)+"s;--t:"+(10+r()*8).toFixed(1)+"s;--dx:"+((r()-.5)*80).toFixed(0)+"px"+(red?";--c:#ff4a42;--g:rgba(224,20,30,.7)":"")+"'></i>"}
+  b.insertAdjacentHTML("beforeend",h)})();
+// ---------- engine (server-driven) ----------
+// S = the player's session state from GET /api/session/<code> (deposits, turnover, plays, readiness — all decided by the
+// server). START = POST /api/play: the server checks the deposit + turnover gate, draws the prize and records it. This page then
+// builds a COSMETIC plan for the light board (which cell of the drawn prize group the light stops on, or the WILD layout) and
+// stores it with POST /api/plan, so a refresh replays exactly the same board. The plan never changes the amount. Demo mode
+// draws locally and records nothing.
+let S=null,busy=false,N=0,cur=null,demoPlays=[],planQ=Promise.resolve(),lastSig="";
+const DEMO_N=2;
+const RING=GAME.ring,TIER=GAME.tier,NC=RING.length;
+async function post(path,body){const r=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})});const j=await r.json().catch(()=>({}));return{status:r.status,...j}}
+const r2=n=>Math.round(Number(n)*100)/100;
+function tierOf(amt){const i=PRIZES.indexOf(r2(amt));return i>=0?i:(r2(amt)>=PRIZES[1]?1:0)} // prize group of a server amount
+let lastStop=null;function plays(){return lastStop==null?[]:[{cell:lastStop}]} // the GAME module asks for the last stop so the symbols rotate (memo — never walks playList(), which would recurse through fromServer)
+// cosmetic plans: {v:1,wild:false,cell,tier} or {v:1,wild:true,cell:<WILD cell>,wtier,hits:[cells],parts:[centavos]}
+function normalPlan(tier){return {v:1,wild:false,cell:GAME.cellFor(tier),tier}}
+function wildPlanFor(tier){const w=GAME.wildPlan(tier);return {v:1,wild:true,cell:w.wildCell,wtier:tier,hits:w.hits,parts:w.parts}}
+function planOf(pl){const p={v:1,wild:!!pl.wild,cell:pl.cell};if(pl.wild){p.wtier=pl.wprize;p.hits=pl.hits;p.parts=pl.parts}else p.tier=pl.prize;if(pl.done)p.done=true;return p}
+function validPlan(p,row){
+  if(!p||typeof p!=="object"||!Number.isInteger(p.cell)||p.cell<0||p.cell>=NC||!!p.wild!==!!row.wild)return false;
+  const tier=tierOf(row.amount);
+  if(!p.wild)return p.tier===tier&&TIER[RING[p.cell]]===tier;
+  if(RING[p.cell]!=="wild"||p.wtier!==tier||!Array.isArray(p.hits)||!Array.isArray(p.parts)||p.hits.length!==p.parts.length)return false;
+  const syms=[...new Set(RING.filter(s=>TIER[s]===tier))];
+  if(p.hits.length!==syms.length||new Set(p.hits).size!==p.hits.length)return false;
+  return p.hits.every((h,k)=>Number.isInteger(h)&&h>=0&&h<NC&&TIER[RING[h]]===tier&&p.parts[k]===SYMVAL[RING[h]])&&new Set(p.hits.map(h=>RING[h])).size===syms.length}
+// server PLAY row -> local play object (same shape the GAME module expects). `fresh` = just paid: always build a new layout.
+function fromServer(row,fresh){const amount=Number(row.amount),wild=!!row.wild,tier=tierOf(amount);
+  let p=!fresh&&row.plan&&validPlan(row.plan,row)?row.plan:null;if(!p)p=wild?wildPlanFor(tier):normalPlan(tier);
+  const pl={id:row.id,no:row.play_no,amount,wild:!!p.wild,cell:p.cell,at:row.at,seen:!!row.seen,done:!fresh};
+  if(p.wild){pl.wprize=p.wtier;pl.hits=p.hits.slice();pl.parts=p.parts.slice();pl.total=pl.parts.reduce((a,b)=>a+b,0)}else pl.prize=p.tier;
+  return pl}
+function savePlan(){if(!cur||mode!=="player"||!cur.id)return;const body={id:cur.id,plan:planOf(cur)};planQ=planQ.then(()=>post("/api/plan/"+encodeURIComponent(code),body)).catch(()=>{})}
+function playList(){if(mode!=="player")return demoPlays;if(!S||!S.plays)return [];return S.plays.map(r=>cur&&cur.id===r.id?cur:fromServer(r,false))}
+function sigOf(r){return JSON.stringify([r.exists,r.expired,r.stopped,r.stopNote,r.playOpen,r.capped,r.ready,r.betOk,r.depOk,r.playsUsed,r.playsTotal,(r.missing||[]).join("|"),(r.plays||[]).map(p=>p.id+":"+p.seen+":"+(p.plan?1:0))])}
+async function refresh(force){if(mode!=="player")return;let r=null;try{r=await fetch("/api/session/"+encodeURIComponent(code)).then(r=>r.json())}catch(e){}
+  if(!r)return;if(r.config){CONF=r.config;syncOdds()}S=r;const sig=sigOf(r);if(force||sig!==lastSig){lastSig=sig;buildView()}}
+function renderMech(){
+  const steps=["<b>Every "+php(CONF.perPlay)+" deposit = 1 play</b>, up to <b>"+CONF.maxPlays+" plays per day</b>. E.g. "+php(CONF.perPlay*2)+" = 2 plays, all on the personal link from your agent. Deposits count from "+hours()+".",
+    "<b>"+wagerRule()+"</b> Each play unlocks once your "+wagerLabel()+" reaches <b>"+CONF.turnover+"× the deposit</b> ("+php(CONF.perPlay)+" deposit → "+php(CONF.perPlay*CONF.turnover)+" in bets). Your deposits and turnover are checked automatically from your account — nothing to send.",
+    "<b>Hours:</b> "+hours()+" daily. <b>Max bonus:</b> "+php(CONF.dailyCap)+" per day for all players.",
+    "<b>How to get your link:</b> ask your agent after you deposit. Your link keeps working for the whole day; deposit again and your next play unlocks on the same link.",
+    "<b>Prize:</b> The bonus is random on every play and is set when you press START. The light stops on a symbol of your prize group (₱8.20 or ₱16.50). Land on <b>WILD</b> and the light hits every symbol of one group — the hits add up to the same prizes. 77 (₱177), BAR BAR (₱77) and the ₱777 wild tease are display-only and can never be won.",
+    "<b>Claiming:</b> Your win is recorded the moment it is revealed. The bonus is credited the following day at 1:00 PM and must be wagered "+CONF.turnover+"× before it can be withdrawn.",
+    "<b>Results are final.</b> Refreshing or reopening the link does not give extra plays; an unclaimed play is shown again."];
+  $("mechSteps").innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
+  const how=["Tick the T&C box.","Press the red <b>START</b> button. The light runs around the board, slows down and stops on a symbol. You win that symbol's group total (shown under the strip).","Land on <b>WILD</b> and the lights go wild — the light hits every symbol of one group and your bonus is the total of the wild hits.","The <b>BONUS WIN</b> display shows your bonus. <b>Every play wins a bonus.</b>","Your win is recorded automatically — no screenshot needed."];
+  $("howSteps").innerHTML=how.map(s=>"<li>"+s+"</li>").join("");
+}
+function setGo(show,text){const g=$("goBtn");g.hidden=!show;if(text)g.textContent=text;g.disabled=false;g.classList.remove("pressed");g.classList.toggle("startbtn",text==null||text==="START")}
+const HOWTO="The light runs around the board and stops on your bonus. Every play wins!";
+function rangeText(){return "Every "+php(CONF.perPlay)+" deposit = 1 play · <b>"+N+" play"+(N===1?"":"s")+"</b> today ("+php(S.dep)+" deposited) · every play wins a bonus"}
+function lockView(label,msg){GAME.build($("play"));$("range").textContent="";$("count").hidden=false;$("count").textContent=label;setGo(false);cheer("");$("note").textContent=msg}
+function lockReason(){
+  if(!S.playOpen)return {cheer:"Game closed for today.",note:"Swerte Lights is open "+hm12(CONF.playFrom)+"–"+hm12(CONF.playUntil)+" daily. Come back tomorrow."};
+  if(S.capped)return {cheer:"Daily bonus budget reached.",note:"Today's "+php(CONF.dailyCap)+" bonus budget is used up. Try again tomorrow."};
+  if(!S.betOk){const need=Math.max(0,S.nextNeed-S.slot);return {cheer:"Finish your turnover first.",note:"Play "+(S.playsUsed+1)+" unlocks once your "+wagerLabel()+" today reaches "+php(S.nextNeed)+" — bet "+php(need)+" more (now "+php(S.slot)+"). This page refreshes on its own."}}
+  return {cheer:"Not ready yet.",note:(S.missing||[]).join(" · ")||"Please wait a moment."}}
+function buildView(){
+  renderMech();
+  $("gameTitle").textContent=GAME.title;
+  $("demoTag").hidden=mode==="player";
+  $("resetBtn").hidden=mode==="player";
+  $("win").hidden=true;$("summary").hidden=true;$("cheer").textContent="";busy=false;$("resetBtn").disabled=false;$("who").hidden=true;
+  GAME.stop();
+  $("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));
+  if(mode!=="player"){
+    N=DEMO_N;$("range").innerHTML="Every "+php(CONF.perPlay)+" deposit = 1 play · <b>demo</b> · "+N+" plays · every play wins a bonus";GAME.build($("play"));
+    const P=demoPlays,last=P[P.length-1];
+    if(last&&!last.seen){cur=last;GAME.finish(last.cell,last.prize,last);showResult(false);return}
+    if(P.length>=N){cur=null;if(last)GAME.finish(last.cell,last.prize,last);showSummary();return}
+    cur=null;$("count").hidden=false;$("count").textContent="Play "+(P.length+1)+" of "+N;setGo(true,"START");
+    cheer(P.length?"Ready for your next play!":"Press START to run the lights!");$("note").textContent=HOWTO;return}
+  if(!S)return;
+  if(!S.exists){lockView("INVALID LINK","This link is not valid. Ask your agent for a new link.");return}
+  $("who").hidden=false;$("who").innerHTML="For <b>"+esc(S.name)+"</b> 🎉 · "+esc(S.account);
+  if(S.expired){lockView("EXPIRED","This link has expired (it was for another day). Ask your agent for a new link.");return}
+  if(S.stopped){lockView("PAUSED","The game is paused by the admin right now. Please try again later."+(S.stopNote?" ("+esc(S.stopNote)+")":""));return}
+  N=S.playsTotal;
+  const P=playList(),last=P[P.length-1];
+  if(last&&!last.seen){ // an unclaimed play: show its result again on the same board (no re-roll)
+    cur=last;$("range").innerHTML=rangeText();GAME.build($("play"));GAME.finish(last.cell,last.prize,last);showResult(false);return}
+  cur=null;
+  if(S.playsUsed>=CONF.maxPlays||(P.length>=N&&N>0)){GAME.build($("play"));if(P.length){GAME.finish(last.cell,last.prize,last)}showSummary();return}
+  if(!N){GAME.build($("play"));$("range").textContent="Waiting for a qualifying deposit.";$("count").hidden=true;setGo(false);
+    $("note").textContent="Every "+php(CONF.perPlay)+" deposit ("+hours()+") = 1 play. Deposit, then this page unlocks your play on its own.";cheer("No qualifying deposit yet.");return}
+  $("range").innerHTML=rangeText();GAME.build($("play"));
+  $("count").hidden=false;$("count").textContent="Play "+(P.length+1)+" of "+N;
+  if(S.ready){setGo(true,"START");cheer(P.length?"Ready for your next play!":"Press START to run the lights!");$("note").textContent=HOWTO;return}
+  setGo(true,"START");$("goBtn").disabled=true;
+  const why=lockReason();cheer(why.cheer);$("note").textContent=why.note;
+}
+// demo only: the same draw the server makes, done locally (nothing recorded)
+function planPlayDemo(){
+  if(rnd()<WILD_RATE){const wprize=drawWild(),w=GAME.wildPlan(wprize),total=w.parts.reduce((a,b)=>a+b,0);
+    return {wild:true,wprize,total,amount:total/100,cell:w.wildCell,hits:w.hits,parts:w.parts}}
+  const prize=drawPrize();return {wild:false,prize,amount:PRIZES[prize],cell:GAME.cellFor(prize)}}
+function runRound(){
+  busy=true;$("resetBtn").disabled=true;
+  const g=$("goBtn");g.classList.add("pressed");setTimeout(()=>{if(busy)setGo(false)},reduce()?0:160);
+  beep(220,.12,.2,"square");beep(330,.1,.12,"square",.06);
+  $("count").hidden=false;$("count").textContent="Play "+cur.no+" of "+N;
+  cheer("Swerte, swerte…");$("note").textContent="Lights running. Good luck!";
+  const cb=document.querySelector(".cab");if(cb&&cb.scrollIntoView){const r=cb.getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)try{cb.scrollIntoView({behavior:reduce()?"auto":"smooth",block:r.height>innerHeight?"start":"center"})}catch(e){}}
+  GAME.run(cur.cell,cur.wild?-1:cur.prize,()=>{busy=false;$("resetBtn").disabled=false;cur.done=true;savePlan();showResult(true)},cur.wild?cur:null,cur.amount);
+}
+async function start(){
+  if(busy||GAME.running)return;if(needAgree())return;
+  if(mode!=="player"){if(demoPlays.length>=N)return;
+    cur=Object.assign(planPlayDemo(),{no:demoPlays.length+1,at:Date.now(),seen:false});demoPlays.push(cur);runRound();return}
+  if(!S||!S.ready)return;
+  busy=true;setGo(false);cheer("Checking your deposit…");
+  const r=await post("/api/play/"+encodeURIComponent(code));
+  if(r.status!==200||!r.play){busy=false;if(r.exists){S=r;lastSig=sigOf(r)}buildView();cheer(r.msg||r.error||"Please try again.");return}
+  S=r;lastSig=sigOf(r);
+  cur=fromServer(r.play,true);cur.done=false;
+  savePlan();runRound();
+}
+function resultLine(pl){return pl.wild?"WILD · "+CATNAME[pl.wprize]:GAME.result(pl.cell)}
+function showResult(celebrate){
+  const pl=cur;if(!pl)return;const big=bigOf(pl);
+  $("count").hidden=false;$("count").textContent="Play "+pl.no+" of "+N;
+  $("amt").textContent=php2(amtOf(pl));$("winNote").textContent="Play "+pl.no+" of "+N+(pl.wild?" · Wild bonus · "+CATNAME[pl.wprize]:" · "+GAME.result(pl.cell)+(big?" · Big win!":""));
+  $("win").hidden=false;$("summary").hidden=true;
+  cheer(pl.wild?(big?"BIG WILD BONUS! You won!":"WILD BONUS! You won!"):(big?"BIG WIN! ":"BONUS! ")+GAME.result(pl.cell));
+  const more=pl.no<N;
+  setGo(!celebrate,more?"Next play":"See my total");
+  $("note").textContent=more?"Claim your reward, then the board resets for your next play.":"That was your last play for now.";
+  if(celebrate)setTimeout(()=>openWin(pl),reduce()?50:250);
+}
+async function nextRound(){
+  const pl=cur;if(!pl)return;
+  if(mode!=="player"){pl.seen=true;cur=null;if(demoPlays.length>=N){showSummary();return}buildView();return}
+  if(!pl.seen){pl.seen=true;try{await post("/api/seen/"+encodeURIComponent(code),{id:pl.id})}catch(e){}}
+  cur=null;await refresh(true);
+}
+function showSummary(){
+  const P=playList(),tot=P.reduce((a,p)=>a+Math.round(amtOf(p)*100),0)/100;
+  $("count").hidden=false;$("count").textContent="Played "+P.length+" of "+Math.max(N,P.length);
+  $("win").hidden=true;setGo(false);
+  $("sumAmt").textContent=php2(tot);
+  $("sumList").innerHTML="";P.forEach((p,i)=>{const li=el("li");li.textContent="Play "+(i+1)+": "+php2(amtOf(p))+(p.wild?" · Wild":"");$("sumList").appendChild(li)});
+  $("summary").hidden=false;
+  cheer("Thanks for playing Swerte Lights!");
+  $("note").textContent=mode==="player"&&S.playsUsed>=CONF.maxPlays?"You used all "+CONF.maxPlays+" plays for today. Come back tomorrow!":mode==="player"?"All plays from today's deposit are used. Deposit again ("+php(CONF.perPlay)+" = 1 play) and this page unlocks your next play.":"Demo over. Press Reset to try again.";
+}
+$("goBtn").onclick=()=>{if(busy)return;if(cur&&!cur.seen&&!$("win").hidden){nextRound();return}start()};
+$("resetBtn").onclick=()=>{if(busy||mode==="player")return;demoPlays=[];cur=null;buildView()};
+$("showCard").onclick=()=>{const P=playList();const pl=cur&&!cur.seen?cur:P[P.length-1];if(pl)openWin(pl,true)};
 
 // ---------- win pop-up ----------
-let confettiRAF=null;
-function openWin(amt,big){
-  const jp=$("jp"),el=$("jpAmt");jp.classList.toggle("big",big);
-  $("jpTitle").textContent=big?"JACKPOT!":"YOU WON!";$("jpSub").textContent=LABELS[state.step];
-  jp.hidden=false;$("jpClose").focus();fanfare(big);
-  if(reduce()){el.textContent=php(amt);return}
+let confettiRAF=null,cardPl=null;
+function openWin(pl,quiet){
+  const amt=amtOf(pl),big=bigOf(pl);cardPl=pl;
+  const jp=$("jp"),a=$("jpAmt");jp.classList.toggle("big",big);
+  $("jpTitle").textContent=big&&!pl.wild?"BIG WIN!":"YOU WON!";$("jpSub").textContent=(mode!=="player"?"DEMO · ":"")+(pl.wild?"Wild bonus":BRAND.game)+" · Play "+pl.no+" of "+N;
+  $("jpLogo").src=$("wordmark").src;
+  const when=typeof pl.at==="number"?new Date(pl.at).toLocaleString("en-PH",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"}):String(pl.at||"");
+  const ref=mode!=="player"?"DEMO-"+pl.no:(code+"-"+pl.no).toUpperCase();
+  const rows=[["Player",mode!=="player"?"DEMO":(S?S.account:"")],["Promo","TamasaPH Lucky Lights Bonus"],["Deposit",mode!=="player"?"—":php(S?S.dep:0)],["Play",pl.no+" of "+N],
+    ["Result",resultLine(pl)],
+    ...(pl.wild&&Array.isArray(pl.parts)?[["Wild hits",pl.parts.map((c,k)=>GAME.label(pl.hits[k])+" "+php2(c/100)).join(" + ")+" = "+php2(amt)]]:[]),["Total",php2(amt)],["Date",when],["Ref code",ref]];
+  const dl=$("jpTicket");dl.innerHTML="";rows.forEach(([k,v])=>{dl.appendChild(el("dt","",k));const d=el("dd",k==="Ref code"?"ref":"");d.textContent=v;dl.appendChild(d)});
+  document.querySelector(".jp-note span").textContent=mode!=="player"?"Demo only — nothing is recorded. Ask your agent for a real link to win a real bonus.":"Your win is recorded. The bonus is credited the following day at 1:00 PM after verification.";
+  jp.hidden=false;try{$("jpClose").focus({preventScroll:true})}catch(e){}
+  if(quiet||reduce()){a.textContent=php2(amt);return}
+  cheerSnd(big);
   const s=performance.now(),dur=big?1600:1100;
-  (function f(now){const k=Math.min(1,(now-s)/dur);el.textContent=php(Math.round(amt*(1-Math.pow(1-k,3))));if(k<1&&!jp.hidden)requestAnimationFrame(f);else el.textContent=php(amt)})(s);
+  (function f(now){const k=Math.min(1,(now-s)/dur);a.textContent=php2(Math.round(amt*100*(1-Math.pow(1-k,3)))/100);if(k<1&&!jp.hidden)requestAnimationFrame(f);else a.textContent=php2(amt)})(s);
   confetti(big?180:90,big);
 }
 function confetti(count,big){
-  const cv=$("confetti"),ctx=cv.getContext("2d"),d=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);
-  const cols=big?["#ffc53d","#fff1b8","#e0a800","#ffffff","#ff4d4d"]:["#ff4d4d","#ffb3a8","#ffffff","#ffc53d"];
+  const cv=$("confetti");let c=null;try{c=cv.getContext&&cv.getContext("2d")}catch(e){}if(!c)return;
+  const d=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;cv.width=W*d;cv.height=H*d;c.setTransform(d,0,0,d,0,0);
+  const cols=big?BRAND.confettiBig:BRAND.confetti;
   const ps=Array.from({length:count},()=>({x:W/2+(rnd()-.5)*80,y:H*.42,vx:(rnd()-.5)*14,vy:-rnd()*14-4,r:4+rnd()*5,c:cols[Math.floor(rnd()*cols.length)],a:rnd()*6,va:(rnd()-.5)*.3}));
   const s=performance.now();
-  (function fr(now){ctx.clearRect(0,0,W,H);ps.forEach(p=>{p.vy+=.28;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.fillStyle=p.c;ctx.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);ctx.restore()});
-    if(now-s<4500&&!$("jp").hidden)confettiRAF=requestAnimationFrame(fr);else ctx.clearRect(0,0,W,H)})(s);
+  (function fr(now){c.clearRect(0,0,W,H);ps.forEach(p=>{p.vy+=.28;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;c.save();c.translate(p.x,p.y);c.rotate(p.a);c.fillStyle=p.c;c.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);c.restore()});
+    if(now-s<4500&&!$("jp").hidden)confettiRAF=requestAnimationFrame(fr);else c.clearRect(0,0,W,H)})(s);
 }
-function closeWin(){$("jp").hidden=true;cancelAnimationFrame(confettiRAF)}
+function closeWin(){if($("jp").hidden)return;$("jp").hidden=true;cancelAnimationFrame(confettiRAF);
+  if(cardPl&&cardPl===cur&&!cur.seen)nextRound()}
 $("jpClose").onclick=closeWin;
 $("jp").addEventListener("click",e=>{if(e.target===$("jp"))closeWin()});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("jp").hidden)closeWin()});
+// ---------- T&C ----------
+function openTnc(){$("tnc").hidden=false;try{$("tncAgree").focus()}catch(e){}}
+function closeTnc(){$("tnc").hidden=true}
+document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("tnc").hidden)closeTnc();else if(!$("jp").hidden)closeWin()});
+try{$("agree").checked=localStorage.getItem(BRAND.key+"-tnc")==="yes"}catch(e){}
+function agreeChanged(){try{localStorage.setItem(BRAND.key+"-tnc",$("agree").checked?"yes":"no")}catch(e){}$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));if($("cheer").textContent==="Please tick the T&C box first.")$("cheer").textContent=""}
+$("agree").addEventListener("change",agreeChanged);
+$("tncLink").onclick=e=>{e.preventDefault();e.stopPropagation();openTnc()};
+$("tncBtn").onclick=openTnc;
+$("tncClose").onclick=closeTnc;
+$("tncAgree").onclick=()=>{$("agree").checked=true;agreeChanged();closeTnc()};
+$("tnc").addEventListener("click",e=>{if(e.target===$("tnc"))closeTnc()});
 
-try{$("agree").checked=localStorage.getItem("tamasa-tnc")==="yes"}catch(e){}
-$("agree").addEventListener("change",()=>{try{localStorage.setItem("tamasa-tnc",$("agree").checked?"yes":"no")}catch(e){}$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));if($("cheer").textContent==="I-check muna ang T&C.")$("cheer").textContent=""});
-$("tncLink").onclick=e=>{e.preventDefault();$("tnc").open=true;$("tnc").scrollIntoView({behavior:"smooth",block:"start"})};
-
-// ---------- admin panel ----------
-let db=null,saveTimer=null,saving=false,pending=false,adminToken=sessionStorage.getItem("admin-token")||null;
-async function apiGet(){try{const r=await fetch("/api/session/"+encodeURIComponent(code));if(!r.ok)return null;return await r.json()}catch(e){return null}}
-async function apiPut(data){const r=await fetch("/api/session/"+encodeURIComponent(code),{method:"PUT",headers:{"Content-Type":"application/json","X-Admin-Token":adminToken||""},body:JSON.stringify(data)});if(!r.ok)throw new Error("save failed");return r.json()}
-function playerLink(){return location.href.split("#")[0]+"#"+code}
-function adminUI(){
-  if(document.activeElement!==$("pname"))$("pname").value=cfg.name||"";
-  if(document.activeElement!==$("deposit"))$("deposit").value=cfg.deposit??"";
-  const box=$("aTier");
-  if(qualifies(cfg.deposit)){box.className="tierbox";box.innerHTML="Qualified — prize pool: <b>₱10</b> (4%), <b>₱27</b> (95%), <b>₱57</b> (1%)"}
-  else{box.className="tierbox bad";box.innerHTML="<b>Hindi qualified.</b> Minimum deposit ay ₱200."}
+// ---------- link maker (agents) ----------
+let adminToken="";
+try{adminToken=sessionStorage.getItem("cg-admin-token")||""}catch(e){}
+let look=null,capState=null;
+function playerLink(){return look&&look.code?location.href.split("#")[0]+"#"+look.code:""}
+async function api(path,opts){
+  const r=await fetch(path,Object.assign({headers:{"Content-Type":"application/json","X-Admin-Token":adminToken}},opts||{}));
+  const j=await r.json().catch(()=>({}));
+  if(r.status===403){adminToken="";try{sessionStorage.removeItem("cg-admin-token")}catch(e){}location.reload()}
+  return {ok:r.ok,status:r.status,j};
+}
+function renderCap(){
+  const c=capState;if(!c)return;
+  $("capText").innerHTML="Today: <b>"+php(c.capUsed)+"</b> used · <b>"+php(c.capLeft)+"</b> left of <b>"+php(c.dailyCap)+"</b>"+(c.dailyCap!==c.defaultCap?" <small>(default "+php(c.defaultCap)+")</small>":"")+(c.capped?" — <span style='color:var(--bad)'>BUDGET REACHED: no new links or plays</span>":"");
+  $("capInput").placeholder="e.g. "+(c.dailyCap+5000);
+  renderStop();
+}
+function renderStop(){
+  const c=capState;if(!c)return;const btn=$("stopBtn");
+  if(c.stopped){$("stopText").innerHTML="<span style='color:var(--bad)'><b>STOPPED</b></span>"+(c.stopNote?" — "+esc(c.stopNote):"")+". Nobody can make a link or play.";btn.textContent="RESUME";btn.style.background="#49d17a"}
+  else{$("stopText").innerHTML="The game is live.";btn.textContent="STOP ALL";btn.style.background="var(--bad)"}
+}
+async function toggleStop(){
+  const c=capState;const goingStop=!(c&&c.stopped);
+  if(!confirm(goingStop?"Stop ALL links and plays for EVERY player right now?":"Resume the game for all players?"))return;
+  let note="";if(goingStop){note=prompt("Reason (optional, shown to other admins):","")||""}
+  const r=await api("/api/stop",{method:"POST",body:JSON.stringify({stopped:goingStop,note})});
+  if(!r.ok){alert(r.j.msg||r.j.error||"Error");return}
+  capState=Object.assign(capState||{},r.j);renderStop();
+}
+async function loadLinksToday(){
+  const box=$("linksTodayList");box.innerHTML="<p class=\"hint\">Loading…</p>";
+  const r=await api("/api/links-today");
+  if(!r.ok){box.innerHTML="<p class=\"hint\">Error: "+esc(r.j.msg||r.j.error||"")+"</p>";return}
+  const players=r.j.players||[];
+  if(!players.length){box.innerHTML="<p class=\"hint\">No links made today yet.</p>";return}
+  box.innerHTML="<table class=\"ltbl\"><tr><th>Player</th><th>Links</th><th>Plays</th><th>Won</th><th>Last link</th></tr>"
+    +players.map(p=>"<tr><td><button type=\"button\" class=\"linkbtn\" data-acct=\""+esc(p.account)+"\">"+esc(p.account)+"</button>"+(p.name&&p.name!==p.account?" <small>("+esc(p.name)+")</small>":"")+"</td><td>"+p.links+"</td><td>"+p.rounds+"</td><td>"+php(p.won)+"</td><td>"+esc(new Date(Number(p.last_link_at)).toLocaleTimeString("en-PH",{hour:"2-digit",minute:"2-digit"}))+"</td></tr>").join("")+"</table>";
+  box.querySelectorAll(".linkbtn").forEach(b=>{b.onclick=()=>{$("acct").value=b.dataset.acct;doLookup();window.scrollTo(0,0)}});
+}
+function renderLookup(){
+  const tb=$("aTier"),ob=$("offerBox"),l=look;
+  $("linkField").hidden=!(l&&l.code);$("makeRow").hidden=!(l&&l.found&&!l.code);ob.hidden=!(l&&l.found);
+  if(!l){tb.className="tierbox";tb.innerHTML="Type the player's username and press Check.";return}
+  if(!l.found){tb.className="tierbox bad";tb.innerHTML="<b>Not found:</b> account <code>"+esc(l.account)+"</code>. Check the spelling — username, user ID or game ID (not the real name).";return}
+  const used=l.playsUsed||0,tot=l.playsTotal||0,deps=l.deposits||[];
+  tb.className="tierbox"+(tot?"":" bad");
+  tb.innerHTML="<b>"+esc(l.account)+"</b>"+(l.name&&l.name!==l.account?" ("+esc(l.name)+")":"")+(l.gameId?" · game ID "+esc(l.gameId):"")
+    +"<br>Deposit today ("+hours()+"): <b>"+php(l.dep)+"</b> in "+deps.length+" deposit"+(deps.length===1?"":"s")+" → <b>"+tot+" play"+(tot===1?"":"s")+"</b> <small>(every "+php(CONF.perPlay)+" = 1 play, max "+CONF.maxPlays+"/day)</small>"
+    +"<br>"+(anyGame()?"Turnover today (all games)":"Slot turnover today")+": <b>"+php(l.slot)+"</b>"+(l.syncedAt?" <small>(synced "+esc(String(l.syncedAt).slice(11,16))+")</small>":" <small>(not synced yet)</small>")+(anyGame()?"":" · other games "+php(l.other))
+    +"<br>Plays used: <b>"+used+" of "+tot+"</b>"+(used<tot?" · next play needs "+wagerLabel()+" "+php(l.nextNeed)+(l.betOk?" ✓":" <span style='color:var(--bad)'>(short by "+php(Math.max(0,l.nextNeed-l.slot))+")</span>"):"")
+    +"<br><small>Links issued today: <b>"+(l.linksIssued||0)+"</b> · ready to play now: <b>"+(l.ready?"YES":"no")+"</b></small>";
+  const odds=CONF.prizes.map(p=>php2(p.amt)+" ("+p.p+"%)").join(" · "),wodds=(CONF.wildPrizes||[]).filter(p=>p.p>0).map(p=>php2(p.amt)+" ("+p.p+"%)").join(" · ");
+  ob.innerHTML="<strong>Status</strong>"+(l.missing&&l.missing.length?"<p>Not yet: "+l.missing.map(esc).join(" · ")+"</p>":"<p>Ready to play.</p>")
+    +"<p>Today's plays: "+(l.plays&&l.plays.length?l.plays.map(h=>"#"+h.play_no+" "+php2(h.amount)+(h.wild?" (wild)":"")+(h.seen?"":" (unclaimed)")).join(", "):"none yet")+"</p>"
+    +"<p class='small'>Server time "+esc(l.serverTime)+" · prizes: "+odds+(CONF.wildRate>0?" · WILD round "+Math.round(CONF.wildRate*100)+"% of plays: "+wodds:"")+" (77 ₱177, BAR BAR ₱77 and the ₱777 tease are display-only)</p>";
+  $("makeLink").disabled=!!l.capped;
   $("plink").textContent=playerLink();
 }
-function changed(){adminUI();viewKey="";refreshView();scheduleSave()}
-function scheduleSave(){$("sync").className="sync";$("sync").textContent=db?"Saving…":"Preview only";if(!db)return;clearTimeout(saveTimer);saveTimer=setTimeout(save,400)}
-async function save(){
-  saveTimer=null;if(saving){pending=true;return}saving=true;
-  try{await apiPut({deposit:cfg.deposit||0,name:cfg.name||"",game:cfg.game,resetAt:cfg.resetAt||0});$("sync").className="sync on";$("sync").textContent="Live";$("aMsg").textContent=""}
-  catch(e){$("sync").className="sync";$("sync").textContent="Not saved";$("aMsg").textContent="Hindi na-save. Subukan ulit."}
-  saving=false;if(pending){pending=false;save()}
-}
-function revealAdmin(){
+function flashBtn(btn,txt){const o=btn.textContent;btn.textContent=txt;setTimeout(()=>btn.textContent=o,1500)}
+async function copyText(t,btn){try{await navigator.clipboard.writeText(t);flashBtn(btn,"Copied")}catch(e){const r=document.createRange();r.selectNodeContents($("plink"));const s=getSelection();s.removeAllRanges();s.addRange(r);flashBtn(btn,"Selected")}}
+async function loadCap(){const r=await api("/api/cap");if(r.ok){capState=r.j;renderCap()}}
+async function doLookup(){const a=$("acct").value.trim();if(!a)return;$("aMsg").textContent="Looking up…";const r=await api("/api/lookup?account="+encodeURIComponent(a));$("aMsg").textContent=r.ok?"":(r.j.error||"Error");look=r.ok?r.j:null;renderLookup();loadCap()}
+async function makeLink(fresh){if(!look||!look.found)return;$("aMsg").textContent="Making the link…";const r=await api("/api/link",{method:"POST",body:JSON.stringify({account:look.account,fresh:!!fresh})});if(!r.ok){$("aMsg").textContent=r.j.msg||r.j.error||"Error";loadCap();return}look=Object.assign({found:true},r.j);renderLookup();loadLinksToday();$("aMsg").textContent=fresh?"New link. Same progress — it is tied to the account, not the link.":"The link is ready."}
+async function setCap(){const v=parseInt($("capInput").value,10);if(!(v>=0)){$("capMsg").textContent="Enter the new budget (whole number).";return}if(!confirm("Set today's daily budget to "+php(v)+"?"))return;const r=await api("/api/cap",{method:"POST",body:JSON.stringify({dailyCap:v})});$("capMsg").textContent=r.ok?"Today's budget updated.":(r.j.msg||r.j.error||"Error");if(r.ok){capState=r.j;renderCap();$("capInput").value="";if(look&&look.found)doLookup()}}
+function unlockAdmin(){
   $("adminGate").hidden=true;$("adminBody").hidden=false;
-  $("pname").addEventListener("input",()=>{cfg.name=$("pname").value;changed()});
-  $("aGenerate").onclick=async()=>{
-    const n=$("pname").value.trim();
-    if(!n){$("aMsg").textContent="Ilagay muna ang pangalan ng player.";return}
-    const newCode=cleanCode(n+Math.random().toString(36).slice(2,6));
-    try{await fetch("/api/session/"+encodeURIComponent(newCode),{method:"PUT",headers:{"Content-Type":"application/json","X-Admin-Token":adminToken||""},body:JSON.stringify({deposit:cfg.deposit??0,name:n,resetAt:0})})}catch(e){}
-    location.hash="admin-"+newCode;location.reload();
-  };
-  $("deposit").addEventListener("input",e=>{const v=e.target.value;cfg.deposit=v===""?0:Math.max(0,Math.floor(+v));changed()});
-  $("aReset").onclick=()=>{cfg.resetAt=Date.now();changed();$("aMsg").textContent="Na-reset ang laro ng player. Pwede na siyang maglaro ulit."};
-  $("copyBtn").onclick=async()=>{const t=playerLink();try{await navigator.clipboard.writeText(t);$("copyBtn").textContent="Copied"}catch(e){const r=document.createRange();r.selectNodeContents($("plink"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("copyBtn").textContent="Selected"}setTimeout(()=>$("copyBtn").textContent="Copy",1500)};
-  adminUI();
+  document.querySelectorAll("#adminBody .hrs").forEach(e=>e.textContent=hours());
+  document.querySelectorAll("#adminBody .perplay").forEach(e=>e.textContent=php(CONF.perPlay));
+  document.querySelectorAll("#adminBody .maxplays").forEach(e=>e.textContent=CONF.maxPlays);
+  document.querySelectorAll("#adminBody .wgame").forEach(e=>e.textContent=anyGame()?"any game":"slot games");
+  $("lookupBtn").onclick=doLookup;$("acct").addEventListener("keydown",e=>{if(e.key==="Enter")doLookup()});
+  $("makeLink").onclick=()=>makeLink(false);
+  $("newLink").onclick=()=>makeLink(true);
+  $("capBtn").onclick=setCap;
+  $("stopBtn").onclick=toggleStop;
+  $("linksRefreshBtn").onclick=loadLinksToday;
+  $("copyLink").onclick=()=>copyText(playerLink(),$("copyLink"));
+  $("copyMsg").onclick=()=>{if(!playerLink()){$("aMsg").textContent="Make a link first.";return}copyText(BRAND.script()+"\n\n🔗 Play here: "+playerLink(),$("copyMsg"))};
+  renderLookup();loadCap();loadLinksToday();
 }
-if(isAdmin){
+function initAdmin(){
   $("admin").hidden=false;$("previewLabel").hidden=false;
-  if(adminToken)revealAdmin();
-  $("adminUnlockBtn").onclick=async()=>{
-    const pass=$("adminPass").value;
-    $("adminGateErr").textContent="";
-    try{
-      const r=await fetch("/api/admin-login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pass})});
-      if(!r.ok){$("adminGateErr").textContent="Maling password.";return}
-      const d=await r.json();adminToken=d.token;sessionStorage.setItem("admin-token",adminToken);
-      revealAdmin();
-    }catch(e){$("adminGateErr").textContent="Hindi ma-verify. Subukan ulit."}
+  if(adminToken){unlockAdmin();return}
+  $("adminGate").innerHTML="<span>This needs the admin password. Ask your supervisor.</span><div style='display:flex;gap:8px;margin-top:8px'><input class='inp' type='password' id='adminPass' placeholder='Password' autocomplete='off' style='max-width:200px'><button class='btn small' id='adminPassGo' type='button'>Unlock</button></div><p id='adminPassErr' style='color:var(--bad);margin:6px 0 0'></p>";
+  const tryUnlock=async()=>{
+    const r=await fetch("/api/admin-login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:$("adminPass").value})});
+    if(r.ok){const j=await r.json();adminToken=j.token;try{sessionStorage.setItem("cg-admin-token",adminToken)}catch(e){}unlockAdmin()}
+    else{$("adminPassErr").textContent="Wrong password."}
   };
-  $("adminPass").addEventListener("keydown",e=>{if(e.key==="Enter")$("adminUnlockBtn").click()});
+  $("adminPassGo").onclick=tryUnlock;
+  $("adminPass").addEventListener("keydown",e=>{if(e.key==="Enter")tryUnlock()});
 }
-refreshView();
 
-// ---------- live sync (self-hosted backend) ----------
-db=true;
-(async()=>{
-  async function poll(){
-    const res=await apiGet();
-    if(res&&res.exists){
-      const d=res.data;live=true;
-      if(!(isAdmin&&(saving||pending||saveTimer))){
-        cfg={deposit:Number(d.deposit)||0,name:d.name||"",game:"slot",resetAt:Number(d.resetAt)||0};
-      }
-      if(isAdmin){adminUI();$("sync").className="sync on";$("sync").textContent="Live"}
-      viewKey="";refreshView();
-    }else if(isAdmin){
-      adminUI();scheduleSave();
-    }
-  }
-  await poll();
-  setInterval(poll,2500);
+// ---------- boot ----------
+(async function boot(){
+  try{const r=await fetch("/api/config");if(r.ok){const j=await r.json();if(j&&j.prizes)CONF=j}}catch(e){}
+  syncOdds();
+  if(mode==="admin")initAdmin();
+  if(mode==="player"){
+    await refresh(true);
+    setInterval(()=>{if(!busy&&!GAME.running&&$("jp").hidden&&document.visibilityState==="visible")refresh()},8000);
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&!busy&&!GAME.running&&$("jp").hidden)refresh()});
+  }else buildView();
 })();
 </script>
-
-</body></html>
+</body>
+</html>
