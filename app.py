@@ -53,10 +53,13 @@ def date_range_clauses(args, clauses, params):
             params.append(to_ms)
 
 
+RANGE_BRANDS = {"gopyesta", "pots"}  # pots (2026-11-06): Pearl Mine server-drawn ladder P7/P17 -- 7 is not in VALID_AMOUNTS
+
+
 def amount_ok(brand: str, amount: int) -> bool:
     if amount in VALID_AMOUNTS:
         return True
-    return brand == "gopyesta" and WHEEL_RANGE[0] <= amount <= WHEEL_RANGE[1]
+    return brand in RANGE_BRANDS and WHEEL_RANGE[0] <= amount <= WHEEL_RANGE[1]
 VALID_BRANDS = {"gopyesta", "pots", "rollem", "winforlife", "cow", "tamasa", "gspot", "t2b"}
 
 
