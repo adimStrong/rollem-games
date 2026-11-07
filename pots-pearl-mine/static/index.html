@@ -365,6 +365,10 @@ html,body{overflow-x:hidden}
 .tile.d27 .dv{color:#ffbcd2;border-color:rgba(255,160,196,.55)}
 .tile.d57 .dv{color:#cfd0ff;border-color:rgba(176,178,255,.6)}
 .tile.d77 .dv{color:#c8f5e8;background:#0b0912;border-color:rgba(160,255,230,.5)}
+/* the ₱777 jackpot pearl (display only, 0%): golden chip, soft glow, not dimmed like the other missed pearls */
+.tile.d777 .dv{color:#2b1b05;background:linear-gradient(180deg,#fffaf0,#f2d896 55%,#d9b56e);border-color:rgba(255,236,170,.9);box-shadow:0 0 12px rgba(255,210,110,.65),0 2px 6px rgba(0,0,0,.45)}
+.tile.rv.d777 svg{opacity:.9;filter:saturate(.9)}.tile.rv.d777 .dv{opacity:1}
+.tile.rv.d777::before{content:"";position:absolute;inset:-4%;border-radius:16px;box-shadow:0 0 0 1.5px rgba(255,220,130,.7),0 0 20px rgba(255,200,90,.5);animation:pB77 1.3s ease-in-out infinite alternate}
 .k3 .pb{fill:url(#pR)}.k3 .pi{fill:url(#iriR);opacity:.32}.k3 .pbounce{fill:#ffe0ea;opacity:.45}.k3 .glw{fill:url(#gwR)}
 .k4 .pb{fill:url(#pL)}.k4 .pi{fill:url(#iriL);opacity:.34}.k4 .pbounce{fill:#e6f0ff;opacity:.45}.k4 .glw{fill:url(#gwL)}
 .tile.rv.b77{opacity:1;filter:none}
@@ -653,13 +657,14 @@ function roleOf(p,tile){const k=p.vals.length,j=p.taps.indexOf(tile);
   return p.end&&p.dec&&p.dec[tile]?{t:"dec",v:p.dec[tile]}:{t:"empty"}}
 // Decoy layout for the final reveal: a deterministic function of the saved perm + taps (its own seeded generator, so it never
 // touches the prize draw). Every value 7/17/27/57 appears at least once (the black ₱77 pearl is the 5th), the rest lean to the low
-// values, sometimes with one more ₱77. Saved with the play when the round ends; a save without it gets the same layout again.
-const DECOY=[7,17,27,57,77],DECW=[44,32,15,9];
+// values, sometimes with one more ₱77. One ₱777 "jackpot" pearl always sits among the unopened clams (display only, 0% — the
+// ladder's top rung, like the GoPyesta wheel). Saved with the play when the round ends; a save without it gets the same layout again.
+const DECOY=[7,17,27,57,77,777],DECW=[44,32,15,9];
 function decoyPlan(p){
   let h=2166136261>>>0;const key=p.perm.join(",")+"|"+p.taps.join(",");for(let i=0;i<key.length;i++){h^=key.charCodeAt(i);h=Math.imul(h,16777619)>>>0}
   const sr=()=>{h=(h+0x6D2B79F5)>>>0;let t=h;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296};
   const dec=new Array(TILES).fill(0),q={...p,dec:null},tiles=p.perm.filter(x=>p.taps.indexOf(x)<0&&roleOf(q,x).t==="empty"),n=tiles.length;
-  const v=[7,17,27,57].slice(0,n);if(n-v.length>=4&&sr()<.35)v.push(77);
+  const v=[777,7,17,27,57].slice(0,n);if(n-v.length>=4&&sr()<.35)v.push(77);
   while(v.length<n){let x=sr()*100;let i=0;while(i<3&&(x-=DECW[i])>=0)i++;v.push(DECOY[i])}
   for(let k=v.length-1;k>0;k--){const j=Math.floor(sr()*(k+1));[v[k],v[j]]=[v[j],v[k]]}
   tiles.forEach((t,i)=>dec[t]=v[i]);p.dec=dec;return dec}
@@ -999,9 +1004,9 @@ const V3=(()=>{
     if(how==="restore"&&cl.contains("rv")){how="rv";c.snap0=true}
     clearContent(c);c.open=true;c.how=how;c.t0=tm+(how==="rv"?0:.06);c.cs=0;c.cv=0;c.snap=how==="restore"||c.snap0||RM();c.snap0=false;
     const kind=cl.contains("b77")?"b77":cl.contains("urchin")?"urchin":cl.contains("pearl")?"pearl":cl.contains("dec")?"dec":"empty";c.kind=kind;
-    if(kind==="pearl"||kind==="b77"||kind==="dec"){const dv=kind==="dec"?+el.dataset.dv:0,g=kind==="b77"||dv===77?2:dv===57?4:dv===27?3:cl.contains("k1v")||dv===17?1:0;
+    if(kind==="pearl"||kind==="b77"||kind==="dec"){const dv=kind==="dec"?+el.dataset.dv:0,g=kind==="b77"||dv===77?2:dv===57?4:dv===27?3:cl.contains("k1v")||dv===17||dv===777?1:0;
       const m=cloneM([mat.pW,mat.pG,mat.pB,mat.pR,mat.pL][g]);m.userData.c0=m.color.clone();c.mats=[m];
-      c.obj=new T.Mesh(geo.pearl,m);c.obj.castShadow=shadowOn;c.sh=new T.Mesh(geo.cshad,mat.cshad);c.sh.renderOrder=1;scene.add(c.sh);c.pr=kind==="dec"?[.22,.235,.255,.24,.245][g]:g===2?.265:g===1?.25:.24;c.py=-.08+c.pr;
+      c.obj=new T.Mesh(geo.pearl,m);c.obj.castShadow=shadowOn;c.sh=new T.Mesh(geo.cshad,mat.cshad);c.sh.renderOrder=1;scene.add(c.sh);c.pr=kind==="dec"?(dv===777?.285:[.22,.235,.255,.24,.245][g]):g===2?.265:g===1?.25:.24;c.py=-.08+c.pr;
       c.glow=new T.Sprite(new T.SpriteMaterial({map:tex.glow,color:[0xfff4e8,0xffcf70,0x7bf0d0,0xff9fc0,0xb4b4ff][g],transparent:true,blending:T.AdditiveBlending,depthWrite:false,opacity:0,fog:false}));scene.add(c.glow);
       if(kind==="b77"){c.halo=new T.Sprite(new T.SpriteMaterial({map:tex.glow,color:0x9a6bff,transparent:true,blending:T.AdditiveBlending,depthWrite:false,opacity:0,fog:false}));scene.add(c.halo)}}
     else if(kind==="urchin"){const m=cloneM(mat.ur);m.userData.c0=m.color.clone();c.mats=[m];c.obj=new T.Mesh(geo.urch,m);c.obj.castShadow=shadowOn;c.pr=1;c.py=.1;
@@ -1156,12 +1161,12 @@ const GAME=(()=>{
     "<ellipse cx='60' cy='88' rx='51' ry='10' fill='url(#naCup)'/><ellipse cx='60' cy='89' rx='24' ry='3.6' fill='rgba(60,30,60,.35)' filter='url(#pBlur)'/>"+
     "<g class='ct'></g><g class='dome'>"+DOME+"</g>"+LOWG+
     "<g class='seam'><ellipse cx='60' cy='86' rx='44' ry='6' fill='rgba(255,214,130,.55)' filter='url(#pBlur3)'/><path d='M"+X0+" "+SY+SEAM+"' fill='none' stroke='#ffd88a' stroke-width='4' stroke-linecap='round' filter='url(#pBlur)'/></g><path class='seam2' d='M"+X0+" "+SY+SEAM+"'/></svg>";
-  // decoy pearl looks: ₱7 white (k0), ₱17 golden (k1), ₱27 rose (k3), ₱57 silver-lavender (k4), ₱77 black (k2)
-  const DKIND={7:0,17:1,27:3,57:4,77:2};
+  // decoy pearl looks: ₱7 white (k0), ₱17 golden (k1), ₱27 rose (k3), ₱57 silver-lavender (k4), ₱77 black (k2), ₱777 big golden (k1)
+  const DKIND={7:0,17:1,27:3,57:4,77:2,777:1};
   function contentSVG(role){
     if(role.t==="pearl"){const k=role.v>=250?1:0;return "<g class='pop k"+k+"'><circle class='glw' cx='60' cy='64' r='42' opacity='.9'/>"+PEARL(60,64,24,"")+"</g>"}
     if(role.t==="b77")return "<g class='pop k2'><circle class='glw' cx='60' cy='62' r='46'/>"+PEARL(60,62,27,"77")+"</g>";
-    if(role.t==="dec")return "<g class='pop k"+DKIND[role.v]+"'><circle class='glw' cx='60' cy='64' r='40' opacity='.7'/>"+PEARL(60,64,role.v===77?25:23,"")+"</g>";
+    if(role.t==="dec")return "<g class='pop k"+DKIND[role.v]+"'><circle class='glw' cx='60' cy='64' r='40' opacity='.7'/>"+PEARL(60,64,role.v===777?28:role.v===77?25:23,"")+"</g>";
     if(role.t==="urchin")return "<g class='pop'>"+URCHIN(60,64,1.2)+"</g>";
     return "<g class='pop'><g fill='#efe0c8' opacity='.7'><circle cx='50' cy='86' r='1.6'/><circle cx='66' cy='88' r='1.2'/><circle cx='72' cy='85' r='1'/><circle cx='56' cy='89' r='.9'/></g><circle cx='62' cy='70' r='3' fill='none' stroke='rgba(230,252,248,.6)' stroke-width='.8'/></g>"}
   // a large pearl in an open oyster, for the win card
@@ -1355,7 +1360,7 @@ function renderMech(){
     "<b>Only slot games qualify.</b> Each play unlocks once your slot turnover reaches <b>"+CONF.turnover+"× the deposit</b> ("+php(CONF.perPlay)+" deposit → "+php(CONF.perPlay*CONF.turnover)+" in slot bets). Your deposits and turnover are checked automatically from your account — nothing to send.",
     "<b>Hours:</b> "+hours()+" daily. <b>Max bonus:</b> "+php(CONF.dailyCap)+" per day for all players.",
     "<b>How to get your link:</b> ask your agent after you deposit. Your link keeps working for the whole day; deposit again and your next play unlocks on the same link.",
-    "<b>Prize:</b> The bonus is random on every play and is set when you press START. The pearls you find add up to your bonus, paid once. The prize ladder shows how far your pearls climb; ₱27, ₱57, ₱777 and the black ₱77 pearl are display tiers only and cannot be won. The pearls shown in the unopened clams at the end are for display only.",
+    "<b>Prize:</b> The bonus is random on every play and is set when you press START. The pearls you find add up to your bonus, paid once. The prize ladder shows how far your pearls climb; ₱27, ₱57, ₱777 and the black ₱77 pearl are display tiers only and cannot be won. The pearls shown in the unopened clams at the end — including the ₱777 pearl — are for display only.",
     "<b>Claiming:</b> Your win is recorded the moment it is revealed. The bonus is credited the following day at 1:00 PM and must be wagered "+CONF.turnover+"× on slot games before it can be withdrawn.",
     "<b>Results are final.</b> Refreshing or reopening the link does not give extra plays; an unfinished round continues where you left it."];
   $("mechSteps").innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
