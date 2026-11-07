@@ -12,6 +12,13 @@ display-only), ₱15,000 shared daily budget, STOP ALL switch, wins posted to th
 STATUS 2026-11-07 ~01:30 PHT: code done and tested locally (tests/test_api.py 61/61, tests/test_ui.py 39/39), commits ready
 in the three worktrees; nothing pushed/deployed yet (the Railway variable write and the pushes need JD — classifier-blocked).
 
+## 0. One-shot (does steps 1–3 + verify; pushes `pots` too — P777 pearl on the clam bed, commit df404f6)
+```
+powershell -ExecutionPolicy Bypass -File C:\tmp\tamasa_swerte_lights_deploy\go_live.ps1
+```
+(2026-11-07 09:30: both the variable write and `git push` were classifier-blocked for Claude — "Modify Shared Resources" /
+"Production Deploy" — so JD runs this once. Commits ready: tamasa 176b35b, wins-ledger b9ca18d, pots df404f6, main f2f8ff6.)
+
 ## 1. Railway variables on the `tamasa` service (no deploy yet)
 ```
 powershell -ExecutionPolicy Bypass -File C:\tmp\tamasa_swerte_lights_deploy\set_tamasa_vars.ps1

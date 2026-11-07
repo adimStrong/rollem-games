@@ -241,7 +241,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(34px,10vw,50p
 .paynote b{color:#ffd400}
 @media (max-width:420px){.bet .pv{font-size:8.6px}}
 /* (group highlight class is "lit", not "win": .win is the result panel class) */
-/* strip grouped: JACKPOT (77 ₱177 · BAR BAR ₱77, display only) | ₱16.50 (kundol, star, bell) | ₱8.20 (BAR, cherry, apple, orange); in a WILD round each key shows its wild value and a thin bracket under each group carries the group total */
+/* strip grouped: JACKPOT (77 ₱777 · BAR BAR ₱77, display only) | ₱16.50 (kundol, star, bell) | ₱8.20 (BAR, cherry, apple, orange); in a WILD round each key shows its wild value and a thin bracket under each group carries the group total */
 .strip{display:flex;align-items:flex-start;gap:9px;padding:8px 7px 6px}
 .sgrp{flex:var(--n) 1 0;min-width:0;display:grid;gap:3px}
 .sgrp .keys{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:4px}
@@ -509,7 +509,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(34px,10vw,50p
         <li>Every ₱200 of verified deposit made between 1:00 PM and 9:00 PM gives 1 play (for example ₱400 = 2 plays), up to 5 plays per player per day. Your plays are on the personal link from your agent; your deposits are checked automatically from your account. Pending, failed or reversed deposits do not qualify.</li>
         <li>Each play unlocks only once your turnover for the day reaches 1× the deposit for that play (₱200 deposit → ₱200 in bets, ₱400 → ₱400, and so on). Bets on any game count. Turnover is read from your account and refreshes every few minutes.</li>
         <li>The promo runs daily from 1:00 PM to 9:00 PM. Total bonus paid by this promo is capped at ₱15,000 per day for all players; once the cap is reached, new plays wait for the next day.</li>
-        <li>Each play's bonus is set at random by the system the moment you press START: ₱8.20 or ₱16.50. In Swerte Lights the light runs around the board and stops on a symbol of your prize group. On some plays the light lands on WILD and then hits every symbol of one group once; the hits add up to the same prizes. Where the light stops makes no difference to the amount. 77 (₱177), BAR BAR (₱77) and the ₱777 wild tease are display-only and can never be won or collected. This is an animated promo game only, not a bet.</li>
+        <li>Each play's bonus is set at random by the system the moment you press START: ₱8.20 or ₱16.50. In Swerte Lights the light runs around the board and stops on a symbol of your prize group. On some plays the light lands on WILD and then hits every symbol of one group once; the hits add up to the same prizes. Where the light stops makes no difference to the amount. The ₱777 max jackpot (77), BAR BAR (₱77) and the ₱777 wild tease are display-only and can never be won or collected. This is an animated promo game only, not a bet.</li>
         <li>Results are final once you press START. Refreshing the page, reopening the link or using another device does not give extra plays or a new bonus; an unclaimed play is shown again as it was.</li>
         <li>Every win is recorded automatically. The bonus is credited the following day at 1:00 PM after verification and must be wagered 1× (1× wagering) before it can be withdrawn.</li>
         <li>One claim per play. Multiple or linked accounts or any attempt to abuse this promo void the bonus and may lead to action on the account.</li>
@@ -545,6 +545,7 @@ HOW TO JOIN
 • ${anyGame()?"Bets on any game count toward the turnover requirement.":"Only slot games qualify for this promotion."}
 • Each FREE PLAY unlocks once you complete the ${CONF.turnover}× turnover requirement.
 • Request your Swerte Lights link and use your plays within the event hours ${hours()}
+• Prizes up to ${php(CONF.maxPrize||777)}!
 
 🎁 BONUS DISTRIBUTION
 Bonus rewards will be distributed the following day at 1:00 PM.
@@ -558,7 +559,7 @@ const $=id=>document.getElementById(id);
 // same weights, which are refreshed from /api/config at boot.
 const PRIZES=[8.2,16.5];let WEIGHTS=[90,10]; // ₱8.20 group (BAR/cherry/apple/orange) 90%, ₱16.50 group (kundol/star/bell) 10%
 const SYMVAL={bar:250,cherry:220,apple:180,orange:170,kundol:600,star:550,bell:500};
-const JPVAL={seven:177,barbar:77}; // display-only jackpots on the strip: never a stop, never a wild hit
+const JPVAL={seven:777,barbar:77}; // display-only jackpots on the strip (₱777 max jackpot, 0% — like the POTS/GoPyesta top rung): never a stop, never a wild hit
 const CATNAME=["₱8.20 group","₱16.50 group"];
 const BIG=1; // the ₱16.50 group gets the big celebration
 let WILD_RATE=.05;const WILD_PRIZES=[...PRIZES,777];let WILD_WEIGHTS=[95,5,0];const WILD_BIG=1; // ₱777 = display-only tease, never drawn
@@ -671,7 +672,7 @@ const GAME=(()=>{
   if(Object.keys(SYMVAL).some(s=>TIER[s]==null))throw new Error("SYMVAL has a symbol outside the groups");
   const pick=a=>a[Math.floor(rnd()*a.length)];
   function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-  // bottom lamps, grouped: JACKPOT (77 ₱177 · BAR BAR ₱77, display only) | ₱16.50 (kundol, star, bell) | ₱8.20 (BAR, cherry, apple, orange)
+  // bottom lamps, grouped: JACKPOT (77 ₱777 · BAR BAR ₱77, display only) | ₱16.50 (kundol, star, bell) | ₱8.20 (BAR, cherry, apple, orange)
   const SGRP=[["jp",["seven","barbar"]],[1,["kundol","star","bell"]],[0,["bar","cherry","apple","orange"]]];
   const STRIP=SGRP.flatMap(g=>g[1]);
   const stripOf=s=>STRIP.indexOf(s);
@@ -970,7 +971,7 @@ function renderMech(){
     "<b>"+wagerRule()+"</b> Each play unlocks once your "+wagerLabel()+" reaches <b>"+CONF.turnover+"× the deposit</b> ("+php(CONF.perPlay)+" deposit → "+php(CONF.perPlay*CONF.turnover)+" in bets). Your deposits and turnover are checked automatically from your account — nothing to send.",
     "<b>Hours:</b> "+hours()+" daily. <b>Max bonus:</b> "+php(CONF.dailyCap)+" per day for all players.",
     "<b>How to get your link:</b> ask your agent after you deposit. Your link keeps working for the whole day; deposit again and your next play unlocks on the same link.",
-    "<b>Prize:</b> The bonus is random on every play and is set when you press START. The light stops on a symbol of your prize group (₱8.20 or ₱16.50). Land on <b>WILD</b> and the light hits every symbol of one group — the hits add up to the same prizes. 77 (₱177), BAR BAR (₱77) and the ₱777 wild tease are display-only and can never be won.",
+    "<b>Prize:</b> The bonus is random on every play and is set when you press START. The light stops on a symbol of your prize group (₱8.20 or ₱16.50). Land on <b>WILD</b> and the light hits every symbol of one group — the hits add up to the same prizes. The ₱777 max jackpot (77), BAR BAR (₱77) and the ₱777 wild tease are display-only and can never be won.",
     "<b>Claiming:</b> Your win is recorded the moment it is revealed. The bonus is credited the following day at 1:00 PM and must be wagered "+CONF.turnover+"× before it can be withdrawn.",
     "<b>Results are final.</b> Refreshing or reopening the link does not give extra plays; an unclaimed play is shown again."];
   $("mechSteps").innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
@@ -1180,7 +1181,7 @@ function renderLookup(){
   const odds=CONF.prizes.map(p=>php2(p.amt)+" ("+p.p+"%)").join(" · "),wodds=(CONF.wildPrizes||[]).filter(p=>p.p>0).map(p=>php2(p.amt)+" ("+p.p+"%)").join(" · ");
   ob.innerHTML="<strong>Status</strong>"+(l.missing&&l.missing.length?"<p>Not yet: "+l.missing.map(esc).join(" · ")+"</p>":"<p>Ready to play.</p>")
     +"<p>Today's plays: "+(l.plays&&l.plays.length?l.plays.map(h=>"#"+h.play_no+" "+php2(h.amount)+(h.wild?" (wild)":"")+(h.seen?"":" (unclaimed)")).join(", "):"none yet")+"</p>"
-    +"<p class='small'>Server time "+esc(l.serverTime)+" · prizes: "+odds+(CONF.wildRate>0?" · WILD round "+Math.round(CONF.wildRate*100)+"% of plays: "+wodds:"")+" (77 ₱177, BAR BAR ₱77 and the ₱777 tease are display-only)</p>";
+    +"<p class='small'>Server time "+esc(l.serverTime)+" · prizes: "+odds+(CONF.wildRate>0?" · WILD round "+Math.round(CONF.wildRate*100)+"% of plays: "+wodds:"")+" (77 ₱777 max jackpot, BAR BAR ₱77 and the ₱777 wild tease are display-only)</p>";
   $("makeLink").disabled=!!l.capped;
   $("plink").textContent=playerLink();
 }
