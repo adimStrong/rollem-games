@@ -7,12 +7,12 @@ service deployed from its own branch in this repo.
 | --- | --- | --- | --- |
 | `gopyesta` | Lucky Ferris Wheel | Gopyesta | Flask + Postgres (platform-verified deposits + turnover) |
 | `pots` | Pearl Drop | POTS | static |
-| `rollem` | ROLL IT (3D dice) | Roll'em | Flask + Postgres (live admin↔player sync) |
-| `winforlife` | Spin For Life (roulette; was Sabong ng Swerte / Tree of Life) | Win For Life | static |
+| `rollem` | Roll It (3D dice) — `rollem-roll-it-v2/` | Roll'em | Flask + Postgres cg3 (platform-verified deposits + turnover from the rollem-retention DB) |
+| `winforlife` | Spin For Life (roulette) — `wfl-spin-for-life-v2/` | Win For Life | Flask + Postgres cg3 (platform-verified deposits + turnover from the wfl-retention DB) |
 | `cow` | Cash Cow | COW88 | static |
 | `tamasa` | Triple Tama (slot) | Tamasa | Flask + Postgres (live admin↔player sync) |
 | `gspot` | Power-Up Cards (was Treasure Spot / Gagamba Spot / Loot Drop) | GameSpot | static |
-| `t2b` | T2B Derby | Time2Bet | static |
+| `t2b` | Time 2 Race (6-horse race; was T2B Derby) — `time2bet-time2race/` | Time2Bet | static (agent-verified; different console vendor) |
 
 `dice-roll-tester/` and `raffle-wheel/` are not deployed as community games (internal tool /
 no dedicated brand).
