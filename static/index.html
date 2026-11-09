@@ -394,6 +394,10 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(34px,10vw,50p
 @keyframes tw{0%,100%{opacity:0}50%{opacity:.9}}
 @keyframes rise{0%{transform:translate(0,0);opacity:0}10%{opacity:.8}100%{transform:translate(var(--dx,20px),-70vh);opacity:0}}
 @media (prefers-reduced-motion:reduce){.bgfx *,.bgfx::before,.bgfx::after{animation:none!important}.bgfx .sp{opacity:.6}}
+
+/* steady look for phones (dev build 2026-11-09): nothing on the page animates; only the game light moves during a play */
+*,*::before,*::after{animation:none!important;transition:none!important}
+.bgfx .fl,.bgfx .sp{display:none!important}
 </style>
 <style>
 /* server-driven build additions (the first rule replaces the artifact shell's base sheet the export relied on) */
@@ -921,8 +925,8 @@ const GAME=(()=>{
       else{p.y+=p.vy;p.x+=p.vx+Math.sin(t/1500+p.rot)*.15;p.rot+=p.vr;if(p.y>H+20){Object.assign(p,mk("c",-20))}
         c.save();c.translate(p.x,p.y);c.rotate(p.rot);c.globalAlpha=p.a;c.fillStyle="rgb("+p.col+")";c.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);c.restore();c.globalAlpha=1}}}
   function loop(t){if(t-last>32){draw(t);last=t}requestAnimationFrame(loop)}
-  size();if("ResizeObserver" in window)new ResizeObserver(size).observe(booth);else addEventListener("resize",size);
-  if(reduce())draw(0);else requestAnimationFrame(loop);
+  size();if("ResizeObserver" in window)new ResizeObserver(()=>{size();draw(0)}).observe(booth);else addEventListener("resize",()=>{size();draw(0)});
+  draw(0); /* static backdrop: no moving particles (dev build 2026-11-09) */
 })();
 // page backdrop: faint stars, gold sparkles and rising gold/red embers
 (()=>{const b=$("bgfx"),r=Math.random;let h="";
@@ -1097,10 +1101,10 @@ function openWin(pl,quiet){
   if(quiet||reduce()){a.textContent=php2(amt);return}
   cheerSnd(big);
   const s=performance.now(),dur=big?1600:1100;
-  (function f(now){const k=Math.min(1,(now-s)/dur);a.textContent=php2(Math.round(amt*100*(1-Math.pow(1-k,3)))/100);if(k<1&&!jp.hidden)requestAnimationFrame(f);else a.textContent=php2(amt)})(s);
+  a.textContent=php2(amt); /* shown at once, no count-up (dev build 2026-11-09) */
   confetti(big?180:90,big);
 }
-function confetti(count,big){
+function confetti(count,big){return; /* no confetti (dev build 2026-11-09) */
   const cv=$("confetti");let c=null;try{c=cv.getContext&&cv.getContext("2d")}catch(e){}if(!c)return;
   const d=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;cv.width=W*d;cv.height=H*d;c.setTransform(d,0,0,d,0,0);
   const cols=big?BRAND.confettiBig:BRAND.confetti;
