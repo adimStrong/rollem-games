@@ -311,7 +311,7 @@ html,body{overflow-x:hidden}
 .pstage.done .hud .ht{background:linear-gradient(180deg,#fffaf0,#f2d896 55%,#d9b56e);color:#2b1b05;border-color:#f4dda4;box-shadow:0 0 22px rgba(244,221,164,.45)}
 .pstage.done .hud .ht b{color:#2b1b05}
 /* clam bed */
-.bed{position:relative;z-index:2;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(3px,1.3vw,8px);padding:10px 6px 12px;border-radius:20px;
+.bed{position:relative;z-index:2;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(3px,1.3vw,8px);padding:10px 6px 12px;border-radius:20px;
   background:radial-gradient(90% 75% at 50% 45%,rgba(232,206,160,.20),rgba(232,206,160,.05) 62%,transparent 80%),linear-gradient(180deg,rgba(2,22,30,.30),rgba(2,22,30,.55));
   box-shadow:inset 0 0 0 1px rgba(236,208,142,.22),inset 0 14px 30px rgba(0,0,0,.35)}
 .pstage.shake .bed{animation:pShake .5s cubic-bezier(.36,.07,.19,.97)}
@@ -364,11 +364,9 @@ html,body{overflow-x:hidden}
 .tile.d17 .dv{color:#f6d68a;border-color:rgba(244,210,122,.55)}
 .tile.d27 .dv{color:#ffbcd2;border-color:rgba(255,160,196,.55)}
 .tile.d57 .dv{color:#cfd0ff;border-color:rgba(176,178,255,.6)}
-.tile.d77 .dv{color:#c8f5e8;background:#0b0912;border-color:rgba(160,255,230,.5)}
-/* the ₱777 jackpot pearl (display only, 0%): golden chip, soft glow, not dimmed like the other missed pearls */
-.tile.d777 .dv{color:#2b1b05;background:linear-gradient(180deg,#fffaf0,#f2d896 55%,#d9b56e);border-color:rgba(255,236,170,.9);box-shadow:0 0 12px rgba(255,210,110,.65),0 2px 6px rgba(0,0,0,.45)}
-.tile.rv.d777 svg{opacity:.9;filter:saturate(.9)}.tile.rv.d777 .dv{opacity:1}
-.tile.rv.d777::before{content:"";position:absolute;inset:-4%;border-radius:16px;box-shadow:0 0 0 1.5px rgba(255,220,130,.7),0 0 20px rgba(255,200,90,.5);animation:pB77 1.3s ease-in-out infinite alternate}
+.tile.d77 .dv,.tile.d777 .dv{color:#c8f5e8;background:#0b0912;border-color:rgba(160,255,230,.5)}
+/* the ₱777 decoy pearls (display only, 0%; dev build 2026-11-09): black pearl with a gold value chip */
+.tile.d777 .dv{color:#ffe08a;border-color:rgba(255,214,120,.8);font-weight:800}
 .k3 .pb{fill:url(#pR)}.k3 .pi{fill:url(#iriR);opacity:.32}.k3 .pbounce{fill:#ffe0ea;opacity:.45}.k3 .glw{fill:url(#gwR)}
 .k4 .pb{fill:url(#pL)}.k4 .pi{fill:url(#iriL);opacity:.34}.k4 .pbounce{fill:#e6f0ff;opacity:.45}.k4 .glw{fill:url(#gwL)}
 .tile.rv.b77{opacity:1;filter:none}
@@ -437,10 +435,10 @@ html,body{overflow-x:hidden}
   box-shadow:0 0 0 1px rgba(236,208,142,.55),0 0 0 4px rgba(4,26,36,.9),0 0 0 5px rgba(236,208,142,.2),0 12px 26px -12px rgba(0,0,0,.7)}
 .pladder .lh{margin:0 0 7px;font:600 10.5px var(--body);letter-spacing:2.6px;text-transform:uppercase;color:#cfe6e1;text-align:center}
 .pladder .lh b{color:var(--gold);font-weight:700}
-.lrow{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;list-style:none;margin:0;padding:0}
-.lrow .ltrack,.lrow .lfill{position:absolute;left:10%;top:50%;height:8px;margin-top:-4px;border-radius:4px;z-index:0}
-.lrow .ltrack{right:10%;background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(10,40,48,.6));box-shadow:inset 0 0 0 1px rgba(236,208,142,.28),inset 0 2px 3px rgba(0,0,0,.5)}
-.lrow .lfill{width:var(--lp,0%);max-width:80%;background:linear-gradient(180deg,#fff7d6,#f4d27a 45%,#c8913a);box-shadow:0 0 10px rgba(244,221,164,.75),inset 0 1px 0 rgba(255,255,255,.7);transition:width .55s cubic-bezier(.3,1.2,.5,1)}
+.lrow{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;list-style:none;margin:0;padding:0}
+.lrow .ltrack,.lrow .lfill{position:absolute;left:12.5%;top:50%;height:8px;margin-top:-4px;border-radius:4px;z-index:0}
+.lrow .ltrack{right:12.5%;background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(10,40,48,.6));box-shadow:inset 0 0 0 1px rgba(236,208,142,.28),inset 0 2px 3px rgba(0,0,0,.5)}
+.lrow .lfill{width:var(--lp,0%);max-width:75%;background:linear-gradient(180deg,#fff7d6,#f4d27a 45%,#c8913a);box-shadow:0 0 10px rgba(244,221,164,.75),inset 0 1px 0 rgba(255,255,255,.7);transition:width .55s cubic-bezier(.3,1.2,.5,1)}
 .lrow .lfill::after{content:"";position:absolute;right:-5px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:radial-gradient(circle,#fff 0 30%,rgba(255,240,200,.85) 45%,rgba(244,210,130,0) 72%);opacity:var(--lh,0)}
 .lt{position:relative;z-index:1;justify-self:center;display:grid;place-items:center;width:clamp(46px,13vw,56px);aspect-ratio:1/1;border-radius:50%;overflow:hidden;
   font:900 clamp(13px,3.7vw,16px)/1 "Cinzel",Georgia,serif;letter-spacing:-.2px;color:#3b2a35;
@@ -493,6 +491,8 @@ html,body{overflow-x:hidden}
 </style>
 <style>
 /* server-driven build additions */
+/* POTS clean look (dev build 2026-11-09): no sun rays, no caustic waves, no moving plants, no floating effects */
+.bgfx .ry,.bgfx .gcau,.deco .dray,.deco .cau,.bgfx .kp,.deco .kelp,.mote,.dfish,.tb,.bgfx .pl,.bgfx .jel,.bgfx .gf{display:none!important}
 .who{color:var(--gold);font-size:14px;margin:4px 0 0}
 .ltbl{width:100%;border-collapse:collapse;font-size:13px}.ltbl th{text-align:left;color:var(--muted);font-weight:600;padding:4px 6px}.ltbl td{padding:4px 6px;border-top:1px solid var(--line)}
 #goBtn:disabled{cursor:not-allowed}
@@ -587,7 +587,7 @@ html,body{overflow-x:hidden}
         <li>Every ₱150 of verified deposit made between 12 PM and 9 PM gives 1 play (for example ₱300 = 2 plays), up to 5 plays per player per day. Your plays are on the personal link from your agent; your deposits are checked automatically from your account. Pending, failed or reversed deposits do not qualify.</li>
         <li>Only bets on slot games count for this promo. Each play unlocks only once your slot turnover for the day reaches 1× the deposit for that play (₱150 deposit → ₱150 in slot bets, ₱300 → ₱300, and so on). Turnover is read from your account and refreshes every few minutes.</li>
         <li>The promo runs daily from 12 PM to 9 PM. Total bonus paid by this promo is capped at ₱10,000 per day for all players; once the cap is reached, new plays wait for the next day.</li>
-        <li>Each play's bonus is set at random by the system the moment you press START. In Pearl Mine you open clams one by one: the pearls you find add up to your bonus. A sea urchin ends the round and you keep the pearls already found. If you press COLLECT before all the pearls of your bonus are found, the tide brings you the rest, so your total is the same either way. Which clams you open makes no difference. The prize ladder (₱7 · ₱17 · ₱27 · ₱57 · ₱777) shows your running total. The ₱27, ₱57 and ₱777 tiers and the black ₱77 pearl are display tiers only and can never be won or collected. The pearls shown in the unopened clams at the end of a round are for display only and are not added to your bonus.</li>
+        <li>Each play's bonus is set at random by the system the moment you press START. In Pearl Mine you open clams one by one: the pearls you find add up to your bonus. A sea urchin ends the round and you keep the pearls already found. If you press COLLECT before all the pearls of your bonus are found, the tide brings you the rest, so your total is the same either way. Which clams you open makes no difference. The prize ladder (₱7 · ₱17 · ₱27 · ₱57) shows your running total. The ₱27 and ₱57 tiers and the black ₱77 pearl are display tiers only and can never be won or collected. The pearls shown in the unopened clams at the end of a round — including the ₱777 pearls — are for display only and are not added to your bonus.</li>
         <li>Results are final once you press START. Refreshing the page, reopening the link or using another device does not give extra plays or a new bonus; an unfinished round continues where you left it.</li>
         <li>Every win is recorded automatically. The bonus is credited the following day at 1:00 PM after verification and must be wagered 1× (1× wagering) on slot games before it can be withdrawn.</li>
         <li>One claim per play. Multiple or linked accounts or any attempt to abuse this promo void the bonus and may lead to action on the account.</li>
@@ -637,15 +637,15 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 // <draw>
 // Bonus totals: 0 = ₱7, 1 = ₱17, 2 = ₱27, 3 = ₱57 (prize-ladder display tiers), 4 = black ₱77 pearl.
 // Win rates 90 / 10 / 0 / 0 / 0: only ₱7 and ₱17 can ever be drawn; ₱27, ₱57 and the black ₱77 pearl are display only.
-const NUMS=[7,17,27,57,77],ODDS=[90,10,0,0,0],TILES=25,URCH=5;
-const LADDER=[7,17,27,57,777]; // the prize ladder shown above the clam bed (pesos); ₱777 = display-only top rung (0%), same as the GoPyesta wheel
+const NUMS=[7,17,27,57,77],ODDS=[90,10,0,0,0],TILES=16,URCH=5; /* 4×4 clam bed (dev build 2026-11-09) */
+const LADDER=[7,17,27,57]; // the prize ladder shown above the clam bed (pesos); ₱777 is shown only as decoy pearls in the final reveal
 function drawPrize(){let x=rnd()*ODDS.reduce((a,b)=>a+b,0);for(let i=0;i<ODDS.length;i++){x-=ODDS[i];if(x<0)return i}return 0}
 function shuffle(a){for(let k=a.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
 // split a peso total into k pearl values in whole ₱0.50 steps (integer centavos), each ₱0.50…cap, summing exactly
 function splitVals(total,k,cap){const U=Math.round(total*2),v=new Array(k).fill(1);let left=U-k;
   while(left>0){const i=Math.floor(rnd()*k);if(v[i]<cap){v[i]++;left--}}return v.map(u=>u*50)}
 // one play: the total, its pearls (k = 3–6 for ₱7, 5–8 for ₱17) and a shuffled tile order used for the tide and the final reveal
-function drawPlay(){const step=drawPrize(),k=step?5+Math.floor(rnd()*4):3+Math.floor(rnd()*4);
+function drawPlay(){const step=drawPrize(),k=step?5+Math.floor(rnd()*3):3+Math.floor(rnd()*4); /* ₱17 = 5–7 pearls so the 3 decoy ₱777 always fit on 16 clams */
   return {step,vals:splitVals(NUMS[step],k,step?10:6),perm:shuffle(Array.from({length:TILES},(_,i)=>i))}}
 // The grid is resolved lazily from the tap order: taps 1…k are the planned pearls in order, tap k+1 is a sea urchin.
 // Unopened clams at the end: the first in perm order holds the black ₱77 pearl, the next ones are the remaining urchins,
@@ -657,14 +657,14 @@ function roleOf(p,tile){const k=p.vals.length,j=p.taps.indexOf(tile);
   return p.end&&p.dec&&p.dec[tile]?{t:"dec",v:p.dec[tile]}:{t:"empty"}}
 // Decoy layout for the final reveal: a deterministic function of the saved perm + taps (its own seeded generator, so it never
 // touches the prize draw). Every value 7/17/27/57 appears at least once (the black ₱77 pearl is the 5th), the rest lean to the low
-// values, sometimes with one more ₱77. One ₱777 "jackpot" pearl always sits among the unopened clams (display only, 0% — the
-// ladder's top rung, like the GoPyesta wheel). Saved with the play when the round ends; a save without it gets the same layout again.
+// values, sometimes with one more ₱77. Three ₱777 "jackpot" pearls always sit among the unopened clams (display only, 0% — dev
+// build 2026-11-09). Saved with the play when the round ends; a save without it gets the same layout again.
 const DECOY=[7,17,27,57,77,777],DECW=[44,32,15,9];
 function decoyPlan(p){
   let h=2166136261>>>0;const key=p.perm.join(",")+"|"+p.taps.join(",");for(let i=0;i<key.length;i++){h^=key.charCodeAt(i);h=Math.imul(h,16777619)>>>0}
   const sr=()=>{h=(h+0x6D2B79F5)>>>0;let t=h;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296};
   const dec=new Array(TILES).fill(0),q={...p,dec:null},tiles=p.perm.filter(x=>p.taps.indexOf(x)<0&&roleOf(q,x).t==="empty"),n=tiles.length;
-  const v=[777,7,17,27,57].slice(0,n);if(n-v.length>=4&&sr()<.35)v.push(77);
+  const v=[777,777,777].slice(0,n).concat([7,17,27,57].slice(0,Math.max(0,n-3))); /* three ₱777 decoys in every final reveal (display only) */
   while(v.length<n){let x=sr()*100;let i=0;while(i<3&&(x-=DECW[i])>=0)i++;v.push(DECOY[i])}
   for(let k=v.length-1;k>0;k--){const j=Math.floor(sr()*(k+1));[v[k],v[j]]=[v[j],v[k]]}
   tiles.forEach((t,i)=>dec[t]=v[i]);p.dec=dec;return dec}
@@ -731,9 +731,9 @@ const V3=(()=>{
   const S={on:false};
   let T=null,R=null,scene,cam,canvas,stage=null,bed=null,ok=null,raf=0,last=0,tm=0,hidden=false,onScr=true,io=null,ro=null,low=false,dpr=1,W=1,H=1,BX=0,BY=0,BW=1,BH=1;
   let lowerIM,lidIM,seamIM,blobIM,sun,snowMat,bubMat,fishIM,fishData=[],rays=[],perfN=0,perfAcc=0,shadowOn=true;
-  const U={uTime:{value:0},uCauK:{value:1.5},uCur:{value:0},uSway:{value:1}};
+  const U={uTime:{value:0},uCauK:{value:0},uCur:{value:0},uSway:{value:1}};
   const SP=1,SPZ=1.12,HINGE=.39,BASEY=.12,CL=[];
-  const C={pitch:.96,fov:36,d:8,tgt:null,px:0,py:0,tx:0,ty:0,gyro:false,focus:-1,fT:-9,shT:-9,offX:0,offY:0,hover:-1};
+  const C={pitch:.96,fov:36,d:6.8,tgt:null,px:0,py:0,tx:0,ty:0,gyro:false,focus:-1,fT:-9,shT:-9,offX:0,offY:0,hover:-1};
   const fx=[];let tex={},geo={},mat={};
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),ss=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
   const RM=()=>{try{return matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){return false}};
@@ -760,7 +760,7 @@ const V3=(()=>{
     // sand: rippled colour + bump, tileable
     {const N=low?256:512,[c,g]=cvs(N,N),[cb,gb]=cvs(N,N),id=g.createImageData(N,N),ib=gb.createImageData(N,N),n1=vnoise(16,3),n2=vnoise(64,9);
       for(let y=0;y<N;y++)for(let x=0;x<N;x++){const u=x/N,v=y/N,w=n1(u*16,v*16),q=n2(u*64,v*64);
-        const rip=.5+.5*Math.sin((v*14+Math.sin(u*Math.PI*4+w*3)*.35+w*.9)*Math.PI*2),h=clamp(rip*.55+w*.3+q*.25,0,1);
+        const rip=.5 /* flat sand, no ripple waves (dev build) */,h=clamp(rip*.55+w*.3+q*.25,0,1);
         const grain=Math.random(),k=(y*N+x)*4;let L=.78+h*.22;if(grain>.985)L*=.62;else if(grain>.97)L*=1.12;
         id.data[k]=clamp(128*L,0,255);id.data[k+1]=clamp(126*L,0,255);id.data[k+2]=clamp(108*L,0,255);id.data[k+3]=255;
         const b=clamp(h*200+grain*40,0,255);ib.data[k]=ib.data[k+1]=ib.data[k+2]=b;ib.data[k+3]=255}
@@ -839,7 +839,7 @@ const V3=(()=>{
     cam=new T.PerspectiveCamera(C.fov,1,.1,80);
     scene.add(new T.HemisphereLight(0x5cc0d2,0x1a2622,.32));
     sun=new T.SpotLight(0xe2f6ee,2.2,0,.44,.85,1);sun.position.set(-2.4,10,4.5);sun.target.position.set(0,0,-.2);scene.add(sun,sun.target);
-    if(shadowOn){sun.castShadow=true;sun.shadow.camera.near=4;sun.shadow.camera.far=20;sun.shadow.mapSize.set(low?512:1024,low?512:1024);sun.shadow.bias=-.0006;sun.shadow.normalBias=.02;sun.shadow.focus=.9}
+    if(shadowOn){sun.castShadow=true;sun.shadow.camera.near=4;sun.shadow.camera.far=20;sun.shadow.mapSize.set(512,512);sun.shadow.bias=-.0006;sun.shadow.normalBias=.02;sun.shadow.focus=.9}
     const fill=new T.DirectionalLight(0x5fb8d0,.22);fill.position.set(3,2,6);scene.add(fill);
     // sea floor with a shallow basin around the bed
     {const g=new T.PlaneGeometry(44,44,low?44:66,low?44:66);g.rotateX(-Math.PI/2);const p=g.attributes.position,n=vnoise(16,21);
@@ -851,12 +851,12 @@ const V3=(()=>{
     const NA=low?44:56,NU=low?15:19;geo.lid=valveGeo(.18,false,NA,NU);geo.low=valveGeo(.2,true,NA,NU);
     mat.ext=inject(new T.MeshStandardMaterial({vertexColors:true,roughness:.5,metalness:0,envMapIntensity:.45}),{cau:1});
     mat.nac=inject(new T.MeshPhysicalMaterial({vertexColors:true,roughness:.24,metalness:.05,clearcoat:.8,clearcoatRoughness:.12,envMapIntensity:1.05}),{cau:.6,iri:[.24,.16,.1,1]});
-    lowerIM=new T.InstancedMesh(geo.low,[mat.ext,mat.nac],25);lidIM=new T.InstancedMesh(geo.lid,[mat.ext,mat.nac],25);
+    lowerIM=new T.InstancedMesh(geo.low,[mat.ext,mat.nac],TILES);lidIM=new T.InstancedMesh(geo.lid,[mat.ext,mat.nac],TILES);
     [lowerIM,lidIM].forEach(m=>{m.castShadow=shadowOn;m.receiveShadow=shadowOn;m.frustumCulled=false;m.instanceMatrix.setUsage(T.DynamicDrawUsage);scene.add(m)});
-    {const g=new T.CircleGeometry(.33,24);g.rotateX(-Math.PI/2);seamIM=new T.InstancedMesh(g,new T.MeshBasicMaterial({color:0xffd27a,transparent:true,opacity:.95,blending:T.AdditiveBlending,depthWrite:false,fog:false}),25);seamIM.frustumCulled=false;scene.add(seamIM)}
-    {const g=new T.PlaneGeometry(1,1);g.rotateX(-Math.PI/2);blobIM=new T.InstancedMesh(g,new T.MeshBasicMaterial({map:tex.blob,transparent:true,depthWrite:false,opacity:.85}),25);blobIM.renderOrder=-1;scene.add(blobIM)}
+    {const g=new T.CircleGeometry(.33,24);g.rotateX(-Math.PI/2);seamIM=new T.InstancedMesh(g,new T.MeshBasicMaterial({color:0xffd27a,transparent:true,opacity:.95,blending:T.AdditiveBlending,depthWrite:false,fog:false}),TILES);seamIM.frustumCulled=false;scene.add(seamIM)}
+    {const g=new T.PlaneGeometry(1,1);g.rotateX(-Math.PI/2);blobIM=new T.InstancedMesh(g,new T.MeshBasicMaterial({map:tex.blob,transparent:true,depthWrite:false,opacity:.85}),TILES);blobIM.renderOrder=-1;scene.add(blobIM)}
     const col=new T.Color(1,1,1),m4=new T.Matrix4();
-    for(let i=0;i<25;i++){const r=Math.floor(i/5),c=i%5,x=(c-2)*SP+(((i*37)%7)-3)*.012,z=(r-2)*SPZ+(((i*53)%5)-2)*.012;
+    for(let i=0;i<TILES;i++){const r=Math.floor(i/4),c=i%4,x=(c-1.5)*SP+(((i*37)%7)-3)*.012,z=(r-1.5)*SPZ+(((i*53)%5)-2)*.012;
       const tn=.84+((i*41)%7)*.03,th=((i*17)%5-2)*.025;
       CL[i]={i,x,z,tint:[tn*(1+th),tn,tn*(1-th*.6)],yaw:(((i*29)%9)-4)*.035,ph:i*1.73,ang:0,vel:0,open:false,how:"",kind:"",obj:null,cs:0,cv:0,dim:1,dimT:1,hov:0,lift:0,t0:0,glow:null,halo:null,mats:[],pr:0};
       lowerIM.setColorAt(i,col);lidIM.setColorAt(i,col);seamIM.setColorAt(i,col);
@@ -884,28 +884,28 @@ const V3=(()=>{
     // kelp at the edges and in the distance
     {const km=inject(new T.MeshStandardMaterial({map:tex.kelp,alphaTest:.4,side:T.DoubleSide,roughness:.7,metalness:0,emissive:0x1a3010,emissiveIntensity:.35}),{sway:"kelp"}),kg=new T.PlaneGeometry(.75,4,1,14);kg.translate(0,2,0);
       [[-2.98,-1.7,.78],[-3.08,.5,.66],[3.0,-2.1,.84],[3.12,.8,.7],[-1.3,-4.4,1.1],[1.7,-4.8,1.25],[-3.9,-.6,1.1],[-4.3,1.2,.9],[-3.6,-3.4,1.3],[4,-.2,1],[4.4,-2.6,1.25],[3.7,1.8,.85],[-2,-6.5,1.6],[1.2,-7.2,1.8],[-5.5,-4.5,1.5],[5.2,-6,1.7],[-4.2,3.6,1],[4.3,3.4,1.05]].forEach(([x,z,s],k)=>{
-        const m=new T.Mesh(kg,km);m.position.set(x,-.05,z);m.scale.set(s,s*(.85+((k*7)%5)*.08),s);m.rotation.y=k*.7;scene.add(m)})}
+        const m=new T.Mesh(kg,km);m.position.set(x,-.05,z);m.scale.set(s,s*(.85+((k*7)%5)*.08),s);m.rotation.y=k*.7;m.visible=false;scene.add(m)})} /* kelp hidden (dev build) */
     // god rays from the surface
     {const rm=new T.MeshBasicMaterial({map:tex.ray,transparent:true,blending:T.AdditiveBlending,depthWrite:false,fog:false,color:0x9fefe6,side:T.DoubleSide});
-      [[-2.4,-3.6,1.9,.2],[-.4,-5,1.5,.12],[1.6,-2.8,2.3,.22],[3,-4.6,1.6,.16],[.3,-1.4,1.3,.14],[-1.6,-1.2,1,.18]].forEach(([x,z,w,rz],k)=>{const m=new T.Mesh(new T.PlaneGeometry(w,15),rm.clone());m.position.set(x,6.2,z);m.rotation.z=rz;m.userData={ph:k*1.9,b:.2+(k%3)*.06,rz};rays.push(m);scene.add(m)})}
+      [[-2.4,-3.6,1.9,.2],[-.4,-5,1.5,.12],[1.6,-2.8,2.3,.22],[3,-4.6,1.6,.16],[.3,-1.4,1.3,.14],[-1.6,-1.2,1,.18]].forEach(([x,z,w,rz],k)=>{const m=new T.Mesh(new T.PlaneGeometry(w,15),rm.clone());m.position.set(x,6.2,z);m.rotation.z=rz;m.userData={ph:k*1.9,b:.2+(k%3)*.06,rz};m.visible=false;rays.push(m);scene.add(m)})}
     // marine snow + rising bubbles (all motion on the GPU)
     {const n=low?150:260,g=new T.BufferGeometry(),p=new Float32Array(n*3),sd=new Float32Array(n*4);for(let i=0;i<n;i++){p[i*3]=(Math.random()-.5)*16;p[i*3+1]=Math.random()*7;p[i*3+2]=-10+Math.random()*16;sd.set([Math.random(),.05+Math.random()*.12,.012+Math.random()*.02,Math.random()],i*4)}
       g.setAttribute("position",new T.BufferAttribute(p,3));g.setAttribute("sd",new T.BufferAttribute(sd,4));
       snowMat=new T.ShaderMaterial({transparent:true,depthWrite:false,blending:T.AdditiveBlending,uniforms:Object.assign({uS:{value:300}},U),
         vertexShader:"attribute vec4 sd;uniform float uTime,uS,uCur;varying float vA;void main(){vec3 p=position;p.y=mod(p.y-uTime*sd.y*.35+sin(uTime*.4+sd.x*20.)*.2,7.)-.3;p.x=mod(p.x+8.+sin(uTime*.3+sd.w*6.28)*.35+uCur*(.6+sd.y*6.),16.)-8.;p.z+=cos(uTime*.25+sd.x*9.)*.3;vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;float dd=-mv.z;gl_PointSize=clamp(sd.z*uS/dd,1.,48.);vA=(.35+.65*sd.w)*smoothstep(.0,.6,p.y+.3)*exp(-dd*dd*.0022)*smoothstep(.4,2.,dd)*(dd<3.?.45:1.);}",
         fragmentShader:"varying float vA;void main(){float r=length(gl_PointCoord-.5);float a=smoothstep(.5,.0,r);gl_FragColor=vec4(vec3(.85,1.,.96)*a*vA*.8,a*vA);}"});
-      const pts=new T.Points(g,snowMat);pts.frustumCulled=false;scene.add(pts)}
+      const pts=new T.Points(g,snowMat);pts.frustumCulled=false;pts.visible=false;scene.add(pts)}
     {const n=low?24:44,g=new T.BufferGeometry(),p=new Float32Array(n*3),sd=new Float32Array(n*4),vents=[[-3.1,-1.8],[3.2,.9],[-2.9,2.6],[3,-3.1],[.6,-4.4]];
       for(let i=0;i<n;i++){const v=vents[i%vents.length];p.set([v[0]+(Math.random()-.5)*.3,Math.random()*6,v[1]+(Math.random()-.5)*.3],i*3);sd.set([Math.random(),.5+Math.random()*.6,.05+Math.random()*.07,Math.random()],i*4)}
       g.setAttribute("position",new T.BufferAttribute(p,3));g.setAttribute("sd",new T.BufferAttribute(sd,4));
       bubMat=new T.ShaderMaterial({transparent:true,depthWrite:false,uniforms:Object.assign({uS:{value:300},map:{value:tex.bubble}},U),
         vertexShader:"attribute vec4 sd;uniform float uTime,uS,uCur;varying float vA;void main(){vec3 p=position;float y=mod(p.y+uTime*sd.y,6.5);p.y=y;p.x+=sin(uTime*2.+sd.x*30.+y*2.)*.06*y+uCur*.4*y;p.z+=cos(uTime*1.7+sd.w*30.)*.05*y;vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;float dd=-mv.z;gl_PointSize=clamp(sd.z*uS/dd*(1.+y*.08),1.,40.);vA=smoothstep(0.,.4,y)*(1.-smoothstep(5.,6.5,y))*exp(-dd*dd*.0018);}",
         fragmentShader:"uniform sampler2D map;varying float vA;void main(){vec4 c=texture2D(map,gl_PointCoord);gl_FragColor=vec4(c.rgb,c.a*vA*.9);}"});
-      const pts=new T.Points(g,bubMat);pts.frustumCulled=false;scene.add(pts)}
+      const pts=new T.Points(g,bubMat);pts.frustumCulled=false;pts.visible=false;scene.add(pts)}
     // distant fish schools
     {const sh=new T.Shape();sh.moveTo(-.5,0);sh.quadraticCurveTo(-.1,.26,.3,.05);sh.lineTo(.52,.2);sh.lineTo(.46,0);sh.lineTo(.52,-.2);sh.lineTo(.3,-.05);sh.quadraticCurveTo(-.1,-.26,-.5,0);
       const n=low?18:34;fishIM=new T.InstancedMesh(new T.ShapeGeometry(sh),new T.MeshBasicMaterial({color:0x0a3640,side:T.DoubleSide}),n);fishIM.frustumCulled=false;
-      for(let i=0;i<n;i++){const sc=i<n*.6?0:1;fishData.push({sc,ox:(Math.random()-.5)*2.6,oy:(Math.random()-.5)*1,oz:(Math.random()-.5)*1.6,ph:Math.random()*6.28,s:.16+Math.random()*.07})}scene.add(fishIM)}
+      for(let i=0;i<n;i++){const sc=i<n*.6?0:1;fishData.push({sc,ox:(Math.random()-.5)*2.6,oy:(Math.random()-.5)*1,oz:(Math.random()-.5)*1.6,ph:Math.random()*6.28,s:.16+Math.random()*.07})}fishIM.visible=false;scene.add(fishIM)}
   }
   // ---------- per-frame ----------
   let m4a,m4b,m4c,m4d,q0,v0,v1,v2,col0,ray,rc,box;
@@ -930,10 +930,8 @@ const V3=(()=>{
     // camera: parallax (pointer / gyro), idle drift, dolly toward the tapped clam, shake
     if(!rm){const k=Math.min(1,dt*3.2);C.px+=(C.tx-C.px)*k;C.py+=(C.ty-C.py)*k}else{C.px=C.py=0}
     const fa=rm?0:env(t-C.fT,.35,.55,1.1),sh=rm?0:Math.max(0,1-(t-C.shT)/.55);
-    const yaw=C.px*.1+(rm?0:Math.sin(t*.21)*.022),pitch=C.pitch+C.py*.06+(rm?0:Math.sin(t*.17)*.012);
-    v0.copy(C.tgt);if(C.focus>=0&&fa>0){const c=CL[C.focus];v1.set(c.x,.1,c.z);v0.lerp(v1,.1*fa)}
-    if(sh>0){v0.x+=Math.sin(t*61)*.05*sh;v0.y+=Math.sin(t*47)*.035*sh}
-    placeCam(yaw,pitch,C.d*(1-.05*fa),v0);
+    // steady camera (dev build): no parallax, no idle drift, no dolly, no shake
+    v0.copy(C.tgt);placeCam(0,C.pitch,C.d,v0);
     if(S.dbgCam){cam.position.fromArray(S.dbgCam[0]);cam.lookAt(v1.fromArray(S.dbgCam[1]));cam.updateMatrixWorld()}
     if(!rm){sun.position.set(-2.4+Math.sin(t*.23)*1.1,10,4.5+Math.cos(t*.19)*.8)}
     // clams
@@ -978,8 +976,8 @@ const V3=(()=>{
   function syncDom(){if(!bed)return;const tiles=tilesEls;if(!corners.length)for(let k=0;k<8;k++)corners.push(new T.Vector3());
     tiles.forEach(el=>{const c=CL[+el.dataset.i];if(!c)return;let k=0;for(const x of [-.47,.47])for(const y of [0,.3])for(const z of [-.44,.44])corners[k++].set(c.x+x,y,c.z+z);
       const bb=projBox(corners),L=bb.x0-BX,Tp=bb.y0-BY,w=bb.x1-bb.x0,h=bb.y1-bb.y0,st=el.style;
-      st.left=L.toFixed(1)+"px";st.top=Tp.toFixed(1)+"px";st.width=w.toFixed(1)+"px";st.height=h.toFixed(1)+"px";st.zIndex=String(2+Math.floor(c.i/5)+(el.classList.contains("b77")||el.classList.contains("hit")?10:0));
-      if(c.obj){const o=c.obj.position;const q=proj(v1.set(o.x,o.y+c.pr+.17,o.z));st.setProperty("--vx",(q[0]-BX-L).toFixed(1)+"px");st.setProperty("--vy",(q[1]-BY-Tp).toFixed(1)+"px");st.setProperty("--vs",(.78+.22*(Math.floor(c.i/5)/4)).toFixed(2))}})}
+      st.left=L.toFixed(1)+"px";st.top=Tp.toFixed(1)+"px";st.width=w.toFixed(1)+"px";st.height=h.toFixed(1)+"px";st.zIndex=String(2+Math.floor(c.i/4)+(el.classList.contains("b77")||el.classList.contains("hit")?10:0));
+      if(c.obj){const o=c.obj.position;const q=proj(v1.set(o.x,o.y+c.pr+.17,o.z));st.setProperty("--vx",(q[0]-BX-L).toFixed(1)+"px");st.setProperty("--vy",(q[1]-BY-Tp).toFixed(1)+"px");st.setProperty("--vs",(.78+.22*(Math.floor(c.i/4)/3)).toFixed(2))}})}
   // ---------- hit-testing: the nearest clam body (or opened lid) under the pointer ----------
   function pick(cx,cy){if(!S.on||!canvas)return -1;const r=canvas.getBoundingClientRect();if(!r.width)return -1;
     rc.setFromCamera({x:(cx-r.left)/r.width*2-1,y:-((cy-r.top)/r.height)*2+1},cam);let best=-1,bd=1e9;const ray=rc.ray,lr=new T.Ray(),inv=new T.Matrix4(),lb=new T.Box3(new T.Vector3(-.5,-.03,0),new T.Vector3(.5,.24,.84));
@@ -989,7 +987,7 @@ const V3=(()=>{
     lidIM.updateMatrixWorld();const hits=rc.intersectObject(lidIM,false);for(const h of hits){const c=CL[h.instanceId];if(c&&c.ang>.25&&h.distance<bd){bd=h.distance;best=c.i;break}}
     return best}
   // ---------- content + fx ----------
-  function spriteFx(o){const m=new T.SpriteMaterial({map:o.map||tex.glow,color:o.color||0xffffff,transparent:true,opacity:0,depthWrite:false,blending:o.add?T.AdditiveBlending:T.NormalBlending,rotation:Math.random()*6.28,fog:!o.add});
+  function spriteFx(o){return; /* effects off (dev build) */const m=new T.SpriteMaterial({map:o.map||tex.glow,color:o.color||0xffffff,transparent:true,opacity:0,depthWrite:false,blending:o.add?T.AdditiveBlending:T.NormalBlending,rotation:Math.random()*6.28,fog:!o.add});
     const s=new T.Sprite(m);s.position.copy(o.p);s.scale.setScalar(o.s0);s.visible=false;scene.add(s);fx.push({s,t0:tm+(o.delay||0),life:o.life,v:o.v||new T.Vector3(),drag:o.drag||1,lift:o.lift||0,s0:o.s0,s1:o.s1,rot:o.rot||0,a0:o.a0,fade:o.fade==null?.5:o.fade})}
   function at(i,y){const c=CL[i];return new T.Vector3(0,y,.03).applyMatrix4(c.cm||new T.Matrix4().makeTranslation(c.x,BASEY,c.z))}
   function bubbles(i,n){if(!S.on||RM())return;const p=at(i,.12);for(let k=0;k<n;k++){const s=.035+Math.random()*.06;spriteFx({map:tex.bubble,p:p.clone().add(v0.set((Math.random()-.5)*.4,Math.random()*.1,(Math.random()-.5)*.3)),s0:s,s1:s*1.25,life:1.3+Math.random()*.8,
@@ -1004,13 +1002,13 @@ const V3=(()=>{
     if(how==="restore"&&cl.contains("rv")){how="rv";c.snap0=true}
     clearContent(c);c.open=true;c.how=how;c.t0=tm+(how==="rv"?0:.06);c.cs=0;c.cv=0;c.snap=how==="restore"||c.snap0||RM();c.snap0=false;
     const kind=cl.contains("b77")?"b77":cl.contains("urchin")?"urchin":cl.contains("pearl")?"pearl":cl.contains("dec")?"dec":"empty";c.kind=kind;
-    if(kind==="pearl"||kind==="b77"||kind==="dec"){const dv=kind==="dec"?+el.dataset.dv:0,g=kind==="b77"||dv===77?2:dv===57?4:dv===27?3:cl.contains("k1v")||dv===17||dv===777?1:0;
+    if(kind==="pearl"||kind==="b77"||kind==="dec"){const dv=kind==="dec"?+el.dataset.dv:0,g=kind==="b77"||dv===77||dv===777?2:dv===57?4:dv===27?3:cl.contains("k1v")||dv===17?1:0;
       const m=cloneM([mat.pW,mat.pG,mat.pB,mat.pR,mat.pL][g]);m.userData.c0=m.color.clone();c.mats=[m];
-      c.obj=new T.Mesh(geo.pearl,m);c.obj.castShadow=shadowOn;c.sh=new T.Mesh(geo.cshad,mat.cshad);c.sh.renderOrder=1;scene.add(c.sh);c.pr=kind==="dec"?(dv===777?.285:[.22,.235,.255,.24,.245][g]):g===2?.265:g===1?.25:.24;c.py=-.08+c.pr;
-      c.glow=new T.Sprite(new T.SpriteMaterial({map:tex.glow,color:[0xfff4e8,0xffcf70,0x7bf0d0,0xff9fc0,0xb4b4ff][g],transparent:true,blending:T.AdditiveBlending,depthWrite:false,opacity:0,fog:false}));scene.add(c.glow);
-      if(kind==="b77"){c.halo=new T.Sprite(new T.SpriteMaterial({map:tex.glow,color:0x9a6bff,transparent:true,blending:T.AdditiveBlending,depthWrite:false,opacity:0,fog:false}));scene.add(c.halo)}}
+      c.obj=new T.Mesh(geo.pearl,m);c.obj.castShadow=shadowOn;c.sh=new T.Mesh(geo.cshad,mat.cshad);c.sh.renderOrder=1;scene.add(c.sh);c.pr=kind==="dec"?[.22,.235,.255,.24,.245][g]:g===2?.265:g===1?.25:.24;c.py=-.08+c.pr;
+      c.glow=new T.Sprite(new T.SpriteMaterial({map:tex.glow,color:[0xfff4e8,0xffcf70,0x7bf0d0,0xff9fc0,0xb4b4ff][g],transparent:true,blending:T.AdditiveBlending,depthWrite:false,opacity:0,fog:false}));c.glow.visible=false;scene.add(c.glow);
+      if(kind==="b77"){c.halo=new T.Sprite(new T.SpriteMaterial({map:tex.glow,color:0x9a6bff,transparent:true,blending:T.AdditiveBlending,depthWrite:false,opacity:0,fog:false}));c.halo.visible=false;scene.add(c.halo)}}
     else if(kind==="urchin"){const m=cloneM(mat.ur);m.userData.c0=m.color.clone();c.mats=[m];c.obj=new T.Mesh(geo.urch,m);c.obj.castShadow=shadowOn;c.pr=1;c.py=.1;
-      c.glow=new T.Sprite(new T.SpriteMaterial({map:tex.glow,color:cl.contains("hit")?0xff60d0:0x9a50d0,transparent:true,blending:T.AdditiveBlending,depthWrite:false,opacity:0,fog:false}));c.pr=1;scene.add(c.glow)}
+      c.glow=new T.Sprite(new T.SpriteMaterial({map:tex.glow,color:cl.contains("hit")?0xff60d0:0x9a50d0,transparent:true,blending:T.AdditiveBlending,depthWrite:false,opacity:0,fog:false}));c.pr=1;c.glow.visible=false;scene.add(c.glow)}
     else{const g=new T.Group(),m=new T.MeshStandardMaterial({color:0xe8d6b4,roughness:.9});m.userData.c0=m.color.clone();c.mats=[m];
       for(let k=0;k<6;k++){const s=new T.Mesh(geo.grain,m);s.position.set((Math.random()-.5)*.3,0,(Math.random()-.5)*.2);s.scale.setScalar(.012+Math.random()*.014);g.add(s)}c.obj=g;c.pr=1;c.py=-.0}
     scene.add(c.obj);
@@ -1031,7 +1029,7 @@ const V3=(()=>{
   // ---------- parallax input ----------
   let g0=null;
   function onGyro(e){if(e.beta==null||e.gamma==null)return;if(!g0)g0={b:e.beta,g:e.gamma};C.gyro=true;C.tx=clamp((e.gamma-g0.g)/16,-1,1);C.ty=clamp((e.beta-g0.b)/16,-1,1)}
-  function askGyro(){try{const D=window.DeviceOrientationEvent;if(D&&typeof D.requestPermission==="function")D.requestPermission().then(s=>{if(s==="granted")addEventListener("deviceorientation",onGyro)}).catch(()=>{})}catch(e){}}
+  function askGyro(){return; /* steady camera: no gyro (dev build) */try{const D=window.DeviceOrientationEvent;if(D&&typeof D.requestPermission==="function")D.requestPermission().then(s=>{if(s==="granted")addEventListener("deviceorientation",onGyro)}).catch(()=>{})}catch(e){}}
   function onMove(e){if(!S.on)return;const r=stage.getBoundingClientRect();if(!C.gyro&&(e.pointerType==="mouse"||e.buttons)){C.tx=clamp((e.clientX-r.left)/r.width*2-1,-1,1);C.ty=clamp((e.clientY-r.top)/r.height*2-1,-1,1)}
     if(e.pointerType==="mouse")C.hover=pick(e.clientX,e.clientY)}
   function onLeave(){if(!C.gyro){C.tx=0;C.ty=0}C.hover=-1}
@@ -1040,7 +1038,7 @@ const V3=(()=>{
     try{T=window.THREE;canvas=document.createElement("canvas");canvas.className="v3c";canvas.setAttribute("aria-hidden","true");
       const DPR=window.devicePixelRatio||1,small=Math.min(screen.width||999,innerWidth||999)<700;low=small&&(navigator.hardwareConcurrency||4)<=6;
       R=new T.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:"high-performance"});if(!R.getContext())throw 0;
-      dpr=Math.min(DPR,small?1.75:2);R.outputEncoding=T.sRGBEncoding;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1;R.shadowMap.enabled=shadowOn;R.shadowMap.type=T.PCFSoftShadowMap;
+      dpr=Math.min(DPR,small?1.2:1.5); /* lower resolution for smoother phones (dev build) */R.outputEncoding=T.sRGBEncoding;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1;R.shadowMap.enabled=shadowOn;R.shadowMap.type=T.PCFSoftShadowMap;
       initTmp();makeTextures();build();
       canvas.addEventListener("webglcontextlost",e=>{e.preventDefault();S.on=false;ok=false;if(stage)stage.classList.remove("g3d");if(canvas.parentNode)canvas.remove()});
       document.addEventListener("visibilitychange",()=>{hidden=document.hidden;if(!hidden)kick()});
@@ -1161,12 +1159,12 @@ const GAME=(()=>{
     "<ellipse cx='60' cy='88' rx='51' ry='10' fill='url(#naCup)'/><ellipse cx='60' cy='89' rx='24' ry='3.6' fill='rgba(60,30,60,.35)' filter='url(#pBlur)'/>"+
     "<g class='ct'></g><g class='dome'>"+DOME+"</g>"+LOWG+
     "<g class='seam'><ellipse cx='60' cy='86' rx='44' ry='6' fill='rgba(255,214,130,.55)' filter='url(#pBlur3)'/><path d='M"+X0+" "+SY+SEAM+"' fill='none' stroke='#ffd88a' stroke-width='4' stroke-linecap='round' filter='url(#pBlur)'/></g><path class='seam2' d='M"+X0+" "+SY+SEAM+"'/></svg>";
-  // decoy pearl looks: ₱7 white (k0), ₱17 golden (k1), ₱27 rose (k3), ₱57 silver-lavender (k4), ₱77 black (k2), ₱777 big golden (k1)
-  const DKIND={7:0,17:1,27:3,57:4,77:2,777:1};
+  // decoy pearl looks: ₱7 white (k0), ₱17 golden (k1), ₱27 rose (k3), ₱57 silver-lavender (k4), ₱77 black (k2), ₱777 black with gold chip (k2)
+  const DKIND={7:0,17:1,27:3,57:4,77:2,777:2};
   function contentSVG(role){
     if(role.t==="pearl"){const k=role.v>=250?1:0;return "<g class='pop k"+k+"'><circle class='glw' cx='60' cy='64' r='42' opacity='.9'/>"+PEARL(60,64,24,"")+"</g>"}
     if(role.t==="b77")return "<g class='pop k2'><circle class='glw' cx='60' cy='62' r='46'/>"+PEARL(60,62,27,"77")+"</g>";
-    if(role.t==="dec")return "<g class='pop k"+DKIND[role.v]+"'><circle class='glw' cx='60' cy='64' r='40' opacity='.7'/>"+PEARL(60,64,role.v===777?28:role.v===77?25:23,"")+"</g>";
+    if(role.t==="dec")return "<g class='pop k"+DKIND[role.v]+"'><circle class='glw' cx='60' cy='64' r='40' opacity='.7'/>"+PEARL(60,64,role.v===77||role.v===777?25:23,"")+"</g>";
     if(role.t==="urchin")return "<g class='pop'>"+URCHIN(60,64,1.2)+"</g>";
     return "<g class='pop'><g fill='#efe0c8' opacity='.7'><circle cx='50' cy='86' r='1.6'/><circle cx='66' cy='88' r='1.2'/><circle cx='72' cy='85' r='1'/><circle cx='56' cy='89' r='.9'/></g><circle cx='62' cy='70' r='3' fill='none' stroke='rgba(230,252,248,.6)' stroke-width='.8'/></g>"}
   // a large pearl in an open oyster, for the win card
@@ -1204,9 +1202,9 @@ const GAME=(()=>{
   const urchinIcon="<svg viewBox='26 36 68 68' aria-hidden='true'>"+URCHIN(60,70,.95)+"</svg>";
   // ---- effects ----
   function center(t,host){try{const s=(host||stage).getBoundingClientRect(),r=t.getBoundingClientRect();return {x:r.left-s.left+r.width/2,y:r.top-s.top+r.height*.55,w:r.width}}catch(e){return {x:0,y:0,w:60}}}
-  function sparkle(x,y,k,n){if(reduce()||!fx)return;const cols=k===1?["#fff3c4","#f4d27a","#ffffff"]:["#ffffff","#ffe3ec","#f4dda4"];
+  function sparkle(x,y,k,n){return; /* sparks off (dev build) */if(reduce()||!fx)return;const cols=k===1?["#fff3c4","#f4d27a","#ffffff"]:["#ffffff","#ffe3ec","#f4dda4"];
     for(let i=0;i<(n||14);i++){const s=el("i","spk"+(i%3?"":" o"));const a=rnd()*Math.PI*2,d=R(20,50);s.style.cssText="left:"+f1(x)+"px;top:"+f1(y)+"px;--dx:"+(Math.cos(a)*d).toFixed(0)+"px;--dy:"+(Math.sin(a)*d*.8-12).toFixed(0)+"px;--c:"+cols[i%3]+";animation-delay:"+(i*.015).toFixed(2)+"s";fx.appendChild(s);setTimeout(()=>s.remove(),1300)}}
-  function bubbles(x,y,n,spread){if(reduce()||!fx||V3.on)return;for(let i=0;i<n;i++){const b=el("i","tb");b.style.cssText="transform:translate("+f1(x+R(-spread,spread))+"px,"+f1(y+R(-spread*.6,spread*.6))+"px);--s:"+R(4,10).toFixed(1)+"px;--dx:"+R(-14,14).toFixed(0)+"px;animation-delay:"+(i*.04).toFixed(2)+"s;animation-duration:"+R(.8,1.3).toFixed(2)+"s";fx.appendChild(b);setTimeout(()=>b.remove(),1500)}}
+  function bubbles(x,y,n,spread){return; /* bubbles off (dev build) */if(reduce()||!fx||V3.on)return;for(let i=0;i<n;i++){const b=el("i","tb");b.style.cssText="transform:translate("+f1(x+R(-spread,spread))+"px,"+f1(y+R(-spread*.6,spread*.6))+"px);--s:"+R(4,10).toFixed(1)+"px;--dx:"+R(-14,14).toFixed(0)+"px;animation-delay:"+(i*.04).toFixed(2)+"s;animation-duration:"+R(.8,1.3).toFixed(2)+"s";fx.appendChild(b);setTimeout(()=>b.remove(),1500)}}
   function floatText(txt,x,y,cls,ms){if(!fx)return;const W=stage.clientWidth||340;const t=el("span","ftxt"+(cls?" "+cls:""));t.textContent=txt;t.style.left=f1(Math.max(70,Math.min(W-70,x)))+"px";t.style.top=f1(y)+"px";fx.appendChild(t);setTimeout(()=>t.remove(),ms||1300)}
   function inkCloud(t,x,y,w){if(reduce()||!fx)return;if(V3.on){V3.ink(+t.dataset.i);V3.shake();return}const il=bed.querySelector(".inkl"),b=center(t,bed);
     for(let i=0;i<8;i++){const k=el("i","ink"),a=rnd()*Math.PI*2,d=R(w*.3,w*.9);k.style.cssText="--s:"+f1(w*R(1.5,2.4))+"px;--x:"+f1(b.x)+"px;--y:"+f1(b.y)+"px;--dx:"+f1(Math.cos(a)*d)+"px;--dy:"+f1(Math.sin(a)*d-10)+"px;animation-delay:"+(i*.05).toFixed(2)+"s";il.appendChild(k);setTimeout(()=>k.remove(),2500)}
@@ -1215,10 +1213,10 @@ const GAME=(()=>{
     bubbles(x,y,10,w*.35)}
   // ---- prize ladder ----
   // the gold fill climbs with the running total: 0 → ₱7 → ₱17 → ₱27 → ₱57 map to the medallion centres (12.5 / 37.5 / 62.5 / 87.5 %)
-  const LPOS=[10,10,30,50,70,90],LVAL=[0].concat(LADDER); // 5 medallion centres (10/30/50/70/90 %)
+  const LPOS=[12.5,12.5,37.5,62.5,87.5],LVAL=[0].concat(LADDER); // 4 medallion centres (12.5/37.5/62.5/87.5 %)
   function ladPos(cents){const v=cents/100;for(let i=1;i<LVAL.length;i++)if(v<=LVAL[i])return LPOS[i-1]+(LPOS[i]-LPOS[i-1])*(v-LVAL[i-1])/(LVAL[i]-LVAL[i-1]);return LPOS[LPOS.length-1]}
   function ladPaint(cents,anim){if(!ladEl)return;const row=ladEl.querySelector(".lrow"),pos=ladPos(cents);
-    row.style.setProperty("--lp",(pos-10).toFixed(2)+"%");row.style.setProperty("--lh",cents>0&&cents/100<LADDER[LADDER.length-1]?"1":"0");
+    row.style.setProperty("--lp",(pos-12.5).toFixed(2)+"%");row.style.setProperty("--lh",cents>0&&cents/100<LADDER[LADDER.length-1]?"1":"0");
     let on=0;ladEl.querySelectorAll(".lt").forEach((t,i)=>{const hit=cents>=LADDER[i]*100,lo=i?LADDER[i-1]*100:0;
       t.style.setProperty("--q",Math.max(0,Math.min(1,(cents-lo)/(LADDER[i]*100-lo))).toFixed(3));if(hit)on=i+1;t.classList.toggle("on",hit);t.classList.toggle("far",!hit&&i>=2)});
     if(anim&&on>ladOn){const t=ladEl.querySelectorAll(".lt")[on-1];T(()=>{t.classList.remove("pop");void t.offsetWidth;t.classList.add("pop");
@@ -1289,13 +1287,13 @@ const GAME=(()=>{
       G.stop();pl=null;hooks=null;shown=0;
       if(!document.getElementById("clDefs")){const d=document.createElement("div");d.id="clDefs";d.innerHTML=DEFS;document.body.appendChild(d)}
       wrap=el("div","clsea");
-      let tiles="";for(let i=0;i<TILES;i++)tiles+="<button class='tile' type='button' data-i='"+i+"' aria-label='Clam "+(Math.floor(i/5)+1)+"-"+(i%5+1)+"' style='--bd:-"+((i*7%11)*.31).toFixed(2)+"s'>"+TILE_SVG+"</button>";
+      let tiles="";for(let i=0;i<TILES;i++)tiles+="<button class='tile' type='button' data-i='"+i+"' aria-label='Clam "+(Math.floor(i/4)+1)+"-"+(i%4+1)+"' style='--bd:-"+((i*7%11)*.31).toFixed(2)+"s'>"+TILE_SVG+"</button>";
       wrap.innerHTML="<div class='pstage idle'>"+
         "<div class='deco' aria-hidden='true'>"+SCENE()+"</div><div class='current' aria-hidden='true'></div>"+
         "<div class='hud'><span class='hf'>Pearls found: <b class='hfn'>0</b> · Total <b class='htn'>₱0.00</b></span><span class='hu'>"+urchinIcon+"<b>"+URCH+"</b> urchins</span></div>"+
-        "<div class='bed' role='group' aria-label='Clam bed, 5 by 5'><div class='inkl' aria-hidden='true'></div>"+tiles+"</div>"+
+        "<div class='bed' role='group' aria-label='Clam bed, 4 by 4'><div class='inkl' aria-hidden='true'></div>"+tiles+"</div>"+
         "<div class='fx' aria-hidden='true'></div>"+
-        "<div class='intro'><span class='ic'>25 clams · 5 sea urchins</span>"+introSVG()+"<p>Press <b>START</b>, then open clams to find <b>pearls</b>. Watch out for <b>sea urchins</b>!</p></div>"+
+        "<div class='intro'><span class='ic'>16 clams · 5 sea urchins</span>"+introSVG()+"<p>Press <b>START</b>, then open clams to find <b>pearls</b>. Watch out for <b>sea urchins</b>!</p></div>"+
         "</div>";
       ladEl=el("div","pladder");ladEl.id="ladder";ladEl.setAttribute("role","img");ladOn=0;
       ladEl.innerHTML="<p class='lh'>Prize ladder · <b>climb the ladder</b></p><div class='lrow' aria-hidden='true'><i class='ltrack'></i><i class='lfill'></i>"+
@@ -1334,7 +1332,7 @@ let S=null,busy=false,N=0,cur=null,demoPlays=[],planQ=Promise.resolve(),lastSig=
 const DEMO_N=2;
 async function post(path,body){const r=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})});const j=await r.json().catch(()=>({}));return{status:r.status,...j}}
 function stepOf(amt){const i=NUMS.indexOf(Math.round(Number(amt)));return i>=0?i:0}
-function makePlan(amt){const step=stepOf(amt),k=step?5+Math.floor(rnd()*4):3+Math.floor(rnd()*4);return {vals:splitVals(NUMS[step],k,step?10:6),perm:shuffle(Array.from({length:TILES},(_,i)=>i)),taps:[],end:null}}
+function makePlan(amt){const step=stepOf(amt),k=step?5+Math.floor(rnd()*3):3+Math.floor(rnd()*4);return {vals:splitVals(NUMS[step],k,step?10:6),perm:shuffle(Array.from({length:TILES},(_,i)=>i)),taps:[],end:null}}
 function planOf(pl){const p={vals:pl.vals,perm:pl.perm,taps:pl.taps,end:pl.end||null};if(pl.collect!=null)p.collect=pl.collect;if(pl.dec)p.dec=pl.dec;return p}
 function validPlan(p,step){if(!p||!Array.isArray(p.vals)||!Array.isArray(p.perm)||!Array.isArray(p.taps))return false;
   const k=p.vals.length;if(k<1||k>12||p.vals.some(v=>!Number.isInteger(v)||v<50||v%50)||p.vals.reduce((a,b)=>a+b,0)!==NUMS[step]*100)return false;
@@ -1360,7 +1358,7 @@ function renderMech(){
     "<b>Only slot games qualify.</b> Each play unlocks once your slot turnover reaches <b>"+CONF.turnover+"× the deposit</b> ("+php(CONF.perPlay)+" deposit → "+php(CONF.perPlay*CONF.turnover)+" in slot bets). Your deposits and turnover are checked automatically from your account — nothing to send.",
     "<b>Hours:</b> "+hours()+" daily. <b>Max bonus:</b> "+php(CONF.dailyCap)+" per day for all players.",
     "<b>How to get your link:</b> ask your agent after you deposit. Your link keeps working for the whole day; deposit again and your next play unlocks on the same link.",
-    "<b>Prize:</b> The bonus is random on every play and is set when you press START. The pearls you find add up to your bonus, paid once. The prize ladder shows how far your pearls climb; ₱27, ₱57, ₱777 and the black ₱77 pearl are display tiers only and cannot be won. The pearls shown in the unopened clams at the end — including the ₱777 pearl — are for display only.",
+    "<b>Prize:</b> The bonus is random on every play and is set when you press START. The pearls you find add up to your bonus, paid once. The prize ladder shows how far your pearls climb; ₱27, ₱57 and the black ₱77 pearl are display tiers only and cannot be won. The pearls shown in the unopened clams at the end — including the ₱777 pearls — are for display only.",
     "<b>Claiming:</b> Your win is recorded the moment it is revealed. The bonus is credited the following day at 1:00 PM and must be wagered "+CONF.turnover+"× on slot games before it can be withdrawn.",
     "<b>Results are final.</b> Refreshing or reopening the link does not give extra plays; an unfinished round continues where you left it."];
   $("mechSteps").innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
@@ -1482,7 +1480,7 @@ function openWin(pl,quiet){
   (function f(now){const k=Math.min(1,(now-s)/dur);a.textContent=php(Math.round(amt*(1-Math.pow(1-k,3))));if(k<1&&!jp.hidden)requestAnimationFrame(f);else a.textContent=php(amt)})(s);
   confetti(big?180:90,big);
 }
-function confetti(count,big){
+function confetti(count,big){return; /* effects off (dev build) */
   // a shimmer of pearls and four-point sparkles bursting from the jewel box
   const cv=$("confetti");let c=null;try{c=cv.getContext&&cv.getContext("2d")}catch(e){}if(!c)return;
   const d=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;cv.width=W*d;cv.height=H*d;c.setTransform(d,0,0,d,0,0);
