@@ -242,7 +242,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(34px,10vw,50p
 .paynote b{color:#ffd400}
 @media (max-width:420px){.bet .pv{font-size:8.6px}}
 /* (group highlight class is "lit", not "win": .win is the result panel class) */
-/* strip grouped: JACKPOT (77 ₱177 · BAR BAR ₱77, display only) | ₱16.50 (kundol, star, bell) | ₱8.20 (BAR, cherry, apple, orange); in a WILD round each key shows its wild value and a thin bracket under each group carries the group total */
+/* strip grouped: JACKPOT (77 ₱777 · BAR BAR ₱77, display only) | ₱16.50 (kundol, star, bell) | ₱8.20 (BAR, cherry, apple, orange); in a WILD round each key shows its wild value and a thin bracket under each group carries the group total */
 .strip{display:flex;align-items:flex-start;gap:9px;padding:8px 7px 6px}
 .sgrp{flex:var(--n) 1 0;min-width:0;display:grid;gap:3px}
 .sgrp .keys{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:4px}
@@ -656,7 +656,7 @@ body{background:radial-gradient(60% 38% at 50% 0%,rgba(255,184,40,.34),transpare
         <h4 class="fsub">Normal plays · <span id="fNormPct"></span> of plays</h4>
         <div class="tblwrap"><table><thead><tr><th>Prize</th><th>Probability</th><th>Users</th><th>Cost</th></tr></thead><tbody id="fRows"></tbody></table></div>
         <div hidden><h4 class="fsub">Respawn plays · <span id="fWildPct"></span> of plays</h4>
-        <p class="hint">The light lands on RESPAWN, a tier is drawn, and the light hits every loot of that tier once (₱7 Common: coin ₱2.00 + potion ₱1.80 + shield ₱1.70 + boots ₱1.50 = 4 hits; ₱17 Rare: sword ₱6.00 + helmet ₱5.50 + gem ₱5.50 = 3 hits). The hits add up to the tier prize, so a respawn win matches the normal prizes. *₱777 is a display-only tease (0%), never awarded; the golden controller ₱77 and the dragon chest ₱177 are display-only legendary loot (0%), never a stop or a hit.</p>
+        <p class="hint">The light lands on RESPAWN, a tier is drawn, and the light hits every loot of that tier once (₱7 Common: coin ₱2.00 + potion ₱1.80 + shield ₱1.70 + boots ₱1.50 = 4 hits; ₱17 Rare: sword ₱6.00 + helmet ₱5.50 + gem ₱5.50 = 3 hits). The hits add up to the tier prize, so a respawn win matches the normal prizes. *₱777 is a display-only tease (0%), never awarded; the golden controller ₱77 and the dragon chest ₱777 are display-only legendary loot (0%), never a stop or a hit.</p>
         <div class="tblwrap"><table><thead><tr><th>Group</th><th>Probability</th><th>Users</th><th>Cost</th></tr></thead><tbody id="fWild"></tbody></table></div>
         <h4 class="fsub">Owner's respawn table · per 1,000 respawn plays</h4>
         <div class="tblwrap"><table><thead><tr><th>Group</th><th>Probability</th><th>Users</th><th>Cost</th></tr></thead><tbody id="fWild1k"></tbody></table></div>
@@ -732,8 +732,8 @@ body{background:radial-gradient(60% 38% at 50% 0%,rgba(255,184,40,.34),transpare
       <ol>
         <li>Open to verified GameSpot players aged 21 and above. Self-excluded, restricted or unverified accounts are not eligible.</li>
         <li>Plays are unlocked by a qualifying deposit verified by a GameSpot agent, made within the validity period of your offer. Every ₱200 of verified deposit gives 1 play; for example, ₱1,000 = 5 plays. Pending, failed or reversed deposits do not qualify.</li>
-        <li>In Power-Up Cards you press START (or tap a card), the 4 cards shuffle, and you pick 1. The 4 cards hold ₱7, ₱17, ₱77 and ₱177. Your card flips and shows your bonus: ₱7 or ₱17. Every play wins a bonus. The bonus is random on every play and is decided the moment you press START. This is an animated promo game only, not a bet.</li>
-        <li>After your pick, the other 3 cards flip for show only. Amounts on cards you did not pick are not won and cannot be claimed. The ₱77 and ₱177 cards are for display only and cannot be won.</li>
+        <li>In Power-Up Cards you press START (or tap a card), the 4 cards shuffle, and you pick 1. The 4 cards hold ₱7, ₱17, ₱77 and ₱777. Your card flips and shows your bonus: ₱7 or ₱17. Every play wins a bonus. The bonus is random on every play and is decided the moment you press START. This is an animated promo game only, not a bet.</li>
+        <li>After your pick, the other 3 cards flip for show only. Amounts on cards you did not pick are not won and cannot be claimed. The ₱77 and ₱777 cards are for display only and cannot be won.</li>
         <li>All your plays are made on the personal link from your agent. Results are final once you press START. Refreshing the page, reopening the link or using another device does not give extra plays. Only results confirmed by your agent count.</li>
         <li>Send a screenshot of each reward card to your agent. The bonus is credited after the agent verifies your deposit and result, within the time your agent announces.</li>
         <li>Wager ×1: the bonus must be wagered 1× before it can be withdrawn. Only bets on slot games are valid and count toward wagering.</li>
@@ -758,8 +758,8 @@ const PRIZES=[7,17],WEIGHTS=[90,10]; // ₱7 Common (coin/potion/shield/boots) 9
 // per-symbol WILD values in centavos; each group's symbols add up exactly to its prize (asserted at load). Players see them on the strip during a WILD round.
 // A normal stop pays the GROUP prize; a WILD round hits every symbol of one group once, so the wild total matches the same prizes.
 const SYMVAL={bar:200,cherry:180,apple:170,orange:150,kundol:600,star:550,bell:550}; // Common ₱7: coin 2.00 + potion 1.80 + shield 1.70 + boots 1.50 · Rare ₱17: sword 6.00 + helmet 5.50 + gem 5.50
-// display-only jackpots on the strip: 77 = ₱177, BAR BAR = ₱77. 0% chance: never a normal stop and never a wild hit (asserted at load)
-const JPVAL={seven:177,barbar:77};
+// display-only jackpots on the strip: 77 = ₱777, BAR BAR = ₱77. 0% chance: never a normal stop and never a wild hit (asserted at load)
+const JPVAL={seven:777,barbar:77};
 const CATNAME=["₱7 Common loot","₱17 Rare loot"];
 const BIG=1; // Rare loot (₱17) gets the big celebration
 // WILD round (admin only, never shown to players): 5% of plays land on WILD; those plays draw a wild CATEGORY instead of the normal prize
@@ -822,9 +822,9 @@ function cheer(text){const c=$("cheer");c.textContent=text;c.classList.remove("p
 function needAgree(){if($("agree").checked)return false;const l=$("agreeLbl");l.classList.remove("nudge");void l.offsetWidth;l.classList.add("nudge");cheer("Please tick the T&C box first.");return true}
 
 // ---------- game ----------
-// Power-Up Cards: 4 face-down power-up cards holding ₱7, ₱17, ₱77 and ₱177. Press START (or tap a card), the cards shuffle, pick 1 and it flips to show your bonus.
+// Power-Up Cards: 4 face-down power-up cards holding ₱7, ₱17, ₱77 and ₱777. Press START (or tap a card), the cards shuffle, pick 1 and it flips to show your bonus.
 // The bonus is drawn first (₱7 95% / ₱17 5%, weights admin only); the picked card always shows it.
-// The other 3 cards flip afterwards for show only and hold the remaining amounts; ₱77 and ₱177 are display only (0%), never won.
+// The other 3 cards flip afterwards for show only and hold the remaining amounts; ₱77 and ₱777 are display only (0%), never won.
 const GAME=(()=>{
   const NB=4;
   let wrap,cards=[],amtEl,timers=[],anim=false,waiting=false,pending=null,cur=null;
@@ -856,8 +856,8 @@ const GAME=(()=>{
   const ICON={7:"<svg viewBox='0 0 40 40' aria-hidden='true'><path d='M20 34 C9 26 4 20 4 13.5 C4 8.6 7.8 5 12.4 5 C15.6 5 18.4 6.8 20 9.6 C21.6 6.8 24.4 5 27.6 5 C32.2 5 36 8.6 36 13.5 C36 20 31 26 20 34Z' fill='#3ecf6a' stroke='#0e5a24' stroke-width='2'/><path d='M10 12 C10.6 9.8 12.4 8.6 14.4 8.6' stroke='#fff' stroke-width='2.4' stroke-linecap='round' fill='none' opacity='.7'/><path d='M17 17 h6 v-5 h0 M14 17 h12 M20 11 v12' stroke='#fff' stroke-width='3' stroke-linecap='round'/></svg>",
     17:"<svg viewBox='0 0 40 40' aria-hidden='true'><path d='M23 2 L7 23 H18 L15 38 L33 15 H22Z' fill='#ffcc2a' stroke='#0a4a5a' stroke-width='2' stroke-linejoin='round'/><path d='M21 7 L12 20' stroke='#e8fdff' stroke-width='2.4' stroke-linecap='round'/></svg>",
     77:"<svg viewBox='0 0 40 40' aria-hidden='true'><path d='M20 3 L34 9 C34 22 29 31 20 37 C11 31 6 22 6 9Z' fill='#e8b830' stroke='#2a0a6a' stroke-width='2' stroke-linejoin='round'/><path d='M20 11 l2.6 5.4 5.8.8 -4.2 4.1 1 5.8 -5.2-2.8 -5.2 2.8 1-5.8 -4.2-4.1 5.8-.8Z' fill='#fff3b0' stroke='#7a4a00' stroke-width='1'/></svg>",
-    177:"<svg viewBox='0 0 40 40' aria-hidden='true'><path d='M5 30 L3 11 L13 19 L20 6 L27 19 L37 11 L35 30Z' fill='#ffcc2a' stroke='#7a4a00' stroke-width='2' stroke-linejoin='round'/><rect x='5' y='30' width='30' height='5' rx='1.5' fill='#ffcc2a' stroke='#7a4a00' stroke-width='2'/><circle cx='20' cy='23' r='3' fill='#ff3d5a'/><circle cx='11' cy='25' r='2' fill='#ffcc2a'/><circle cx='29' cy='25' r='2' fill='#ffcc2a'/></svg>"};
-  const KIND={7:["COMMON","common"],17:["RARE","rare"],77:["EPIC","epic"],177:["LEGENDARY","legendary"]};
+    777:"<svg viewBox='0 0 40 40' aria-hidden='true'><path d='M5 30 L3 11 L13 19 L20 6 L27 19 L37 11 L35 30Z' fill='#ffcc2a' stroke='#7a4a00' stroke-width='2' stroke-linejoin='round'/><rect x='5' y='30' width='30' height='5' rx='1.5' fill='#ffcc2a' stroke='#7a4a00' stroke-width='2'/><circle cx='20' cy='23' r='3' fill='#ff3d5a'/><circle cx='11' cy='25' r='2' fill='#ffcc2a'/><circle cx='29' cy='25' r='2' fill='#ffcc2a'/></svg>"};
+  const KIND={7:["COMMON","common"],17:["RARE","rare"],77:["EPIC","epic"],777:["LEGENDARY","legendary"]};
   function setAmt(v,bump){amtEl.textContent=php2(v);if(bump){amtEl.classList.remove("bump");void amtEl.offsetWidth;amtEl.classList.add("bump")}}
   function countUp(v){const steps=reduce()?1:20;let j=0;const up=()=>{j++;setAmt(Math.round(v*100*j/steps)/100,true);if(j%4===0)beep(900+j*30,.04,.04,"square");if(j<steps)T(up,40)};up()}
   // a burst of sparks and coins out of a card (presentation only)
@@ -871,11 +871,11 @@ const GAME=(()=>{
     c.querySelector(".pc-amt").textContent=php2(val);c.dataset.tier=k[1];
     c.classList.remove("peek");c.classList.add("open",mine?"mine":"other");c.querySelector(".pc-tag").textContent=mine?"YOUR BONUS":"";
     if(quiet)c.classList.add("instant");else if(mine)T(()=>burst(c,k[1],k[1]==="rare"?26:16),300)}
-  // the other 3 cards hold the remaining amounts of the set ₱7 · ₱17 · ₱77 · ₱177, in a random order
+  // the other 3 cards hold the remaining amounts of the set ₱7 · ₱17 · ₱77 · ₱777, in a random order
   function othersFor(i,mine){const pool=[PRIZES[0],PRIZES[1],JPVAL.barbar,JPVAL.seven].filter(v=>v!==mine);
     for(let k=pool.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[pool[k],pool[j]]=[pool[j],pool[k]]}
     const o=[];for(let k=0,p=0;k<NB;k++)o.push(k===i?null:pool[p++]);return o}
-  // show the prize set face up before the shuffle (₱7 · ₱17 · ₱77 · ₱177 in that order)
+  // show the prize set face up before the shuffle (₱7 · ₱17 · ₱77 · ₱777 in that order)
   const SET=()=>[PRIZES[0],PRIZES[1],JPVAL.barbar,JPVAL.seven];
   function peek(){SET().forEach((v,k)=>{const c=cards[k];c.querySelector(".pc-amt").textContent=php2(v);c.dataset.tier=(KIND[v]||KIND[7])[1];c.classList.add("peek")})}
   function unpeek(){cards.forEach(c=>c.classList.remove("peek"))}
@@ -978,7 +978,7 @@ const GAME=(()=>{
       anim=true;cur={prize,done};wrap.classList.remove("done");
       const go=()=>{waiting=true;wrap.classList.add("live");cheer("Pick 1 card!");if(pending!=null){const p=pending;pending=null;p.classList.remove("queued");T(()=>pick(+p.dataset.i),reduce()?0:250)}};
       if(reduce()){unpeek();go();return}
-      wrap.classList.remove("deal");peek();cheer("These are the prizes: ₱7 · ₱17 · ₱77 · ₱177");
+      wrap.classList.remove("deal");peek();cheer("These are the prizes: ₱7 · ₱17 · ₱77 · ₱777");
       cards.forEach((c,k)=>T(()=>{c.classList.add("glint");beep(660+k*110,.06,.06,"triangle");T(()=>c.classList.remove("glint"),500)},150+k*220));
       T(()=>{unpeek();noise(.2,.08,2600);cheer("Flipping face down…")},1500);
       T(()=>{wrap.classList.add("shuffle","shuffling");cheer("Shuffling…");
@@ -1036,12 +1036,12 @@ function renderMech(){
     "<b>Only for slot games</b>. <b>Wager ×"+WAGER_X+"</b>: the bonus must be wagered "+WAGER_X+"× before it can be withdrawn.",
     "<b>Hours:</b> 1 PM–9 PM daily. Max bonus <b>"+php(DAILY_CAP)+"</b> per day."];
   $("mechSteps").innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
-  const how=["Tick the T&C box.","Press <b>START</b> (or tap a card). The 4 power-up cards shuffle. They hold <b>₱7</b>, <b>₱17</b>, <b>₱77</b> and <b>₱177</b>.","<b>Pick 1 card.</b> It flips and shows your bonus: <b>₱7</b> (power-up) or <b>₱17</b> (rare). <b>Every play wins.</b>","The other 3 cards then flip for show only. Amounts on cards you did not pick are not won, and the ₱77 (epic) and ₱177 (legendary) cards are display only.","Take a screenshot of your reward card and send it to your agent to get it credited."];
+  const how=["Tick the T&C box.","Press <b>START</b> (or tap a card). The 4 power-up cards shuffle. They hold <b>₱7</b>, <b>₱17</b>, <b>₱77</b> and <b>₱777</b>.","<b>Pick 1 card.</b> It flips and shows your bonus: <b>₱7</b> (power-up) or <b>₱17</b> (rare). <b>Every play wins.</b>","The other 3 cards then flip for show only. Amounts on cards you did not pick are not won, and the ₱77 (epic) and ₱777 (legendary) cards are display only.","Take a screenshot of your reward card and send it to your agent to get it credited."];
   $("howSteps").innerHTML=how.map(s=>"<li>"+s+"</li>").join("");
 }
 function plays(){return state?state.plays:[]}
 // one play: first 5% decides a wild play. Wild → a wild group is drawn (₱7 / ₱17 at 90/10; ₱777 weight 0) and the light hits every symbol of it once.
-// Not wild → the normal prize is drawn (₱7 / ₱17 at 90/10) and the light stops on a cell of that group. dragon chest (₱177) and golden controller (₱77) are display only, never drawn.
+// Not wild → the normal prize is drawn (₱7 / ₱17 at 90/10) and the light stops on a cell of that group. dragon chest (₱777) and golden controller (₱77) are display only, never drawn.
 function planPlay(){
   const forceWild=TEST_PATTERN?(testIdx()%4>=2):null; // TEST_PATTERN: 0,1 normal · 2,3 wild · repeat (normal plays still draw 90/10, wild plays 95/5)
   if(forceWild===null?rnd()<WILD_RATE:forceWild){const wprize=drawWild(),w=GAME.wildPlan(wprize);
@@ -1167,7 +1167,7 @@ function adminUI(){
   if(document.activeElement!==$("deposit"))$("deposit").value=cfg.deposit||"";
   if(document.activeElement!==$("code"))$("code").value=cfg.code;
   const n=playsFor(cfg.deposit),tb=$("aTier");
-  if(n){tb.className="tierbox";tb.innerHTML="<b>"+n+" play"+(n>1?"s":"")+"</b> ("+php(cfg.deposit)+" ÷ "+php(PLAY_DEP)+") on this one link · bonus per play <b>"+PRIZES.map(php2).join(" / ")+"</b> · the ₱77 and ₱177 cards are display only (never won)"}
+  if(n){tb.className="tierbox";tb.innerHTML="<b>"+n+" play"+(n>1?"s":"")+"</b> ("+php(cfg.deposit)+" ÷ "+php(PLAY_DEP)+") on this one link · bonus per play <b>"+PRIZES.map(php2).join(" / ")+"</b> · the ₱77 and ₱777 cards are display only (never won)"}
   else{tb.className="tierbox bad";tb.innerHTML="<b>Not qualified.</b> The minimum deposit is "+php(PLAY_DEP)+" (1 play per "+php(PLAY_DEP)+"). The game is locked on this link."}
   $("plink").textContent=playerLink();
 }
@@ -1183,7 +1183,7 @@ function formulaUI(){
     const h=vals.map((v,i)=>{const pr=ws[i]/tw,u=n*pr,c=u*v;cost+=c;e+=pr*v;return "<tr><td>"+lab(v,i)+"</td><td>"+pct(pr*100)+"</td><td>"+nf(u)+"</td><td>"+php(r2(c))+"</td></tr>"}).join("")+
       "<tr class='sum'><td>Total</td><td>100%</td><td>"+nf(n)+"</td><td>"+php(r2(cost))+"</td></tr>";return [h,cost,e]};
   $("fNormPct").textContent=pct(pN*100);$("fWildPct").textContent=pct(pW*100);
-  // normal table also lists the display-only strip jackpots at 0%: ₱177 (77) and ₱77 (BAR BAR)
+  // normal table also lists the display-only strip jackpots at 0%: ₱777 (77) and ₱77 (BAR BAR)
   const NV=[...PRIZES,JPVAL.barbar,JPVAL.seven],NW=[...WEIGHTS,0,0],nlab=(v,i)=>i<PRIZES.length?php2(v):php2(v)+"* (display only)";
   const [hN,cN,eN]=table(NV,NW,U*pN,nlab),wlab=(v,i)=>v===777?"₱777* (tease)":CATNAME[i],[hW,cW,eW]=table(WILD_PRIZES,WILD_WEIGHTS,U*pW,wlab),[h1k]=table(WILD_PRIZES,WILD_WEIGHTS,1000,wlab);
   $("fRows").innerHTML=hN;$("fWild").innerHTML=hW;$("fWild1k").innerHTML=h1k;
