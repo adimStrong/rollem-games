@@ -53,7 +53,7 @@ def date_range_clauses(args, clauses, params):
             params.append(to_ms)
 
 
-RANGE_BRANDS = {"gopyesta", "pots", "tamasa", "gspot"}  # pots (2026-11-06): Pearl Mine server-drawn ladder P7/P17 -- 7 is not in VALID_AMOUNTS; gspot (2026-11-09): Power-Up Cards pays P7/P17
+RANGE_BRANDS = {"gopyesta", "pots", "tamasa", "gspot", "winforlife", "rollem"}  # pots (2026-11-06): Pearl Mine server-drawn ladder P7/P17 -- 7 is not in VALID_AMOUNTS; gspot (2026-11-09): Power-Up Cards pays P7/P17; winforlife P8.20/P16.50/P26 + rollem P7.50/P17.65/P27 (dev builds 2026-11-09)
 # tamasa (2026-11-07): Swerte Lights pays P8.20 / P16.50 (centavo prizes), so `amount` is a decimal (DOUBLE PRECISION) from now on
 
 
