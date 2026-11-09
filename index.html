@@ -1,5 +1,10 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Time2Bet T2B Derby</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>[hidden]:not([hidden=until-found i]){display:none!important}img{max-width:100%}</style>
+<title>Time2Bet Time 2 Race</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow:wght@400;500;600;700&family=Share+Tech+Mono&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
 /* Layout: brand logo on the brand's own ground, one centered game booth. Player view = the brand's game; admin view (#admin) = link maker above a live preview. Single dark look by choice. */
@@ -24,7 +29,28 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-body{background:var(--bgimg),var(--night);background-attachment:fixed;color:var(--paper);font-family:var(--body);font-size:15px;line-height:1.5;margin:0;padding-inline:16px;padding-block:24px}
+body{background:var(--night);color:var(--paper);font-family:var(--body);font-size:15px;line-height:1.5;margin:0;padding-inline:16px;padding-block:24px;overflow-x:hidden}
+/* Night racecourse backdrop: floodlit sky, grandstand silhouette, mowed turf with white rails */
+body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:
+  radial-gradient(30% 18% at 8% 2%,rgba(255,244,214,.55),transparent 70%),
+  radial-gradient(30% 18% at 92% 2%,rgba(255,244,214,.55),transparent 70%),
+  radial-gradient(60% 30% at 50% 0%,rgba(80,130,255,.28),transparent 75%),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 300' preserveAspectRatio='none'%3E%3Cpath d='M0 300V170l60-20v-30h40v20l80-26v-24h30v16l90-28 10-30h60l10 30 90 28V86h30v24l80 26v-20h40v30l60 20 70-20v-28h36v20l80-24v-20h30v14l64-20 70 24v28l60 20v130z' fill='%23040a1c'/%3E%3Cg fill='%23ffd76a' opacity='.55'%3E%3Ccircle cx='140' cy='190' r='2'/%3E%3Ccircle cx='230' cy='176' r='1.6'/%3E%3Ccircle cx='330' cy='160' r='2'/%3E%3Ccircle cx='470' cy='150' r='1.6'/%3E%3Ccircle cx='600' cy='170' r='2'/%3E%3Ccircle cx='720' cy='160' r='1.6'/%3E%3Ccircle cx='850' cy='170' r='2'/%3E%3Ccircle cx='960' cy='180' r='1.6'/%3E%3Ccircle cx='1080' cy='190' r='2'/%3E%3C/g%3E%3C/svg%3E") center 52%/100% 26vh no-repeat,
+  linear-gradient(180deg,#0c2260 0%,#081841 30%,#06122e 52%,#071a22 64%,#0b3a22 76%,#0e4a29 100%);}
+body::after{content:"";position:fixed;left:0;right:0;bottom:0;height:42vh;z-index:-1;pointer-events:none;background:
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 400' preserveAspectRatio='none'%3E%3Cpath d='M-50 80 Q600 20 1250 80' fill='none' stroke='%23f4f6f8' stroke-width='5' opacity='.75'/%3E%3Cpath d='M-50 92 Q600 32 1250 92' fill='none' stroke='%23f4f6f8' stroke-width='2' opacity='.4'/%3E%3Cpath d='M-80 330 Q600 210 1280 330' fill='none' stroke='%23f4f6f8' stroke-width='9' opacity='.8'/%3E%3Cpath d='M-80 350 Q600 230 1280 350' fill='none' stroke='%23f4f6f8' stroke-width='3' opacity='.45'/%3E%3C/svg%3E") center/100% 100% no-repeat,
+  repeating-linear-gradient(100deg,rgba(255,255,255,.045) 0 70px,transparent 70px 140px),
+  linear-gradient(180deg,transparent,rgba(0,0,0,.35));
+  -webkit-mask:linear-gradient(180deg,transparent 0,#000 22%);mask:linear-gradient(180deg,transparent 0,#000 22%)}
+.beams{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.beams i{position:absolute;top:-10vh;width:46vw;height:90vh;background:linear-gradient(180deg,rgba(255,244,214,.20),rgba(255,244,214,0) 80%);clip-path:polygon(46% 0,54% 0,100% 100%,0 100%);transform-origin:50% 0;animation:sway 9s ease-in-out infinite alternate;mix-blend-mode:screen}
+.beams i:nth-child(1){left:-15vw;--r0:-24deg;--r1:-14deg}
+.beams i:nth-child(2){right:-15vw;--r0:24deg;--r1:14deg;animation-delay:-4.5s}
+.beams b{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:0;box-shadow:0 0 8px 3px rgba(255,255,255,.7);animation:camflash 5s infinite}
+@keyframes sway{from{transform:rotate(var(--r0))}to{transform:rotate(var(--r1))}}
+@keyframes camflash{0%,92%,100%{opacity:0}94%{opacity:1}96%{opacity:.2}}
+@media (prefers-reduced-motion:reduce){.beams i,.beams b{animation:none}.beams b{display:none}}
+.booth{box-shadow:0 0 0 1px rgba(255,204,51,.12),0 24px 60px rgba(0,0,0,.55),0 0 90px rgba(80,130,255,.18)}
 .stack{width:100%;max-width:520px;margin:0 auto;display:grid;gap:18px}
 .mark{display:grid;justify-items:center;gap:6px;text-align:center}
 .mark img{display:block;height:58px;width:auto;max-width:80%;filter:drop-shadow(0 4px 12px rgba(0,0,0,.5))}
@@ -38,13 +64,6 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 .cheer.pop{animation:pop .35s ease-out}
 @keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
 .play{display:grid;justify-items:center;gap:12px;position:relative}
-.ladder{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0;padding:0;list-style:none;width:min(360px,100%)}
-.ladder li{display:grid;gap:1px;padding:6px 6px;border-radius:9px;border:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.25;min-width:0}
-.ladder li b{font:700 13px var(--mono);color:var(--paper);font-variant-numeric:tabular-nums}
-.ladder li.top{border-color:var(--gold)}
-.ladder li.top b{color:var(--gold)}
-.ladder li.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.ladder li.on b{color:var(--accent-ink)}
 .btn{font:700 18px var(--body);letter-spacing:.3px;padding:15px 22px;border-radius:12px;border:0;cursor:pointer;background:var(--accent);color:var(--accent-ink);width:100%}
 .btn:disabled,.btn[aria-disabled="true"]{opacity:.5;cursor:default}
 .btn:focus-visible,.linkbtn:focus-visible,.chip:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
@@ -82,6 +101,17 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 .tierbox{border-radius:12px;padding:12px 14px;background:rgba(0,0,0,.25);font-size:14px}
 .tierbox b{color:var(--gold)}
 .tierbox.bad b{color:var(--bad)}
+.fx{border-radius:12px;padding:12px 14px;border:1px solid var(--line);background:rgba(0,0,0,.18);display:grid;gap:10px;font-size:13.5px}
+.fx h3{font-family:var(--display);font-weight:400;font-size:17px;margin:0;color:var(--gold)}
+.fx .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.fx table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
+.fx td,.fx th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:right}
+.fx td:first-child,.fx th:first-child{text-align:left}
+.fx th{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.fx dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+.fx dt{color:var(--muted)}
+.fx dd{margin:0;text-align:right;font-family:var(--mono);font-weight:700}
+.fx .board{margin:0;font-size:12px;color:var(--muted)}
 .offerbox{border-radius:12px;padding:12px 14px;border:1px dashed var(--line);font-size:13.5px;display:grid;gap:6px}
 .offerbox strong{font-family:var(--display);font-weight:400;font-size:17px;color:var(--gold)}
 .offerbox p{margin:0}
@@ -89,6 +119,18 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 .linkrow code{flex:1;min-width:0;font:500 12px var(--mono);background:var(--plank);border:1px solid var(--line);border-radius:8px;padding:10px;overflow-x:auto;white-space:nowrap}
 .btnrow{display:flex;flex-wrap:wrap;gap:8px}
 .preview-label{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:center;margin:0}
+/* admin backend */
+.adm-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.adm-top h2{flex:1}
+.adm-who{font:600 12px var(--mono);color:var(--gold)}
+.adm-login{display:grid;gap:10px}
+.errline{color:var(--bad);min-height:1.2em}
+.ptab .ok{color:#7be3a3;font-weight:700}
+.ptab .no{color:var(--bad);font-weight:700}
+.ptab td.mute,.ptab .mute{color:var(--muted)}
+.ptab .btn.small{padding:6px 10px;font-size:12px}
+.acts2{white-space:nowrap}
+#adminBody .btn:disabled{opacity:.45}
 /* win pop-up */
 .jp{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.78);backdrop-filter:blur(3px);overflow:hidden}
 .jp canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
@@ -125,48 +167,269 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 .mech td,.mech th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
 .mech th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:600}
 .mech tr.cur td{color:var(--gold);font-weight:700}
-/* game */
-.track{width:100%;display:grid;gap:4px;padding:10px 8px;border-radius:16px;background:linear-gradient(180deg,#123a2a,#0c2a1f);box-shadow:inset 0 0 0 3px var(--gold),0 12px 26px rgba(0,0,0,.45);position:relative}
-.track::after{content:"";position:absolute;top:10px;bottom:10px;right:14px;width:8px;background:repeating-conic-gradient(#fff 0 25%,#0b1a3a 0 50%) 0 0/8px 8px;opacity:.9;pointer-events:none}
-.lane{position:relative;display:grid;grid-template-columns:24px 1fr;align-items:center;gap:6px;height:44px;padding:0 26px 0 0;border:0;border-bottom:1px dashed rgba(255,255,255,.18);background:transparent;color:var(--paper);cursor:pointer;text-align:left;border-radius:8px}
-.lane:last-child{border-bottom:0}
+/* game: racecourse. A 1020px-wide course (starting gate → finish post) pans under fixed lanes; the camera follows the leaders */
+.track{--st:54px;--inf:22px;--rl:12px;--ln:50px;--nt:14px;--top:calc(var(--st) + var(--inf) + var(--rl));position:relative;width:100%;height:calc(var(--top) + var(--ln)*6 + var(--rl) + var(--nt));border-radius:16px;overflow:hidden;background:#3c8538;box-shadow:0 12px 26px rgba(0,0,0,.45);isolation:isolate;-webkit-user-select:none;user-select:none}
+.track::after{content:"";position:absolute;inset:0;border-radius:16px;box-shadow:inset 0 0 0 3px var(--gold);pointer-events:none;z-index:9}
+.scene{position:absolute;inset:0}
+.world{position:absolute;left:0;top:0;width:1020px;height:100%;will-change:transform}
+.stands{position:relative;height:var(--st);background:linear-gradient(180deg,#0b1a3a,#16264d);overflow:hidden}
+.stands::after{content:"";position:absolute;left:0;right:0;top:9px;bottom:0;background:repeating-linear-gradient(90deg,transparent 0 117px,rgba(207,214,226,.7) 117px 120px),linear-gradient(transparent calc(100% - 5px),#0a1530 calc(100% - 5px));pointer-events:none}
+.awning{position:absolute;left:0;right:0;top:0;height:9px;background:repeating-linear-gradient(90deg,var(--gold) 0 14px,#0b1a3a 14px 28px);border-bottom:2px solid #c99a1a;z-index:1}
+.awning::after{content:"";position:absolute;left:0;right:0;top:9px;height:6px;background:radial-gradient(circle at 7px 0,var(--gold) 6px,transparent 6.5px) 0 0/28px 6px,radial-gradient(circle at 21px 0,#0b1a3a 6px,transparent 6.5px) 0 0/28px 6px}
+.crowd2{position:absolute;left:0;right:0;top:17px;bottom:5px;background:
+ radial-gradient(circle at 5px 5px,#f0c8a0 2.6px,transparent 3px) 0 0/11px 11px,
+ radial-gradient(circle at 5px 11px,#ff4d6d 4px,transparent 4.5px) 0 0/22px 11px,
+ radial-gradient(circle at 16px 11px,#5d8bff 4px,transparent 4.5px) 0 0/22px 11px,
+ radial-gradient(circle at 10px 16px,#ffcc33 4px,transparent 4.5px) 0 0/33px 11px,
+ radial-gradient(circle at 27px 16px,#eef3ff 4px,transparent 4.5px) 0 0/33px 11px;opacity:.9}
+.flags{position:absolute;left:8px;right:40px;top:9px;display:flex;justify-content:space-between;pointer-events:none;z-index:2}
+.flags i{position:relative;width:2px;height:16px;background:#cfd6e2}
+.flags i::after{content:"";position:absolute;left:2px;top:0;width:12px;height:8px;background:var(--c);clip-path:polygon(0 0,100% 30%,85% 55%,100% 100%,0 80%);transform-origin:0 50%;animation:flag 1.1s ease-in-out infinite alternate;animation-delay:var(--d)}
+@keyframes flag{to{transform:skewY(-12deg) scaleX(.82)}}
+/* manicured infield beyond the far rail: hedge with flowers, mowed stripes */
+.infield{position:relative;height:var(--inf);background:linear-gradient(180deg,rgba(0,0,0,.2),transparent 45%),repeating-linear-gradient(90deg,#55a14a 0 46px,#48923f 46px 92px)}
+.hedge{position:absolute;left:0;right:0;top:0;height:13px;background:
+ radial-gradient(circle at 5px 6px,#ff5d8f 1.5px,transparent 2px) 0 0/23px 13px,
+ radial-gradient(circle at 15px 4px,#fff07a 1.4px,transparent 1.9px) 0 0/31px 13px,
+ radial-gradient(circle at 9px 8px,#ffffff 1.2px,transparent 1.7px) 0 0/19px 13px,
+ radial-gradient(circle at 25px 7px,#ff8a3d 1.4px,transparent 1.9px) 0 0/37px 13px,
+ radial-gradient(ellipse 9px 9px at 8px 13px,#2f7d33 0 95%,transparent) 0 0/16px 13px,
+ radial-gradient(ellipse 9px 10px at 8px 13px,#1d5a24 0 95%,transparent) 8px 0/16px 13px}
+/* white running rails with posts */
+.rail{position:relative;height:var(--rl);background:linear-gradient(#fff,#dfe5ea) 0 1px/100% 4px no-repeat,repeating-linear-gradient(90deg,#f2f5f7 0 3px,transparent 3px 28px) 0 1px/100% 9px no-repeat,linear-gradient(180deg,#3f8a3a,#367d33)}
+.rail.top{box-shadow:0 3px 4px rgba(0,0,0,.28);z-index:1}
+.rail.bot{background:linear-gradient(#fff,#dfe5ea) 0 4px/100% 4px no-repeat,repeating-linear-gradient(90deg,#f2f5f7 0 3px,transparent 3px 28px) 0 4px/100% 8px no-repeat,linear-gradient(180deg,#367d33,#3f8a3a);box-shadow:inset 0 3px 3px -2px rgba(0,0,0,.3)}
+.nturf{height:var(--nt);background:repeating-linear-gradient(90deg,#55a14a 0 46px,#48923f 46px 92px)}
+/* groomed dirt: hoof prints, harrow lines, dashed lane lines */
+.dirt{position:relative;height:calc(var(--ln)*6);background:
+ radial-gradient(3px 2px at 8px 6px,rgba(70,36,12,.42) 0 60%,transparent 100%) 0 0/29px 17px,
+ radial-gradient(3px 2px at 20px 13px,rgba(70,36,12,.32) 0 60%,transparent 100%) 0 0/43px 25px,
+ radial-gradient(2px 1.5px at 5px 4px,rgba(255,232,196,.22) 0 60%,transparent 100%) 0 0/23px 13px,
+ repeating-linear-gradient(0deg,rgba(80,44,18,.14) 0 1px,transparent 1px 6px),
+ linear-gradient(180deg,rgba(0,0,0,.16),transparent 12%,transparent 86%,rgba(0,0,0,.12)),
+ linear-gradient(180deg,#bd8a56,#ab7746 50%,#9c6a3b)}
+.dirt::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 16px,transparent 16px 30px);-webkit-mask:repeating-linear-gradient(180deg,transparent 0 calc(var(--ln) - 1px),#000 calc(var(--ln) - 1px) var(--ln));mask:repeating-linear-gradient(180deg,transparent 0 calc(var(--ln) - 1px),#000 calc(var(--ln) - 1px) var(--ln))}
+/* starting gate: stalls with front doors that swing open at GO */
+.gate{position:absolute;left:24px;top:0;width:94px;height:100%;z-index:1}
+.gback{position:absolute;left:0;top:-3px;bottom:-3px;width:10px;background:linear-gradient(90deg,#155c2c,#22843f 60%,#155c2c);border-radius:3px;box-shadow:2px 0 4px rgba(0,0,0,.3)}
+.gfront{position:absolute;left:82px;top:-3px;bottom:-3px;width:4px;background:#1f7a3c;border-radius:2px;box-shadow:1px 0 2px rgba(0,0,0,.3)}
+.stall{position:absolute;left:0;width:100%;height:var(--ln)}
+.stall::before,.gate::after{content:"";position:absolute;left:0;width:86px;top:-2px;height:4px;background:repeating-linear-gradient(90deg,#fff 0 6px,#1f7a3c 6px 12px);border-radius:2px;box-shadow:0 1px 2px rgba(0,0,0,.35)}
+.gate::after{top:auto;bottom:-2px}
+.door{position:absolute;left:86px;width:6px;height:calc(50% - 3px);background:repeating-linear-gradient(180deg,#fff 0 4px,#1f7a3c 4px 8px);border:1px solid #0e3d1e;border-radius:2px;transition:transform .32s cubic-bezier(.3,1.5,.5,1)}
+.door.t{top:3px;transform-origin:50% 0}
+.door.b{bottom:3px;transform-origin:50% 100%}
+.open .door.t{transform:rotate(-80deg)}
+.open .door.b{transform:rotate(80deg)}
+.ghdr{position:absolute;left:21px;top:calc(var(--st) + var(--inf) - 9px);width:100px;height:15px;z-index:2;background:linear-gradient(#22843f,#155c2c);border:1px solid #0e3d1e;border-radius:3px;font:700 8px/13px var(--mono);letter-spacing:2px;color:#fff;text-align:center;box-shadow:0 2px 3px rgba(0,0,0,.35)}
+/* distance poles on the far rail */
+.dpole{position:absolute;top:calc(var(--st) + 2px);height:calc(var(--inf) + 6px);width:3px;margin-left:-1.5px;background:repeating-linear-gradient(180deg,#c8102e 0 4px,#fff 4px 8px);z-index:2;border-radius:1px;box-shadow:1px 1px 1px rgba(0,0,0,.3)}
+.dpole b{position:absolute;left:50%;top:-1px;transform:translateX(-50%);font:700 8px/10px var(--mono);color:#0b1a3a;background:#fff;border:1.5px solid #c8102e;border-radius:6px;padding:0 3px}
+/* finish: red/white checkered line, winning post, FINISH board, judge's box */
+.fline{position:absolute;left:933px;top:0;bottom:0;width:10px;background:repeating-conic-gradient(#fff 0 25%,#c8102e 0 50%) 0 0/10px 10px;box-shadow:0 0 0 1px rgba(0,0,0,.25);z-index:1}
+.fsign{position:absolute;left:908px;top:17px;width:60px;z-index:3;font:700 9px/14px var(--mono);letter-spacing:1.5px;text-align:center;color:#fff;background:#c8102e;border:1.5px solid #fff;border-radius:3px;box-shadow:0 2px 4px rgba(0,0,0,.45)}
+.fpole{position:absolute;left:936px;top:33px;width:4px;height:calc(var(--top) - 33px);background:repeating-linear-gradient(180deg,#fff 0 5px,#c8102e 5px 10px);z-index:2;box-shadow:1px 0 1px rgba(0,0,0,.3)}
+.disc{position:absolute;left:929px;top:calc(var(--st) + 1px);width:18px;height:18px;border-radius:50%;background:radial-gradient(circle,#c8102e 0 42%,#fff 45% 68%,#c8102e 71%);box-shadow:0 1px 3px rgba(0,0,0,.45);z-index:3}
+.judge{position:absolute;left:954px;top:20px;width:40px;height:calc(var(--st) + var(--inf) - 20px);z-index:2;background:linear-gradient(90deg,#9aa5b5 0 2px,transparent 2px calc(100% - 2px),#9aa5b5 calc(100% - 2px)) 0 26px/100% 100% no-repeat}
+.judge b{position:relative;display:block;height:26px;padding-top:13px;background:linear-gradient(#f4f6f8,#dfe5ea);border:1px solid #0b1a3a;border-radius:4px 4px 1px 1px;font:700 6.5px/9px var(--mono);letter-spacing:.4px;color:#0b1a3a;text-align:center}
+.judge b::before{content:"";position:absolute;left:3px;right:3px;top:3px;height:7px;background:#16264d;border-radius:1px;box-shadow:inset 0 0 0 1px #5d8bff}
+.bpost{position:absolute;left:936px;top:0;width:4px;height:100%;background:repeating-linear-gradient(180deg,#c8102e 0 4px,#fff 4px 8px)}
+/* speed lines (final stretch) */
+.speed{position:absolute;left:0;right:0;top:var(--top);height:calc(var(--ln)*6);pointer-events:none;opacity:0;transition:opacity .5s;background:repeating-linear-gradient(90deg,transparent 0 70px,rgba(255,255,255,.55) 70px 112px,transparent 112px 190px);-webkit-mask:repeating-linear-gradient(180deg,transparent 0 9px,#000 9px 10px,transparent 10px 23px,#000 23px 24px,transparent 24px 31px);mask:repeating-linear-gradient(180deg,transparent 0 9px,#000 9px 10px,transparent 10px 23px,#000 23px 24px,transparent 24px 31px);animation:speed .3s linear infinite}
+@keyframes speed{to{background-position:-190px 0}}
+.final .speed{opacity:.5}
+.final .scene{animation:shake .2s linear infinite}
+@keyframes shake{25%{transform:translate(.7px,-.5px)}50%{transform:translate(-.6px,.5px)}75%{transform:translate(.5px,.7px)}}
+.final .crowd2{animation:crowd .24s steps(2) infinite}
+@keyframes crowd{50%{transform:translateY(-1.5px)}}
+/* lanes sit over the course; only the runners move */
+.lanes{position:absolute;left:0;right:0;top:var(--top);height:calc(var(--ln)*6);z-index:3}
+.lane{position:relative;display:block;width:100%;height:var(--ln);margin:0;padding:0;border:0;background:transparent;color:var(--paper);cursor:pointer;text-align:left;border-radius:6px;font:inherit}
 .lane:disabled{cursor:default}
-.lane.sel{background:rgba(255,204,51,.14);box-shadow:inset 0 0 0 2px var(--gold)}
-.num{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font:700 13px var(--mono);color:#0b1a3a}
-.run{position:relative;height:100%;min-width:0}
-.runner{position:absolute;top:50%;left:calc(var(--x) * (100% - 46px));width:46px;margin-top:-16px;line-height:0}
-.runner svg{width:46px;height:31px;display:block}
-.racing .runner{animation:bob .24s ease-in-out infinite alternate}
-.racing .runner .legs{animation:gallop .24s steps(2) infinite}
-@keyframes bob{to{transform:translateY(-3px)}}
-@keyframes gallop{50%{transform:skewX(-18deg);transform-origin:50% 70%}}
-.nm{position:absolute;left:32px;bottom:1px;font-size:10px;font-weight:600;color:rgba(238,243,255,.55);pointer-events:none}
-.plc{position:absolute;right:-2px;top:50%;transform:translateY(-50%);font:700 11px var(--mono);color:var(--paper);background:#0b1a3a;border-radius:6px;padding:1px 4px;z-index:2}
+.lane.sel{background:rgba(255,204,51,.16);box-shadow:inset 0 0 0 2px var(--gold)}
+.racing .lane.sel{background:rgba(255,204,51,.09)}
+.num{position:absolute;left:4px;top:50%;margin-top:-11px;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font:700 12px var(--mono);color:#0b1a3a;z-index:4;box-shadow:0 1px 3px rgba(0,0,0,.5)}
+.runner{position:absolute;top:50%;left:0;transform:translate3d(var(--px,37px),0,0);width:72px;margin-top:-27px;line-height:0;z-index:2}
+.runner svg{width:72px;height:48px;display:block;overflow:visible}
+.lane.sel .runner::before{content:"YOU";position:absolute;left:0;top:4px;z-index:3;font:700 8px/11px var(--mono);letter-spacing:.5px;color:#0b1a3a;background:var(--gold);border-radius:3px;padding:0 3px;box-shadow:0 1px 2px rgba(0,0,0,.45)}
+.nm{position:absolute;right:36px;bottom:3px;z-index:4;font-size:10px;font-weight:700;line-height:14px;color:#fff;background:rgba(11,26,58,.6);border-radius:4px;padding:0 4px;pointer-events:none;transition:opacity .3s}
+.racing .nm{opacity:0}
+.done .nm{right:auto;left:30px}
+.plc{position:absolute;right:4px;top:50%;transform:translateY(-50%);z-index:4;font:700 11px var(--mono);color:var(--paper);background:#0b1a3a;border-radius:6px;padding:1px 4px;box-shadow:0 1px 3px rgba(0,0,0,.4)}
 .plc:empty{display:none}
 .lane.first .plc{background:var(--gold);color:#0b1a3a}
 .lane.sel .plc{box-shadow:0 0 0 2px var(--gold)}
-@media (prefers-reduced-motion:reduce){.racing .runner,.racing .runner .legs{animation:none}}
+/* race clock */
+.hud{position:absolute;top:14px;left:10px;z-index:6;display:flex;align-items:center;gap:7px;padding:2px 8px;border-radius:8px;background:rgba(5,13,34,.9);border:1px solid rgba(255,204,51,.65);font:700 14px/18px var(--lcd);color:var(--gold);pointer-events:none;white-space:nowrap}
+.hud .bar{position:relative;width:76px;height:6px;border-radius:3px;background:rgba(255,255,255,.18)}
+.hud .bar i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:3px;background:rgba(238,243,255,.55)}
+.hud .bar em{position:absolute;top:50%;left:0;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 1.5px #0b1a3a}
+.final .hud{border-color:#ff4d6d;color:#fff}
+
+
+
+/* paddock picker */
+.paddock{width:100%;display:grid;gap:8px;text-align:left}
+.pad-h{margin:0;font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.pgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.hcard{display:grid;gap:3px;padding:6px 6px 7px;border-radius:12px;border:1px solid var(--line);background:linear-gradient(180deg,#16326a 0%,#0f2147 60%,#7a5634 60%,#8f6438 100%);color:var(--paper);cursor:pointer;min-width:0;text-align:left}
+.hcard .pv{display:block;line-height:0;padding:2px 2px 0}
+.runner.static{position:relative;left:auto;top:auto;margin:0;width:100%;transform:none}
+.runner.static svg{width:100%;height:auto}
+.hcard .hn{display:flex;align-items:flex-start;gap:5px;min-width:0}
+.hcard .hn i{flex:none;width:17px;height:17px;border-radius:4px;display:grid;place-items:center;font:700 10px var(--mono);font-style:normal;color:#0b1a3a}
+.hcard .hn b{font-size:11.5px;line-height:1.1;overflow-wrap:anywhere}
+.hcard small{font-size:10px;color:#e9dcc6;line-height:1.2}
+.hcard.on{border-color:var(--gold);box-shadow:inset 0 0 0 2px var(--gold),0 0 16px var(--glow)}
+.hcard:disabled{cursor:default;opacity:.5}
+.hcard.on:disabled{opacity:1}
+/* animated horses */
+.runner svg *{transform-box:fill-box}
+.runner .horse{transform-origin:50% 80%;animation:hbreath 1.9s ease-in-out infinite}
+@keyframes hbreath{50%{transform:scale(1.01,1.02)}}
+.runner .htail{transform-origin:100% 0;animation:swish 1.8s ease-in-out infinite}
+@keyframes swish{0%,100%{transform:rotate(0)}50%{transform:rotate(-10deg)}}
+.runner .hneck{transform-origin:10% 90%;animation:nod 2.2s ease-in-out infinite}
+@keyframes nod{0%,100%{transform:rotate(0)}40%{transform:rotate(-4deg)}70%{transform:rotate(3deg)}}
+.lane:nth-child(2n) .runner .hneck,.lane:nth-child(2n) .runner .htail{animation-delay:-.9s}
+.lane:nth-child(3n) .runner .hneck{animation-delay:-1.4s}
+.runner .lf1,.runner .lf2,.runner .lr1,.runner .lr2,.runner .lf1b,.runner .lf2b,.runner .lr1b,.runner .lr2b{transform-origin:50% 0}
+.runner .lf2b{animation:stamp 4.2s ease-in-out infinite}
+.lane:nth-child(2n) .runner .lf2b{animation-delay:-2s}
+@keyframes stamp{0%,86%,100%{transform:rotate(0)}91%{transform:rotate(70deg)}}
+.runner .jockey{transform-origin:40% 100%}
+.racing .runner .horse{animation:gpitch .36s linear infinite}
+@keyframes gpitch{0%,100%{transform:translateY(0) rotate(-2.5deg)}50%{transform:translateY(-3px) rotate(2.5deg)}}
+.racing .runner .lf2{animation:gfu .36s linear infinite}.racing .runner .lf2b{animation:gfl .36s linear infinite}
+.racing .runner .lf1{animation:gfu .36s linear infinite -.06s}.racing .runner .lf1b{animation:gfl .36s linear infinite -.06s}
+.racing .runner .lr2{animation:gru .36s linear infinite}.racing .runner .lr2b{animation:grl .36s linear infinite}
+.racing .runner .lr1{animation:gru .36s linear infinite -.06s}.racing .runner .lr1b{animation:grl .36s linear infinite -.06s}
+@keyframes gfu{0%,100%{transform:rotate(-42deg)}25%{transform:rotate(-6deg)}50%{transform:rotate(30deg)}75%{transform:rotate(2deg)}}
+@keyframes gfl{0%,100%{transform:rotate(-8deg)}25%{transform:rotate(0)}50%{transform:rotate(18deg)}75%{transform:rotate(95deg)}}
+@keyframes gru{0%,100%{transform:rotate(32deg)}25%{transform:rotate(2deg)}50%{transform:rotate(-34deg)}75%{transform:rotate(-12deg)}}
+@keyframes grl{0%,100%{transform:rotate(-12deg)}25%{transform:rotate(-55deg)}50%{transform:rotate(-4deg)}75%{transform:rotate(0)}}
+.racing .runner .hneck{animation:gnod .34s linear infinite}
+@keyframes gnod{0%,100%{transform:rotate(4deg)}50%{transform:rotate(-6deg)}}
+.racing .runner .htail{animation:gtail .17s linear infinite alternate;transform-origin:100% 0}
+@keyframes gtail{from{transform:rotate(-22deg) scaleX(1.15)}to{transform:rotate(-30deg) scaleX(1.25)}}
+.racing .runner .mane{animation:gmane .12s linear infinite alternate;transform-origin:100% 0}
+@keyframes gmane{to{transform:skewX(-14deg)}}
+.racing .runner .jockey{animation:gjock .34s linear infinite}
+@keyframes gjock{0%,100%{transform:translateY(0) rotate(4deg)}50%{transform:translateY(2px) rotate(8deg)}}
+.kick{position:absolute;top:80%;width:10px;height:6px;border-radius:50%;background:rgba(214,186,140,.8);pointer-events:none;animation:kick .6s ease-out forwards;z-index:1}
+@keyframes kick{to{transform:translate(-26px,-6px) scale(2.6);opacity:0}}
+.lane.cheer .runner .horse{animation:rear .5s ease-in-out 3}
+@keyframes rear{50%{transform:rotate(-22deg) translateY(-4px)}}
+.lane.cheer .runner .lf1,.lane.cheer .runner .lf2{animation:paw .25s ease-in-out 6 alternate}
+.lane.cheer .runner .lf1b,.lane.cheer .runner .lf2b{animation:pawl .25s ease-in-out 6 alternate}
+@keyframes paw{to{transform:rotate(-55deg)}}
+@keyframes pawl{to{transform:rotate(70deg)}}
+/* start and finish moments */
+.count{position:absolute;left:50%;top:50%;z-index:6;transform:translate(-50%,-50%);font:400 54px var(--display);color:#fff;text-shadow:0 4px 0 #0b1a3a,0 0 24px rgba(0,0,0,.6);pointer-events:none}
+.count.pop{animation:cpop .35s cubic-bezier(.2,1.6,.4,1)}
+.count.go{color:var(--gold);font-size:46px}
+@keyframes cpop{from{transform:translate(-50%,-50%) scale(.3);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+.final .flags i::after{animation-duration:.35s}
+.final .fline{box-shadow:0 0 0 1px rgba(0,0,0,.3),0 0 18px 6px rgba(255,204,51,.55)}
+.final .fsign{animation:fblink .3s steps(2) infinite}
+@keyframes fblink{50%{background:#ffcc33;color:#0b1a3a}}
+.flash{position:absolute;inset:0;z-index:7;background:#fff;pointer-events:none;animation:flash .45s ease-out forwards}
+@keyframes flash{from{opacity:.85}to{opacity:0}}
+.photo{position:absolute;left:50%;top:46%;z-index:8;transform:translate(-50%,-50%) rotate(-4deg);font:400 clamp(20px,6vw,28px)/1.1 var(--display);color:#0b1a3a;background:var(--gold);border:3px solid #fff;border-radius:10px;padding:6px 14px;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.5);pointer-events:none;animation:photo 1.9s ease-out forwards}
+@keyframes photo{0%{transform:translate(-50%,-50%) rotate(-4deg) scale(.3);opacity:0}12%{transform:translate(-50%,-50%) rotate(-4deg) scale(1.08);opacity:1}20%,80%{transform:translate(-50%,-50%) rotate(-4deg) scale(1);opacity:1}100%{opacity:0}}
+.conf{position:absolute;right:22px;z-index:6;width:6px;height:9px;border-radius:2px;pointer-events:none;animation:conf 1.2s cubic-bezier(.2,.6,.4,1) forwards}
+@keyframes conf{to{transform:translate(var(--dx),calc(var(--dy) + 40px)) rotate(var(--r));opacity:0}}
+.lane.crossed .plc{animation:ppop .4s cubic-bezier(.2,1.6,.4,1)}
+@keyframes ppop{from{transform:translateY(-50%) scale(0)}to{transform:translateY(-50%) scale(1)}}
+.lane.first.crossed{animation:lglow 1s ease-out}
+@keyframes lglow{0%{background:rgba(255,204,51,.55)}100%{background:transparent}}
+.racing .lane.crossed .runner *{animation-duration:.6s!important}
+.racing .lane.stopped .runner .horse,.racing .lane.stopped .runner .hneck,.racing .lane.stopped .runner .htail,.racing .lane.stopped .runner .mane,.racing .lane.stopped .runner .jockey,
+.racing .lane.stopped .runner .lf1,.racing .lane.stopped .runner .lf2,.racing .lane.stopped .runner .lr1,.racing .lane.stopped .runner .lr2,
+.racing .lane.stopped .runner .lf1b,.racing .lane.stopped .runner .lf2b,.racing .lane.stopped .runner .lr1b,.racing .lane.stopped .runner .lr2b{animation:none!important;transition:transform .3s}
+
+/* final stretch: jockeys go to the whip (hidden until the last part of the race, stops once a horse has crossed) */
+.runner .whip{opacity:0;transform-origin:100% 100%}
+.final .lane:not(.crossed) .runner .whip{opacity:1;animation:whip .42s cubic-bezier(.5,0,.2,1) infinite}
+.final .lane:nth-child(2n) .runner .whip{animation-delay:-.2s}.final .lane:nth-child(3n) .runner .whip{animation-delay:-.11s}
+@keyframes whip{0%{transform:rotate(18deg)}45%{transform:rotate(22deg)}70%{transform:rotate(-62deg)}100%{transform:rotate(18deg)}}
+.final .lane:not(.crossed) .runner .jockey{animation:gjockdrive .21s linear infinite}
+@keyframes gjockdrive{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(1.5px,1.5px) rotate(4deg)}}
+@media (prefers-reduced-motion:reduce){.final .runner .whip{animation:none!important;opacity:0}}
+@media (prefers-reduced-motion:reduce){.runner *,.kick,.flags i::after,.count,.flash,.photo,.conf,.lane.crossed .plc,.fsign,.speed,.final .scene,.final .crowd2{animation:none!important}.door{transition:none}.speed{display:none}}
 
 @media (prefers-reduced-motion:reduce){.cheer.pop,.jp-card,.jp.big .jp-title,.agree.nudge{animation:none}}
 </style>
+</head>
+<body>
 
+<div class="beams" aria-hidden="true"><i></i><i></i><b style="left:14%;top:47%;animation-delay:-.4s"></b><b style="left:31%;top:44%;animation-delay:-2.1s"></b><b style="left:52%;top:42%;animation-delay:-3.3s"></b><b style="left:68%;top:45%;animation-delay:-1.2s"></b><b style="left:86%;top:47%;animation-delay:-4.1s"></b></div>
 <div class="stack">
   <section class="panel" id="admin" hidden>
-    <h2>Link maker</h2>
-    <p class="hint" id="adminGate">Sinusuri ang access…</p>
+    <div class="adm-top"><h2>Time2Bet Admin</h2><span class="adm-who" id="admWho"></span><button class="btn small ghost" id="logout" type="button" hidden>Log out</button></div>
+    <form id="admLogin" class="adm-login" novalidate>
+      <p class="hint">Enter the admin password to make player links.</p>
+      <label class="field" hidden><span>Username</span><input class="inp" id="admUser" type="text" autocomplete="username" autocapitalize="off" spellcheck="false"></label>
+      <label class="field"><span>Password</span><input class="inp" id="admPin" type="password" autocomplete="current-password"></label>
+      <p class="hint errline" id="admErr" role="alert"></p>
+      <button class="btn" type="submit" id="admLoginBtn">Log in</button>
+    </form>
     <div id="adminBody" hidden style="display:grid;gap:14px">
-      <p class="hint">Gumawa ng link para sa isang player. Nasa link na mismo ang deposit, kaya gumagana ito kahit walang login ang player. Hindi ito gagana kapag binago ng player ang link.</p>
-      <label class="field"><span>Pangalan ng Player</span><input class="inp" id="code" type="text" autocomplete="off" spellcheck="false"></label>
-      <label class="field"><span>Verified deposit</span><div class="money"><span>₱</span><input class="inp" id="deposit" type="number" min="0" step="1" inputmode="numeric"></div></label>
-      <div class="tierbox" id="aTier"></div>
+      <p class="hint" id="dbNote" hidden></p>
+      <div class="fx">
+        <h3>Make a player link</h3>
+        <p class="hint">Type the player's username and the verified deposit, then copy the link. Every ₱200 = 1 run. Check the deposit and the <b>1× slot games</b> turnover yourself before sending.</p>
+        <label class="field"><span>Player code or username</span><input class="inp" id="code" type="text" autocomplete="off" spellcheck="false"></label>
+        <div class="two">
+          <label class="field"><span>Deposit today</span><div class="money"><span>₱</span><input class="inp" id="deposit" type="number" min="0" step="1" inputmode="numeric"></div></label>
+          <label class="field" hidden><span>Slot games TO today (optional)</span><div class="money"><span>₱</span><input class="inp" id="toAmt" type="number" min="0" step="1" inputmode="numeric"></div></label>
+        </div>
+        <div class="btnrow" hidden><button class="btn small ghost" id="toSave" type="button">Save to today's list (optional)</button></div>
+        <div class="tierbox" id="aTier"></div>
+      </div>
+      <div class="field"><span>Offer</span><div class="chips" id="aOffers"></div></div>
+      <div class="offerbox" id="offerBox"></div>
       <div class="field"><span>Player link</span>
-        <div class="linkrow"><code id="plink"></code></div>
-        <div class="btnrow"><button class="btn small" id="copyLink" type="button">Copy link</button><button class="btn small" id="copyMsg" type="button">Copy message + link</button><button class="btn small ghost" id="newLink" type="button">Bagong link (reset)</button></div>
+        <div class="linkrow"><code id="plink">—</code></div>
+        <div class="btnrow"><button class="btn small" id="copyLink" type="button">Copy link</button><button class="btn small" id="copyMsg" type="button">Copy message + link</button><button class="btn small ghost" id="newLink" type="button">New link (reset)</button></div>
       </div>
       <p class="hint" id="aMsg"></p>
+      <div class="fx" hidden>
+        <h3>Today's players</h3>
+        <div class="tblwrap"><table class="ptab"><thead><tr><th>Player</th><th>Deposit</th><th>TO</th><th>Status</th><th>Runs</th><th>By</th><th></th></tr></thead><tbody id="pRows"></tbody></table></div>
+        <p class="hint" id="pNote"></p>
+        <details><summary class="hint" style="cursor:pointer">Paste many players at once</summary>
+          <p class="hint">One player per line: <b>code, deposit, turnover</b> (for example <code>juan123, 400, 450</code>). Copied straight from the back office works too.</p>
+          <textarea id="bulkIn" rows="5" class="inp" style="font-size:13px"></textarea>
+          <div class="btnrow" style="margin-top:8px"><button class="btn small" id="bulkSave" type="button">Save all</button></div>
+          <p class="hint" id="bulkMsg"></p>
+        </details>
+      </div>
+      <div class="fx" id="agentBox" hidden>
+        <h3>Agent accounts</h3>
+        <p class="hint">Agents log in here to save turnover and make player links. They can't add agents or change accounts. Each agent also needs access to this page on claude.ai (Share → invite them with "Can interact").</p>
+        <div class="two">
+          <label class="field"><span>Agent username</span><input class="inp" id="agU" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="24" placeholder="e.g. agent_mae"></label>
+          <label class="field"><span>Password</span><input class="inp" id="agP" type="text" autocomplete="new-password" spellcheck="false" maxlength="40"></label>
+        </div>
+        <div class="btnrow"><button class="btn small" id="agSave" type="button">Add or update agent</button><button class="btn small ghost" id="agGen" type="button">Generate password</button></div>
+        <p class="hint" id="agMsg"></p>
+        <div class="tblwrap"><table class="ptab"><thead><tr><th>Agent</th><th>Status</th><th>Added</th><th></th></tr></thead><tbody id="agRows"></tbody></table></div>
+      </div>
+      <div class="fx" id="fx">
+        <h3>Estimated formula (internal only)</h3>
+        <p class="hint">For admins only; players never see this. Change users or deposit to recalculate.</p>
+        <div class="two">
+          <label class="field"><span>Users</span><input class="inp" id="fxUsers" type="number" min="0" step="1" inputmode="numeric" value="1000"></label>
+          <label class="field"><span>Deposit per user</span><div class="money"><span>₱</span><input class="inp" id="fxDep" type="number" min="0" step="1" inputmode="numeric" value="200"></div></label>
+        </div>
+        <div class="tblwrap"><table><thead><tr><th>Prize</th><th>Probability</th><th>Users</th><th>Cost</th></tr></thead><tbody id="fxRows"></tbody></table></div>
+        <dl id="fxSum"></dl>
+        <p class="board" id="fxBoard"></p>
+      </div>
     </div>
   </section>
-  <p class="preview-label" id="previewLabel" hidden>Preview ng player view</p>
+  <p class="preview-label" id="previewLabel" hidden>Player view preview</p>
 
   <header class="mark">
     <img src="data:image/png;base64,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" alt="Time2Bet">
@@ -177,30 +440,26 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <button class="soundbtn" id="soundBtn" type="button" aria-pressed="true">Sound on</button>
     <div>
       <p class="eyebrow" id="eyebrow">Time2Bet</p>
-      <p id="greeting" hidden style="font-weight:700;color:var(--accent);margin:2px 0 0"></p>
       <h1 class="game" id="gameTitle"></h1>
       <p class="range" id="range"></p>
     </div>
-    <p class="demo" id="demoTag" hidden>DEMO · kailangan ng link mula sa agent mo para sa totoong premyo</p>
+    <p class="demo" id="demoTag" hidden>DEMO · you need a link from your agent to win real prizes</p>
     <p class="cheer" id="cheer"></p>
     <div class="play" id="play"></div>
-    <ul class="ladder" id="ladder" aria-label="Mga premyo" hidden></ul>
-    <label class="agree" id="agreeLbl"><input type="checkbox" id="agree"><span>Nabasa ko at sang-ayon ako sa <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button> ng T2B Derby.</span></label>
+    <label class="agree" id="agreeLbl"><input type="checkbox" id="agree"><span>I have read and agree to the Time 2 Race <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button>.</span></label>
     <div class="acts"><button class="btn" id="goBtn" type="button"></button><button class="btn ghost" id="resetBtn" type="button">Reset</button></div>
     <div class="win" id="win" hidden>
-      <small>Bonus mo</small>
+      <small>Your bonus</small>
       <strong id="amt"></strong>
       <p id="winNote"></p>
     </div>
     <p class="note" id="note"></p>
   </main>
 
-  <section class="mech" id="mech" aria-labelledby="mechTitle" hidden>
+  <section class="mech" id="mech" aria-labelledby="mechTitle">
     <h2 id="mechTitle">Mechanics</h2>
     <p class="mech-sub" id="mechOffer"></p>
     <ol id="mechSteps"></ol>
-    <h3 hidden>Listahan ng premyo</h3>
-    <div class="tblwrap" hidden><table><thead><tr><th>Premyo</th><th>Tsansa</th></tr></thead><tbody id="mechTiers"></tbody></table></div>
   </section>
 
   <div class="jp" id="jp" role="dialog" aria-modal="true" aria-labelledby="jpTitle" hidden>
@@ -208,28 +467,25 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <div class="jp-card">
       <p class="jp-title" id="jpTitle">YOU WON!</p>
       <p class="jp-sub" id="jpSub"></p>
-      <p class="jp-label">Reward mo</p>
+      <p class="jp-label">Your reward</p>
       <p class="jp-amt" id="jpAmt"></p>
-      <p class="jp-note">I-screenshot ito at i-send sa agent mo para ma-credit ang reward.</p>
+      <p class="jp-note">Take a screenshot of this and send it to your agent to get your reward credited.</p>
       <button class="btn" id="jpClose" type="button">Claim reward</button>
     </div>
   </div>
 
   <details class="tnc" id="tnc">
-    <summary>T2B Derby Terms &amp; Conditions</summary>
+    <summary>Time 2 Race Terms &amp; Conditions</summary>
     <h3>Terms &amp; Conditions</h3>
     <ol>
       <li>Open to verified Time2Bet players aged 21 and above. Self-excluded, restricted or unverified accounts are not eligible.</li>
-      <li>A game is unlocked by a single verified deposit of at least ₱200, confirmed by a Time2Bet agent. Pending, failed or reversed deposits do not qualify.</li>
-      <li>The bonus is a flat prize pool, the same for every qualifying player — it does not change based on how much you deposit, as long as you meet the ₱200 minimum.
-        <div class="tblwrap"><table>
-          <thead><tr><th>Premyo</th><th>Tsansa</th></tr></thead>
-          <tbody id="tncRows"></tbody>
-        </table></div></li>
-      <li>There are three prize amounts, shown on the game page: ₱10, ₱27 and ₱57. The game draws one of them at random; ₱57 is the jackpot and is the rarest result. In T2B Derby, you pick one of six horses before the race, and your horse's finishing place sets your prize, from 3rd place (₱10) to 1st place (₱57 jackpot). The chance of each finishing place is not equal: 1st place is the rarest result, and which horse you pick does not change your chances.</li>
-      <li>One game per qualifying deposit and per player link. Results are random and final once the game starts. Refreshing the page, reopening the link or using another device does not give another turn. Only the first result confirmed by your agent counts.</li>
+      <li>Runs are unlocked by a qualifying deposit verified by a Time2Bet agent, made between 2 PM and 9 PM and within the validity period of your offer. Pending, failed or reversed deposits do not qualify.</li>
+      <li>Every ₱200 of one verified qualifying deposit gives 1 run (for example, ₱600 = 3 runs). The minimum deposit is ₱200.</li>
+      <li>In each run you pick one of six horses before the race, and your horse's finishing place sets your prize. Prizes are random in every run, and which horse you pick makes no difference.</li>
+      <li>The promo runs daily from 2 PM to 9 PM. Total promo bonus is capped at ₱10,000 per day; once the cap is reached, the promo closes for the day.</li>
+      <li>The number of runs on your player link is set by your verified deposit. Results are random and final once a race starts. Refreshing the page, reopening the link or using another device does not give another turn. Only the first result confirmed by your agent counts.</li>
       <li>Send a screenshot of your result to your agent. The bonus is credited after the agent verifies your deposit and result, within the time your agent announces.</li>
-      <li>The bonus is subject to the turnover requirement set by Time2Bet before it can be withdrawn.</li>
+      <li>Only bets on slot games are valid for this promo. The bonus must be wagered 1× (Wager ×1) on slot games before it can be withdrawn.</li>
       <li>One claim per player per promo cycle. Multiple or linked accounts, edited links, or any attempt to abuse this promo void the bonus and may lead to action on the account.</li>
       <li>Time2Bet may change, suspend or end this promo at any time. Time2Bet management's decision on any dispute is final.</li>
       <li>Play responsibly. Set limits on your deposits and time, and ask for help if gambling stops being fun.</li>
@@ -239,43 +495,41 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 </div>
 
 <script>
-const BRAND={"key": "t2b", "name": "Time2Bet", "labels": ["6th place", "4th place", "1st place"], "script": "Hi po! Verified na ang deposit mo, kaya may T2B Derby ka. Pumili ng kabayo mo, at kung pang-ilan siya sa finish, yun ang reward mo!", "confetti": ["#ffcc33", "#ffffff", "#5d8bff"], "confettiBig": ["#ffcc33", "#fff1b8", "#ffffff", "#5d8bff"]};
+const BRAND={"key": "t2b", "name": "Time2Bet", "labels": ["6th place", "5th place", "4th place", "3rd place", "2nd place", "1st place"], "offers": {"Reactivation": {"name": "Time-In Bonus", "target": "No deposit in the last 30+ days", "trig": "First verified deposit after the Tele call (Voiso call + SMS)", "valid": "3 days from the call", "script": "Hi! It's time-in again at Time2Bet! Your deposit is verified, so you get a Time 2 Race. Pick your horse, and the place it finishes in sets your reward!"}, "VIP": {"name": "Prime Time VIP", "target": "Top depositors / VIP-tagged players", "trig": "Reached the monthly deposit target", "valid": "Monthly, credited on the 1st", "script": "You're now part of Prime Time VIP. You hit your monthly target, so you get a Time 2 Race for your rebate this month. I'm your VIP host."}, "Community": {"name": "Happy Hour Drop", "target": "Active members of the Time2Bet TG group", "trig": "Deposited during the announced Happy Hour (1 hour, at a random time each week)", "valid": "During Happy Hour only", "script": "Happy Hour Drop! You deposited during Happy Hour, so you get a Time 2 Race. Hope your horse finishes 1st!"}}, "confetti": ["#ffcc33", "#ffffff", "#5d8bff"], "confettiBig": ["#ffcc33", "#fff1b8", "#ffffff", "#5d8bff"]};
 // ---------- shared helpers ----------
 const $=id=>document.getElementById(id);
-const MIN_DEPOSIT=200;
-const PRIZES=[10,27,57]; // peso amounts, ascending
-const WEIGHTS=[4,95,1]; // % chance matching PRIZES index-for-index, sums to 100
-function qualifies(d){return d>=MIN_DEPOSIT}
-function php(n){return "₱"+Number(n).toLocaleString()}
+// Campaign sheet: every ₱200 deposit = 1 run; slot games only; Wager ×1; 2 PM–9 PM; max bonus ₱10,000/day
+const RUN_DEP=200,WAGER_X=1,DAILY_CAP=10000,HOURS="2 PM–9 PM";
+const PRIZES=[8.88,8.88,8.88,8.88,15.88,20.88]; // 6th,5th,4th,3rd,2nd,1st place
+const WEIGHTS=[30,20,20,20,5,5];                // % chance, same order (sum 100)
+function nSteps(){return PRIZES.length}
+function runsFor(d){return Math.max(0,Math.floor((+d||0)/RUN_DEP))}
+function php(n){n=Number(n);return "₱"+n.toLocaleString("en-US",n%1?{minimumFractionDigits:2,maximumFractionDigits:2}:{maximumFractionDigits:2})}
 function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296}
-function drawStep(){let r=rnd()*100;for(let i=0;i<WEIGHTS.length;i++){r-=WEIGHTS[i];if(r<0)return i}return 0}
+function drawStep(){const W=(GAME&&GAME.weights)||WEIGHTS;let r=rnd()*W.reduce((a,b)=>a+b,0);for(let i=0;i<W.length;i++){r-=W[i];if(r<0)return i}return 0}
 function shuffle(a){for(let k=a.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+function tierFor(o,d){const n=runsFor(d);return n>0?{runs:n}:null} // a link qualifies when it carries at least one ₱200 run
 const reduce=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
 function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
-$("tncRows").innerHTML=PRIZES.map((p,i)=>"<tr><td>"+php(p)+"</td><td>"+WEIGHTS[i]+"%</td></tr>").join("");
+function prizeRows(cls){return PRIZES.map((v,i)=>i).reverse().map(i=>"<tr"+(cls&&cls(i)?" class='cur'":"")+"><td>"+BRAND.labels[i]+"</td><td>"+php(PRIZES[i])+"</td><td>"+WEIGHTS[i]+"%</td></tr>").join("")}
 
 // ---------- player links ----------
-// link = #code.<deposit>.<nonce>.<check>; the check stops casual edits to the deposit
+// link = #code.<r|v|c><deposit>.<nonce>.<check>; the check stops casual edits to the deposit
+const OK={Reactivation:"r",VIP:"v",Community:"c"},KO={r:"Reactivation",v:"VIP",c:"Community"},OFFERS=["Reactivation","VIP","Community"];
 const SALT="cg~"+BRAND.key+"~26q4";
+const ADMIN_PASS_CHECK="mqxsis"; // h36(shared admin password + SALT) -- same as the previous T2B Derby page (BRAND.key "t2b")
 function h36(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}let g=h;for(let i=s.length-1;i>=0;i--){g^=s.charCodeAt(i)*31;g=Math.imul(g,2246822519)>>>0}return (h.toString(36)+g.toString(36)).slice(0,6)}
 function cleanCode(c){return (c||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,32)}
-const ADMIN_PASS_CHECK="mqxsis"; // h36("mw28m8vhtk"+SALT)
-function cleanName(n){return (n||"").toLowerCase().replace(/[^a-z0-9 ]/g,"").trim().replace(/\s+/g,"_").slice(0,60)}
-function displayName(n){return (n||"").replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase())}
-function makeToken(c){const body=c.code+"."+c.deposit+"."+c.nonce+"."+cleanName(c.name);return body+"."+h36(body+SALT)}
-function parseToken(t){const p=t.split(".");
-  if(p.length===5){const [code,dep,nonce,nameEnc,chk]=p;
-    if(!/^[a-z0-9-]{1,40}$/.test(code)||!/^\d{1,6}$/.test(dep)||!/^[a-z0-9]{1,12}$/.test(nonce)||!/^[a-z0-9_]{0,60}$/.test(nameEnc))return null;
-    if(h36(code+"."+dep+"."+nonce+"."+nameEnc+SALT)!==chk)return null;return {code,deposit:+dep,nonce,name:displayName(nameEnc)}}
-  if(p.length===4){const [code,dep,nonce,chk]=p;
-    if(!/^[a-z0-9-]{1,40}$/.test(code)||!/^\d{1,6}$/.test(dep)||!/^[a-z0-9]{1,12}$/.test(nonce))return null;
-    if(h36(code+"."+dep+"."+nonce+SALT)!==chk)return null;return {code,deposit:+dep,nonce,name:""}}
-  return null}
+function makeToken(c){const body=c.code+"."+OK[c.offer]+c.deposit+"."+c.nonce;return body+"."+h36(body+SALT)}
+function parseToken(t){const p=t.split(".");if(p.length!==4)return null;const [code,od,nonce,chk]=p;
+  if(!/^[a-z0-9]{1,32}$/.test(code)||!/^[rvc]\d{1,6}$/.test(od)||!/^[a-z0-9]{1,12}$/.test(nonce))return null;
+  if(h36(code+"."+od+"."+nonce+SALT)!==chk)return null;return {code,offer:KO[od[0]],deposit:+od.slice(1),nonce}}
 const raw=decodeURIComponent(location.hash.slice(1)).toLowerCase();
 const tok=parseToken(raw);
 let mode=raw==="admin"?"admin":tok?"player":"demo";
-let cfg=mode==="player"?tok:{code:"juan123",name:"Juan",deposit:500,nonce:mode==="admin"?Date.now().toString(36):"demo"};
-function storeKey(){return BRAND.key+":"+mode+":"+makeToken(cfg)}
+let cfg=mode==="player"?tok:{code:"juan123",offer:"Reactivation",deposit:500,nonce:mode==="admin"?Date.now().toString(36):"demo"};
+let run=0; // which run of this link is on screen (0-based)
+function storeKey(k){return BRAND.key+":"+mode+":"+makeToken(cfg)+":run"+(k==null?run:k)}
 
 // ---------- sound ----------
 let actx=null,soundOn=true;
@@ -289,71 +543,229 @@ function paintSound(){$("soundBtn").textContent=soundOn?"Sound on":"Sound off";$
 $("soundBtn").onclick=()=>{soundOn=!soundOn;try{localStorage.setItem(BRAND.key+"-sound",soundOn?"on":"off")}catch(e){}if(!soundOn&&actx)actx.suspend();paintSound()};
 paintSound();
 function cheer(text){const c=$("cheer");c.textContent=text;c.classList.remove("pop");void c.offsetWidth;c.classList.add("pop")}
-function needAgree(){if($("agree").checked)return false;const l=$("agreeLbl");l.classList.remove("nudge");void l.offsetWidth;l.classList.add("nudge");cheer("I-check muna ang T&C.");return true}
+function needAgree(){if($("agree").checked)return false;const l=$("agreeLbl");l.classList.remove("nudge");void l.offsetWidth;l.classList.add("nudge");cheer("Please tick the T&C box first.");return true}
 
 // ---------- game ----------
-// T2B Derby: pick one of six horses, watch the race; your horse's finishing place sets the prize (1st = jackpot)
+// Time 2 Race: pick one of six horses, watch the race; your horse's finishing place sets the prize (1st = jackpot)
 const GAME=(()=>{
   const HORSES=[{n:"Lucky Seven",c:"#ffcc33"},{n:"Time Keeper",c:"#5d8bff"},{n:"Golden Hour",c:"#ff8a3d"},{n:"Last Minute",c:"#3ecf8e"},{n:"Rush Hour",c:"#ff4d6d"},{n:"Overtime",c:"#c38bff"}];
   const PLACE=["1st","2nd","3rd","4th","5th","6th"];
-  let sel=null,lanes=[],track,raf=null;
-  const HORSE=c=>"<svg viewBox='0 0 48 32' aria-hidden='true'><path d='M9 15 Q2 14 2 22' stroke='#5a3a24' stroke-width='3' fill='none' stroke-linecap='round'/>"+
-    "<g class='legs' stroke='#5a3a24' stroke-width='2.6' stroke-linecap='round'><line x1='14' y1='21' x2='11' y2='31'/><line x1='18' y1='22' x2='21' y2='31'/><line x1='28' y1='22' x2='25' y2='31'/><line x1='32' y1='21' x2='36' y2='30'/></g>"+
-    "<ellipse cx='22' cy='17' rx='13' ry='7' fill='#8a5a3c'/><path d='M30 13 L38 4 L44 6 L46 10 L40 12 L35 19 Z' fill='#8a5a3c'/><circle cx='41' cy='7.5' r='1' fill='#1a0f08'/>"+
-    "<rect x='17' y='10' width='10' height='9' rx='2' fill='"+c+"'/><circle cx='23' cy='5' r='3.4' fill='"+c+"' stroke='#0b1a3a' stroke-width='1'/></svg>";
-  const G={label:"T2B Derby",title:"T2B DERBY",btn:"Pumili muna ng kabayo",
-    how:["I-check ang T&C box.","Pumili ng isa sa anim na kabayo sa pag-tap sa lane niya.","Pindutin ang Simulan ang karera.","Ang puwesto ng kabayo mo sa finish ang premyo mo, mula 3rd hanggang 1st place. 1st place ang jackpot.","Hindi pantay ang tsansa ng bawat puwesto: pinakamadalang ang 1st place, at hindi nakakaapekto sa tsansa kung aling kabayo ang pipiliin mo."],
-    note:"Pumili ng kabayo, tapos simulan ang karera. Ang puwesto ng kabayo mo sa finish ang premyo mo. Pinakamadalang ang 1st place (jackpot).",
+  let sel=null,lanes=[],track,raf=null,cards=[];
+  // coat, mane, lower-leg colour, markings and pattern for each horse
+  const COATS=[
+    {c:"#8a5432",hi:"#b0744a",m:"#1a120d",low:"#1e1612",face:"blaze",d:"Bay with a blaze"},
+    {c:"#e9e4dc",hi:"#ffffff",m:"#4a4440",low:"#d8d2c8",pat:"appaloosa",spot:"#2e2420",d:"Spotted Appaloosa"},
+    {c:"#b0642e",hi:"#d48a4c",m:"#f0d9a0",low:"#b0642e",sock:1,face:"star",d:"Chestnut, blonde mane"},
+    {c:"#241d1b",hi:"#3e3430",m:"#0e0b0a",low:"#1a1513",face:"star",d:"Black with a star"},
+    {c:"#a0582a",hi:"#c47844",m:"#2a1a10",low:"#a0582a",pat:"pinto",sock:1,d:"Patched Pinto"},
+    {c:"#8e959e",hi:"#b8bec6",m:"#3e4248",low:"#5e646c",pat:"dapple",spot:"#d2d7dd",d:"Dapple grey"}];
+  function prng(seed){let x=seed*9301+49297;return()=>{x=(x*9301+49297)%233280;return x/233280}}
+  const BODY="M30 30 C34 22 50 20 64 22 C74 23 82 26 86 32 C90 38 88 46 82 50 C74 54 54 55 42 53 C32 51 26 46 26 40 C26 35 27 32 30 30 Z";
+  const NECK="M78 30 C80 20 86 12 94 8 L102 12 C98 18 94 26 90 36 C88 40 84 40 80 38 Z";
+  const HORSE=(silk,i)=>{const k=COATS[i%COATS.length],O="stroke='#1a0f08' stroke-width='.9' stroke-linejoin='round'",id="h"+i;
+    const far="color-mix(in srgb,"+k.c+" 72%,#000)",farLow="color-mix(in srgb,"+k.low+" 72%,#000)";
+    const front=(cls,x,col,low,sock)=>"<g class='"+cls+"'><path "+O+" fill='"+col+"' d='M"+(x-4)+" 42 L"+(x+4)+" 42 L"+(x+2.5)+" 58 L"+(x-1.5)+" 58 Z'/>"+
+      "<g class='"+cls+"b'><path "+O+" fill='"+(sock?"#f4f1ea":low)+"' d='M"+(x-1.8)+" 57 L"+(x+2.2)+" 57 L"+(x+2.2)+" 73 L"+(x-1.6)+" 73 Z'/><path fill='#1c1714' d='M"+(x-2.4)+" 73 L"+(x+3)+" 73 L"+(x+3.4)+" 76.5 L"+(x-2.4)+" 76.5 Z'/></g></g>";
+    const rear=(cls,x,col,low)=>"<g class='"+cls+"'><path "+O+" fill='"+col+"' d='M"+(x-6)+" 41 L"+(x+5)+" 41 L"+(x+3)+" 55 L"+(x-0.5)+" 62 L"+(x-4)+" 62 L"+(x-3)+" 55 Z'/>"+
+      "<g class='"+cls+"b'><path "+O+" fill='"+low+"' d='M"+(x-4)+" 61 L"+(x-0.6)+" 61 L"+(x+0.4)+" 73 L"+(x-3.4)+" 73 Z'/><path fill='#1c1714' d='M"+(x-4.2)+" 73 L"+(x+1.4)+" 73 L"+(x+1.8)+" 76.5 L"+(x-4.2)+" 76.5 Z'/></g></g>";
+    let pat="";const r=prng(i+3);
+    if(k.pat==="appaloosa")for(let n=0;n<26;n++){const x=28+r()*(n<16?32:58),y=24+r()*28;pat+="<ellipse cx='"+x.toFixed(1)+"' cy='"+y.toFixed(1)+"' rx='"+(1+r()*1.8).toFixed(1)+"' ry='"+(0.8+r()*1.4).toFixed(1)+"' fill='"+k.spot+"'/>"}
+    if(k.pat==="dapple")for(let n=0;n<22;n++){const x=30+r()*56,y=24+r()*26;pat+="<circle cx='"+x.toFixed(1)+"' cy='"+y.toFixed(1)+"' r='"+(1.4+r()*1.8).toFixed(1)+"' fill='none' stroke='"+k.spot+"' stroke-width='1.2' opacity='.85'/>"}
+    if(k.pat==="pinto")pat="<path fill='#f6f2ea' d='M44 21 C52 19 60 24 58 32 C56 40 62 48 58 55 L40 55 C44 46 38 40 42 32 C44 28 40 24 44 21 Z'/><path fill='#f6f2ea' d='M80 26 C86 22 92 24 92 30 C90 34 86 38 82 36 C80 34 78 30 80 26 Z'/><path fill='#f6f2ea' d='M27 36 C30 34 33 37 32 41 C30 44 27 43 26 40 Z'/>";
+    const face=k.face==="blaze"?"<path fill='#f4f1ea' d='M100 5 C103 6 107 9 111 12 L110 14 C106 12 102 9 99.5 7 Z'/>":k.face==="star"?"<path fill='#f4f1ea' d='M100 4.5 L101.6 6 L100.4 7.6 L99 6 Z'/>":"";
+    return "<svg viewBox='0 0 120 80' aria-hidden='true'><defs>"+
+      "<linearGradient id='"+id+"g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='"+k.hi+"'/><stop offset='.55' stop-color='"+k.c+"'/><stop offset='1' stop-color='color-mix(in srgb,"+k.c+" 70%,#000)'/></linearGradient>"+
+      "<clipPath id='"+id+"c'><path d='"+BODY+"'/><path d='"+NECK+"'/></clipPath></defs><g class='horse'>"+
+      "<g class='htail'><path "+O+" fill='"+k.m+"' d='M28 32 C18 30 12 38 10 50 C14 46 16 44 19 45 C14 52 13 60 15 66 C20 56 25 46 29 38 Z'/></g>"+
+      rear("lr1",40,far,farLow)+front("lf1",80,far,farLow,0)+
+      "<path "+O+" fill='url(#"+id+"g)' d='"+BODY+"'/>"+
+      "<g clip-path='url(#"+id+"c)'>"+pat+"</g>"+
+      "<path d='M74 30 C80 36 82 44 78 50 M34 30 C42 34 46 42 44 50' stroke='rgba(0,0,0,.18)' stroke-width='1.4' fill='none'/><path d='M36 25 C48 22 62 22 74 25' stroke='rgba(255,255,255,.22)' stroke-width='2' fill='none'/>"+
+      rear("lr2",36,"url(#"+id+"g)",k.low)+front("lf2",76,"url(#"+id+"g)",k.low,k.sock)+
+      "<rect x='48' y='22' width='16' height='13' rx='2' fill='"+silk+"' "+O+"/><text x='56' y='32' text-anchor='middle' font-size='9' font-weight='700' fill='#0b1a3a' font-family='JetBrains Mono,monospace'>"+(i+1)+"</text>"+
+      "<g class='hneck'><path "+O+" fill='url(#"+id+"g)' d='"+NECK+"'/>"+
+      "<g clip-path='url(#"+id+"c)'>"+(k.pat==="appaloosa"||k.pat==="dapple"?pat:"")+"</g>"+
+      "<path class='mane' "+O+" fill='"+k.m+"' d='M94 6 C88 10 84 16 80 26 L77 21 C81 13 87 7 92 3 Z'/>"+
+      "<path "+O+" fill='url(#"+id+"g)' d='M94 6 C98 2 106 2 112 8 C116 12 116 16 113 18 C110 20 106 19 103 17 C99 15 96 12 94 6 Z'/>"+
+      "<path fill='color-mix(in srgb,"+k.c+" 60%,#000)' d='M110 12 C114 13 115 16 113 18 C111 19 108 18 107 17 Z'/>"+face+
+      "<path "+O+" fill='"+k.c+"' d='M96 4.5 L97 -1.5 L100 4 Z'/><path fill='"+k.m+"' d='M97 4 C100 5 101.5 7 101 9.5 C99 8 98 6.5 97 4 Z'/>"+
+      "<circle cx='103' cy='9' r='1.4' fill='#111'/><circle cx='103.4' cy='8.6' r='.45' fill='#fff'/><circle cx='112.4' cy='14.5' r='.7' fill='#111'/>"+
+      "<path d='M111 15 L103 17 L97 10 M103 17 L99 12' stroke='#c8a24a' stroke-width='.8' fill='none'/></g>"+
+      "<g class='jockey'><path "+O+" fill='#f4f0e6' d='M55 23 L63 26 L60 32 L56 31 Z'/><path "+O+" fill='#3a2a1c' d='M58 30.5 L61.5 31.5 L60.5 35 L57.5 34 Z'/>"+
+      "<path "+O+" fill='"+silk+"' d='M52 22 C54 12 63 7 70 9 L69 15 C64 15 59 18 57 24 Z'/>"+
+      "<path d='M66 12 L80 18' stroke='"+silk+"' stroke-width='3.4' stroke-linecap='round'/><circle cx='81' cy='18.4' r='1.7' fill='#e8c9a8'/><path d='M81 18.4 Q94 20 108 15.5' stroke='#5a3a1a' stroke-width='.7' fill='none'/>"+
+      "<g class='whip'><path d='M65 12 L57 7' stroke='"+silk+"' stroke-width='3.2' stroke-linecap='round'/><circle cx='56.5' cy='6.6' r='1.5' fill='#e8c9a8'/><path d='M56.5 6.6 L39 -3' stroke='#2a1a0c' stroke-width='1.3' stroke-linecap='round'/><path d='M39 -3 L36.5 -5.2 L37.6 -2.2 Z' fill='#2a1a0c'/></g>"+
+      "<circle cx='71' cy='6' r='4' fill='#e8c9a8' "+O+"/><path "+O+" fill='"+silk+"' d='M66.8 5.6 C67 1 75 0.4 75.4 5 Z'/><path d='M75 4.6 L78 5.2' stroke='#1a0f08' stroke-width='1.2'/></g>"+
+      "</g></svg>"};
+  function flash(){const f=el("div","flash");track.appendChild(f);setTimeout(()=>f.remove(),500);noise(.08,.5,5000)}
+  function confettiAt(lane){if(reduce())return;const r=track.getBoundingClientRect(),lr=lane.getBoundingClientRect(),y=lr.top-r.top+lr.height/2;
+    const cols=["#ffcc33","#ffffff","#ff4d6d","#5d8bff","#3ecf8e"];
+    for(let k=0;k<22;k++){const c=el("span","conf");c.style.top=y+"px";c.style.background=cols[k%cols.length];c.style.setProperty("--dx",(-20-rnd()*120).toFixed(0)+"px");c.style.setProperty("--dy",((rnd()-.6)*110).toFixed(0)+"px");c.style.setProperty("--r",(rnd()*720).toFixed(0)+"deg");track.appendChild(c);setTimeout(()=>c.remove(),1300)}}
+  function roar(dur){const a=audio();if(!a)return;const n=Math.floor(a.sampleRate*dur),b=a.createBuffer(1,n,a.sampleRate),ch=b.getChannelData(0);for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1);const src=a.createBufferSource();src.buffer=b;const f=a.createBiquadFilter();f.type="bandpass";f.frequency.value=900;f.Q.value=.6;const g=a.createGain();g.gain.setValueAtTime(0,a.currentTime);g.gain.linearRampToValueAtTime(.12,a.currentTime+dur*.6);g.gain.linearRampToValueAtTime(0,a.currentTime+dur);src.connect(f).connect(g).connect(a.destination);src.start()}
+  // ---------- race music: the classic "ta-ka-TUM ta-ka-TUM" galop (Rossini, William Tell finale, public domain), synthesized ----------
+  const MUS={timer:null,next:0,i:0};
+  const N={B2:123.47,E3:164.81,"G#3":207.65,B3:246.94,E4:329.63,"F#4":369.99,"G#4":415.30,A4:440,B4:493.88,"C#5":554.37,E5:659.25,"F#5":739.99,"G#5":830.61,A5:880,B5:987.77};
+  const s16=.09,s8=.18,s4=.36;
+  const cell=(n)=>[[n,s16],[n,s16],[n,s8]];
+  const SONG=[].concat(
+    cell("B4"),cell("B4"),[["B4",s16],["B4",s16],["E5",s8],["F#5",s8],["G#5",s4]],
+    cell("B4"),cell("B4"),[["B4",s16],["B4",s16],["G#5",s8],["E5",s8],["G#5",s4]],
+    cell("B4"),cell("B4"),[["B4",s16],["B4",s16],["E5",s8],["F#5",s8],["G#5",s4]],
+    [["E5",s8],["G#5",s8],["B5",s4],["A5",s8],["G#5",s8],["F#5",s8],["E5",s4],[null,s8]]);
+  function note(a,f,t,d,type,vol){const o=a.createOscillator(),g=a.createGain(),lp=a.createBiquadFilter();o.type=type;o.frequency.value=f;lp.type="lowpass";lp.frequency.value=3000;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.008);g.gain.setValueAtTime(vol,t+d*.6);g.gain.linearRampToValueAtTime(0,t+d*.95);o.connect(lp).connect(g).connect(a.destination);o.start(t);o.stop(t+d)}
+  function snare(a,t,v){const n=Math.floor(a.sampleRate*.08),b=a.createBuffer(1,n,a.sampleRate),c=b.getChannelData(0);for(let i=0;i<n;i++)c[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
+    const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type="highpass";f.frequency.value=1800;const g=a.createGain();g.gain.value=v;s.connect(f).connect(g).connect(a.destination);s.start(t)}
+  function musicOn(){const a=audio();if(!a)return;musicOff();MUS.next=a.currentTime+.05;MUS.i=0;let beat=0,beatT=MUS.next;
+    MUS.timer=setInterval(()=>{const a=audio();if(!a)return;const ahead=a.currentTime+.25;
+      while(MUS.next<ahead){const [n,d]=SONG[MUS.i%SONG.length];if(n){note(a,N[n],MUS.next,d,"square",.045);note(a,N[n]*.5,MUS.next,d,"sawtooth",.02)}MUS.next+=d;MUS.i++}
+      while(beatT<ahead){const bass=beat%2?N.B2:N.E3;note(a,bass,beatT,s8*.9,"triangle",.11);if(beat%2)snare(a,beatT,.07);note(a,beat%2?N["G#3"]:N.B3,beatT+s8,s8*.6,"triangle",.05);beatT+=s4;beat++}},40)}
+  function musicOff(){if(MUS.timer){clearInterval(MUS.timer);MUS.timer=null}}
+  // ---------- racecourse + race script ----------
+  // Course: 1020px world. Runner left edge = X0 + p*CL (p = 0 in the gate, p = 1 = nose on the finish line at FX).
+  // The race is scripted from the saved result (order + seed), so the same result always replays the same way.
+  const WL=1020,X0=37,CL=832,NOSE=69,FX=X0+NOSE+CL,LEN=1/13,RO=.35/13,RACE=15000; // LEN = one horse length of course; RACE = GO → top 3 home
+  let cam=0,world=null,beatT=null;
+  const TW=()=>(track&&track.clientWidth)||326,camMax=()=>Math.max(0,WL-TW());
+  function setCam(c){cam=c;if(world)world.style.transform="translate3d("+(-c).toFixed(1)+"px,0,0)"}
+  function setPos(l,p){l.style.setProperty("--p",p.toFixed(4));l.style.setProperty("--px",(X0+p*CL-cam).toFixed(1)+"px")}
+  function hud(ms,lead,mine){if(!track)return;const s=Math.max(0,Math.ceil(ms/1000));track.querySelector(".clk").textContent="0:"+String(s).padStart(2,"0");
+    track.querySelector(".bar i").style.width=(Math.min(1,lead)*100).toFixed(1)+"%";track.querySelector(".bar em").style.left=(Math.min(1,mine)*100).toFixed(1)+"%"}
+  const TAU=.06,sB=f=>f-TAU*(1-Math.exp(-f/TAU)),B=f=>f>0?sB(f)/sB(1):0,VC=1/sB(1); // base pace: burst from the gate, then a steady gallop (VC = cruising speed)
+  function pchip(K){const n=K.length,x=K.map(k=>k[0]),y=K.map(k=>k[1]),d=[],m=[];
+    for(let i=0;i<n-1;i++)d[i]=(y[i+1]-y[i])/(x[i+1]-x[i]);
+    m[0]=d[0];m[n-1]=d[n-2];
+    for(let i=1;i<n-1;i++){if(d[i-1]*d[i]<=0){m[i]=0;continue}const h0=x[i]-x[i-1],h1=x[i+1]-x[i],w1=2*h1+h0,w2=h1+2*h0;m[i]=(w1+w2)/(w1/d[i-1]+w2/d[i])}
+    return f=>{if(f<=x[0])return y[0];if(f>=x[n-1])return y[n-1];let i=0;while(f>x[i+1])i++;const h=x[i+1]-x[i],t=(f-x[i])/h,t2=t*t,t3=t2*t;
+      return (2*t3-3*t2+1)*y[i]+(t3-2*t2+t)*h*m[i]+(-2*t3+3*t2)*y[i+1]+(t3-t2)*h*m[i+1]}}
+  // gaps are in horse lengths relative to the player's horse (+ = ahead), keyed by race fraction f (player's horse reaches the line at f = 1)
+  function script(s){
+    const r=prng(1+(s.seed||7)%233280),P=s.horse,place=s.order.indexOf(P),keys={};
+    s.order.forEach(h=>{if(h===P)return;
+      const k=[[0,0],[.05,-(.22+r()*.2)],[.12,-(.45+r()*.25)],[.2,-(.85+r()*.35)]];   // your horse breaks best from the gate
+      [.3,.4,.5,.6,.7].forEach(f=>k.push([f,-(.9+r()*.7)]));keys[h]=k});             // the pack bunches 1-2 lengths back, swapping places
+    const add=(h,a)=>a.forEach(k=>keys[h].push(k)),fin=(h,v,end)=>add(h,[[.8,v],[.88,v-.05],[1,end],[1.08,end-.15]]);
+    let A=null,Bh=null;
+    if(place===2){A=s.order[0];Bh=s.order[1]; // 3rd: two rivals blow past in the last ~2 s
+      add(A,[[.8,-.95],[.84,-.8],[.88,-.35],[.91,.05],[.94,.45],[.97,.75],[1,.9],[1.08,.9]]);
+      add(Bh,[[.8,-1],[.84,-.92],[.88,-.55],[.915,-.2],[.94,.05],[.97,.3],[1,.45],[1.08,.45]])}
+    else if(place===1){A=s.order[0]; // 2nd: one rival catches you right at the end, wins by a nose
+      add(A,[[.8,-.95],[.84,-.85],[.88,-.5],[.92,-.15],[.94,.05],[.96,.12],[1,.15],[1.08,.15]]);fin(s.order[2],-1.05,-.3-r()*.08)}
+    else{A=s.order[1]; // 1st: a rival gets up in the final second... and your horse fights back to win by a nose
+      add(A,[[.8,-.95],[.84,-.85],[.88,-.5],[.915,-.15],[.945,.05],[.965,.14],[.98,.09],[1,-.08],[1.08,-.3]]);fin(s.order[2],-1.05,-.3-r()*.08)}
+    for(let p=3;p<6;p++)fin(s.order[p],-(1.05+r()*.7),-(.8+(p-3)*.35+r()*.1));
+    const fn={};Object.keys(keys).forEach(h=>fn[h]=pchip(keys[h]));fn[P]=()=>0;
+    const raw=(h,f)=>B(f+LEN*fn[h](f)/VC); // a gap of g lengths = running g lengths' worth of time behind/ahead of the base pace (never runs backwards)
+    const fc={},vc={};
+    s.order.forEach(h=>{let a=0;while(raw(h,a+.004)<1)a+=.004;let b=a+.004;for(let i=0;i<30;i++){const m=(a+b)/2;if(raw(h,m)<1)a=m;else b=m}fc[h]=b;vc[h]=(raw(h,b+1e-4)-raw(h,b-1e-4))/2e-4});
+    const f3=Math.max(...s.order.slice(0,3).map(h=>fc[h])); // the 3rd horse home crosses at exactly RACE ms
+    const pos=(h,f)=>f<fc[h]?raw(h,f):1+RO*(1-Math.exp(-(f-fc[h])*vc[h]/RO)); // eases up past the post
+    return {pos,fc,ms:RACE/f3,endF:Math.max(...s.order.map(h=>fc[h]))+.035,A,B:Bh,P,place};
+  }
+  // final-stretch audio: crowd swell + a heartbeat that quickens
+  function thrill(on){if(beatT){clearTimeout(beatT);beatT=null}if(!on)return;roar(3.4);let gap=620;
+    const hb=()=>{beep(62,.16,.32,"sine");beep(55,.14,.24,"sine",.17);gap=Math.max(380,gap-45);beatT=setTimeout(hb,gap)};hb()}
+  function photo(){const p=el("div","photo","PHOTO FINISH");track.appendChild(p);setTimeout(()=>p.remove(),1900)}
+  window.addEventListener("resize",()=>{if(!track||!track.isConnected||!track.classList.contains("done"))return;setCam(camMax());lanes.forEach(l=>setPos(l,+l.style.getPropertyValue("--p")))});
+  const G={label:"Time 2 Race",title:"TIME 2 RACE",weights:WEIGHTS, // % for 6th,5th,4th,3rd,2nd,1st place
+    btn:"Pick a horse first",
+    how:["Tick the T&C box.","Pick one of the six horses in the paddock (or tap its lane on the track). They differ only in looks.","Press Start the race.","Your horse's finishing place sets your prize. Prizes are random in every run."],
+    note:"Pick a horse, then start the race. Your horse's finishing place is your prize. Every ₱200 deposit = 1 run.",
     build(play,ctx){
-      sel=null;lanes=[];
+      sel=null;lanes=[];cards=[];thrill(false);
+      const pad=el("div","paddock");pad.appendChild(el("p","pad-h","Pick your horse"));
+      const pg=el("div","pgrid");
+      HORSES.forEach((h,i)=>{const c=el("button","hcard","<span class='pv'><span class='runner static'>"+HORSE(h.c,i)+"</span></span><span class='hn'><i style='background:"+h.c+"'>"+(i+1)+"</i><b>"+h.n+"</b></span><small>"+COATS[i].d+"</small>");
+        c.type="button";c.setAttribute("aria-label","Horse "+(i+1)+", "+h.n);c.onclick=()=>G.pick(i,ctx);cards[i]=c});
+      const ord=shuffle(HORSES.map((_,k)=>k));ord.forEach(k=>pg.appendChild(cards[k])); // new random gate order every build/reset
+      pad.appendChild(pg);play.appendChild(pad);
       track=el("div","track");
+      const flags=["#ffcc33","#ff4d6d","#5d8bff","#3ecf8e","#ff8a3d","#c38bff","#ffffff"];
+      const poles=[[600,.25],[400,.5],[200,.75]].map(([m,q])=>"<i class='dpole' style='left:"+(X0+NOSE+q*CL)+"px'><b>"+m+"</b></i>").join("");
+      const stalls=HORSES.map((_,k)=>"<i class='stall' style='top:calc(var(--ln)*"+k+")'><i class='door t'></i><i class='door b'></i></i>").join("");
+      track.innerHTML="<div class='scene'><div class='world'>"+
+        "<div class='stands'><div class='awning'></div><div class='crowd2'></div><div class='flags'>"+Array.from({length:26},(_,k)=>"<i style='--c:"+flags[k%flags.length]+";--d:"+(k*-0.23).toFixed(2)+"s'></i>").join("")+"</div></div>"+
+        "<div class='infield'><i class='hedge'></i></div><div class='rail top'></div>"+
+        "<div class='dirt'><div class='gate'><i class='gback'></i>"+stalls+"<i class='gfront'></i></div><i class='fline'></i></div>"+
+        "<div class='rail bot'><i class='bpost'></i></div><div class='nturf'></div>"+
+        "<span class='ghdr'>START</span>"+poles+"<span class='fsign'>FINISH</span><i class='fpole'></i><i class='disc'></i><span class='judge'><b>JUDGE</b></span>"+
+        "</div><div class='speed'></div><div class='lanes'></div></div>"+
+        "<div class='hud' aria-hidden='true'><span class='clk'>0:15</span><span class='bar'><i></i><em></em></span></div>";
+      world=track.querySelector(".world");
+      const lanesBox=track.querySelector(".lanes");
       HORSES.forEach((h,i)=>{
-        const b=el("button","lane","<span class='num' style='background:"+h.c+"'>"+(i+1)+"</span><span class='run'><span class='runner'>"+HORSE(h.c)+"</span></span><span class='nm'>"+h.n+"</span><span class='plc'></span>");
-        b.type="button";b.setAttribute("aria-label","Kabayo "+(i+1)+", "+h.n);b.style.setProperty("--x",0);
-        b.onclick=()=>G.pick(i,ctx);track.appendChild(b);lanes.push(b);
+        const b=el("button","lane","<span class='num' style='background:"+h.c+"'>"+(i+1)+"</span><span class='runner'>"+HORSE(h.c,i)+"</span><span class='nm'>"+h.n+"</span><span class='plc'></span>");
+        b.type="button";b.setAttribute("aria-label","Horse "+(i+1)+", "+h.n);
+        b.onclick=()=>G.pick(i,ctx);lanes[i]=b;
       });
+      ord.forEach(k=>lanesBox.appendChild(lanes[k]));
       play.appendChild(track);$("goBtn").disabled=true;
+      setCam(0);lanes.forEach(l=>setPos(l,0));hud(RACE,0,0);
     },
     pick(i,ctx){
       if(ctx.isBusy()||(ctx.state&&ctx.state.step!=null))return;
       if(!ctx.agreed())return;
-      sel=i;lanes.forEach((l,k)=>l.classList.toggle("sel",k===i));
-      $("goBtn").disabled=false;$("goBtn").textContent="Simulan ang karera";
-      cheer("Pinili mo si #"+(i+1)+" "+HORSES[i].n);beep(660,.1,.1);
+      sel=i;lanes.forEach((l,k)=>l.classList.toggle("sel",k===i));cards.forEach((c,k)=>c.classList.toggle("on",k===i));
+      $("goBtn").disabled=false;$("goBtn").textContent="Start the race";
+      cheer("You picked #"+(i+1)+" "+HORSES[i].n);beep(660,.1,.1);
     },
     go(ctx){
       if(ctx.isBusy()||(ctx.state&&ctx.state.step!=null))return;
-      if(sel===null){cheer("Pumili muna ng kabayo");return}
+      if(sel===null){cheer("Pick a horse first");return}
       if(!ctx.agreed())return;
-      const step=drawStep(),place=(WEIGHTS.length-1)-step; // last step = 1st place (jackpot)
+      const step=Math.max(drawStep(),3),place=5-step; // player's horse always finishes 1st-3rd; 3rd-6th draws (₱8.88) show as 3rd place
       const others=shuffle(HORSES.map((_,k)=>k).filter(k=>k!==sel)),order=[];
       for(let p=0;p<6;p++)order.push(p===place?sel:others.shift());
-      ctx.start({step,horse:sel,order});
-      ctx.setBusy(true);$("goBtn").disabled=true;lanes.forEach(l=>l.disabled=true);
+      ctx.start({step,horse:sel,order,seed:Math.floor(rnd()*1e9)}); // result (and the race script's seed) is saved before the race runs
+      ctx.setBusy(true);$("goBtn").disabled=true;lanes.forEach(l=>l.disabled=true);cards.forEach(c=>c.disabled=true);
       if(reduce()){G.result(ctx);ctx.done();return}
-      track.classList.add("racing");
-      [523,523,784].forEach((f,k)=>beep(f,.18,.12,"square",k*.35));
-      cheer("Takbo na!");
-      const T=[],ph=[];order.forEach((h,p)=>{T[h]=4200+p*300+rnd()*80;ph[h]=rnd()*6.28});
-      const end=Math.max(...T)+250,t0=performance.now()+1050;let lead=-1,lastHoof=0;
+      const sc=script(ctx.state),P=sc.P;
+      // countdown, then the gates open
+      const cd=el("div","count");track.appendChild(cd);
+      const say=(txt,f,big)=>{cd.textContent=txt;cd.classList.remove("pop","go");void cd.offsetWidth;cd.classList.add("pop");if(big)cd.classList.add("go");beep(f,big?.4:.16,.13,"square")};
+      say("3",523);setTimeout(()=>say("2",523),350);setTimeout(()=>say("1",523),700);
+      cheer("Get ready…");
+      setTimeout(()=>{say("GO!",784,true);track.classList.add("racing","open");cheer("And they're off!");noise(.25,.5,600);noise(.12,.35,2400);musicOn()},1050);
+      setTimeout(()=>cd.remove(),1700);
+      const ev={},passed=new Set(),t0=performance.now()+1050;let lastT=t0,lastDust=0;
       (function frame(now){
         const t=now-t0;
         if(t>0){
-          let best=-1,bx=-1;
-          lanes.forEach((l,h)=>{const u=Math.min(1,t/T[h]),x=Math.min(1,u+0.15*Math.sin(6.28*1.4*u+ph[h])*u*(1-u));l.style.setProperty("--x",x.toFixed(4));if(x>bx){bx=x;best=h}});
-          if(best!==lead&&t<3800){lead=best;cheer("Nangunguna: #"+(best+1)+" "+HORSES[best].n)}
-          if(now-lastHoof>110){lastHoof=now;noise(.05,.25,180+rnd()*120)}
-          order.forEach((h,p)=>{if(t>=T[h]&&!lanes[h].dataset.fin){lanes[h].dataset.fin=1;lanes[h].querySelector(".plc").textContent=PLACE[p];if(p===0)beep(1046,.2,.12)}});
+          const f=t/sc.ms,q=t/RACE,ps=lanes.map((_,h)=>sc.pos(h,f)),pP=ps[P],mine=f<sc.fc[P];
+          let lead=0;ps.forEach(p=>{if(p>lead)lead=p});
+          const target=Math.min(camMax(),Math.max(0,X0+NOSE+Math.min(lead,1+RO)*CL-TW()*.66)); // camera follows the leaders
+          setCam(cam+(target-cam)*Math.min(1,Math.max(0,now-lastT)/140));lastT=now;
+          lanes.forEach((l,h)=>setPos(l,ps[h]));
+          hud(RACE-t,lead,pP);
+          // race calls
+          if(q>=.04&&!ev.a){ev.a=1;cheer("Your horse takes the lead!")}
+          if(q>=.35&&!ev.b){ev.b=1;cheer("Still in front!")}
+          if(q>=.68&&!ev.c){ev.c=1;cheer("Can they hold on?!")}
+          if(q>=.83&&!ev.d){ev.d=1;track.classList.add("final");cheer("Here they come!");thrill(true)}
+          if(ev.d&&mine){
+            ps.forEach((p,h)=>{if(h!==P&&p>pP&&!passed.has(h)){passed.add(h);cheer("#"+(h+1)+" "+HORSES[h].n+(sc.place===0?" edges ahead!":passed.size>1?" goes past too!":" goes past!"));beep(330,.18,.08,"sawtooth")}});
+            if(sc.place===0&&passed.size&&!ev.back&&pP>ps[sc.A]){ev.back=1;cheer("Your horse fights back!")}
+          }
+          // dust off the hooves (more of it in the final stretch)
+          if(now-lastDust>(ev.d?70:110)){lastDust=now;lanes.forEach((l,h)=>{const p=ps[h];if(p>.01&&p<1){const d=el("span","kick");d.style.left=(X0+p*CL-cam+6).toFixed(0)+"px";l.appendChild(d);setTimeout(()=>d.remove(),600)}})}
+          // finish line
+          order.forEach((h,p)=>{if(f>=sc.fc[h]&&!lanes[h].dataset.fin){lanes[h].dataset.fin=1;lanes[h].querySelector(".plc").textContent=PLACE[p];lanes[h].classList.add("crossed");setTimeout(()=>lanes[h].classList.add("stopped"),750);
+            if(h===P){thrill(false);
+              if(p===0){musicOff();beep(1046,.2,.12);flash();photo();confettiAt(lanes[h]);cheer("PHOTO FINISH… YOUR HORSE WINS!")}
+              else{tick();cheer(p===1?"Pipped at the post!":"Caught at the line!")}}
+            else if(p===0){musicOff();beep(1046,.2,.12);flash();confettiAt(lanes[h]);cheer("#"+(h+1)+" "+HORSES[h].n+" wins it!")}
+            else tick()}});
         }
-        if(t<end)raf=requestAnimationFrame(frame);
-        else{track.classList.remove("racing");G.result(ctx);ctx.done()}
+        if(t/sc.ms<sc.endF)raf=requestAnimationFrame(frame);
+        else{musicOff();thrill(false);track.classList.remove("racing");G.result(ctx);ctx.done()}
       })(performance.now());
     },
-    result(ctx){
-      const s=ctx.state;
-      lanes.forEach((l,h)=>{l.disabled=true;l.style.setProperty("--x",1);const p=s.order.indexOf(h);l.querySelector(".plc").textContent=PLACE[p];l.classList.toggle("sel",h===s.horse);l.classList.toggle("first",p===0)});
+    result(ctx){track.classList.remove("final","racing");track.classList.add("done","open");thrill(false);
+      const s=ctx.state;setCam(camMax());hud(0,1,1);
+      cards.forEach((c,k)=>{c.disabled=true;c.classList.toggle("on",k===s.horse)});
+      lanes.forEach((l,h)=>{l.disabled=true;setPos(l,1+RO);const p=s.order.indexOf(h);l.querySelector(".plc").textContent=PLACE[p];l.classList.toggle("sel",h===s.horse);l.classList.toggle("first",p===0)});const w=lanes[s.order[0]];if(w){w.classList.remove("cheer");void w.offsetWidth;w.classList.add("cheer")}
     },
-    stop(){cancelAnimationFrame(raf)},
+    stop(){musicOff();thrill(false);cancelAnimationFrame(raf)},
     finish(ctx){sel=ctx.state.horse;G.result(ctx)}
   };
   return G;
@@ -361,11 +773,11 @@ const GAME=(()=>{
 
 
 // ---------- engine ----------
-let state=null,busy=false;
+let state=null,ladder=[],busy=false;
 function save(){try{localStorage.setItem(storeKey(),JSON.stringify(state))}catch(e){}}
 function load(){try{return JSON.parse(localStorage.getItem(storeKey())||"null")}catch(e){return null}}
 const ctx={
-  get ladder(){return PRIZES},get state(){return state},
+  get ladder(){return ladder},get state(){return state},
   start(extra){state=Object.assign({step:drawStep()},extra||{});save();return state},
   update(extra){Object.assign(state,extra);save()},
   setBusy(v){busy=v;$("resetBtn").disabled=v},isBusy(){return busy},
@@ -373,56 +785,65 @@ const ctx={
   done(){busy=false;$("resetBtn").disabled=false;finishView(true)}
 };
 function renderMech(){
-  $("mechOffer").textContent="T2B Derby · Flat na prize pool";
-  const steps=["<b>Sino ang pwede:</b> Verified Time2Bet players na may qualifying deposit na ₱200 pataas.",
-    "<b>Paano ma-unlock:</b> Isang verified deposit na ₱200 o higit pa. Ive-verify ng agent ang deposit mo at ibibigay niya ang personal mong game link."]
+  const off=BRAND.offers[cfg.offer];
+  $("mechOffer").textContent=off.name+" · "+cfg.offer;
+  const steps=["<b>Every ₱200 deposit = 1 run.</b> For example, a ₱600 deposit = 3 runs.",
+    "<b>Only for slot games.</b> Wager ×1: the bonus must be wagered 1× before it can be withdrawn.",
+    "<b>"+HOURS+" daily only.</b> Max promo bonus: "+php(DAILY_CAP)+" per day.",
+    "<b>Who can join:</b> "+off.target+".","<b>How to unlock:</b> "+off.trig+". Your agent will verify your deposit and send you your personal game link.","<b>Validity:</b> "+off.valid+"."]
     .concat(GAME.how.map(s=>"<b>"+GAME.label+":</b> "+s))
-    .concat(["<b>Premyo:</b> Flat na prize pool para sa lahat — ₱10, ₱27, o ₱57. Random ang lalabas, at pinakamadalang ang ₱57 (jackpot).",
-      "<b>Pag-claim:</b> I-screenshot ang resulta at i-send sa agent mo. Ike-credit ang bonus pagkatapos ma-verify, at may turnover requirement bago ma-withdraw.",
-      "<b>Isang laro lang bawat link.</b> Kahit mag-refresh o mag-reset, ang unang resultang na-confirm ng agent ang bibilangin."]);
+    .concat(["<b>Prize:</b> Based on your horse's finishing place in each run. Prizes are random in every game.",
+      "<b>Claiming:</b> Screenshot the result of each run and send it to your agent. The bonus is credited after verification, with Wager ×1 on slot games before withdrawal.",
+      "<b>Runs per link:</b> Based on your verified deposit (1 run per ₱200). Even if you refresh or reset, only the first result confirmed by your agent counts."]);
   $("mechSteps").innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
-  $("mechTiers").innerHTML=PRIZES.map((p,i)=>"<tr><td>"+php(p)+"</td><td>"+WEIGHTS[i]+"%</td></tr>").join("");
 }
+function loadRun(k){try{return JSON.parse(localStorage.getItem(storeKey(k))||"null")}catch(e){return null}}
+function doneRuns(n){const out=[];for(let k=0;k<n;k++){const s=loadRun(k);if(s&&s.step!=null)out.push(PRIZES[s.step])}return out}
 function buildView(){
   renderMech();
-  $("eyebrow").textContent=BRAND.name;
-  $("greeting").hidden=!cfg.name;if(cfg.name)$("greeting").textContent="Para kay "+cfg.name+"! 🎉";
+  const t=tierFor(cfg.offer,cfg.deposit),off=BRAND.offers[cfg.offer];
+  const N=t?t.runs:0;run=0;while(run<N-1){const s=loadRun(run);if(s&&s.step!=null)run++;else break}
+  $("eyebrow").textContent=BRAND.name+" · "+off.name;
   $("gameTitle").textContent=GAME.title;
   $("demoTag").hidden=mode!=="demo";
   $("play").innerHTML="";$("win").hidden=true;$("cheer").textContent="";
   busy=false;$("resetBtn").disabled=false;
   $("goBtn").hidden=!GAME.btn;$("goBtn").textContent=GAME.btn||"";
-  if(!qualifies(cfg.deposit)){$("range").textContent="Hinihintay pa ang qualified na deposit.";$("ladder").innerHTML="";$("goBtn").disabled=true;$("note").textContent="";return}
-  $("range").innerHTML="Panalo ng hanggang <b>₱777</b>!";
-  $("ladder").innerHTML=PRIZES.map((v,i)=>"<li"+(i===PRIZES.length-1?" class='top'":"")+(GAME.chip?" style='"+GAME.chip(i)+"'":"")+">"+BRAND.labels[i]+"<b>"+php(v)+"</b></li>").join("");
+  if(!t){$("range").textContent="Waiting for a qualifying deposit.";$("goBtn").disabled=true;$("note").textContent="";return}
+  const rows=PRIZES.map((v,i)=>({l:BRAND.labels[i],v}));ladder=rows.map(r=>r.v);
+  $("range").innerHTML="Run <b>"+(run+1)+"</b> of "+N; // prize amounts are shown only after the race (Ron: no prize ladder before play)
   $("note").textContent=GAME.note;
   $("goBtn").disabled=false;$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));
   state=load();
   GAME.build($("play"),ctx);
   if(state&&state.step!=null){GAME.finish(ctx);finishView(false)}
 }
+function result(){return GAME.outcome?GAME.outcome(state):{win:true,amt:ladder[state.step],idx:state.step,big:state.step===ladder.length-1,label:BRAND.labels[state.step]}}
+function postWin(amt,label){try{fetch("https://wins-ledger-production.up.railway.app/api/win",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({brand:"t2b",game:"Time 2 Race",name:"",code:cfg.code,amount:amt,link:location.href})}).catch(()=>{})}catch(e){}}
 function finishView(celebrate){
-  const amt=PRIZES[state.step],big=state.step===PRIZES.length-1;
-  [...$("ladder").children].forEach((li,i)=>li.classList.toggle("on",i===state.step));
-  $("amt").textContent=php(amt);$("winNote").textContent=BRAND.labels[state.step]+(big?" · Jackpot!":"");
-  $("win").hidden=false;$("goBtn").disabled=true;$("goBtn").textContent="Nalaro mo na";
-  if(mode==="player")$("resetBtn").disabled=true;
-  cheer(big?"JACKPOT!":"You Won!");
-  if(celebrate){postWin(amt);setTimeout(()=>openWin(amt,big),reduce()?50:450)}
+  const r=result();
+  $("win").classList.toggle("lost",!r.win);$("win").querySelector("small").textContent=r.win?"Your bonus":"Result";
+  $("amt").textContent=php(r.amt);$("winNote").textContent=r.label+(r.big?" · Jackpot!":"")+(r.win?"":" · no prize this time");
+  const N=runsFor(cfg.deposit),won=doneRuns(N),tot=won.reduce((a,b)=>a+b,0);
+  if(N>1)$("winNote").textContent+=" · Run "+(run+1)+"/"+N+" · Total: "+php(Math.round(tot*100)/100)+" from "+won.length+(won.length===1?" run":" runs");
+  $("win").hidden=false;
+  if(run<N-1){$("goBtn").disabled=false;$("goBtn").textContent="Next run ("+(run+2)+"/"+N+")"}
+  else{$("goBtn").disabled=true;$("goBtn").textContent="All runs played"}
+  cheer(!r.win?"So close! No win this time.":r.big?"JACKPOT!":"You Won!");
+  if(celebrate&&r.win){if(mode==="player")postWin(r.amt,r.label);setTimeout(()=>openWin(r.amt,r.big,r.label),reduce()?50:450)}
 }
-function postWin(amt){try{fetch("https://wins-ledger-production.up.railway.app/api/win",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({brand:"t2b",game:"T2B Derby",name:cfg.name||"",code:cfg.code,amount:amt,link:location.href})}).catch(()=>{})}catch(e){}}
-$("goBtn").onclick=()=>{if(GAME.go)GAME.go(ctx)};
-$("resetBtn").onclick=()=>{if(busy)return;if(mode==="player"&&state&&state.step!=null)return;try{localStorage.removeItem(storeKey())}catch(e){}state=null;if(GAME.stop)GAME.stop();buildView();$("goBtn").focus()};
+$("goBtn").onclick=()=>{if(busy)return;if(state&&state.step!=null){if(run<runsFor(cfg.deposit)-1){if(GAME.stop)GAME.stop();buildView();$("goBtn").focus()}return}if(GAME.go)GAME.go(ctx)};
+$("resetBtn").onclick=()=>{if(busy)return;try{localStorage.removeItem(storeKey())}catch(e){}state=null;if(GAME.stop)GAME.stop();buildView();$("goBtn").focus()};
 
 // ---------- win pop-up ----------
 let confettiRAF=null;
-function openWin(amt,big){
+function openWin(amt,big,label){
   const jp=$("jp"),a=$("jpAmt");jp.classList.toggle("big",big);
-  $("jpTitle").textContent=big?"JACKPOT!":"YOU WON!";$("jpSub").textContent=GAME.label+" · "+BRAND.labels[state.step];
+  $("jpTitle").textContent=big?"JACKPOT!":"YOU WON!";$("jpSub").textContent=GAME.label+" · "+label;
   jp.hidden=false;$("jpClose").focus();fanfare(big);
   if(reduce()){a.textContent=php(amt);return}
   const s=performance.now(),dur=big?1600:1100;
-  (function f(now){const k=Math.min(1,(now-s)/dur);a.textContent=php(Math.round(amt*(1-Math.pow(1-k,3))));if(k<1&&!jp.hidden)requestAnimationFrame(f);else a.textContent=php(amt)})(s);
+  (function f(now){const k=Math.min(1,(now-s)/dur);a.textContent=php(Math.round(amt*(1-Math.pow(1-k,3))*100)/100);if(k<1&&!jp.hidden)requestAnimationFrame(f);else a.textContent=php(amt)})(s);
   confetti(big?180:90,big);
 }
 function confetti(count,big){
@@ -438,46 +859,142 @@ $("jpClose").onclick=closeWin;
 $("jp").addEventListener("click",e=>{if(e.target===$("jp"))closeWin()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("jp").hidden)closeWin()});
 try{$("agree").checked=localStorage.getItem(BRAND.key+"-tnc")==="yes"}catch(e){}
-$("agree").addEventListener("change",()=>{try{localStorage.setItem(BRAND.key+"-tnc",$("agree").checked?"yes":"no")}catch(e){}$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));if($("cheer").textContent==="I-check muna ang T&C.")$("cheer").textContent=""});
+$("agree").addEventListener("change",()=>{try{localStorage.setItem(BRAND.key+"-tnc",$("agree").checked?"yes":"no")}catch(e){}$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));if($("cheer").textContent==="Please tick the T&C box first.")$("cheer").textContent=""});
 $("tncLink").onclick=e=>{e.preventDefault();$("tnc").open=true;$("tnc").scrollIntoView({behavior:"smooth",block:"start"})};
 
-// ---------- link maker (owner and editors only) ----------
-function playerLink(){return location.href.split("#")[0]+"#"+makeToken(cfg)}
+// ---------- admin backend: login (admin + agents), turnover database, link maker ----------
+// Main admin: only a SHA-256 of "t2b-admin:<username>:<password>" is stored here.
+// Agents: t2b_agents/<username> = {u, h: sha256("t2b-agent:<username>:<password>"), active, by, at} (only the page owner/editors can write).
+// Turnover: t2b_days/<YYYYMMDD Manila>/players/<code> = {code, dep, to, by, at, link?} (admin and agents read and write; players never).
+const ADMIN_ACCT="95b6f66d9dc1edb088bf74d97e2ba658d5e0f255a6a0783cf8a6cde1b2cb0a51";
+const MIN_DEP=RUN_DEP,TO_MULT=WAGER_X,AG_RE=/^[a-z0-9_.-]{3,24}$/,SESS="t2b-adm-v1";
+const DAY=new Date(Date.now()+8*3600e3).toISOString().slice(0,10).replace(/-/g,"");
+async function sha(s){try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}catch(e){return "x"+h36(s)+h36(s+"#")}}
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num=v=>Math.max(0,Math.min(9999999,Math.floor(+String(v).replace(/[^\d.]/g,"")||0)));
+let DB=null,dbState="loading",who=null,prow=new Map(),agents=new Map(),started=false;
+const pcol=()=>DB.collection("t2b_days/"+DAY+"/players"),acol=()=>DB.collection("t2b_agents");
+const need=r=>Math.max(MIN_DEP,r.dep)*TO_MULT;
+const eligible=r=>!!r&&r.to!=null&&r.dep>=MIN_DEP&&r.to>=need(r);
+async function getDB(){if(DB||dbState==="none")return DB;try{DB=window.claude&&claude.use?await claude.use("db"):null}catch(e){DB=null}dbState=DB?"ok":"none";return DB}
+async function login(u,p){
+  if(await sha("t2b-admin:"+u+":"+p)===ADMIN_ACCT)return {u,role:"admin"};
+  if(!AG_RE.test(u))return null;
+  if(!(await getDB()))return {err:"nodb"};
+  let s;try{s=await acol().doc(u).get()}catch(e){return {err:"nodb"}}
+  if(!s.exists)return null;const a=s.data();
+  if(await sha("t2b-agent:"+u+":"+p)!==a.h)return null;
+  if(a.active===false)return {err:"off"};
+  return {u,role:"agent"}}
+function setSess(w){try{w?sessionStorage.setItem(SESS,JSON.stringify(w)):sessionStorage.removeItem(SESS)}catch(e){}}
+function getSess(){try{const w=JSON.parse(sessionStorage.getItem(SESS)||"null");return w&&w.u&&(w.role==="admin"||w.role==="agent")?w:null}catch(e){return null}}
+function curRow(){return prow.get(cfg.code)}
+function canLink(){return !!(who&&cleanCode($("code").value)&&tierFor(cfg.offer,cfg.deposit))} // manual mode: username + deposit is enough; turnover is checked by hand
+/* inside claude.ai the page runs on a sandbox address, so links point at the public artifact URL; a self-hosted copy links to itself */
+// (artifact URL removed: this copy is self-hosted on the t2b service)
+const pageBase=()=>location.href.split("#")[0]; // self-hosted: links point at this page
+function playerLink(){return pageBase()+"#"+makeToken(cfg)}
 function adminUI(){
-  if(document.activeElement!==$("deposit"))$("deposit").value=cfg.deposit||"";
-  if(document.activeElement!==$("code"))$("code").value=cfg.name||"";
-  const tb=$("aTier");
-  if(qualifies(cfg.deposit)){tb.className="tierbox";tb.innerHTML="Qualified — prize pool: ₱10 (4%), ₱27 (95%), ₱57 (1%)"}
-  else{tb.className="tierbox bad";tb.innerHTML="Hindi qualified — minimum deposit ay ₱200."}
-  $("plink").textContent=playerLink();
+  const box=$("aOffers");box.innerHTML="";
+  OFFERS.forEach(o=>{const b=el("button","chip",BRAND.offers[o].name+" <small>("+o+")</small>");b.type="button";b.setAttribute("aria-pressed",cfg.offer===o);b.onclick=()=>{cfg.offer=o;changed()};box.appendChild(b)});
+  const off=BRAND.offers[cfg.offer];
+  $("offerBox").innerHTML="<strong></strong><p><b>Who it's for:</b> <span class='o1'></span></p><p><b>How to unlock:</b> <span class='o2'></span></p><p><b>Validity:</b> <span class='o3'></span></p>";
+  $("offerBox").querySelector("strong").textContent=off.name;$("offerBox").querySelector(".o1").textContent=off.target;$("offerBox").querySelector(".o2").textContent=off.trig;$("offerBox").querySelector(".o3").textContent=off.valid;
+  const r=curRow(),tb=$("aTier"),t=tierFor(cfg.offer,cfg.deposit);
+  if(!$("code").value.trim()){tb.className="tierbox";tb.textContent="Type the player's username and deposit to make the link.";}
+  else if(!t){tb.className="tierbox bad";tb.innerHTML="<b>Enter the deposit.</b> Minimum is "+php(RUN_DEP)+" (1 run per "+php(RUN_DEP)+")."}
+  else{tb.className="tierbox";tb.innerHTML="<b>Link ready · "+t.runs+(t.runs===1?" run":" runs")+"</b> ("+php(cfg.deposit)+" ÷ "+php(RUN_DEP)+"). Check the deposit and the 1× slot turnover yourself before sending."+(r?" Saved today: deposit "+php(r.dep)+(r.to==null?"":" · TO "+php(r.to)+(eligible(r)?" · eligible":" · not eligible yet"))+(r.link?" · link sent by "+esc(r.link.by):""):"")}
+  const ok=!!canLink();$("plink").textContent=ok?playerLink():"—";$("copyLink").disabled=!ok;$("copyMsg").disabled=!ok;
 }
 function changed(){adminUI();buildView()}
-function flash(btn,txt){const o=btn.textContent;btn.textContent=txt;setTimeout(()=>btn.textContent=o,1500)}
-async function copyText(t,btn){try{await navigator.clipboard.writeText(t);flash(btn,"Copied")}catch(e){const r=document.createRange();r.selectNodeContents($("plink"));const s=getSelection();s.removeAllRanges();s.addRange(r);flash(btn,"Selected")}}
+function renderDbNote(){const n=$("dbNote");
+  n.textContent=dbState==="ok"?"Logged in as "+who.u+". Database connected · today "+DAY.slice(0,4)+"-"+DAY.slice(4,6)+"-"+DAY.slice(6)+" (Manila).":
+    dbState==="loading"?"Connecting to the database…":
+    dbState==="err"?"The database stopped responding. Reload the page.":
+    "Database not available in this view. Open this page on claude.ai while signed in, with access to it from the owner."}
+function renderTable(){const tb=$("pRows");
+  if(dbState!=="ok"){tb.innerHTML="<tr><td colspan='7' class='mute'>"+(dbState==="loading"?"Loading…":"No database in this view.")+"</td></tr>";$("pNote").textContent="";return}
+  const rs=[...prow.values()].sort((a,b)=>(eligible(b)-eligible(a))||(b.at-a.at));
+  if(!rs.length){tb.innerHTML="<tr><td colspan='7' class='mute'>No players saved today yet.</td></tr>";$("pNote").textContent="";return}
+  tb.innerHTML=rs.map(r=>{const ok=eligible(r),n=runsFor(r.dep);return "<tr data-code='"+esc(r.code)+"'><td><b>"+esc(r.code)+"</b></td><td>"+php(r.dep)+"</td><td>"+(r.to==null?"–":php(r.to))+"</td><td>"+(r.to==null?"<span class='mute'>Manual check</span>":ok?"<span class='ok'>Eligible</span>":"<span class='no'>"+(r.dep<MIN_DEP?"Deposit low":php(need(r)-r.to)+" more")+"</span>")+"</td><td>"+(r.link?r.link.runs:ok?n:"–")+"</td><td>"+esc(r.by||"")+(r.link?" · link ✓":"")+"</td><td><button class='btn small ghost' type='button' data-open='"+esc(r.code)+"'>Open</button></td></tr>"}).join("");
+  const e=rs.filter(eligible);$("pNote").textContent=e.length+" of "+rs.length+" players eligible today · "+e.reduce((a,r)=>a+runsFor(r.dep),0)+" runs.";}
+function renderAgents(){const tb=$("agRows");
+  if(dbState!=="ok"){tb.innerHTML="<tr><td colspan='4' class='mute'>No database in this view.</td></tr>";return}
+  const as=[...agents.values()].sort((a,b)=>a.u<b.u?-1:1);
+  tb.innerHTML=as.length?as.map(a=>"<tr><td><b>"+esc(a.u)+"</b></td><td>"+(a.active===false?"<span class='no'>Off</span>":"<span class='ok'>Active</span>")+"</td><td>"+(a.at?new Date(a.at).toLocaleDateString("en-PH"):"")+"</td><td class='acts2'><button class='btn small ghost' type='button' data-tog='"+esc(a.u)+"'>"+(a.active===false?"Turn on":"Turn off")+"</button> <button class='btn small ghost' type='button' data-del='"+esc(a.u)+"'>Remove</button></td></tr>").join(""):"<tr><td colspan='4' class='mute'>No agents yet.</td></tr>"}
+async function startDB(){if(started)return;started=true;
+  await getDB();renderDbNote();
+  if(!DB){renderTable();renderAgents();adminUI();return}
+  pcol().onSnapshot(q=>{prow=new Map(q.docs.map(d=>[d.id,d.data()]));renderTable();adminUI()},e=>{dbState=e&&e.code==="revoked"?"none":"err";renderDbNote();renderTable()});
+  if(who.role==="admin")acol().onSnapshot(q=>{agents=new Map(q.docs.map(d=>[d.id,d.data()]));renderAgents()},()=>{});
+  else acol().doc(who.u).onSnapshot(s=>{if(s.exists&&s.data().active===false){$("aMsg").textContent="This agent account was turned off by the admin.";logout()}},()=>{});
+  renderTable();adminUI()}
+function showBody(){$("admLogin").hidden=true;$("adminBody").hidden=false;$("logout").hidden=false;
+  $("admWho").textContent=who.u+" · "+(who.role==="admin"?"Admin":"Agent");$("agentBox").hidden=true;
+  $("code").value="";cfg.code="player";cfg.deposit=0;adminUI();fxUI();renderDbNote();startDB()}
+function logout(){setSess(null);who=null;location.reload()}
+async function saveRow(code,dep,to){const prev=prow.get(code)||{},body={code,dep,to,by:who.u,at:Date.now()};if(prev.link)body.link=prev.link;prow.set(code,body);await pcol().doc(code).set(body)}
+function loadCode(c){cfg.code=cleanCode(c)||"player";const r=prow.get(cfg.code);
+  if(r&&!$("deposit").value){$("deposit").value=r.dep;$("toAmt").value=r.to==null?"":r.to}cfg.deposit=num($("deposit").value);changed()}
+async function logLink(){if(dbState!=="ok")return;const r=curRow(),link={offer:cfg.offer,dep:cfg.deposit,runs:runsFor(cfg.deposit),by:who.u,at:Date.now()};
+  try{if(r)await pcol().doc(cfg.code).update({link});else await pcol().doc(cfg.code).set({code:cfg.code,dep:cfg.deposit,to:null,by:who.u,at:Date.now(),link})}catch(e){}}
+function flash(btn,txt){const o=btn.dataset.l||(btn.dataset.l=btn.textContent);btn.textContent=txt;clearTimeout(btn._t);btn._t=setTimeout(()=>btn.textContent=o,1500)}
+async function copyText(t,btn){try{await navigator.clipboard.writeText(t);flash(btn,"Copied")}catch(e){try{const ta=document.createElement("textarea");ta.value=t;ta.setAttribute("readonly","");ta.style.cssText="position:fixed;top:0;left:0;opacity:0";document.body.appendChild(ta);ta.select();const k=document.execCommand("copy");ta.remove();flash(btn,k?"Copied":"Copy failed")}catch(e2){flash(btn,"Copy failed")}}}
+// estimated formula: cost = users × runs per user × Σ(prize × probability)
+function fxUI(){
+  const users=Math.max(0,Math.floor(+$("fxUsers").value||0)),dep=Math.max(0,+$("fxDep").value||0),runs=runsFor(dep),plays=users*runs,total=users*dep;
+  const r2=x=>Math.round(x*100)/100,n0=x=>Math.round(x).toLocaleString("en-US");
+  let cost=0;
+  $("fxRows").innerHTML=PRIZES.map((v,i)=>i).reverse().map(i=>{const u=plays*WEIGHTS[i]/100,c=u*PRIZES[i];cost+=c;return "<tr><td>"+BRAND.labels[i]+" "+php(PRIZES[i])+"</td><td>"+WEIGHTS[i]+"%</td><td>"+n0(u)+"</td><td>"+php(r2(c))+"</td></tr>"}).join("");
+  cost=r2(cost);
+  const pct=total?(cost/total*100):0,roas=cost?total/cost:0;
+  $("fxSum").innerHTML="<dt>Users</dt><dd>"+n0(users)+"</dd><dt>Deposit per user</dt><dd>"+php(dep)+"</dd><dt>Runs per user</dt><dd>"+runs+"</dd><dt>Total deposit</dt><dd>"+php(total)+"</dd>"+
+    "<dt>Total bonus cost</dt><dd>"+php(cost)+"</dd><dt>Bonus ÷ deposit</dt><dd>"+pct.toFixed(2)+"%</dd><dt>ROAS (deposit ÷ bonus)</dt><dd>"+(cost?roas.toFixed(1)+"×":"–")+"</dd>"+
+    "<dt>Wagering (deposit × "+WAGER_X+")</dt><dd>"+php(total*WAGER_X)+"</dd><dt>Daily bonus cap</dt><dd>"+php(DAILY_CAP)+(cost>DAILY_CAP?" (over)":"")+"</dd>";
+  $("fxBoard").textContent="";
+}
 if(mode==="admin"){
   $("admin").hidden=false;$("previewLabel").hidden=false;
-  function unlockAdmin(){
-    $("adminGate").hidden=true;$("adminBody").hidden=false;
-    $("code").addEventListener("input",e=>{cfg.name=e.target.value;cfg.code=(cleanCode(e.target.value)||"player")+"-"+Math.random().toString(36).slice(2,6);$("plink").textContent=playerLink()});
-    $("deposit").addEventListener("input",e=>{const v=e.target.value;cfg.deposit=v===""?0:Math.max(0,Math.min(999999,Math.floor(+v)));changed()});
-    $("newLink").onclick=()=>{cfg.nonce=Date.now().toString(36);changed();$("aMsg").textContent="Bagong link na ito. Makakapaglaro ulit ang player gamit ito; huwag nang gamitin ang luma."};
-    $("copyLink").onclick=()=>copyText(playerLink(),$("copyLink"));
-    $("copyMsg").onclick=()=>{if(!qualifies(cfg.deposit)){$("aMsg").textContent="Ilagay muna ang qualified na deposit.";return}copyText(BRAND.script+"\n\nI-play dito: "+playerLink(),$("copyMsg"))};
-    adminUI();
-  }
-  let unlocked=false;
-  try{unlocked=sessionStorage.getItem("admin-unlocked")==="1"}catch(e){}
-  if(unlocked){unlockAdmin()}
-  else{
-    $("adminGate").innerHTML="<span>Kailangan ng password para dito. Tanungin ang supervisor para sa password.</span><div style='display:flex;gap:8px;margin-top:8px'><input class='inp' type='password' id='adminPass' placeholder='Password' autocomplete='off' style='max-width:200px'><button class='btn small' id='adminPassGo' type='button'>Unlock</button></div><p id='adminPassErr' style='color:var(--bad);margin:6px 0 0'></p>";
-    const tryUnlock=()=>{
-      const v=$("adminPass").value;
-      if(h36(v+SALT)===ADMIN_PASS_CHECK){try{sessionStorage.setItem("admin-unlocked","1")}catch(e){}unlockAdmin()}
-      else{$("adminPassErr").textContent="Mali ang password."}
-    };
-    $("adminPassGo").onclick=tryUnlock;
-    $("adminPass").addEventListener("keydown",e=>{if(e.key==="Enter")tryUnlock()});
-  }
+  $("admLogin").onsubmit=async e=>{e.preventDefault();const u=$("admUser").value.trim().toLowerCase(),p=$("admPin").value,er=$("admErr"),b=$("admLoginBtn");
+    if(!p){er.textContent="Enter the admin password.";return}
+    b.disabled=true;const r=(h36(p+SALT)===ADMIN_PASS_CHECK)?{u:"admin",role:"admin"}:null;b.disabled=false;
+    if(!r){er.textContent="Wrong password.";return}
+    if(r.err==="off"){er.textContent="This agent account is turned off. Ask the admin.";return}
+    if(r.err==="nodb"){er.textContent="Agent login needs the database: open this page on claude.ai while signed in, with access from the owner.";return}
+    er.textContent="";$("admPin").value="";who=r;setSess(r);showBody()};
+  $("logout").onclick=logout;
+  $("code").addEventListener("input",e=>loadCode(e.target.value));
+  $("deposit").addEventListener("input",e=>{cfg.deposit=num(e.target.value);changed()});
+  $("toSave").onclick=async()=>{const c=cleanCode($("code").value),b=$("toSave");
+    if(!c){$("aTier").className="tierbox bad";$("aTier").textContent="Type a player code first.";return}
+    if(dbState!=="ok"){$("aTier").className="tierbox bad";$("aTier").textContent="Can't save: the database isn't available in this view.";return}
+    b.disabled=true;try{await saveRow(c,num($("deposit").value),num($("toAmt").value));flash(b,"Saved")}catch(err){$("aTier").className="tierbox bad";$("aTier").textContent="Couldn't save. Make sure you have access to this page on claude.ai, then try again."}
+    b.disabled=false;loadCode(c)};
+  $("pRows").addEventListener("click",e=>{const b=e.target.closest("[data-open]");if(!b)return;$("code").value=b.dataset.open;loadCode(b.dataset.open);$("code").scrollIntoView({behavior:"smooth",block:"center"})});
+  $("bulkSave").onclick=async()=>{const m=$("bulkMsg");if(dbState!=="ok"){m.textContent="Can't save: the database isn't available in this view.";return}
+    const lines=$("bulkIn").value.split(/\n+/).map(l=>l.trim()).filter(Boolean),bad=[];let n=0;
+    for(const l of lines){const p=l.split(/[,\t;|]+/).map(x=>x.trim()),c=cleanCode(p[0]);if(!c||p.length<3){bad.push(l);continue}
+      try{await saveRow(c,num(p[1]),num(p[2]));n++}catch(e){bad.push(l)}}
+    m.textContent="Saved "+n+" player"+(n===1?"":"s")+"."+(bad.length?" Skipped "+bad.length+": "+bad.slice(0,3).join(" · ")+(bad.length>3?"…":""):"");if(!bad.length)$("bulkIn").value="";loadCode($("code").value)};
+  $("newLink").onclick=()=>{cfg.nonce=Date.now().toString(36);changed();$("aMsg").textContent="This is a new link. The player can play again with it; stop using the old one."};
+  $("copyLink").onclick=()=>{if(!canLink())return;copyText(playerLink(),$("copyLink"));logLink()};
+  $("copyMsg").onclick=()=>{if(!canLink())return;copyText(BRAND.offers[cfg.offer].script+"\n\nPlay here: "+playerLink(),$("copyMsg"));logLink()};
+  ["fxUsers","fxDep"].forEach(id=>$(id).addEventListener("input",fxUI));
+  // agents (main admin only)
+  $("agGen").onclick=()=>{const a="abcdefghjkmnpqrstuvwxyz23456789",r=new Uint32Array(8);crypto.getRandomValues(r);$("agP").value="ag-"+[...r].map(x=>a[x%a.length]).join("").replace(/(.{4})/,"$1-")};
+  $("agSave").onclick=async()=>{const u=$("agU").value.trim().toLowerCase(),p=$("agP").value,m=$("agMsg");
+    if(!AG_RE.test(u)){m.textContent="Username: 3–24 letters, numbers, _ . or -";return}
+    if(u==="admin"){m.textContent="Pick another username.";return}
+    if(p.length<6){m.textContent="Password: at least 6 characters.";return}
+    if(dbState!=="ok"){m.textContent="Can't save: the database isn't available in this view.";return}
+    const prev=agents.get(u);
+    try{await acol().doc(u).set({u,h:await sha("t2b-agent:"+u+":"+p),active:true,by:who.u,at:prev&&prev.at||Date.now()});m.textContent=(prev?"Password updated for ":"Agent added: ")+u+". Give them the username and password.";$("agP").value=""}
+    catch(e){m.textContent="Couldn't save. Only the page owner or an editor on claude.ai can manage agents."}};
+  $("agRows").addEventListener("click",async e=>{const t=e.target.closest("[data-tog]"),d=e.target.closest("[data-del]"),m=$("agMsg");
+    try{if(t){const a=agents.get(t.dataset.tog);await acol().doc(a.u).update({active:a.active===false})}
+      if(d){if(d.dataset.sure!=="1"){d.dataset.sure="1";d.textContent="Tap again to remove";setTimeout(()=>{d.dataset.sure="";d.textContent="Remove"},3000);return}await acol().doc(d.dataset.del).delete();m.textContent="Agent removed."}}
+    catch(err){m.textContent="Couldn't change it. Only the page owner or an editor on claude.ai can manage agents."}});
+  const s=getSess();if(s){who=s;showBody()}
 }
 buildView();
 </script>
