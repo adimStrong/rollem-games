@@ -785,7 +785,7 @@ function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className
 // ---------- player links ----------
 // link = #code.d<deposit>.<nonce>.<check>; the check stops casual edits to the deposit (number of plays)
 const SALT="cg~"+BRAND.key+"~26q4";
-const ADMIN_PASS_CHECK="86l4uo"; // h36(ADMIN_PASSWORD+SALT) -- same admin password as the previous GameSpot games
+const ADMIN_PASS_CHECK="1naiwd"; // h36(ADMIN_PASSWORD+SALT) -- same shared admin password; re-hashed for BRAND.key "gamespot-cards" (the old 86l4uo was for key "gamespot")
 function h36(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}let g=h;for(let i=s.length-1;i>=0;i--){g^=s.charCodeAt(i)*31;g=Math.imul(g,2246822519)>>>0}return (h.toString(36)+g.toString(36)).slice(0,6)}
 function cleanCode(c){return (c||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,32)}
 function makeToken(c){const body=c.code+".d"+c.deposit+"."+c.nonce;return body+"."+h36(body+SALT)}
