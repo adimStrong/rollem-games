@@ -29,9 +29,9 @@
 }
 *{box-sizing:border-box}
 body{background:var(--bgimg),var(--night);background-attachment:fixed;color:var(--paper);font-family:var(--body);font-size:15px;line-height:1.5;margin:0;padding-inline:16px;padding-block:24px}
-.stack{width:100%;max-width:520px;margin:0 auto;display:grid;gap:18px}
+.stack{width:100%;max-width:580px;margin:0 auto;display:grid;gap:18px}
 .mark{display:grid;justify-items:center;gap:6px;text-align:center}
-.mark img{display:block;height:66px;width:auto;max-width:80%;filter:drop-shadow(0 4px 12px rgba(0,0,0,.5))}
+.mark img{display:block;height:78px;width:auto;max-width:80%;filter:drop-shadow(0 4px 12px rgba(0,0,0,.5))}
 .mark p{margin:0;font:600 11px var(--body);letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
 .booth{position:relative;background:var(--plank);border-radius:20px;padding:54px 16px 22px;text-align:center;display:grid;gap:16px;overflow:hidden;border-top:6px solid var(--accent)}
 .eyebrow{font:600 12px var(--body);letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin:0}
@@ -42,13 +42,6 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 .cheer.pop{animation:pop .35s ease-out}
 @keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
 .play{display:grid;justify-items:center;gap:12px;position:relative}
-.ladder{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0;padding:0;list-style:none;width:min(360px,100%)}
-.ladder li{display:grid;gap:1px;padding:6px 6px;border-radius:9px;border:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.25;min-width:0}
-.ladder li b{font:700 13px var(--mono);color:var(--paper);font-variant-numeric:tabular-nums}
-.ladder li.top{border-color:var(--gold)}
-.ladder li.top b{color:var(--gold)}
-.ladder li.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.ladder li.on b{color:var(--accent-ink)}
 .btn{font:700 18px var(--body);letter-spacing:.3px;padding:15px 22px;border-radius:12px;border:0;cursor:pointer;background:var(--accent);color:var(--accent-ink);width:100%}
 .btn:disabled,.btn[aria-disabled="true"]{opacity:.5;cursor:default}
 .btn:focus-visible,.linkbtn:focus-visible,.chip:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
@@ -93,19 +86,55 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 .linkrow code{flex:1;min-width:0;font:500 12px var(--mono);background:var(--plank);border:1px solid var(--line);border-radius:8px;padding:10px;overflow-x:auto;white-space:nowrap}
 .btnrow{display:flex;flex-wrap:wrap;gap:8px}
 .preview-label{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:center;margin:0}
-/* win pop-up */
-.jp{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.78);backdrop-filter:blur(3px);overflow:hidden}
-.jp canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.jp-card{position:relative;width:min(420px,100%);text-align:center;border-radius:22px;padding:30px 22px 22px;background:var(--booth);border:2px solid var(--accent);box-shadow:0 0 80px rgba(0,0,0,.6);display:grid;gap:10px;animation:jpIn .55s cubic-bezier(.2,1.4,.4,1)}
-.jp.big .jp-card{border-color:var(--gold);box-shadow:0 0 0 6px rgba(255,255,255,.06),0 0 90px var(--glow)}
-@keyframes jpIn{0%{transform:scale(.4) rotate(-6deg);opacity:0}100%{transform:scale(1);opacity:1}}
-.jp-title{font-family:var(--display);font-weight:400;font-size:clamp(34px,10vw,50px);line-height:1;margin:0;color:var(--paper)}
-.jp.big .jp-title{color:var(--gold);animation:jpPulse 1s ease-in-out infinite alternate}
+/* win pop-up (dev build 2026-11-09): gold prize ticket with spinning clover coin, ribbon title, receipt rows for the agent */
+@property --ring{syntax:'<angle>';inherits:false;initial-value:0deg}
+.jp{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:56px 16px 16px;background:radial-gradient(60% 50% at 50% 45%,rgba(15,107,71,.55),rgba(0,0,0,.88));backdrop-filter:blur(4px);overflow:auto}
+.jp canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
+.jp-burst{position:fixed;left:50%;top:50%;width:160vmax;height:160vmax;translate:-50% -50%;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg,rgba(255,207,74,.16) 0 6deg,transparent 6deg 16deg);
+  -webkit-mask-image:radial-gradient(closest-side,#000 8%,transparent 55%);mask-image:radial-gradient(closest-side,#000 8%,transparent 55%);animation:burst 24s linear infinite}
+.jp.big .jp-burst{background:repeating-conic-gradient(from 0deg,rgba(255,225,120,.34) 0 6deg,rgba(47,227,154,.12) 6deg 11deg,transparent 11deg 16deg);animation-duration:12s}
+@keyframes burst{to{rotate:360deg}}
+.jp-card{position:relative;z-index:1;width:min(400px,100%);text-align:center;border-radius:24px;padding:58px 20px 20px;
+  background:radial-gradient(120% 60% at 50% 0%,#17694b 0%,#0c3326 55%,#071d15 100%);
+  box-shadow:0 30px 80px rgba(0,0,0,.65),0 0 60px rgba(47,227,154,.18);display:grid;gap:10px;animation:jpIn .6s cubic-bezier(.2,1.4,.4,1)}
+.jp-card::before{content:"";position:absolute;inset:-3px;border-radius:27px;padding:3px;pointer-events:none;
+  background:conic-gradient(from var(--ring),#ffcf4a,#fff1b8 12%,#2fe39a 25%,#e0a800 45%,#fff1b8 60%,#2fe39a 78%,#ffcf4a);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);animation:ring 4s linear infinite}
+.jp.big .jp-card{box-shadow:0 30px 80px rgba(0,0,0,.65),0 0 90px var(--glow)}
+.jp.big .jp-card::before{animation-duration:1.6s}
+@keyframes ring{to{--ring:360deg}}
+@keyframes jpIn{0%{transform:scale(.4) translateY(30px);opacity:0}100%{transform:scale(1);opacity:1}}
+.jp-coin{position:absolute;left:50%;top:-46px;width:92px;height:92px;margin-left:-46px;perspective:400px}
+.jp-coin i{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6cf,#ffcf4a 45%,#b8800a 80%);
+  box-shadow:inset 0 0 0 4px #e0a800,inset 0 0 0 7px #fff1b8,0 8px 24px rgba(0,0,0,.5),0 0 30px var(--glow);display:grid;place-items:center;animation:coin 3.2s ease-in-out infinite}
+.jp-coin svg{width:54%;height:54%}
+@keyframes coin{0%,62%{transform:rotateY(0)}80%{transform:rotateY(360deg)}100%{transform:rotateY(360deg)}}
+.jp-logo{display:block;height:30px;width:auto;max-width:60%;margin:0 auto;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
+.jp-ribbon{position:relative;justify-self:center;margin:4px 0 0;padding:8px 26px 6px;background:linear-gradient(180deg,#fff1b8,#ffcf4a 45%,#d99a06);color:#3a2200;
+  font-family:var(--display);font-weight:400;font-size:clamp(28px,8.5vw,40px);line-height:1;letter-spacing:.5px;box-shadow:0 6px 0 #8a5f06,0 10px 20px rgba(0,0,0,.4)}
+.jp-ribbon::before,.jp-ribbon::after{content:"";position:absolute;top:10px;width:22px;height:100%;background:#c98a06;z-index:-1}
+.jp-ribbon::before{left:-16px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,40% 50%)}
+.jp-ribbon::after{right:-16px;clip-path:polygon(0 0,100% 0,60% 50%,100% 100%,0 100%)}
+.jp.big .jp-ribbon{animation:jpPulse .9s ease-in-out infinite alternate}
 @keyframes jpPulse{to{transform:scale(1.06)}}
-.jp-sub{font:700 13px var(--mono);letter-spacing:1px;margin:0;color:var(--muted)}
-.jp-label{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:6px 0 0}
-.jp-amt{font-family:var(--display);font-weight:400;font-size:clamp(46px,14vw,68px);line-height:1;color:#fff;margin:0;text-shadow:0 4px 0 var(--shadowink)}
-.jp-note{margin:0;font-size:14px}
+.jp-sub{justify-self:center;margin:8px 0 0;font:700 12px var(--mono);letter-spacing:1px;color:var(--accent);background:rgba(47,227,154,.12);border:1px solid rgba(47,227,154,.35);padding:4px 12px;border-radius:999px}
+.jp-label{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin:6px 0 -4px}
+.jp-amt{font-family:var(--display);font-weight:400;font-size:clamp(56px,17vw,80px);line-height:1;margin:0;
+  background:linear-gradient(100deg,#e0a800 0%,#fff6cf 18%,#ffcf4a 32%,#e0a800 50%,#fff6cf 68%,#ffcf4a 82%,#e0a800 100%) 0 0/200% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 #6b4a04) drop-shadow(0 0 18px rgba(255,207,74,.35));animation:shine 2.4s linear infinite}
+@keyframes shine{to{background-position:-200% 0}}
+.jp-ticket{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;text-align:left;margin:4px 0 0;padding:12px 14px;border-radius:12px;background:rgba(0,0,0,.3);border:1px dashed rgba(255,207,74,.45);font-size:12px}
+.jp-ticket dt{color:var(--muted);letter-spacing:.5px}
+.jp-ticket dd{margin:0;font:700 12px var(--mono);color:var(--paper);text-align:right;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.jp-ticket dd.ref{color:var(--gold);letter-spacing:1px}
+.jp-note{margin:0;font-size:13px;color:var(--paper);display:flex;gap:8px;align-items:center;justify-content:center;text-align:left}
+.jp-note svg{flex:none;width:18px;height:18px}
+.jp-claim{position:relative;overflow:hidden;background:linear-gradient(180deg,#fff1b8,#ffcf4a 40%,#e0a800);color:#3a2200;box-shadow:0 5px 0 #8a5f06,0 10px 22px rgba(0,0,0,.4);font-size:19px}
+.jp-claim::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-20deg);animation:sweep 2.2s ease-in-out infinite}
+@keyframes sweep{60%,100%{left:130%}}
+.jp-claim:active{transform:translateY(3px);box-shadow:0 2px 0 #8a5f06}
+@media (prefers-reduced-motion:reduce){.jp-burst,.jp-card::before,.jp-coin i,.jp-amt,.jp-claim::after{animation:none}}
 /* T&C */
 .tnc{background:var(--booth);border:1px solid var(--line);border-radius:16px;padding:0 18px;text-align:left}
 .tnc summary{cursor:pointer;padding:15px 0;font-weight:700}
@@ -149,7 +178,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 .face .pk{stroke:rgba(255,207,74,.6);stroke-width:1}
 .face .pk.hit{stroke:#fff;stroke-width:2.5;animation:pkHit .45s ease-in-out infinite alternate}
 @keyframes pkHit{to{filter:brightness(1.7)}}
-.face .amt{font:700 11px var(--mono);fill:var(--paper);font-variant-numeric:tabular-nums}
+.face .amt{font:700 10px var(--mono);fill:var(--paper);font-variant-numeric:tabular-nums}
 .face .amt.j{fill:#2a1a00}
 .face .jl{font:400 6.5px var(--display);fill:#2a1a00;letter-spacing:.5px}
 .face .bulb{fill:var(--gold);animation:bulb 1.2s steps(1) infinite}
@@ -176,14 +205,23 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
   -webkit-mask-image:radial-gradient(70% 45% at 50% 40%,#000 20%,transparent 75%);mask-image:radial-gradient(70% 45% at 50% 40%,#000 20%,transparent 75%);
   animation:boothRays 6s ease-in-out infinite}
 @keyframes boothRays{50%{opacity:.55}}
-.booth>*:not(.soundbtn){position:relative;z-index:1}
+.boothfx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;border-radius:inherit}
+.booth>*:not(.boothfx):not(.soundbtn){position:relative;z-index:1}
 @media (prefers-reduced-motion:reduce){.booth::after{animation:none}}
 
 @media (prefers-reduced-motion:reduce){.cheer.pop,.jp-card,.jp.big .jp-title,.agree.nudge{animation:none}}
+
+/* themed backdrop + steady look for phones (dev build 2026-11-09): nothing on the page animates; only the wheel turns when SPIN is pressed */
+body{background:radial-gradient(70% 45% at 50% 0%,rgba(47,227,154,.25),transparent 70%),radial-gradient(90% 60% at 50% 100%,rgba(255,204,51,.12),transparent 70%),linear-gradient(180deg,#06291c,#021009) fixed}
+.pagefx{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.pagefx::before{content:"";position:absolute;left:50%;top:32%;width:220vmax;height:220vmax;margin:-110vmax 0 0 -110vmax;background:repeating-conic-gradient(rgba(255,214,102,.09) 0 6deg,transparent 6deg 18deg);-webkit-mask:radial-gradient(closest-side,#000,transparent 70%);mask:radial-gradient(closest-side,#000,transparent 70%)}
+.pagefx::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 50%,transparent 55%,rgba(0,0,0,.55))}
+*,*::before,*::after{animation:none!important}
 </style>
 
 </head>
 <body>
+<div class="pagefx" aria-hidden="true"></div>
 <div class="stack">
   <section class="panel" id="admin" hidden>
     <h2>Link maker</h2>
@@ -209,6 +247,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
   </header>
 
   <main class="booth" id="booth" aria-live="polite">
+    <canvas class="boothfx" id="bgfx" aria-hidden="true"></canvas>
     <button class="soundbtn" id="soundBtn" type="button" aria-pressed="true">Tunog bukas</button>
     <div>
       <p class="eyebrow" id="eyebrow">Win For Life</p>
@@ -219,7 +258,6 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <p class="demo" id="demoTag" hidden>DEMO · kailangan ng link mula sa agent mo para sa totoong premyo</p>
     <p class="cheer" id="cheer"></p>
     <div class="play" id="play"></div>
-    <ul class="ladder" id="ladder" aria-label="Mga premyo" hidden></ul>
     <label class="agree" id="agreeLbl"><input type="checkbox" id="agree"><span>Nabasa ko at sang-ayon ako sa <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button> ng Spin For Life.</span></label>
     <div class="acts"><button class="btn" id="goBtn" type="button"></button><button class="btn ghost" id="resetBtn" type="button">Reset</button></div>
     <div class="win" id="win" hidden>
@@ -239,14 +277,18 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
   </section>
 
   <div class="jp" id="jp" role="dialog" aria-modal="true" aria-labelledby="jpTitle" hidden>
+    <div class="jp-burst"></div>
     <canvas id="confetti"></canvas>
     <div class="jp-card">
-      <p class="jp-title" id="jpTitle">YOU WON!</p>
+      <div class="jp-coin" aria-hidden="true"><i><svg viewBox="0 0 40 40"><g fill="#1fae73" stroke="#0a5a3a" stroke-width="1.4"><circle cx="14" cy="14" r="7.5"/><circle cx="26" cy="14" r="7.5"/><circle cx="14" cy="26" r="7.5"/><circle cx="26" cy="26" r="7.5"/></g><path d="M21 22 Q24 31 31 35" stroke="#0a5a3a" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg></i></div>
+      <img class="jp-logo" id="jpLogo" alt="Win For Life">
+      <p class="jp-ribbon" id="jpTitle">YOU WON!</p>
       <p class="jp-sub" id="jpSub"></p>
       <p class="jp-label">Reward mo</p>
       <p class="jp-amt" id="jpAmt"></p>
-      <p class="jp-note">I-screenshot ito at i-send sa agent mo para ma-credit ang reward.</p>
-      <button class="btn" id="jpClose" type="button">Claim reward</button>
+      <dl class="jp-ticket" id="jpTicket"></dl>
+      <p class="jp-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>I-screenshot ang buong card na ito at i-send sa agent mo para ma-credit ang reward.</span></p>
+      <button class="btn jp-claim" id="jpClose" type="button">Claim reward</button>
     </div>
   </div>
 
@@ -256,8 +298,8 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <ol>
       <li>Open to verified Win For Life players aged 21 and above. Self-excluded, restricted or unverified accounts are not eligible.</li>
       <li>A game is unlocked by a qualifying deposit of at least ₱200, verified by a Win For Life agent, made within the validity window announced by your agent. Pending, failed or reversed deposits do not qualify.</li>
-      <li>Qualification is based on one verified deposit of at least ₱200, not on combined deposits. The prize pool is flat — ₱10, ₱27 or ₱57 — drawn at random (see the chances on the game page).</li>
-      <li>There are three prize amounts, shown on the game page. The game draws one of them at random; the highest amount (₱57) is the jackpot and is the rarest result. In Spin For Life, you press SPIN to turn the roulette wheel, and the pocket where it stops under the gold pointer sets your prize, from Talo (lowest) to Kampeon (jackpot). Every spin wins a prize, and how many pockets show an amount on the wheel does not reflect your actual chances. This is an animated promo game only, not a live roulette or a bet.</li>
+      <li>Qualification is based on one verified deposit of at least ₱200, not on combined deposits. The prize pool is flat — ₱8.20, ₱16.50 or ₱26 — drawn at random (see the chances on the game page).</li>
+      <li>There are three prize amounts, shown on the game page. The game draws one of them at random; the highest amount (₱26) is the jackpot and is the rarest result. In Spin For Life, you press SPIN to turn the roulette wheel, and the pocket where it stops under the gold pointer sets your prize, from Talo (lowest) to Kampeon (jackpot). Every spin wins a prize, and how many pockets show an amount on the wheel does not reflect your actual chances. The ₱77, ₱177, ₱188 and ₱777 JACKPOT pockets on the wheel are for display only and cannot be won. This is an animated promo game only, not a live roulette or a bet.</li>
       <li>One game per qualifying deposit and per player link. Results are random and final once the game starts. Refreshing the page, reopening the link or using another device does not give another turn. Only the first result confirmed by your agent counts.</li>
       <li>Send a screenshot of your result to your agent. The bonus is credited after the agent verifies your deposit and result, within the time your agent announces.</li>
       <li>The bonus is subject to the turnover requirement set by Win For Life before it can be withdrawn.</li>
@@ -270,13 +312,13 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 </div>
 
 <script>
-const BRAND={"key": "winforlife", "name": "Win For Life", "labels": ["Talo", "Panalo, dikit", "Kampeon"], "promo": {"name": "Sabong ng Swerte Bonus", "target": "Lahat ng verified Win For Life players", "trig": "Isang verified deposit na ₱200 pataas, bebe-verify-hin ng agent mo", "valid": "Depende sa anunsyo ng iyong agent", "script": "Hi po! Verified na ang deposit mo kaya may Sabong ng Swerte ka na. Pumili ka: Meron o Wala! Ang resulta ng laban ang reward mo, hanggang Kampeon!"}, "confetti": ["#2fe39a", "#ffcf4a", "#a8f5d2", "#ffffff"], "confettiBig": ["#ffcf4a", "#fff1b8", "#e0a800", "#2fe39a"]};
+const BRAND={"key": "winforlife", "name": "Win For Life", "labels": ["Talo", "Panalo, dikit", "Kampeon"], "promo": {"name": "Spin For Life Bonus", "target": "Lahat ng verified Win For Life players", "trig": "Isang verified deposit na ₱200 pataas, bebe-verify-hin ng agent mo", "valid": "Depende sa anunsyo ng iyong agent", "script": "Hi po! Verified na ang deposit mo kaya may Spin For Life ka na. Pindutin ang SPIN at kung saan tumapat ang gintong pointer, iyon ang reward mo, hanggang Kampeon!"}, "confetti": ["#2fe39a", "#ffcf4a", "#a8f5d2", "#ffffff"], "confettiBig": ["#ffcf4a", "#fff1b8", "#e0a800", "#2fe39a"]};
 // ---------- shared helpers ----------
 const $=id=>document.getElementById(id);
 const MIN_DEPOSIT=200;
-const PRIZES=[10,27,57]; // peso amounts, ascending
-const WEIGHTS=[4,95,1]; // % chance matching PRIZES index-for-index, sums to 100
-function php(n){return "₱"+Number(n).toLocaleString()}
+const PRIZES=[8.2,16.5,26]; // peso amounts, ascending (dev build 2026-11-09: ₱8.20 90%, ₱16.50 5%, ₱26 5%)
+const WEIGHTS=[90,5,5]; // % chance matching PRIZES index-for-index, sums to 100
+function php(n){n=Number(n);return "₱"+(Number.isInteger(n)?n.toLocaleString():n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}))}
 function qualifies(d){return d>=MIN_DEPOSIT}
 function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296}
 function drawStep(){let r=rnd()*100;for(let i=0;i<WEIGHTS.length;i++){r-=WEIGHTS[i];if(r<0)return i}return 0}
@@ -319,9 +361,9 @@ function needAgree(){if($("agree").checked)return false;const l=$("agreeLbl");l.
 // ---------- game ----------
 // Sabong ng Swerte: pick Meron or Wala, watch the bout (ulutan, bitaw, sultada); how the bout ends sets the prize
 const GAME=(()=>{
-  const N=12,SEG=360/N,CX=150,CY=150;
+  const CX=150,CY=150;let SEG=30; // SEG = 360 / pocket count, set in svg()
   // prize step shown in each pocket, clockwise from the top; the grand prize (step 2 = Kampeon) appears once
-  const PK=()=>[1,0,1,1,2,1,0,1,1,1,0,1];
+  const PK=()=>[-1,0,1,-3,0,2,-4,0,1,0,0,0,2,-5,0,1]; // -1 ₱188 (top jackpot), -3 ₱77, -4 ₱177, -5 ₱777 jackpot pockets: display only, never drawn (pocketFor only picks pockets of the drawn step)
   const R_HUB=40,R_PK=112,R_TRACK=132,R_RIM=146,R_BALL_OUT=122,R_BALL_IN=103,TILT=34,TILT_WON=16;
   let stage,cam,rotor,blurB,ball,ballSh,ptr,fx,fc,lbl,rot=0,ballA=0,raf=null,idle=null,fxRaf=null,timers=[],parts=[],par=[0,0],spinning=false,done=false;
   const P=(r,d)=>{const t=d*Math.PI/180;return [(CX+r*Math.sin(t)).toFixed(2),(CY-r*Math.cos(t)).toFixed(2)]};
@@ -330,11 +372,12 @@ const GAME=(()=>{
   function wedge(i){const a0=i*SEG-SEG/2,a1=i*SEG+SEG/2,[x0,y0]=P(R_PK,a0),[x1,y1]=P(R_PK,a1),[x2,y2]=P(R_HUB,a1),[x3,y3]=P(R_HUB,a0);
     return "M"+x0+" "+y0+" A"+R_PK+" "+R_PK+" 0 0 1 "+x1+" "+y1+" L"+x2+" "+y2+" A"+R_HUB+" "+R_HUB+" 0 0 0 "+x3+" "+y3+" Z"}
   function svg(ladder){
-    const top=ladder.length-1;let pk="",tx="",bulbs="",dia="",arms="";
-    PK().forEach((st,i)=>{const j=st===top,fill=j?"url(#jpG)":(i%2?"url(#pkB)":"url(#pkG)");
+    SEG=360/PK().length;const small=PK().length>12;const top=ladder.length-1;let pk="",tx="",bulbs="",dia="",arms="";
+    const JP={"-1":188,"-2":888,"-3":77,"-4":177,"-5":777};
+    PK().forEach((st,i)=>{const j=st<0||st===top,fill=j?"url(#jpG)":(i%2?"url(#pkB)":"url(#pkG)");
       pk+="<path class='pk' data-i='"+i+"' d='"+wedge(i)+"' fill='"+fill+"'/>";
-      tx+="<g transform='rotate("+(i*SEG)+" "+CX+" "+CY+")'>"+(j?"<text class='jl' x='"+CX+"' y='"+(CY-68)+"' text-anchor='middle'>JACKPOT</text>":"")+
-        "<text class='amt"+(j?" j":"")+"' x='"+CX+"' y='"+(CY-84)+"' text-anchor='middle'>"+php(ladder[st])+"</text></g>"});
+      tx+="<g transform='rotate("+(i*SEG)+" "+CX+" "+CY+")'>"+(j?"<text class='jl' x='"+CX+"' y='"+(CY-68)+"' text-anchor='middle'"+(small?" style='font-size:9px;letter-spacing:1px'>★★★":">JACKPOT")+"</text>":"")+
+        "<text class='amt"+(j?" j":"")+"'"+(small?" style='font-size:8.5px'":"")+" x='"+CX+"' y='"+(CY-84)+"' text-anchor='middle'>"+php(st<0?JP[st]:ladder[st])+"</text></g>"});
     for(let k=0;k<24;k++){const [x,y]=P(R_RIM-6,k*15+7.5);bulbs+="<circle class='bulb"+(k%3===0?"":k%3===1?" b":"")+"' style='animation-delay:"+(-(k%4)*.125)+"s' cx='"+x+"' cy='"+y+"' r='3.2'/>"}
     for(let k=0;k<8;k++){const a=k*45+22.5,[x,y]=P(R_TRACK-9,a);dia+="<path d='M0 -5 L3 0 L0 5 L-3 0 Z' fill='url(#jpG)' stroke='#5a3c02' stroke-width='.6' transform='translate("+x+" "+y+") rotate("+a+")'/>"}
     for(let k=0;k<4;k++){arms+="<path d='M150 150 L150 "+(150-R_HUB-6)+"' stroke='url(#armG)' stroke-width='5' stroke-linecap='round' transform='rotate("+(k*90+45)+" 150 150)'/><circle cx='150' cy='"+(150-R_HUB-6)+"' r='4.5' fill='url(#hubG)' stroke='#7a5404' stroke-width='.8' transform='rotate("+(k*90+45)+" 150 150)'/>"}
@@ -361,7 +404,7 @@ const GAME=(()=>{
       "<ellipse cx='118' cy='92' rx='70' ry='40' fill='url(#sheenG)' transform='rotate(-30 118 92)' pointer-events='none'/>"+
       "<path class='ptr' id='ptr' d='M138 0 L162 0 L150 27 Z' fill='url(#jpG)' stroke='#5a3c02' stroke-width='1.5'/></svg>"}
   function edges(){let h="";for(let k=1;k<=16;k++){const l=Math.round(62-k*2.4);h+="<div class='edge' style='transform:translateZ("+(-k*1.5)+"px);background:radial-gradient(closest-side,hsl(42 80% "+l+"%) 92%,hsl(40 85% "+(l-14)+"%))'></div>"}return h}
-  function camSet(rx,rz,s,ty){cam.style.transform="rotateX("+(rx+par[1]).toFixed(2)+"deg) rotateY("+par[0].toFixed(2)+"deg) rotateZ("+(rz||0).toFixed(2)+"deg) scale("+(s||1).toFixed(3)+") translateY("+(ty||0).toFixed(1)+"px)"}
+  function camSet(rx,rz,s,ty){rx=TILT;rz=0;s=1;ty=0;par=[0,0]; /* steady wheel: no tilt, zoom or wobble (dev build) */cam.style.transform="rotateX("+(rx+par[1]).toFixed(2)+"deg) rotateY("+par[0].toFixed(2)+"deg) rotateZ("+(rz||0).toFixed(2)+"deg) scale("+(s||1).toFixed(3)+") translateY("+(ty||0).toFixed(1)+"px)"}
   function setRot(a){rot=a;rotor.setAttribute("transform","rotate("+a.toFixed(2)+" 150 150)")}
   function setBall(){}
   function blur(v){if(v<.2){rotor.removeAttribute("filter");return}blurB.setAttribute("stdDeviation",v.toFixed(2));rotor.setAttribute("filter","url(#mb)")}
@@ -370,7 +413,7 @@ const GAME=(()=>{
   function flick(){ptr.animate([{transform:"rotate(-16deg)"},{transform:"rotate(0)"}],{duration:140,easing:"ease-out"})}
   // ---------- particles (screen space, drawn on a canvas over the wheel) ----------
   function ballXY(){const r=ptr.getBoundingClientRect(),c=fx.getBoundingClientRect();return [r.left+r.width/2-c.left,r.bottom-c.top]}
-  function spark(x,y,n,spd){for(let k=0;k<n;k++){const a=rnd()*Math.PI*2,v=(spd||2)*(.4+rnd());parts.push({k:"s",x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-1,life:0,max:28+rnd()*20,sz:1.2+rnd()*2,c:rnd()<.7?"#ffcf4a":"#a8f5d2"})}runFx()}
+  function spark(x,y,n,spd){return; /* sparks off (dev build) */for(let k=0;k<n;k++){const a=rnd()*Math.PI*2,v=(spd||2)*(.4+rnd());parts.push({k:"s",x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-1,life:0,max:28+rnd()*20,sz:1.2+rnd()*2,c:rnd()<.7?"#ffcf4a":"#a8f5d2"})}runFx()}
   function coins(n,big){const c=fx.getBoundingClientRect(),cx=c.width/2,cy=c.height*.46;
     for(let k=0;k<n;k++){const a=-Math.PI/2+(rnd()-.5)*Math.PI*1.5,v=5+rnd()*(big?11:8);parts.push({k:"c",x:cx+(rnd()-.5)*40,y:cy,vx:Math.cos(a)*v,vy:Math.sin(a)*v,z:rnd(),life:0,max:90+rnd()*50,sz:6+rnd()*5,rot:rnd()*6,vr:.15+rnd()*.3})}
     spark(cx,cy,big?70:35,6);runFx()}
@@ -390,7 +433,7 @@ const GAME=(()=>{
   function rumble(dur){const a=audio();if(!a)return;const o=a.createOscillator(),g=a.createGain(),t=a.currentTime;o.type="sawtooth";o.frequency.setValueAtTime(48,t);o.frequency.linearRampToValueAtTime(30,t+dur);
     const f=a.createBiquadFilter();f.type="lowpass";f.frequency.value=160;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.12,t+.4);g.gain.linearRampToValueAtTime(0,t+dur);o.connect(f).connect(g).connect(a.destination);o.start(t);o.stop(t+dur)}
   // ---------- idle: wheel turns slowly and leans toward the pointer/finger ----------
-  function startIdle(){if(idle||reduce()||done)return;let last=performance.now();const f=now=>{const dt=now-last;last=now;setRot(rot+dt*.012);camSet(TILT,0,1);idle=requestAnimationFrame(f)};idle=requestAnimationFrame(f)}
+  function startIdle(){return; /* wheel stays still until SPIN (dev build) */if(idle||reduce()||done)return;let last=performance.now();const f=now=>{const dt=now-last;last=now;setRot(rot+dt*.012);camSet(TILT,0,1);idle=requestAnimationFrame(f)};idle=requestAnimationFrame(f)}
   function stopIdle(){if(idle)cancelAnimationFrame(idle);idle=null}
   function rest(p,big){stopIdle();done=true;setRot(-p*SEG);setBall(0,R_BALL_IN,0);highlight(p);stage.classList.add("won");stage.classList.toggle("big",!!big);camSet(TILT_WON,0,.98)}
   const G={label:"Spin For Life",title:"SPIN FOR LIFE",btn:"SPIN!",
@@ -435,7 +478,7 @@ const GAME=(()=>{
           if(t>.9&&!caught){caught=true;cheer("Saan kaya titigil?")}
         }
         if(t<1){raf=requestAnimationFrame(frame);return}
-        raf=null;spinning=false;done=true;blur(0);noise(.09,.6,2400);beep(110,.18,.18,"sine");stage.animate([{transform:"translate(0,0)"},{transform:"translate(-4px,2px)"},{transform:"translate(3px,-2px)"},{transform:"translate(0,0)"}],{duration:220});{const [x,y]=ballXY();spark(x,y,16,3)}setRot(mod(W));setBall(mod(W+p*SEG),R_BALL_IN,0);
+        raf=null;spinning=false;done=true;blur(0);noise(.09,.6,2400);beep(110,.18,.18,"sine");{const [x,y]=ballXY();spark(x,y,16,3)}setRot(mod(W));setBall(mod(W+p*SEG),R_BALL_IN,0);
         stage.classList.remove("spinning");stage.classList.add("won");stage.classList.toggle("big",big);highlight(p);
         cam.classList.add("settle");camSet(TILT_WON,0,.98);T(()=>cam.classList.remove("settle"),1100);
         coins(big?110:45,big);whoosh(.6,2000,600,.2);
@@ -463,6 +506,27 @@ const ctx={
   agreed(){return !needAgree()},
   done(){busy=false;$("resetBtn").disabled=false;finishView(true)}
 };
+// ---------- booth backdrop: gold and emerald lights, twinkles and clovers, drawn once (static, dev build 2026-11-09) ----------
+(()=>{
+  const cv=$("bgfx"),booth=$("booth");let c=null;try{c=cv&&cv.getContext("2d")}catch(e){}if(!c)return;let W=0,H=0,items=[];
+  function size(){const d=Math.min(2,window.devicePixelRatio||1);W=booth.clientWidth;H=booth.clientHeight;cv.width=W*d;cv.height=H*d;c.setTransform(d,0,0,d,0,0);seed()}
+  function mk(kind,y){const r=Math.random;
+    if(kind==="b")return {k:"b",x:r()*W,y:y??r()*H,rad:6+r()*22,a:.05+r()*.12,ph:r()*6,col:r()<.6?"255,207,74":"47,227,154"};
+    if(kind==="t")return {k:"t",x:r()*W,y:r()*H,s:2+r()*4,ph:r()*6,sp:.02+r()*.04};
+    return {k:"c",x:r()*W,y:y??r()*H,s:5+r()*6,rot:r()*6,a:.10+r()*.14}}
+  function seed(){const n=Math.round(W*H/9000);items=[];for(let i=0;i<n;i++)items.push(mk("b"));for(let i=0;i<n*.7;i++)items.push(mk("t"));for(let i=0;i<n*.35;i++)items.push(mk("c"))}
+  function clover(x,y,s,rot,a){c.save();c.translate(x,y);c.rotate(rot);c.globalAlpha=a;c.fillStyle="#2fe39a";
+    for(let k=0;k<4;k++){const an=k*Math.PI/2+Math.PI/4;c.beginPath();c.arc(Math.cos(an)*s*.55,Math.sin(an)*s*.55,s*.55,0,7);c.fill()}
+    c.strokeStyle="#2fe39a";c.lineWidth=s*.18;c.beginPath();c.moveTo(0,0);c.quadraticCurveTo(s*.3,s*.9,s*.8,s*1.2);c.stroke();c.restore()}
+  function draw(t){c.clearRect(0,0,W,H);
+    for(const p of items){
+      if(p.k==="b"){const g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,p.rad),al=p.a*(.7+.3*Math.sin(t/900+p.ph));g.addColorStop(0,"rgba("+p.col+","+al+")");g.addColorStop(1,"rgba("+p.col+",0)");c.fillStyle=g;c.beginPath();c.arc(p.x,p.y,p.rad,0,7);c.fill()}
+      else if(p.k==="t"){const tw=Math.max(0,Math.sin(t*p.sp/16+p.ph));if(tw<.05)continue;const s=p.s*tw;c.globalAlpha=tw*.8;c.fillStyle="#fff6cf";
+        c.beginPath();c.moveTo(p.x,p.y-s*2);c.lineTo(p.x+s*.35,p.y-s*.35);c.lineTo(p.x+s*2,p.y);c.lineTo(p.x+s*.35,p.y+s*.35);c.lineTo(p.x,p.y+s*2);c.lineTo(p.x-s*.35,p.y+s*.35);c.lineTo(p.x-s*2,p.y);c.lineTo(p.x-s*.35,p.y-s*.35);c.closePath();c.fill();c.globalAlpha=1}
+      else clover(p.x,p.y,p.s,p.rot,p.a)}}
+  size();if("ResizeObserver" in window)new ResizeObserver(()=>{size();draw(0)}).observe(booth);else addEventListener("resize",()=>{size();draw(0)});
+  draw(0);
+})();
 function renderMech(){
   const off=BRAND.promo;
   $("mechOffer").textContent=off.name;
@@ -484,10 +548,9 @@ function buildView(){
   $("play").innerHTML="";$("win").hidden=true;$("cheer").textContent="";
   busy=false;$("resetBtn").disabled=false;
   $("goBtn").hidden=!GAME.btn;$("goBtn").textContent=GAME.btn||"";
-  if(!q){$("range").textContent="Hinihintay pa ang qualified na deposit (minimum ₱200).";$("ladder").innerHTML="";$("goBtn").disabled=true;$("note").textContent="";return}
+  if(!q){$("range").textContent="Hinihintay pa ang qualified na deposit (minimum ₱200).";$("goBtn").disabled=true;$("note").textContent="";return}
   ladder=PRIZES;
   $("range").innerHTML="Mga premyo namin, hanggang <b>₱777</b> ang halaga!";
-  $("ladder").innerHTML=ladder.map((v,i)=>"<li"+(i===PRIZES.length-1?" class='top'":"")+(GAME.chip?" style='"+GAME.chip(i)+"'":"")+">"+BRAND.labels[i]+"<b>"+php(v)+"</b></li>").join("");
   $("note").textContent=GAME.note;
   $("goBtn").disabled=false;$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));
   state=load();
@@ -496,12 +559,11 @@ function buildView(){
 }
 function finishView(celebrate){
   const amt=ladder[state.step],big=state.step===PRIZES.length-1;
-  [...$("ladder").children].forEach((li,i)=>li.classList.toggle("on",i===state.step));
   $("amt").textContent=php(amt);$("winNote").textContent=BRAND.labels[state.step]+(big?" · Jackpot!":"");
   $("win").hidden=false;$("goBtn").disabled=true;$("goBtn").textContent="Nalaro mo na";
   if(mode==="player")$("resetBtn").disabled=true;
   cheer(big?"JACKPOT!":"You Won!");
-  if(celebrate){postWin(amt);setTimeout(()=>openWin(amt,big),reduce()?50:450)}
+  if(celebrate){if(mode==="player")postWin(amt);setTimeout(()=>openWin(amt,big),reduce()?50:450)} // demo/admin previews never reach the ledger
 }
 function postWin(amt){try{fetch("https://wins-ledger-production.up.railway.app/api/win",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({brand:"winforlife",game:"Spin For Life",name:cfg.name||"",code:cfg.code,amount:amt,link:location.href})}).catch(()=>{})}catch(e){}}
 $("goBtn").onclick=()=>{if(GAME.go)GAME.go(ctx)};
@@ -512,13 +574,18 @@ let confettiRAF=null;
 function openWin(amt,big){
   const jp=$("jp"),a=$("jpAmt");jp.classList.toggle("big",big);
   $("jpTitle").textContent=big?"JACKPOT!":"YOU WON!";$("jpSub").textContent=GAME.label+" · "+BRAND.labels[state.step];
+  const logo=document.querySelector(".mark img");if(logo)$("jpLogo").src=logo.src;
+  if(state&&!state.at)ctx.update({at:Date.now()});
+  const when=new Date((state&&state.at)||Date.now()),ref=makeToken(cfg).split(".").pop().toUpperCase();
+  const rows=[["Player",mode==="demo"?"DEMO":(cfg.name||cfg.code)],["Promo",BRAND.promo.name],["Deposit",php(cfg.deposit)],["Date",when.toLocaleString("en-PH",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"})],["Ref code",ref]];
+  const dl=$("jpTicket");dl.innerHTML="";rows.forEach(([k,v])=>{dl.appendChild(el("dt","",k));const d=el("dd",k==="Ref code"?"ref":"");d.textContent=v;dl.appendChild(d)});
   jp.hidden=false;$("jpClose").focus();fanfare(big);
   if(reduce()){a.textContent=php(amt);return}
   const s=performance.now(),dur=big?1600:1100;
-  (function f(now){const k=Math.min(1,(now-s)/dur);a.textContent=php(Math.round(amt*(1-Math.pow(1-k,3))));if(k<1&&!jp.hidden)requestAnimationFrame(f);else a.textContent=php(amt)})(s);
+  (function f(now){const k=Math.min(1,(now-s)/dur);a.textContent=php(Number.isInteger(amt)?Math.round(amt*(1-Math.pow(1-k,3))):Math.round(amt*100*(1-Math.pow(1-k,3)))/100);if(k<1&&!jp.hidden)requestAnimationFrame(f);else a.textContent=php(amt)})(s);
   confetti(big?180:90,big);
 }
-function confetti(count,big){
+function confetti(count,big){return; /* no confetti (dev build) */
   const cv=$("confetti"),c=cv.getContext("2d"),d=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;cv.width=W*d;cv.height=H*d;c.setTransform(d,0,0,d,0,0);
   const cols=big?BRAND.confettiBig:BRAND.confetti;
   const ps=Array.from({length:count},()=>({x:W/2+(rnd()-.5)*80,y:H*.42,vx:(rnd()-.5)*14,vy:-rnd()*14-4,r:4+rnd()*5,c:cols[Math.floor(rnd()*cols.length)],a:rnd()*6,va:(rnd()-.5)*.3}));

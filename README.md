@@ -8,7 +8,7 @@ service deployed from its own branch in this repo.
 | `gopyesta` | Lucky Ferris Wheel | Gopyesta | Flask + Postgres (platform-verified deposits + turnover) |
 | `pots` | Pearl Drop | POTS | static |
 | `rollem` | ROLL IT (3D dice) | Roll'em | Flask + Postgres (live admin↔player sync) |
-| `winforlife` | Tree of Life | Win For Life | static |
+| `winforlife` | Spin For Life (roulette; was Sabong ng Swerte / Tree of Life) | Win For Life | static |
 | `cow` | Cash Cow | COW88 | static |
 | `tamasa` | Triple Tama (slot) | Tamasa | Flask + Postgres (live admin↔player sync) |
 | `gspot` | Power-Up Cards (was Treasure Spot / Gagamba Spot / Loot Drop) | GameSpot | static |
