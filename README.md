@@ -11,7 +11,7 @@ service deployed from its own branch in this repo.
 | `winforlife` | Tree of Life | Win For Life | static |
 | `cow` | Cash Cow | COW88 | static |
 | `tamasa` | Triple Tama (slot) | Tamasa | Flask + Postgres (live admin↔player sync) |
-| `gspot` | Loot Drop | GameSpot | static |
+| `gspot` | Power-Up Cards (was Treasure Spot / Gagamba Spot / Loot Drop) | GameSpot | static |
 | `t2b` | T2B Derby | Time2Bet | static |
 
 `dice-roll-tester/` and `raffle-wheel/` are not deployed as community games (internal tool /
