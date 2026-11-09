@@ -307,6 +307,63 @@ def delete_wins_by_player():
     return jsonify({"ok": True, "deleted": deleted})
 
 
+# ---------- per-brand public winnings report (no password; the token in the URL is the key) ----------
+# Agent brands (GameSpot, Win For Life, Roll'em, Time2Bet) have no server of their own, so their "Links & Winnings"
+# equivalent lives here: every win posted for the brand in a PH date range. The token is derived from the admin password,
+# so no new Railway variable is needed: base64url(HMAC-SHA256(ADMIN_PASSWORD, "report:" + brand))[:32].
+BRAND_LABELS = {"gopyesta": "Gopyesta", "pots": "POTS", "rollem": "Roll'em", "winforlife": "Win For Life", "cow": "COW88",
+                "tamasa": "TamasaPH", "gspot": "GameSpot", "t2b": "Time2Bet"}
+
+
+def report_token(brand: str) -> str:
+    import base64
+    digest = hmac.new(ADMIN_PASSWORD.encode(), ("report:" + brand).encode(), hashlib.sha256).digest()
+    return base64.urlsafe_b64encode(digest).decode().rstrip("=")[:32]
+
+
+def report_access_ok(brand: str, token: str) -> bool:
+    return brand in VALID_BRANDS and bool(token) and hmac.compare_digest(token, report_token(brand))
+
+
+@app.route("/report/<brand>/<token>", methods=["GET"])
+def brand_report_page(brand, token):
+    if not report_access_ok(brand, token):
+        return "Not found", 404
+    return send_from_directory(STATIC_DIR, "report-brand.html")
+
+
+@app.route("/api/report/<brand>/<token>", methods=["GET"])
+def brand_report_api(brand, token):
+    if not report_access_ok(brand, token):
+        return jsonify({"error": "not found"}), 404
+    clauses, params = ["brand=%s"], [brand]
+    date_range_clauses(request.args, clauses, params)
+    where = "WHERE " + " AND ".join(clauses)
+    with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute(f"SELECT id, game, player_name, code, amount, created_at, claimed, revoked, note FROM wins {where} "
+                    "ORDER BY created_at DESC LIMIT 2000", params)
+        rows = cur.fetchall()
+    wins = []
+    for r in rows:
+        wins.append({"id": r["id"], "game": r["game"], "player_name": r["player_name"], "code": r["code"], "amount": r["amount"],
+                     "at": r["created_at"], "status": "revoked" if r["revoked"] else ("sent_to_risk" if r["claimed"] else "pending"),
+                     "note": r["note"]})
+    valid = [w for w in wins if w["status"] != "revoked"]
+    totals = {"wins": len(valid), "revoked": len(wins) - len(valid), "players": len({(w["player_name"] or w["code"]).lower() for w in valid}),
+              "amount": round(sum(float(w["amount"]) for w in valid), 2)}
+    game = wins[0]["game"] if wins else ""
+    return jsonify({"brand": brand, "label": BRAND_LABELS.get(brand, brand), "game": game, "wins": wins, "totals": totals})
+
+
+@app.route("/api/report-links", methods=["GET"])
+def report_links():
+    """Admin-only: the public report link of every brand (so the dashboard password holder can hand them out)."""
+    if not require_admin():
+        return jsonify({"error": "forbidden"}), 403
+    base = request.url_root.rstrip("/")
+    return jsonify({b: f"{base}/report/{b}/{report_token(b)}" for b in sorted(VALID_BRANDS)})
+
+
 @app.route("/")
 def index():
     return send_from_directory(STATIC_DIR, "index.html")
