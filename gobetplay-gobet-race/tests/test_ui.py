@@ -62,7 +62,7 @@ os.environ.update(
     LEDGER_URL="http://127.0.0.1:%d/api/win" % stub.server_address[1],
     PLATFORM="gb", BRAND="gobetplay", BRAND_LABEL="GoBetplay", GAME_NAME="GoBet Race",
     PER_PLAY="200", MAX_PLAYS="5", TURNOVER_MULT="1", WAGER_CATS="all", DAILY_CAP="10000",
-    PRIZES="[[7,95],[27,5],[77,0],[177,0]]", WILD_RATE="0",
+    PRIZES="[[7,93],[17,5],[27,2],[77,0],[177,0]]", WILD_RATE="0",
     DEP_FROM="00:00", DEP_TO="23:59", PLAY_FROM="00:00", PLAY_UNTIL="23:59",  # so this runs at any hour
     REPORT_SHARE_TOKEN="test-share-token",
 )
@@ -186,7 +186,7 @@ with sync_playwright() as pw:
         ok(len(posts) == 1, "the server posted exactly one win to the ledger", posts)
         amount = posts[0]["amount"] if posts else None
         if posts:
-            ok(posts[0]["brand"] == "gobetplay" and amount in (7, 27),
+            ok(posts[0]["brand"] == "gobetplay" and amount in (7, 17, 27),
                "the ledger payload is the real drawn prize", posts[0])
 
         # winner finishes ~15s in, then the result card appears
@@ -201,7 +201,12 @@ with sync_playwright() as pw:
         res_next = txt("#resNext")
         if amount is not None:
             ok(str(amount) in res_next, "the result card states the amount actually won", res_next[:170])
-            ok((place == 3) == (amount == 27), "the finishing place matches the prize drawn", (place, amount))
+            # the amount decides the place through the page's prize-by-place table
+            want = {27: 3, 17: 4}.get(amount)
+            if want:
+                ok(place == want, "P%d finishes %dth" % (amount, want), (place, amount))
+            else:
+                ok(place >= 5, "P7 finishes 5th-8th", (place, amount))
 
         # ---------- 3. a refresh does not re-roll ----------
         # Once the result has been shown the play is marked seen, so a refresh correctly returns to the

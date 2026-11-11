@@ -169,7 +169,7 @@ textarea{width:100%;min-height:180px;resize:vertical;font:600 16px/1.4 var(--bod
         <h2 id="lobbyTitle">Racers</h2>
         <p class="lhint" id="lhint"></p>
         <div class="slots" id="slots"></div>
-        <table class="prizes" aria-label="Prizes and player chances"><thead><tr><th>Place</th><th>Prize</th><th>Player chance</th></tr></thead><tbody id="prizeBody"></tbody></table>
+        <table class="prizes" aria-label="Prize for each finishing place"><thead><tr><th>Place</th><th>Prize</th></tr></thead><tbody id="prizeBody"></tbody></table>
         <p class="lhint" id="oddsNote"></p>
       <div class="gbrules">
         <h3>How it works</h3>
@@ -177,7 +177,7 @@ textarea{width:100%;min-height:180px;resize:vertical;font:600 16px/1.4 var(--bod
           <li><b>One deposit of &#8369;200 or more</b> made between <b>12:00 PM and 9:00 PM</b> (Philippine time) = <b>1 free race</b>, up to <b>5 per day</b>. A bigger deposit is still 1 race &mdash; deposit again for another race.</li>
           <li>Each race unlocks once your turnover for the day reaches <b>1&times; that deposit</b> &mdash; bets on any game count. So a &#8369;5,000 deposit needs &#8369;5,000 of turnover before its race opens. Your deposits and turnover are read from your account automatically.</li>
           <li>Ask your agent for your personal link. It works until <b>11:59 PM</b> on the day it was issued and <b>expires at midnight</b>.</li>
-          <li>Prizes go by finishing place. <b>1st (&#8369;177) and 2nd (&#8369;77) are display only and can never be won.</b></li>
+          <li>Prizes go by finishing place: <b>3rd &#8369;27 &middot; 4th &#8369;17 &middot; 5th&ndash;8th &#8369;7</b>. <b>1st (&#8369;177) and 2nd (&#8369;77) are display only and can never be won by a player</b> &mdash; those two places always go to the house carabaos.</li>
           <li>Total bonus paid by this promo is capped at <b>&#8369;10,000 per day</b> for all players.</li>
         </ul>
         <p class="gbtnc">Your bonus is drawn by the server the moment you press Start and is recorded automatically &mdash; it is credited the following day at 1:00 PM after verification. Refreshing or reopening your link shows the same race again and never gives an extra one. This is an animated promo game only, not a bet.</p>
@@ -240,7 +240,7 @@ let players=['#1','#2','#3','#4','#5','#6','#7'],forcedWinner=null;
 
 function setPlayers(list){const c=[...new Set(list.map(s=>String(s).trim().slice(0,18)).filter(Boolean))].slice(0,7);if(c.length<2)return false;players=c;
   try{localStorage.setItem('kalabaw-names',JSON.stringify(c))}catch(e){}return true;}
-const PRIZES=[177,77,27,7,7,7,7,7],FIELD=8,MAX_SLOTS=5,HOUSE_N=0,HOUSE_NAMES=[],HOUSE_COLOR=0x1b1b1b;
+const PRIZES=[177,77,27,17,7,7,7,7],FIELD=8,MAX_SLOTS=5,HOUSE_N=0,HOUSE_NAMES=[],HOUSE_COLOR=0x1b1b1b;
 // Place chances for every real player (admin only, Ron): 1st ₱177 0% · 2nd ₱77 0% · 3rd ₱27 5% · 4th ₱7 80% · 5th–8th ₱7 share the other 15%.
 // Empty lanes are filled with random usernames so every racer looks like a player; 1st and 2nd always go to them.
 const P3=.05,P4_GIVEN_NOT3=80/95;
@@ -1289,8 +1289,8 @@ $('resetBtn').onclick=()=>{if(mode!=='demo')return;newRace();};
 window.TamarawRace.start=startRace;window.TamarawRace.reset=()=>newRace();
 window.__dbg={cam:null,get state(){return state},set phase(v){phaseT=v},set rt(v){raceT=v},snap(){snapCam=true},racers:()=>racers};
 function renderOdds(np){
-  const rows=[['1st',177,'0%'],['2nd',77,'0%'],['3rd',27,'5%'],['4th',7,'80%'],['5th–8th',7,'15%']];
-  $('prizeBody').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');}
+  const rows=[['1st',177],['2nd',77],['3rd',27],['4th',17],['5th–8th',7]];
+  $('prizeBody').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${php(r[1])}</td></tr>`).join('');}
 
 function applySlotNames(){const vals=[...document.querySelectorAll('.sname')].map(x=>x.value.trim().slice(0,18)).filter(Boolean);
   const uniq=[...new Set(vals)];const same=uniq.length===players.length&&uniq.every((v,k)=>v===players[k]);if(same)return;
