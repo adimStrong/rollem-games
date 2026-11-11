@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GoBet Race — Verify Winner</title>
+<style>
+  [hidden]{display:none!important}
+  :root{--bg:#0a0a0a;--card:#141414;--line:#2b2b2b;--ink:#f5f5f5;--mute:#9a9a9a;--green:#aeff40}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Barlow Condensed",sans-serif;padding:16px}
+  .wrap{max-width:760px;margin:0 auto}
+  h1{font-size:20px;margin:0 0 2px;letter-spacing:.02em}
+  .sub{color:var(--mute);font-size:13px;margin:0 0 14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+  label{display:grid;gap:4px;font-size:12px;color:var(--mute)}
+  input{font:inherit;background:#0e0e0e;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+  button{font:inherit;font-weight:700;background:var(--green);color:#08210a;border:0;border-radius:8px;padding:9px 14px;cursor:pointer}
+  .tot{font-weight:800;color:var(--green)}
+  .scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;min-width:520px}
+  th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);padding:6px 8px;border-bottom:1px solid var(--line)}
+  td{padding:7px 8px;border-bottom:1px solid #1e1e1e}
+  td:last-child,th:last-child{text-align:right}
+  .empty{color:var(--mute);padding:14px 8px}
+  .note{color:var(--mute);font-size:12px;margin:10px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>GoBet Race — Verify Winner</h1>
+  <p class="sub">Every finished race and the bonus each player won, straight from the game's own records. No password needed: the long code in this link is the key.</p>
+  <div class="card">
+    <div class="row">
+      <label>From <input id="from" type="date"></label>
+      <label>To <input id="to" type="date"></label>
+      <button id="go" type="button">Show</button>
+    </div>
+  </div>
+  <div class="card">
+    <p class="sub" id="meta">Loading…</p>
+    <div class="scroll"><table><thead><tr><th>Date</th><th>Race</th><th>Player</th><th>Place</th><th>Bonus</th></tr></thead><tbody id="rows"></tbody></table></div>
+    <p class="note">Only real players are listed. The racers that finish 1st and 2nd are house racers, and those places are display-only — they can never be won by a player.</p>
+  </div>
+</div>
+<script>
+// the share token is the last path segment of this page's own URL
+var TOKEN = location.pathname.split("/").filter(Boolean).pop() || "";
+function phToday(){ return new Date(Date.now() + 8*3600e3).toISOString().slice(0,10); }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+  return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[c]; }); }
+function peso(n){ var v = Number(n) || 0; return "₱" + (v === Math.round(v) ? v.toLocaleString("en-US")
+  : v.toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2})); }
+function load(){
+  var f = document.getElementById("from").value, t = document.getElementById("to").value;
+  var q = "/api/report?token=" + encodeURIComponent(TOKEN)
+        + (f ? "&from=" + encodeURIComponent(f) : "") + (t ? "&to=" + encodeURIComponent(t) : "");
+  document.getElementById("meta").textContent = "Loading…";
+  fetch(q, {cache:"no-store"}).then(function(r){
+    if (!r.ok) throw new Error(r.status === 403 ? "This link is not valid." : "Could not load (" + r.status + ").");
+    return r.json();
+  }).then(function(j){
+    var rows = j.rows || [];
+    document.getElementById("rows").innerHTML = rows.length
+      ? rows.map(function(x){ return "<tr><td>" + esc(x.date) + "</td><td>" + esc(x.race) + "</td><td>"
+          + esc(x.account) + (x.name ? ' <span style="color:var(--mute)">' + esc(x.name) + "</span>" : "")
+          + "</td><td>" + esc(x.place) + "</td><td>" + peso(x.prize) + "</td></tr>"; }).join("")
+      : '<tr><td colspan="5" class="empty">No finished races in this range yet.</td></tr>';
+    document.getElementById("meta").innerHTML = esc(j.brand) + " · " + esc(j.game) + " · "
+      + esc(j.from) + " to " + esc(j.to) + " · " + rows.length + " win" + (rows.length === 1 ? "" : "s")
+      + ' · total <span class="tot">' + peso(j.total) + "</span>";
+  }).catch(function(e){ document.getElementById("meta").textContent = e.message; });
+}
+document.getElementById("to").value = phToday();
+document.getElementById("from").value = phToday();
+document.getElementById("go").onclick = load;
+load();
+</script>
+</body>
+</html>
