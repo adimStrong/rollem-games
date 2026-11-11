@@ -769,7 +769,7 @@ const WILD_RATE=0,WILD_PRIZES=[...PRIZES,777],WILD_WEIGHTS=[90,10,0],WILD_BIG=1;
 const TEST_PATTERN=false; // live: wild is a random 5% of plays. (true = test pattern normal, normal, wild, wild, …)
 // test-pattern position: on an agent link = the play index on that link; in demo/admin preview = a counter kept in localStorage that Reset does not clear
 function testIdx(){if(mode==="player")return plays().length;let n=plays().length;try{const k=BRAND.key+"-testcount";n=parseInt(localStorage.getItem(k),10)||0;localStorage.setItem(k,String(n+1))}catch(e){}return n}
-function playsFor(d){return Math.floor((d||0)/PLAY_DEP)}
+function playsFor(d){return (+d||0)>=PLAY_DEP?1:0}
 function php(n){n=Number(n);return "₱"+(Number.isInteger(n)?n.toLocaleString("en-US"):n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}))}
 function php2(n){return "₱"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}
 function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296}
@@ -1231,8 +1231,8 @@ function adminUI(){
   if(document.activeElement!==$("deposit"))$("deposit").value=cfg.deposit||"";
   if(document.activeElement!==$("code"))$("code").value=cfg.code;
   const n=playsFor(cfg.deposit),tb=$("aTier");
-  if(n){tb.className="tierbox";tb.innerHTML="<b>"+n+" play"+(n>1?"s":"")+"</b> ("+php(cfg.deposit)+" ÷ "+php(PLAY_DEP)+") on this one link · bonus per play <b>"+PRIZES.map(php2).join(" / ")+"</b> · the ₱77 and ₱777 cards are display only (never won)"}
-  else{tb.className="tierbox bad";tb.innerHTML="<b>Not qualified.</b> The minimum deposit is "+php(PLAY_DEP)+" (1 play per "+php(PLAY_DEP)+"). The game is locked on this link."}
+  if(n){tb.className="tierbox";tb.innerHTML="<b>1 play</b> (one deposit of "+php(PLAY_DEP)+" or more = 1 play, a bigger deposit is still 1) on this one link · bonus per play <b>"+PRIZES.map(php2).join(" / ")+"</b> · the ₱77 and ₱777 cards are display only (never won)"}
+  else{tb.className="tierbox bad";tb.innerHTML="<b>Not qualified.</b> The minimum deposit is "+php(PLAY_DEP)+" (one deposit of "+php(PLAY_DEP)+" or more = 1 play). The game is locked on this link."}
   $("plink").textContent=playerLink();
   const noClock=clockState!=="ok",mm=srvMin(),amsg=$("aMsg");
   if($("copyLink"))$("copyLink").disabled=noClock;
@@ -1276,7 +1276,7 @@ function unlockAdmin(){
   $("deposit").addEventListener("input",e=>{const v=e.target.value;cfg.deposit=v===""?0:Math.max(0,Math.min(999999,Math.floor(+v)));changed()});
   $("newLink").onclick=()=>{cfg.nonce=Date.now().toString(36);changed();$("aMsg").textContent="This is a new link. The player can play again with it; do not use the old one anymore."};
   $("copyLink").onclick=()=>copyText(playerLink(),$("copyLink"));
-  $("copyMsg").onclick=()=>{const n=playsFor(cfg.deposit);if(!n){$("aMsg").textContent="Enter a qualifying deposit first.";return}copyText(LINK_NOTE+"\n\n"+BRAND.script+" You have "+n+" play"+(n>1?"s":"")+".\n\nPlay here: "+playerLink(),$("copyMsg"))};
+  $("copyMsg").onclick=()=>{const n=playsFor(cfg.deposit);if(!n){$("aMsg").textContent="Enter a qualifying deposit first.";return}copyText(LINK_NOTE+"\n\n"+BRAND.script+" You have 1 play on this link.\n\nPlay here: "+playerLink(),$("copyMsg"))};
   $("fUsers").addEventListener("input",formulaUI);$("fDep").addEventListener("input",formulaUI);formulaUI();
   adminUI();
   if(clockState==="ok"){cfg.day=srvDay();changed()}
