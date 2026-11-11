@@ -46,6 +46,7 @@ BRAND = os.environ.get("BRAND", "pots")                  # wins-ledger brand slu
 BRAND_LABEL = os.environ.get("BRAND_LABEL", "POTS")
 GAME_NAME = os.environ.get("GAME_NAME", "Pearl Mine")
 platform = importlib.import_module("platform_" + PLATFORM)
+WAGER_VERB = getattr(platform, "WAGER_VERB", "mag-slots")   # Taglish gate reason verb ("mag-slots pa ng ₱X" / "mag-bet pa ng ₱X")
 
 # ---- mechanics (env-overridable, same knobs as the wheel) ----
 PER_PLAY = float(os.environ.get("PER_PLAY", "150"))        # pesos of Success deposit per play
@@ -56,7 +57,7 @@ DAILY_CAP = float(os.environ.get("DAILY_CAP", "10000"))
 DEP_FROM = os.environ.get("DEP_FROM", "12:00")   # deposits counted from (inclusive, HH:MM)
 DEP_TO = os.environ.get("DEP_TO", "21:00")       # deposits counted until (exclusive)
 PLAY_FROM = os.environ.get("PLAY_FROM", DEP_FROM)
-PLAY_UNTIL = os.environ.get("PLAY_UNTIL", "21:00")
+PLAY_UNTIL = os.environ.get("PLAY_UNTIL", "23:59")   # plays stay usable to end of day; the link still dies at midnight (biz_date)
 # prize ladder: [[pesos, weight], ...]; weight 0 = display-only tier that is never drawn
 _DEFAULT_PRIZES = "[[7,90],[17,10],[27,0],[57,0],[77,0],[777,0]]"  # 777 = display-only top rung (JD 2026-11-06, like the wheel)
 PRIZES = [{"amt": float(a), "w": float(w)} for a, w in json.loads(os.environ.get("PRIZES") or _DEFAULT_PRIZES)]
@@ -310,7 +311,7 @@ def summary(cur, user, date):
     elif not dep_ok:
         missing.append("mag-deposit pa ng ₱%s" % f"{PER_PLAY * next_no - dep_total:,.0f}")
     if not bet_ok:
-        missing.append("mag-slots pa ng ₱%s" % f"{need - slot_today:,.0f}")
+        missing.append("%s pa ng ₱%s" % (WAGER_VERB, f"{need - slot_today:,.0f}"))
     wg = wager(cur, uid)
     cur.execute("SELECT * FROM cg_plays WHERE user_id=%s AND status='paid' ORDER BY created_at DESC LIMIT 30", (uid,))
     hist = [pub_play(dict(r)) for r in cur.fetchall()]
