@@ -378,20 +378,20 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
       <p class="hint" id="dbNote" hidden></p>
       <div class="fx">
         <h3>Make a player link</h3>
-        <p class="hint">Type the player's username and the verified deposit, then copy the link. Every ₱200 = 1 run. Check the deposit and the <b>1× slot games</b> turnover yourself before sending.</p>
-        <label class="field"><span>Player code or username</span><input class="inp" id="code" type="text" autocomplete="off" spellcheck="false"></label>
+        <p class="hint">Type the player's username, user ID or game ID and press Check. The deposits and turnover are read from the Time2Bet database — you do not type an amount, and a link can only be made for a player who actually qualifies.</p>
+        <label class="field"><span>Player username, user ID or game ID</span><input class="inp" id="code" type="text" autocomplete="off" spellcheck="false"></label>
         <div class="two">
-          <label class="field"><span>Deposit today</span><div class="money"><span>₱</span><input class="inp" id="deposit" type="number" min="0" step="1" inputmode="numeric"></div></label>
+          <label class="field" hidden><span>Deposit today</span><div class="money"><span>₱</span><input class="inp" id="deposit" type="number" min="0" step="1" inputmode="numeric"></div></label>
           <label class="field" hidden><span>Slot games TO today (optional)</span><div class="money"><span>₱</span><input class="inp" id="toAmt" type="number" min="0" step="1" inputmode="numeric"></div></label>
         </div>
         <div class="btnrow" hidden><button class="btn small ghost" id="toSave" type="button">Save to today's list (optional)</button></div>
         <div class="tierbox" id="aTier"></div>
       </div>
-      <div class="field"><span>Offer</span><div class="chips" id="aOffers"></div></div>
-      <div class="offerbox" id="offerBox"></div>
+      <div class="field" hidden><span>Offer</span><div class="chips" id="aOffers"></div></div>
+      <div class="offerbox" id="offerBox" hidden></div>
       <div class="field"><span>Player link</span>
         <div class="linkrow"><code id="plink">—</code></div>
-        <div class="btnrow"><button class="btn small" id="copyLink" type="button">Copy link</button><button class="btn small" id="copyMsg" type="button">Copy message + link</button><button class="btn small ghost" id="newLink" type="button">New link (reset)</button></div>
+        <div class="btnrow"><button class="btn small" id="copyLink" type="button">Copy link</button><button class="btn small" id="copyMsg" type="button">Copy message + link</button><button class="btn small ghost" id="newLink" type="button">New link</button></div>
       </div>
       <p class="hint" id="aMsg"></p>
       <div class="fx" hidden>
@@ -416,7 +416,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
         <p class="hint" id="agMsg"></p>
         <div class="tblwrap"><table class="ptab"><thead><tr><th>Agent</th><th>Status</th><th>Added</th><th></th></tr></thead><tbody id="agRows"></tbody></table></div>
       </div>
-      <div class="fx" id="fx">
+      <div class="fx" id="fx" hidden>
         <h3>Estimated formula (internal only)</h3>
         <p class="hint">For admins only; players never see this. Change users or deposit to recalculate.</p>
         <div class="two">
@@ -479,10 +479,10 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <h3>Terms &amp; Conditions</h3>
     <ol>
       <li>Open to verified Time2Bet players aged 21 and above. Self-excluded, restricted or unverified accounts are not eligible.</li>
-      <li>Runs are unlocked by a qualifying deposit verified by a Time2Bet agent, made between 2 PM and 9 PM and within the validity period of your offer. Pending, failed or reversed deposits do not qualify.</li>
+      <li>Runs are unlocked by a qualifying deposit verified by a Time2Bet agent, made between 12 PM and 9 PM (Philippine time) on the day you play. Pending, failed or reversed deposits do not qualify.</li>
       <li>Every ₱200 of one verified qualifying deposit gives 1 run (for example, ₱600 = 3 runs). The minimum deposit is ₱200.</li>
-      <li>In each run you pick one of six horses before the race, and your horse's finishing place sets your prize. Prizes are random in every run, and which horse you pick makes no difference.</li>
-      <li>The promo runs daily from 2 PM to 9 PM. Total promo bonus is capped at ₱10,000 per day; once the cap is reached, the promo closes for the day.</li>
+      <li>In each run you pick one of six horses before the race, and your horse's finishing place sets your prize. The prize is drawn by the game server before the race runs, so which horse you pick makes no difference and refreshing the page cannot change the result.</li>
+      <li>The promo runs daily: deposits qualify from 12 PM to 9 PM, and the runs on your link must be used by 11:59 PM the same day — your link stops working at midnight and cannot be used the next day. Total promo bonus is capped at ₱10,000 per day; once the cap is reached, the promo closes for the day.</li>
       <li>The number of runs on your player link is set by your verified deposit. Results are random and final once a race starts. Refreshing the page, reopening the link or using another device does not give another turn. Only the first result confirmed by your agent counts.</li>
       <li>Send a screenshot of your result to your agent. The bonus is credited after the agent verifies your deposit and result, within the time your agent announces.</li>
       <li>Only bets on slot games are valid for this promo. The bonus must be wagered 1× (Wager ×1) on slot games before it can be withdrawn.</li>
@@ -498,38 +498,60 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 const BRAND={"key": "t2b", "name": "Time2Bet", "labels": ["6th place", "5th place", "4th place", "3rd place", "2nd place", "1st place"], "offers": {"Reactivation": {"name": "Time-In Bonus", "target": "No deposit in the last 30+ days", "trig": "First verified deposit after the Tele call (Voiso call + SMS)", "valid": "3 days from the call", "script": "Hi! It's time-in again at Time2Bet! Your deposit is verified, so you get a Time 2 Race. Pick your horse, and the place it finishes in sets your reward!"}, "VIP": {"name": "Prime Time VIP", "target": "Top depositors / VIP-tagged players", "trig": "Reached the monthly deposit target", "valid": "Monthly, credited on the 1st", "script": "You're now part of Prime Time VIP. You hit your monthly target, so you get a Time 2 Race for your rebate this month. I'm your VIP host."}, "Community": {"name": "Happy Hour Drop", "target": "Active members of the Time2Bet TG group", "trig": "Deposited during the announced Happy Hour (1 hour, at a random time each week)", "valid": "During Happy Hour only", "script": "Happy Hour Drop! You deposited during Happy Hour, so you get a Time 2 Race. Hope your horse finishes 1st!"}}, "confetti": ["#ffcc33", "#ffffff", "#5d8bff"], "confettiBig": ["#ffcc33", "#fff1b8", "#ffffff", "#5d8bff"]};
 // ---------- shared helpers ----------
 const $=id=>document.getElementById(id);
-// Campaign sheet: every ₱200 deposit = 1 run; slot games only; Wager ×1; 2 PM–9 PM; max bonus ₱10,000/day
-const RUN_DEP=200,WAGER_X=1,DAILY_CAP=10000,HOURS="2 PM–9 PM",MAX_RUNS=5;
+// Campaign sheet: ONE deposit of ₱200+ = 1 run (a bigger deposit is still 1), max 5 runs/day; Wager ×1; deposits count 12 PM–9 PM, runs usable until 11:59 PM the same day; max bonus ₱10,000/day
+const RUN_DEP=200,WAGER_X=1,DAILY_CAP=10000,HOURS="12 PM–9 PM",MAX_RUNS=5;
 const PRIZES=[8.88,8.88,8.88,8.88,15.88,20.88]; // 6th,5th,4th,3rd,2nd,1st place
 const WEIGHTS=[30,20,20,20,5,5];                // % chance, same order (sum 100)
 function nSteps(){return PRIZES.length}
-function runsFor(d){return (+d||0)>=RUN_DEP?1:0}
+function runsFor(){return mode==="player"?((S&&S.playsTotal)||0):1}
 function php(n){n=Number(n);return "₱"+n.toLocaleString("en-US",n%1?{minimumFractionDigits:2,maximumFractionDigits:2}:{maximumFractionDigits:2})}
 function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296}
-function drawStep(){const W=(GAME&&GAME.weights)||WEIGHTS;let r=rnd()*W.reduce((a,b)=>a+b,0);for(let i=0;i<W.length;i++){r-=W[i];if(r<0)return i}return 0}
+// PRIZES is indexed BY PLACE (0 = 6th ... 5 = 1st). For a real player the amount is already drawn
+// SERVER-SIDE, so this returns the place index that pays exactly that amount; P8.88 sits at 0-3 and
+// the race collapses those to 3rd, so 3 is the right index for it. Demo/admin still draw locally.
+function drawStep(){
+  if(mode==="player"){const i=PRIZES.lastIndexOf(Number(SRV&&SRV.amount));return i<0?3:Math.max(i,3)}
+  const W=(GAME&&GAME.weights)||WEIGHTS;let r=rnd()*W.reduce((a,b)=>a+b,0);
+  for(let i=0;i<W.length;i++){r-=W[i];if(r<0)return i}return 0}
 function shuffle(a){for(let k=a.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
-function tierFor(o,d){const n=runsFor(d);return n>0?{runs:n}:null} // a link qualifies when it carries at least one ₱200 run
+function tierFor(){const n=runsFor();return n>0?{runs:n}:null} // the session decides; "qualifies" now means the DB says so
 const reduce=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
 function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
 function prizeRows(cls){return PRIZES.map((v,i)=>i).reverse().map(i=>"<tr"+(cls&&cls(i)?" class='cur'":"")+"><td>"+BRAND.labels[i]+"</td><td>"+php(PRIZES[i])+"</td><td>"+WEIGHTS[i]+"%</td></tr>").join("")}
 
-// ---------- player links ----------
-// link = #code.<r|v|c><deposit>.<nonce>.<check>; the check stops casual edits to the deposit
-const OK={Reactivation:"r",VIP:"v",Community:"c"},KO={r:"Reactivation",v:"VIP",c:"Community"},OFFERS=["Reactivation","VIP","Community"];
-const SALT="cg~"+BRAND.key+"~26q4";
-const ADMIN_PASS_CHECK="mqxsis"; // h36(shared admin password + SALT) -- same as the previous T2B Derby page (BRAND.key "t2b")
-function h36(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}let g=h;for(let i=s.length-1;i>=0;i--){g^=s.charCodeAt(i)*31;g=Math.imul(g,2246822519)>>>0}return (h.toString(36)+g.toString(36)).slice(0,6)}
-function cleanCode(c){return (c||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,32)}
-function makeToken(c){const body=c.code+"."+OK[c.offer]+c.deposit+"."+c.nonce;return body+"."+h36(body+SALT)}
-function parseToken(t){const p=t.split(".");if(p.length!==4)return null;const [code,od,nonce,chk]=p;
-  if(!/^[a-z0-9]{1,32}$/.test(code)||!/^[rvc]\d{1,6}$/.test(od)||!/^[a-z0-9]{1,12}$/.test(nonce))return null;
-  if(h36(code+"."+od+"."+nonce+SALT)!==chk)return null;return {code,offer:KO[od[0]],deposit:+od.slice(1),nonce}}
-const raw=decodeURIComponent(location.hash.slice(1)).toLowerCase();
-const tok=parseToken(raw);
-let mode=raw==="admin"?"admin":tok?"player":"demo";
-let cfg=mode==="player"?tok:{code:"juan123",offer:"Reactivation",deposit:500,nonce:mode==="admin"?Date.now().toString(36):"demo"};
-let run=0; // which run of this link is on screen (0-based)
-function storeKey(k){return BRAND.key+":"+mode+":"+makeToken(cfg)+":run"+(k==null?run:k)}
+// ---------- cg3 per-link play ----------
+// The hash is just the code the link maker handed out (or "admin"). There is no deposit, no offer
+// letter and no check hash in it: the server decides what this code is entitled to, so there is
+// nothing in the URL worth forging. A code that does not exist simply reports exists:false.
+const RAW=decodeURIComponent(location.hash.slice(1)).trim().toLowerCase();
+const CODE=(RAW!=="admin"&&/^[a-z0-9][a-z0-9._-]{2,63}$/.test(RAW))?RAW:"";
+let mode=RAW==="admin"?"admin":(CODE?"player":"demo");
+let cfg={code:CODE||"juan123"};   // kept: buildView/finishView/the link maker all read cfg.code
+let run=0;                        // which run of this link is on screen (0-based)
+let S=null;                       // the live session from GET /api/session/<code>
+let SRV=null;                     // the play the SERVER drew for the run being animated
+let CONF={perPlay:200,maxPlays:5,turnover:1,dailyCap:10000,depFrom:"12:00",depTo:"21:00",
+          playFrom:"12:00",playUntil:"23:59"};
+let ADM=null;try{ADM=sessionStorage.getItem("t2b-adm-cg3")}catch(e){}
+let busyPlay=false,pollTimer=null;
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function cleanCode(c){return (c||"").trim().toLowerCase().replace(/[^a-z0-9._-]/g,"").slice(0,64)}
+function hm12(s){const a=String(s||"00:00").split(":"),h=+a[0],m=+a[1]||0;
+  return (((h+11)%12)+1)+":"+String(m).padStart(2,"0")+" "+(h>=12?"PM":"AM")}
+function hoursTxt(){return hm12(CONF.depFrom)+"–"+hm12(CONF.depTo)}
+function playEndTxt(){return hm12(CONF.playUntil)}
+async function api(path,opt){
+  const o=Object.assign({headers:{"Content-Type":"application/json"}},opt||{});
+  if(ADM)o.headers["X-Admin-Token"]=ADM;
+  o.cache="no-store";
+  let r,j={};
+  try{r=await fetch(path.replace(/^\//,""),o)}catch(e){return {ok:false,status:0,j:{}}}
+  try{j=await r.json()}catch(e){}
+  return {ok:r.ok,status:r.status,j:j};
+}
+// demo and admin previews still keep their throwaway state locally; a real player's state is the
+// server's, so it cannot be wiped by clearing the browser
+function storeKey(k){return BRAND.key+":cg3:"+(CODE||"demo")+":run"+(k==null?run:k)}
 
 // ---------- sound ----------
 let actx=null,soundOn=true;
@@ -774,8 +796,11 @@ const GAME=(()=>{
 
 // ---------- engine ----------
 let state=null,ladder=[],busy=false;
-function save(){try{localStorage.setItem(storeKey(),JSON.stringify(state))}catch(e){}}
-function load(){try{return JSON.parse(localStorage.getItem(storeKey())||"null")}catch(e){return null}}
+function save(){
+  if(mode==="player"){if(SRV&&state)api("/api/plan/"+CODE,{method:"POST",
+    body:JSON.stringify({id:SRV.id,plan:state})});return}
+  try{localStorage.setItem(storeKey(),JSON.stringify(state))}catch(e){}}
+function load(){return loadRun(run)}   // player: the server's plan; demo/admin: localStorage
 const ctx={
   get ladder(){return ladder},get state(){return state},
   start(extra){state=Object.assign({step:drawStep()},extra||{});save();return state},
@@ -785,55 +810,127 @@ const ctx={
   done(){busy=false;$("resetBtn").disabled=false;finishView(true)}
 };
 function renderMech(){
-  const off=BRAND.offers[cfg.offer];
-  $("mechOffer").textContent=off.name+" · "+cfg.offer;
-  const steps=["<b>Every ₱200 deposit = 1 run.</b> For example, a ₱600 deposit = 3 runs.",
-    "<b>Only for slot games.</b> Wager ×1: the bonus must be wagered 1× before it can be withdrawn.",
-    "<b>"+HOURS+" daily only.</b> Max promo bonus: "+php(DAILY_CAP)+" per day.",
-    "<b>Who can join:</b> "+off.target+".","<b>How to unlock:</b> "+off.trig+". Your agent will verify your deposit and send you your personal game link.","<b>Validity:</b> "+off.valid+"."]
+  $("mechOffer").textContent=GAME.label;
+  const steps=["<b>One deposit of "+php(CONF.perPlay)+" or more = 1 run</b>, up to <b>"+CONF.maxPlays+" runs a day</b>. A bigger deposit is still 1 run — deposit again for another.",
+    "<b>Only for slot games.</b> Wager ×"+CONF.turnover+": the bonus must be wagered before it can be withdrawn.",
+    "<b>Deposits count "+hoursTxt()+".</b> Use your runs until "+playEndTxt()+" the same day; your link stops working at midnight. Max promo bonus: "+php(CONF.dailyCap)+" per day.",
+    "<b>How to unlock:</b> deposit inside the hours above, then ask your agent for your personal game link. Your deposits are read from the Time2Bet system, so nobody types an amount by hand."]
     .concat(GAME.how.map(s=>"<b>"+GAME.label+":</b> "+s))
     .concat(["<b>Prize:</b> Based on your horse's finishing place in each run. Prizes are random in every game.",
       "<b>Claiming:</b> Screenshot the result of each run and send it to your agent. The bonus is credited after verification, with Wager ×1 on slot games before withdrawal.",
-      "<b>Runs per link:</b> One run per link. One deposit of ₱200 or more = 1 run — a bigger deposit is still 1 run, so deposit again and ask your agent for another link (max 5 a day). Even if you refresh or reset, only the first result confirmed by your agent counts."]);
+      "<b>Runs per link:</b> your deposits are read from the Time2Bet system, so the runs on your link are whatever you actually earned. The prize is drawn by the server before the race, and refreshing replays the same race."]);
   $("mechSteps").innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
 }
-function loadRun(k){try{return JSON.parse(localStorage.getItem(storeKey(k))||"null")}catch(e){return null}}
+// A paid play carries its cosmetic race in play.plan, so a refresh (or another device) replays the
+// same race instead of re-rolling, and clearing the browser cannot hand out a second run.
+function loadRun(k){
+  if(mode==="player"){const p=(S&&S.plays)||[],pl=p[k];
+    return (pl&&pl.plan&&pl.plan.step!=null)?Object.assign({},pl.plan):null}
+  try{return JSON.parse(localStorage.getItem(storeKey(k))||"null")}catch(e){return null}}
 function doneRuns(n){const out=[];for(let k=0;k<n;k++){const s=loadRun(k);if(s&&s.step!=null)out.push(PRIZES[s.step])}return out}
 function buildView(){
   renderMech();
-  const t=tierFor(cfg.offer,cfg.deposit),off=BRAND.offers[cfg.offer];
-  const N=t?t.runs:0;run=0;while(run<N-1){const s=loadRun(run);if(s&&s.step!=null)run++;else break}
-  $("eyebrow").textContent=BRAND.name+" · "+off.name;
+  const t=tierFor();
+  const N=t?t.runs:0;
+  // a real player resumes at the first run the SERVER has not paid yet
+  run=mode==="player"?Math.min((S&&S.playsUsed)||0,Math.max(N-1,0)):0;
+  if(mode!=="player"){while(run<N-1){const s=loadRun(run);if(s&&s.step!=null)run++;else break}}
+  // point SRV at the play on screen so closeWin() can clear its unseen flag after a reload
+  if(mode==="player")SRV=((S&&S.plays)||[])[run]||null;
+  $("eyebrow").textContent=BRAND.name;
   $("gameTitle").textContent=GAME.title;
   $("demoTag").hidden=mode!=="demo";
   $("resetBtn").hidden=!(mode==="demo"||mode==="admin");
   $("play").innerHTML="";$("win").hidden=true;$("cheer").textContent="";
   busy=false;$("resetBtn").disabled=false;
   $("goBtn").hidden=!GAME.btn;$("goBtn").textContent=GAME.btn||"";
-  if(!t){$("range").textContent="Waiting for a qualifying deposit.";$("goBtn").disabled=true;$("note").textContent="";return}
+  if(!t){lockLobby();return}
   const rows=PRIZES.map((v,i)=>({l:BRAND.labels[i],v}));ladder=rows.map(r=>r.v);
   $("range").innerHTML="Run <b>"+(run+1)+"</b> of "+N; // prize amounts are shown only after the race (Ron: no prize ladder before play)
   $("note").textContent=GAME.note;
   $("goBtn").disabled=false;$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));
+  // Each hard condition is checked HERE rather than trusting the server's computed `ready`, so a
+  // session that says ready:true while also saying expired/stopped/closed/capped still locks.
+  // The saved run is read FIRST: using up the last run makes playsLeft 0, which is a hard lock, and
+  // the player must still be able to see the result they just won (and after a reload).
+  {const saved=mode==="player"?loadRun(run):null;
+   if(mode==="player"&&hardLock(S)&&!(saved&&saved.step!=null)){lockLobby();return}}
   state=load();
   GAME.build($("play"),ctx);
   if(state&&state.step!=null){GAME.finish(ctx);finishView(false)}
 }
+// Any reason a run must not be startable. Deliberately independent of the server's own `ready`
+// flag: if the two ever disagree, the page refuses rather than letting a race begin.
+function hardLock(s){
+  if(!s)return true;
+  return !s.exists||!!s.expired||!!s.stopped||!s.playOpen||!!s.capped
+    ||(s.playsTotal||0)<=0||(s.playsLeft||0)<=0||!s.ready;
+}
+// why the player cannot start right now, in their own words
+function lockLobby(){
+  $("goBtn").disabled=true;$("note").textContent="";
+  if(mode!=="player"){$("range").textContent="Waiting for a qualifying deposit.";return}
+  if(!S){$("range").textContent="Checking your link…";return}
+  if(!S.exists){$("range").textContent="This link is not valid.";
+    $("note").textContent="Ask your agent for your own game link.";return}
+  if(S.expired){$("range").textContent="This link has expired.";
+    $("note").textContent="It was issued on an earlier day. Deposit again between "+hoursTxt()
+      +" and ask your agent for a new link.";return}
+  if(S.stopped){$("range").textContent="The game is paused.";
+    $("note").textContent=S.stopNote||"Please try again later.";return}
+  if(!S.playOpen){$("range").textContent="Closed for today.";
+    $("note").textContent="The game runs until "+playEndTxt()+". Bukas na ulit.";return}
+  if(S.capped){$("range").textContent="Daily bonus budget reached.";
+    $("note").textContent="Bukas na ulit.";return}
+  if((S.playsTotal||0)<=0||(S.playsLeft||0)<=0){
+    $("range").textContent=(S.playsTotal||0)<=0?"Waiting for a qualifying deposit.":"All runs played.";
+    $("note").textContent=(S.playsTotal||0)<=0
+      ?("One deposit of "+php(CONF.perPlay)+" or more between "+hoursTxt()+" = 1 run.")
+      :("You have used all "+S.playsTotal+" run"+(S.playsTotal===1?"":"s")+" for today.");return}
+  $("range").textContent="Almost there.";
+  $("note").textContent=(S.missing&&S.missing.length)
+    ?("Kulang pa: "+S.missing.join(" at ")+". Nag-re-refresh ang page na ito mag-isa.")
+    :"Hintayin lang, inaayos pa ang deposit at turnover mo.";
+}
+async function refresh(){
+  if(mode!=="player")return;
+  const r=await api("/api/session/"+CODE);
+  if(r.ok&&r.j){S=r.j;if(S.config)CONF=Object.assign(CONF,S.config)}
+}
 function result(){return GAME.outcome?GAME.outcome(state):{win:true,amt:ladder[state.step],idx:state.step,big:state.step===ladder.length-1,label:BRAND.labels[state.step]}}
-function postWin(amt,label){try{fetch("https://wins-ledger-production.up.railway.app/api/win",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({brand:"t2b",game:"Time 2 Race",name:"",code:cfg.code,amount:amt,link:location.href})}).catch(()=>{})}catch(e){}}
 function finishView(celebrate){
   const r=result();
   $("win").classList.toggle("lost",!r.win);$("win").querySelector("small").textContent=r.win?"Your bonus":"Result";
   $("amt").textContent=php(r.amt);$("winNote").textContent=r.label+(r.big?" · Jackpot!":"")+(r.win?"":" · no prize this time");
-  const N=runsFor(cfg.deposit),won=doneRuns(N),tot=won.reduce((a,b)=>a+b,0);
+  const N=runsFor(),won=mode==="player"?((S&&S.plays)||[]).map(p=>Number(p.amount)):doneRuns(N),tot=won.reduce((a,b)=>a+b,0);
   if(N>1)$("winNote").textContent+=" · Run "+(run+1)+"/"+N+" · Total: "+php(Math.round(tot*100)/100)+" from "+won.length+(won.length===1?" run":" runs");
   $("win").hidden=false;
   if(run<N-1){$("goBtn").disabled=false;$("goBtn").textContent="Next run ("+(run+2)+"/"+N+")"}
   else{$("goBtn").disabled=true;$("goBtn").textContent="All runs played"}
   cheer(!r.win?"So close! No win this time.":r.big?"JACKPOT!":"You Won!");
-  if(celebrate&&r.win){if(mode==="player")postWin(r.amt,r.label);setTimeout(()=>openWin(r.amt,r.big,r.label),reduce()?50:450)}
+  // the win is recorded by the server (app.py posts to the wins-ledger); never post from here
+  if(celebrate&&r.win)setTimeout(()=>openWin(r.amt,r.big,r.label),reduce()?50:450);
 }
-$("goBtn").onclick=()=>{if(busy)return;if(state&&state.step!=null){if(run<runsFor(cfg.deposit)-1){if(GAME.stop)GAME.stop();buildView();$("goBtn").focus()}return}if(GAME.go)GAME.go(ctx)};
+$("goBtn").onclick=async()=>{
+  if(busy||busyPlay)return;
+  if(state&&state.step!=null){ // already played: this button moves to the next run
+    if(run<runsFor()-1){if(GAME.stop)GAME.stop();run++;state=null;buildView();$("goBtn").focus()}
+    return}
+  if(mode!=="player"){if(GAME.go)GAME.go(ctx);return}
+  if(hardLock(S)){await refresh();if(hardLock(S)){buildView();return}}
+  if(!ctx.agreed())return;
+  if(GAME.pick&&GAME.picked&&!GAME.picked())return;   // the game asks for a horse first
+  busyPlay=true;$("goBtn").disabled=true;
+  const r=await api("/api/play/"+CODE,{method:"POST",body:JSON.stringify({})});
+  busyPlay=false;
+  if(!r.ok||!r.j||!r.j.play){
+    if(r.j&&r.j.exists)S=r.j;
+    $("goBtn").disabled=false;
+    cheer((r.j&&(r.j.msg||r.j.error))||"Hindi natuloy. Subukan ulit.");
+    buildView();return}
+  S=r.j;SRV=r.j.play;              // drawStep() now returns the place that pays SRV.amount
+  if(GAME.go)GAME.go(ctx);
+};
 $("resetBtn").onclick=()=>{if(busy||!(mode==="demo"||mode==="admin"))return;try{localStorage.removeItem(storeKey())}catch(e){}state=null;if(GAME.stop)GAME.stop();buildView();$("goBtn").focus()};
 
 // ---------- win pop-up ----------
@@ -855,7 +952,8 @@ function confetti(count,big){
   (function fr(now){c.clearRect(0,0,W,H);ps.forEach(p=>{p.vy+=.28;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;c.save();c.translate(p.x,p.y);c.rotate(p.a);c.fillStyle=p.c;c.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);c.restore()});
     if(now-s<4500&&!$("jp").hidden)confettiRAF=requestAnimationFrame(fr);else c.clearRect(0,0,W,H)})(s);
 }
-function closeWin(){$("jp").hidden=true;cancelAnimationFrame(confettiRAF)}
+function closeWin(){
+  if(mode==="player"&&SRV&&!SRV.seen){SRV.seen=1;api("/api/seen/"+CODE,{method:"POST",body:JSON.stringify({id:SRV.id})})}$("jp").hidden=true;cancelAnimationFrame(confettiRAF)}
 $("jpClose").onclick=closeWin;
 $("jp").addEventListener("click",e=>{if(e.target===$("jp"))closeWin()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("jp").hidden)closeWin()});
@@ -863,141 +961,109 @@ try{$("agree").checked=localStorage.getItem(BRAND.key+"-tnc")==="yes"}catch(e){}
 $("agree").addEventListener("change",()=>{try{localStorage.setItem(BRAND.key+"-tnc",$("agree").checked?"yes":"no")}catch(e){}$("goBtn").setAttribute("aria-disabled",String(!$("agree").checked));if($("cheer").textContent==="Please tick the T&C box first.")$("cheer").textContent=""});
 $("tncLink").onclick=e=>{e.preventDefault();$("tnc").open=true;$("tnc").scrollIntoView({behavior:"smooth",block:"start"})};
 
-// ---------- admin backend: login (admin + agents), turnover database, link maker ----------
-// Main admin: only a SHA-256 of "t2b-admin:<username>:<password>" is stored here.
-// Agents: t2b_agents/<username> = {u, h: sha256("t2b-agent:<username>:<password>"), active, by, at} (only the page owner/editors can write).
-// Turnover: t2b_days/<YYYYMMDD Manila>/players/<code> = {code, dep, to, by, at, link?} (admin and agents read and write; players never).
-const ADMIN_ACCT="95b6f66d9dc1edb088bf74d97e2ba658d5e0f255a6a0783cf8a6cde1b2cb0a51";
-const MIN_DEP=RUN_DEP,TO_MULT=WAGER_X,AG_RE=/^[a-z0-9_.-]{3,24}$/,SESS="t2b-adm-v1";
-const DAY=new Date(Date.now()+8*3600e3).toISOString().slice(0,10).replace(/-/g,"");
-async function sha(s){try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}catch(e){return "x"+h36(s)+h36(s+"#")}}
-const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const num=v=>Math.max(0,Math.min(9999999,Math.floor(+String(v).replace(/[^\d.]/g,"")||0)));
-let DB=null,dbState="loading",who=null,prow=new Map(),agents=new Map(),started=false;
-const pcol=()=>DB.collection("t2b_days/"+DAY+"/players"),acol=()=>DB.collection("t2b_agents");
-const need=r=>Math.max(MIN_DEP,r.dep)*TO_MULT;
-const eligible=r=>!!r&&r.to!=null&&r.dep>=MIN_DEP&&r.to>=need(r);
-async function getDB(){if(DB||dbState==="none")return DB;try{DB=window.claude&&claude.use?await claude.use("db"):null}catch(e){DB=null}dbState=DB?"ok":"none";return DB}
-async function login(u,p){
-  if(await sha("t2b-admin:"+u+":"+p)===ADMIN_ACCT)return {u,role:"admin"};
-  if(!AG_RE.test(u))return null;
-  if(!(await getDB()))return {err:"nodb"};
-  let s;try{s=await acol().doc(u).get()}catch(e){return {err:"nodb"}}
-  if(!s.exists)return null;const a=s.data();
-  if(await sha("t2b-agent:"+u+":"+p)!==a.h)return null;
-  if(a.active===false)return {err:"off"};
-  return {u,role:"agent"}}
-function setSess(w){try{w?sessionStorage.setItem(SESS,JSON.stringify(w)):sessionStorage.removeItem(SESS)}catch(e){}}
-function getSess(){try{const w=JSON.parse(sessionStorage.getItem(SESS)||"null");return w&&w.u&&(w.role==="admin"||w.role==="agent")?w:null}catch(e){return null}}
-function curRow(){return prow.get(cfg.code)}
-function canLink(){return !!(who&&cleanCode($("code").value)&&tierFor(cfg.offer,cfg.deposit))} // manual mode: username + deposit is enough; turnover is checked by hand
-/* inside claude.ai the page runs on a sandbox address, so links point at the public artifact URL; a self-hosted copy links to itself */
-// (artifact URL removed: this copy is self-hosted on the t2b service)
-const pageBase=()=>location.href.split("#")[0]; // self-hosted: links point at this page
-function playerLink(){return pageBase()+"#"+makeToken(cfg)}
+// ---------- admin: the cg3 link maker ----------
+// No local password hash and no claude.ai database: the password goes to POST /api/admin-login and
+// the token it returns authorises /api/lookup and /api/link. The agent never types a deposit -- the
+// server reads the Time2Bet deposits table, so a link cannot be issued to a player who did not qualify.
+let who=null,LOOK=null;
+const pageBase=()=>location.href.split("#")[0].split("?")[0];
+function playerLink(){return pageBase()+"#"+cfg.code}
+function admMsg(t){const m=$("aMsg");if(m)m.textContent=t||""}
+function showBody(){
+  $("admLogin").hidden=true;$("adminBody").hidden=false;
+  $("admWho").textContent="admin";$("logout").hidden=false;
+  adminUI();
+}
+async function adminLogin(p){
+  const r=await api("/api/admin-login",{method:"POST",body:JSON.stringify({password:p})});
+  if(r.ok&&r.j&&r.j.token){ADM=r.j.token;try{sessionStorage.setItem("t2b-adm-cg3",ADM)}catch(e){}return true}
+  return false;
+}
+function canLink(){return !!(who&&LOOK&&LOOK.found&&(LOOK.playsTotal||0)>0)}
+function tierBox(){
+  const tb=$("aTier");if(!tb)return;
+  if(!LOOK){tb.className="tierbox";tb.innerHTML="<b>Type a username and press Check.</b> Deposits and"
+    +" turnover are read from the Time2Bet database.";return}
+  if(!LOOK.found){tb.className="tierbox bad";
+    tb.innerHTML="<b>Not found.</b> No Time2Bet account matches that username, user ID or game ID.";return}
+  const deps=(LOOK.deposits||[]),q=deps.filter(d=>Number(d.amount)>=CONF.perPlay);
+  const rows=deps.length?deps.map(d=>php(d.amount)+(d.at?" @"+esc(String(d.at).slice(11,16)):"")).join(", "):"none";
+  if((LOOK.playsTotal||0)<=0){tb.className="tierbox bad";
+    tb.innerHTML="<b>Not qualified.</b> "+esc(LOOK.account||"")+" has no deposit of "+php(CONF.perPlay)
+      +" or more inside "+hoursTxt()+" today.<br>Deposits today: "+rows;return}
+  tb.className="tierbox";
+  tb.innerHTML="<b>"+esc(LOOK.name||LOOK.account||"")+" · "+LOOK.playsTotal+" run"
+    +(LOOK.playsTotal===1?"":"s")+"</b> ("+q.length+" qualifying deposit"+(q.length===1?"":"s")
+    +" of "+php(CONF.perPlay)+"+)<br>Deposits today: "+rows
+    +"<br>Turnover: <b>"+php(LOOK.slot||0)+"</b> · needed for the next run: <b>"+php(LOOK.nextNeed||0)+"</b>"
+    +"<br>Used: <b>"+(LOOK.playsUsed||0)+"</b> · left: <b>"+(LOOK.playsLeft||0)+"</b>"
+    +(LOOK.ready?" · <b>ready to play</b>":(LOOK.missing&&LOOK.missing.length?" · kulang pa: "+esc(LOOK.missing.join(", ")):""));
+}
 function adminUI(){
-  const box=$("aOffers");box.innerHTML="";
-  OFFERS.forEach(o=>{const b=el("button","chip",BRAND.offers[o].name+" <small>("+o+")</small>");b.type="button";b.setAttribute("aria-pressed",cfg.offer===o);b.onclick=()=>{cfg.offer=o;changed()};box.appendChild(b)});
-  const off=BRAND.offers[cfg.offer];
-  $("offerBox").innerHTML="<strong></strong><p><b>Who it's for:</b> <span class='o1'></span></p><p><b>How to unlock:</b> <span class='o2'></span></p><p><b>Validity:</b> <span class='o3'></span></p>";
-  $("offerBox").querySelector("strong").textContent=off.name;$("offerBox").querySelector(".o1").textContent=off.target;$("offerBox").querySelector(".o2").textContent=off.trig;$("offerBox").querySelector(".o3").textContent=off.valid;
-  const r=curRow(),tb=$("aTier"),t=tierFor(cfg.offer,cfg.deposit);
-  if(!$("code").value.trim()){tb.className="tierbox";tb.textContent="Type the player's username and deposit to make the link.";}
-  else if(!t){tb.className="tierbox bad";tb.innerHTML="<b>Enter the deposit.</b> Minimum is "+php(RUN_DEP)+" (one deposit of "+php(RUN_DEP)+" or more = 1 run)."}
-  else{tb.className="tierbox";tb.innerHTML="<b>Link ready · 1 run</b> (one deposit of "+php(RUN_DEP)+" or more = 1 run; a bigger deposit is still 1). Check the deposit and the 1× slot turnover yourself before sending."+(r?" Saved today: deposit "+php(r.dep)+(r.to==null?"":" · TO "+php(r.to)+(eligible(r)?" · eligible":" · not eligible yet"))+(r.link?" · link sent by "+esc(r.link.by):""):"")}
-  const ok=!!canLink();$("plink").textContent=ok?playerLink():"—";$("copyLink").disabled=!ok;$("copyMsg").disabled=!ok;
+  tierBox();
+  const ok=canLink();
+  $("plink").textContent=(ok&&cfg.code&&cfg.code!=="juan123")?playerLink():"—";
+  $("copyLink").disabled=!ok;$("copyMsg").disabled=!ok;
 }
-function changed(){adminUI();buildView()}
-function renderDbNote(){const n=$("dbNote");
-  n.textContent=dbState==="ok"?"Logged in as "+who.u+". Database connected · today "+DAY.slice(0,4)+"-"+DAY.slice(4,6)+"-"+DAY.slice(6)+" (Manila).":
-    dbState==="loading"?"Connecting to the database…":
-    dbState==="err"?"The database stopped responding. Reload the page.":
-    "Database not available in this view. Open this page on claude.ai while signed in, with access to it from the owner."}
-function renderTable(){const tb=$("pRows");
-  if(dbState!=="ok"){tb.innerHTML="<tr><td colspan='7' class='mute'>"+(dbState==="loading"?"Loading…":"No database in this view.")+"</td></tr>";$("pNote").textContent="";return}
-  const rs=[...prow.values()].sort((a,b)=>(eligible(b)-eligible(a))||(b.at-a.at));
-  if(!rs.length){tb.innerHTML="<tr><td colspan='7' class='mute'>No players saved today yet.</td></tr>";$("pNote").textContent="";return}
-  tb.innerHTML=rs.map(r=>{const ok=eligible(r),n=runsFor(r.dep);return "<tr data-code='"+esc(r.code)+"'><td><b>"+esc(r.code)+"</b></td><td>"+php(r.dep)+"</td><td>"+(r.to==null?"–":php(r.to))+"</td><td>"+(r.to==null?"<span class='mute'>Manual check</span>":ok?"<span class='ok'>Eligible</span>":"<span class='no'>"+(r.dep<MIN_DEP?"Deposit low":php(need(r)-r.to)+" more")+"</span>")+"</td><td>"+(r.link?r.link.runs:ok?n:"–")+"</td><td>"+esc(r.by||"")+(r.link?" · link ✓":"")+"</td><td><button class='btn small ghost' type='button' data-open='"+esc(r.code)+"'>Open</button></td></tr>"}).join("");
-  const e=rs.filter(eligible);$("pNote").textContent=e.length+" of "+rs.length+" players eligible today · "+e.reduce((a,r)=>a+runsFor(r.dep),0)+" runs.";}
-function renderAgents(){const tb=$("agRows");
-  if(dbState!=="ok"){tb.innerHTML="<tr><td colspan='4' class='mute'>No database in this view.</td></tr>";return}
-  const as=[...agents.values()].sort((a,b)=>a.u<b.u?-1:1);
-  tb.innerHTML=as.length?as.map(a=>"<tr><td><b>"+esc(a.u)+"</b></td><td>"+(a.active===false?"<span class='no'>Off</span>":"<span class='ok'>Active</span>")+"</td><td>"+(a.at?new Date(a.at).toLocaleDateString("en-PH"):"")+"</td><td class='acts2'><button class='btn small ghost' type='button' data-tog='"+esc(a.u)+"'>"+(a.active===false?"Turn on":"Turn off")+"</button> <button class='btn small ghost' type='button' data-del='"+esc(a.u)+"'>Remove</button></td></tr>").join(""):"<tr><td colspan='4' class='mute'>No agents yet.</td></tr>"}
-async function startDB(){if(started)return;started=true;
-  await getDB();renderDbNote();
-  if(!DB){renderTable();renderAgents();adminUI();return}
-  pcol().onSnapshot(q=>{prow=new Map(q.docs.map(d=>[d.id,d.data()]));renderTable();adminUI()},e=>{dbState=e&&e.code==="revoked"?"none":"err";renderDbNote();renderTable()});
-  if(who.role==="admin")acol().onSnapshot(q=>{agents=new Map(q.docs.map(d=>[d.id,d.data()]));renderAgents()},()=>{});
-  else acol().doc(who.u).onSnapshot(s=>{if(s.exists&&s.data().active===false){$("aMsg").textContent="This agent account was turned off by the admin.";logout()}},()=>{});
-  renderTable();adminUI()}
-function showBody(){$("admLogin").hidden=true;$("adminBody").hidden=false;$("logout").hidden=false;
-  $("admWho").textContent=who.u+" · "+(who.role==="admin"?"Admin":"Agent");$("agentBox").hidden=true;
-  $("code").value="";cfg.code="player";cfg.deposit=0;adminUI();fxUI();renderDbNote();startDB()}
-function logout(){setSess(null);who=null;location.reload()}
-async function saveRow(code,dep,to){const prev=prow.get(code)||{},body={code,dep,to,by:who.u,at:Date.now()};if(prev.link)body.link=prev.link;prow.set(code,body);await pcol().doc(code).set(body)}
-function loadCode(c){cfg.code=cleanCode(c)||"player";const r=prow.get(cfg.code);
-  if(r&&!$("deposit").value){$("deposit").value=r.dep;$("toAmt").value=r.to==null?"":r.to}cfg.deposit=num($("deposit").value);changed()}
-async function logLink(){if(dbState!=="ok")return;const r=curRow(),link={offer:cfg.offer,dep:cfg.deposit,runs:runsFor(cfg.deposit),by:who.u,at:Date.now()};
-  try{if(r)await pcol().doc(cfg.code).update({link});else await pcol().doc(cfg.code).set({code:cfg.code,dep:cfg.deposit,to:null,by:who.u,at:Date.now(),link})}catch(e){}}
-function flash(btn,txt){const o=btn.dataset.l||(btn.dataset.l=btn.textContent);btn.textContent=txt;clearTimeout(btn._t);btn._t=setTimeout(()=>btn.textContent=o,1500)}
-async function copyText(t,btn){try{await navigator.clipboard.writeText(t);flash(btn,"Copied")}catch(e){try{const ta=document.createElement("textarea");ta.value=t;ta.setAttribute("readonly","");ta.style.cssText="position:fixed;top:0;left:0;opacity:0";document.body.appendChild(ta);ta.select();const k=document.execCommand("copy");ta.remove();flash(btn,k?"Copied":"Copy failed")}catch(e2){flash(btn,"Copy failed")}}}
-// estimated formula: cost = users × runs per user × Σ(prize × probability)
-function fxUI(){
-  const users=Math.max(0,Math.floor(+$("fxUsers").value||0)),dep=Math.max(0,+$("fxDep").value||0),runs=runsFor(dep),plays=users*runs,total=users*dep;
-  const r2=x=>Math.round(x*100)/100,n0=x=>Math.round(x).toLocaleString("en-US");
-  let cost=0;
-  $("fxRows").innerHTML=PRIZES.map((v,i)=>i).reverse().map(i=>{const u=plays*WEIGHTS[i]/100,c=u*PRIZES[i];cost+=c;return "<tr><td>"+BRAND.labels[i]+" "+php(PRIZES[i])+"</td><td>"+WEIGHTS[i]+"%</td><td>"+n0(u)+"</td><td>"+php(r2(c))+"</td></tr>"}).join("");
-  cost=r2(cost);
-  const pct=total?(cost/total*100):0,roas=cost?total/cost:0;
-  $("fxSum").innerHTML="<dt>Users</dt><dd>"+n0(users)+"</dd><dt>Deposit per user</dt><dd>"+php(dep)+"</dd><dt>Runs per user</dt><dd>"+runs+"</dd><dt>Total deposit</dt><dd>"+php(total)+"</dd>"+
-    "<dt>Total bonus cost</dt><dd>"+php(cost)+"</dd><dt>Bonus ÷ deposit</dt><dd>"+pct.toFixed(2)+"%</dd><dt>ROAS (deposit ÷ bonus)</dt><dd>"+(cost?roas.toFixed(1)+"×":"–")+"</dd>"+
-    "<dt>Wagering (deposit × "+WAGER_X+")</dt><dd>"+php(total*WAGER_X)+"</dd><dt>Daily bonus cap</dt><dd>"+php(DAILY_CAP)+(cost>DAILY_CAP?" (over)":"")+"</dd>";
-  $("fxBoard").textContent="";
+async function lookup(fresh){
+  const acct=$("code").value.trim();
+  if(!acct){LOOK=null;adminUI();admMsg("Type a username first.");return}
+  admMsg(fresh?"Making the link…":"Checking…");
+  const r=fresh
+    ?await api("/api/link",{method:"POST",body:JSON.stringify({account:acct,fresh:true})})
+    :await api("/api/lookup?account="+encodeURIComponent(acct));
+  if(r.status===401||r.status===403){ADM=null;try{sessionStorage.removeItem("t2b-adm-cg3")}catch(e){}
+    $("adminBody").hidden=true;$("admLogin").hidden=false;$("admErr").textContent="Session expired. Log in again.";return}
+  if(!r.ok&&r.status!==404){LOOK=null;adminUI();
+    admMsg((r.j&&(r.j.msg||r.j.error))||"Could not reach the game server.");return}
+  LOOK=r.j||{};
+  if(LOOK.code)cfg.code=LOOK.code;
+  adminUI();
+  admMsg(LOOK.found?(LOOK.code?"Link ready. Copy it and send it to the player.":"Checked. Press Make link.")
+    :"Not found.");
 }
-if(mode==="admin"){
-  $("admin").hidden=false;$("previewLabel").hidden=false;
-  $("admLogin").onsubmit=async e=>{e.preventDefault();const u=$("admUser").value.trim().toLowerCase(),p=$("admPin").value,er=$("admErr"),b=$("admLoginBtn");
-    if(!p){er.textContent="Enter the admin password.";return}
-    b.disabled=true;const r=(h36(p+SALT)===ADMIN_PASS_CHECK)?{u:"admin",role:"admin"}:null;b.disabled=false;
-    if(!r){er.textContent="Wrong password.";return}
-    if(r.err==="off"){er.textContent="This agent account is turned off. Ask the admin.";return}
-    if(r.err==="nodb"){er.textContent="Agent login needs the database: open this page on claude.ai while signed in, with access from the owner.";return}
-    er.textContent="";$("admPin").value="";who=r;setSess(r);showBody()};
-  $("logout").onclick=logout;
-  $("code").addEventListener("input",e=>loadCode(e.target.value));
-  $("deposit").addEventListener("input",e=>{cfg.deposit=num(e.target.value);changed()});
-  $("toSave").onclick=async()=>{const c=cleanCode($("code").value),b=$("toSave");
-    if(!c){$("aTier").className="tierbox bad";$("aTier").textContent="Type a player code first.";return}
-    if(dbState!=="ok"){$("aTier").className="tierbox bad";$("aTier").textContent="Can't save: the database isn't available in this view.";return}
-    b.disabled=true;try{await saveRow(c,num($("deposit").value),num($("toAmt").value));flash(b,"Saved")}catch(err){$("aTier").className="tierbox bad";$("aTier").textContent="Couldn't save. Make sure you have access to this page on claude.ai, then try again."}
-    b.disabled=false;loadCode(c)};
-  $("pRows").addEventListener("click",e=>{const b=e.target.closest("[data-open]");if(!b)return;$("code").value=b.dataset.open;loadCode(b.dataset.open);$("code").scrollIntoView({behavior:"smooth",block:"center"})});
-  $("bulkSave").onclick=async()=>{const m=$("bulkMsg");if(dbState!=="ok"){m.textContent="Can't save: the database isn't available in this view.";return}
-    const lines=$("bulkIn").value.split(/\n+/).map(l=>l.trim()).filter(Boolean),bad=[];let n=0;
-    for(const l of lines){const p=l.split(/[,\t;|]+/).map(x=>x.trim()),c=cleanCode(p[0]);if(!c||p.length<3){bad.push(l);continue}
-      try{await saveRow(c,num(p[1]),num(p[2]));n++}catch(e){bad.push(l)}}
-    m.textContent="Saved "+n+" player"+(n===1?"":"s")+"."+(bad.length?" Skipped "+bad.length+": "+bad.slice(0,3).join(" · ")+(bad.length>3?"…":""):"");if(!bad.length)$("bulkIn").value="";loadCode($("code").value)};
-  $("newLink").onclick=()=>{cfg.nonce=Date.now().toString(36);changed();$("aMsg").textContent="This is a new link. The player can play again with it; stop using the old one."};
-  $("copyLink").onclick=()=>{if(!canLink())return;copyText(playerLink(),$("copyLink"));logLink()};
-  $("copyMsg").onclick=()=>{if(!canLink())return;copyText(BRAND.offers[cfg.offer].script+"\n\nPlay here: "+playerLink(),$("copyMsg"));logLink()};
-  ["fxUsers","fxDep"].forEach(id=>$(id).addEventListener("input",fxUI));
-  // agents (main admin only)
-  $("agGen").onclick=()=>{const a="abcdefghjkmnpqrstuvwxyz23456789",r=new Uint32Array(8);crypto.getRandomValues(r);$("agP").value="ag-"+[...r].map(x=>a[x%a.length]).join("").replace(/(.{4})/,"$1-")};
-  $("agSave").onclick=async()=>{const u=$("agU").value.trim().toLowerCase(),p=$("agP").value,m=$("agMsg");
-    if(!AG_RE.test(u)){m.textContent="Username: 3–24 letters, numbers, _ . or -";return}
-    if(u==="admin"){m.textContent="Pick another username.";return}
-    if(p.length<6){m.textContent="Password: at least 6 characters.";return}
-    if(dbState!=="ok"){m.textContent="Can't save: the database isn't available in this view.";return}
-    const prev=agents.get(u);
-    try{await acol().doc(u).set({u,h:await sha("t2b-agent:"+u+":"+p),active:true,by:who.u,at:prev&&prev.at||Date.now()});m.textContent=(prev?"Password updated for ":"Agent added: ")+u+". Give them the username and password.";$("agP").value=""}
-    catch(e){m.textContent="Couldn't save. Only the page owner or an editor on claude.ai can manage agents."}};
-  $("agRows").addEventListener("click",async e=>{const t=e.target.closest("[data-tog]"),d=e.target.closest("[data-del]"),m=$("agMsg");
-    try{if(t){const a=agents.get(t.dataset.tog);await acol().doc(a.u).update({active:a.active===false})}
-      if(d){if(d.dataset.sure!=="1"){d.dataset.sure="1";d.textContent="Tap again to remove";setTimeout(()=>{d.dataset.sure="";d.textContent="Remove"},3000);return}await acol().doc(d.dataset.del).delete();m.textContent="Agent removed."}}
-    catch(err){m.textContent="Couldn't change it. Only the page owner or an editor on claude.ai can manage agents."}});
-  const s=getSess();if(s){who=s;showBody()}
-}
+$("admLoginBtn").onclick=async()=>{
+  const p=$("admPin").value,er=$("admErr"),b=$("admLoginBtn");
+  if(!p){er.textContent="Enter the admin password.";return}
+  b.disabled=true;er.textContent="Checking…";
+  const ok=await adminLogin(p);
+  b.disabled=false;
+  if(!ok){er.textContent="Wrong password.";return}
+  er.textContent="";who={u:"admin",role:"admin"};showBody();
+};
+$("admPin").addEventListener("keydown",e=>{if(e.key==="Enter")$("admLoginBtn").click()});
+$("logout").onclick=()=>{ADM=null;who=null;LOOK=null;
+  try{sessionStorage.removeItem("t2b-adm-cg3")}catch(e){}
+  $("adminBody").hidden=true;$("admLogin").hidden=false;$("admWho").textContent="";$("logout").hidden=true};
+$("code").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();lookup(false)}});
+$("code").addEventListener("input",()=>{LOOK=null;cfg.code="juan123";adminUI()});
+$("newLink").onclick=()=>lookup(true);
+$("copyLink").onclick=()=>copyText(playerLink(),$("copyLink"));
+$("copyMsg").onclick=()=>{
+  if(!canLink()){admMsg("Check a qualifying player first.");return}
+  const n=LOOK.playsTotal||1;
+  copyText("Hi "+(LOOK.name||LOOK.account||"")+"! Your deposit is verified, so you have "+n+" Time 2 Race"
+    +(n===1?"":"s")+". Pick your horse and the place it finishes in sets your reward!\n\n"
+    +"⏰ Deposits count "+hoursTxt()+" (PH time). Use your runs today until "+playEndTxt()
+    +" — this link stops working at midnight (hindi na gagana bukas).\n\nPlay here: "+playerLink(),
+    $("copyMsg"));
+};
+if(ADM){who={u:"admin",role:"admin"};showBody()}
 buildView();
+// A real player's page is driven by the session: paint once from nothing, then again as soon as the
+// server answers, and keep polling so a deposit or turnover landing a minute later unlocks START
+// without the player having to reload.
+if(mode==="player"){
+  refresh().then(()=>buildView());
+  pollTimer=setInterval(()=>{
+    if(busy||busyPlay)return;                       // never disturb a running race
+    if(state&&state.step!=null)return;              // nor a finished one on screen
+    refresh().then(()=>{if(!busy&&!busyPlay&&!(state&&state.step!=null))buildView()});
+  },20000);
+  addEventListener("visibilitychange",()=>{
+    if(!document.hidden&&!busy&&!busyPlay&&!(state&&state.step!=null))refresh().then(()=>buildView());
+  });
+}
 </script>
 
 </body></html>
