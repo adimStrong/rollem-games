@@ -447,7 +447,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <p class="cheer" id="cheer"></p>
     <div class="play" id="play"></div>
     <label class="agree" id="agreeLbl"><input type="checkbox" id="agree"><span>I have read and agree to the Time 2 Race <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button>.</span></label>
-    <div class="acts"><button class="btn" id="goBtn" type="button"></button><button class="btn ghost" id="resetBtn" type="button">Reset</button></div>
+    <div class="acts"><button class="btn" id="goBtn" type="button"></button><button class="btn ghost" id="resetBtn" type="button" hidden>Reset</button></div>
     <div class="win" id="win" hidden>
       <small>Your bonus</small>
       <strong id="amt"></strong>
@@ -806,6 +806,7 @@ function buildView(){
   $("eyebrow").textContent=BRAND.name+" · "+off.name;
   $("gameTitle").textContent=GAME.title;
   $("demoTag").hidden=mode!=="demo";
+  $("resetBtn").hidden=!(mode==="demo"||mode==="admin");
   $("play").innerHTML="";$("win").hidden=true;$("cheer").textContent="";
   busy=false;$("resetBtn").disabled=false;
   $("goBtn").hidden=!GAME.btn;$("goBtn").textContent=GAME.btn||"";
@@ -833,7 +834,7 @@ function finishView(celebrate){
   if(celebrate&&r.win){if(mode==="player")postWin(r.amt,r.label);setTimeout(()=>openWin(r.amt,r.big,r.label),reduce()?50:450)}
 }
 $("goBtn").onclick=()=>{if(busy)return;if(state&&state.step!=null){if(run<runsFor(cfg.deposit)-1){if(GAME.stop)GAME.stop();buildView();$("goBtn").focus()}return}if(GAME.go)GAME.go(ctx)};
-$("resetBtn").onclick=()=>{if(busy)return;try{localStorage.removeItem(storeKey())}catch(e){}state=null;if(GAME.stop)GAME.stop();buildView();$("goBtn").focus()};
+$("resetBtn").onclick=()=>{if(busy||!(mode==="demo"||mode==="admin"))return;try{localStorage.removeItem(storeKey())}catch(e){}state=null;if(GAME.stop)GAME.stop();buildView();$("goBtn").focus()};
 
 // ---------- win pop-up ----------
 let confettiRAF=null;
