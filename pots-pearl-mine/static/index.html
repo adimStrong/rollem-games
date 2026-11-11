@@ -584,7 +584,7 @@ html,body{overflow-x:hidden}
       <h2 id="tncTitle">Pearl Mine Terms &amp; Conditions</h2>
       <ol>
         <li>Open to verified POTS players aged 21 and above. Self-excluded, restricted or unverified accounts are not eligible.</li>
-        <li>Every ₱150 of verified deposit made between 12:00 PM and 9:00 PM gives 1 play (for example ₱300 = 2 plays), up to 5 plays per player per day. Your plays are on the personal link from your agent; your deposits are checked automatically from your account. Pending, failed or reversed deposits do not qualify.</li>
+        <li>One deposit of ₱150 or more made between 12:00 PM and 9:00 PM gives 1 play — a bigger deposit is still 1 play, and two ₱150 deposits are 2 plays, up to 5 plays per player per day. Your plays are on the personal link from your agent; your deposits are checked automatically from your account. Pending, failed or reversed deposits do not qualify.</li>
         <li>Only bets on slot games count for this promo. Each play unlocks only once your slot turnover for the day reaches 1× the deposit for that play (₱150 deposit → ₱150 in slot bets, ₱300 → ₱300, and so on). Turnover is read from your account and refreshes every few minutes.</li>
         <li>The promo runs daily: deposits count from 12:00 PM to 9:00 PM, and the plays on your link must be used by 11:59 PM the same day — your link expires at midnight and cannot be used the next day. Total bonus paid by this promo is capped at ₱10,000 per day for all players; once the cap is reached, new plays wait for the next day.</li>
         <li>Each play's bonus is set at random by the system the moment you press START. In Pearl Mine you open clams one by one: the pearls you find add up to your bonus. A sea urchin ends the round and you keep the pearls already found. If you press COLLECT before all the pearls of your bonus are found, the tide brings you the rest, so your total is the same either way. Which clams you open makes no difference. The prize ladder (₱7 · ₱17 · ₱27 · ₱57) shows your running total. The ₱27 and ₱57 tiers and the black ₱77 pearl are display tiers only and can never be won or collected. The pearls shown in the unopened clams at the end of a round — including the ₱777 pearls — are for display only and are not added to your bonus.</li>
@@ -619,7 +619,7 @@ const BRAND={key:"pots-mine",name:"POTS",game:"Pearl Mine",
 
 HOW TO JOIN
 
-• Every ${php(CONF.perPlay)} deposit = 1 FREE PLAY
+• One deposit of ${php(CONF.perPlay)} or more = 1 FREE PLAY (a bigger deposit is still 1)
 • Maximum of ${CONF.maxPlays} FREE PLAYS per player per day.
 • Only slot games qualify for this promotion.
 • Each FREE PLAY unlocks once you complete the ${CONF.turnover}× turnover requirement.
@@ -1359,7 +1359,7 @@ async function refresh(force){if(mode!=="player")return;let r=null;try{r=await f
   if(!r)return;if(r.config)CONF=r.config;S=r;const sig=sigOf(r);if(force||sig!==lastSig){lastSig=sig;buildView()}}
 function renderMech(){
   $("mechOffer").textContent="POTS Pearl Mine Bonus · Community game";
-  const steps=["<b>Every "+php(CONF.perPlay)+" deposit = 1 play</b>, up to <b>"+CONF.maxPlays+" plays per day</b>. E.g. "+php(CONF.perPlay*2)+" = 2 plays, all on the personal link from your agent. Deposits count from "+hours()+".",
+  const steps=["<b>One deposit of "+php(CONF.perPlay)+" or more = 1 play</b>, up to <b>"+CONF.maxPlays+" plays per day</b>. A bigger deposit is still 1 play — deposit again for another. Deposits count from "+hours()+".",
     "<b>Only slot games qualify.</b> Each play unlocks once your slot turnover reaches <b>"+CONF.turnover+"× the deposit</b> ("+php(CONF.perPlay)+" deposit → "+php(CONF.perPlay*CONF.turnover)+" in slot bets). Your deposits and turnover are checked automatically from your account — nothing to send.",
     "<b>Hours:</b> deposits count "+hours()+" · play until "+playEnd()+" daily. <b>Max bonus:</b> "+php(CONF.dailyCap)+" per day for all players.",
     "<b>How to get your link:</b> ask your agent after you deposit. Your link works until "+playEnd()+" on the day it was issued, then expires at midnight; deposit again and your next play unlocks on the same link.",
