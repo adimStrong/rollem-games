@@ -242,7 +242,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(34px,10vw,50p
 .paynote b{color:#ffd400}
 @media (max-width:420px){.bet .pv{font-size:8.6px}}
 /* (group highlight class is "lit", not "win": .win is the result panel class) */
-/* strip grouped: JACKPOT (77 ₱777 · BAR BAR ₱77, display only) | ₱16.50 (kundol, star, bell) | ₱8.20 (BAR, cherry, apple, orange); in a WILD round each key shows its wild value and a thin bracket under each group carries the group total */
+/* strip grouped: JACKPOT (77 ₱177 · BAR BAR ₱77, display only) | ₱16.50 (kundol, star, bell) | ₱8.20 (BAR, cherry, apple, orange); in a WILD round each key shows its wild value and a thin bracket under each group carries the group total */
 .strip{display:flex;align-items:flex-start;gap:9px;padding:8px 7px 6px}
 .sgrp{flex:var(--n) 1 0;min-width:0;display:grid;gap:3px}
 .sgrp .keys{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:4px}
@@ -630,7 +630,7 @@ body{background:radial-gradient(60% 38% at 50% 0%,rgba(255,184,40,.34),transpare
   <section class="panel" id="admin" hidden>
     <h2>Link maker</h2>
     <div id="adminLock" style="display:grid;gap:12px">
-      <p class="hint">Enter the admin password to create player links.</p>
+      <p class="hint">Enter the admin password to make player links.</p>
       <div class="linkrow"><input class="inp" id="adminPassInput" type="password" autocomplete="off" spellcheck="false" placeholder="Password"><button class="btn small" id="adminPassBtn" type="button">Unlock</button></div>
       <p class="hint" id="adminGateMsg"></p>
     </div>
@@ -639,7 +639,7 @@ body{background:radial-gradient(60% 38% at 50% 0%,rgba(255,184,40,.34),transpare
   <template id="adminTpl">
       <p class="hint">Create a link for one player. The player and the verified deposit are built into the link itself, so it works even if the player is not logged in. It stops working if the player edits the link.</p>
       <label class="field"><span>Player name or ID</span><input class="inp" id="code" type="text" autocomplete="off" spellcheck="false"></label>
-      <label class="field"><span>Verified deposit</span><div class="money"><span>₱</span><input class="inp" id="deposit" type="number" min="0" step="1" inputmode="numeric"></div></label>
+      <label class="field" hidden><span>Verified deposit</span><div class="money"><span>₱</span><input class="inp" id="deposit" type="number" min="0" step="1" inputmode="numeric"></div></label>
       <div class="tierbox" id="aTier"></div>
       <div class="field"><span>Player link</span>
         <div class="linkrow"><code id="plink"></code></div>
@@ -656,7 +656,7 @@ body{background:radial-gradient(60% 38% at 50% 0%,rgba(255,184,40,.34),transpare
         <h4 class="fsub">Normal plays · <span id="fNormPct"></span> of plays</h4>
         <div class="tblwrap"><table><thead><tr><th>Prize</th><th>Probability</th><th>Users</th><th>Cost</th></tr></thead><tbody id="fRows"></tbody></table></div>
         <div hidden><h4 class="fsub">Respawn plays · <span id="fWildPct"></span> of plays</h4>
-        <p class="hint">The light lands on RESPAWN, a tier is drawn, and the light hits every loot of that tier once (₱7 Common: coin ₱2.00 + potion ₱1.80 + shield ₱1.70 + boots ₱1.50 = 4 hits; ₱17 Rare: sword ₱6.00 + helmet ₱5.50 + gem ₱5.50 = 3 hits). The hits add up to the tier prize, so a respawn win matches the normal prizes. *₱777 is a display-only tease (0%), never awarded; the golden controller ₱77 and the dragon chest ₱777 are display-only legendary loot (0%), never a stop or a hit.</p>
+        <p class="hint">The light lands on RESPAWN, a tier is drawn, and the light hits every loot of that tier once (₱7 Common: coin ₱2.00 + potion ₱1.80 + shield ₱1.70 + boots ₱1.50 = 4 hits; ₱17 Rare: sword ₱6.00 + helmet ₱5.50 + gem ₱5.50 = 3 hits). The hits add up to the tier prize, so a respawn win matches the normal prizes. *₱777 is a display-only tease (0%), never awarded; the golden controller ₱77 and the dragon chest ₱177 are display-only legendary loot (0%), never a stop or a hit.</p>
         <div class="tblwrap"><table><thead><tr><th>Group</th><th>Probability</th><th>Users</th><th>Cost</th></tr></thead><tbody id="fWild"></tbody></table></div>
         <h4 class="fsub">Owner's respawn table · per 1,000 respawn plays</h4>
         <div class="tblwrap"><table><thead><tr><th>Group</th><th>Probability</th><th>Users</th><th>Cost</th></tr></thead><tbody id="fWild1k"></tbody></table></div>
@@ -732,12 +732,12 @@ body{background:radial-gradient(60% 38% at 50% 0%,rgba(255,184,40,.34),transpare
       <ol>
         <li>Open to verified GameSpot players aged 21 and above. Self-excluded, restricted or unverified accounts are not eligible.</li>
         <li>Plays are unlocked by a qualifying deposit verified by a GameSpot agent, made within the validity period of your offer. Every ₱200 of verified deposit gives 1 play; for example, ₱1,000 = 5 plays. Pending, failed or reversed deposits do not qualify.</li>
-        <li>In Power-Up Cards you press START (or tap a card), the 4 cards shuffle, and you pick 1. The 4 cards hold ₱7, ₱17, ₱77 and ₱777. Your card flips and shows your bonus: ₱7 or ₱17. Every play wins a bonus. The bonus is random on every play and is decided the moment you press START. This is an animated promo game only, not a bet.</li>
-        <li>After your pick, the other 3 cards flip for show only. Amounts on cards you did not pick are not won and cannot be claimed. The ₱77 and ₱777 cards are for display only and cannot be won.</li>
+        <li>In Power-Up Cards you press START (or tap a card), the 4 cards shuffle, and you pick 1. The 4 cards hold ₱7, ₱17, ₱77 and ₱177. Your card flips and shows your bonus: ₱7 or ₱17. Every play wins a bonus. The bonus is random on every play and is decided the moment you press START. This is an animated promo game only, not a bet.</li>
+        <li>After your pick, the other 3 cards flip for show only. Amounts on cards you did not pick are not won and cannot be claimed. The ₱77 and ₱177 cards are for display only and cannot be won.</li>
         <li>All your plays are made on the personal link from your agent. Results are final once you press START. Refreshing the page, reopening the link or using another device does not give extra plays. Only results confirmed by your agent count.</li>
         <li>Send a screenshot of each reward card to your agent. The bonus is credited after the agent verifies your deposit and result, within the time your agent announces.</li>
         <li>Wager ×1: the bonus must be wagered 1× before it can be withdrawn. Only bets on slot games are valid and count toward wagering.</li>
-        <li>Deposits qualify from 12 PM to 9 PM (Philippine time) daily, and the plays on your link must be used by 11:59 PM the same day — the link expires at midnight and cannot be used the next day. Total bonus paid out by this game is capped at ₱10,000 per day; once the cap is reached, new plays are credited from the next promo day.</li>
+        <li>Power-Up Cards is open from 1 PM to 9 PM (Philippine time) daily. Total bonus paid out by this game is capped at ₱10,000 per day; once the cap is reached, new plays are credited from the next promo day.</li>
         <li>Multiple or linked accounts, edited links, or any attempt to abuse this promo void the bonus and may lead to action on the account.</li>
         <li>GameSpot may change, suspend or end this promo at any time. GameSpot management's decision on any dispute is final.</li>
         <li>Play responsibly. Set limits on your deposits and time, and ask for help if gambling stops being fun.</li>
@@ -753,14 +753,13 @@ const BRAND={"key":"gamespot-cards","name":"GameSpot","confetti":["#b8860b","#ff
   "script":"Hi! It's respawn time at GameSpot. Your verified deposit unlocked Power-Up Cards: press START, pick 1 of the 4 cards, and every play wins a bonus!"};
 // ---------- shared helpers ----------
 const $=id=>document.getElementById(id);
-const PLAY_DEP=200,DAILY_CAP=10000,WAGER_X=1; // every ₱200 verified deposit = 1 play; Wager ×1; deposit 12 PM–9 PM, play until 11:59 PM the same day; max bonus ₱10,000/day (GameSpot)
-const LINK_NOTE="⏰ Deposits count from 12 PM to 9 PM (PH time). Use your plays today until 11:59 PM — this link stops working at midnight (hindi na gagana bukas).";
+const PLAY_DEP=200,DAILY_CAP=10000,WAGER_X=1; // every ₱200 verified deposit = 1 play; Wager ×1; 1 PM–9 PM; max bonus ₱10,000/day (GameSpot)
 const PRIZES=[7,17],WEIGHTS=[90,10]; // ₱7 Common (coin/potion/shield/boots) 90%, ₱17 Rare (sword/helmet/gem) 10% (the weights are admin only, never shown to players)
 // per-symbol WILD values in centavos; each group's symbols add up exactly to its prize (asserted at load). Players see them on the strip during a WILD round.
 // A normal stop pays the GROUP prize; a WILD round hits every symbol of one group once, so the wild total matches the same prizes.
 const SYMVAL={bar:200,cherry:180,apple:170,orange:150,kundol:600,star:550,bell:550}; // Common ₱7: coin 2.00 + potion 1.80 + shield 1.70 + boots 1.50 · Rare ₱17: sword 6.00 + helmet 5.50 + gem 5.50
-// display-only jackpots on the strip: 77 = ₱777, BAR BAR = ₱77. 0% chance: never a normal stop and never a wild hit (asserted at load)
-const JPVAL={seven:777,barbar:77};
+// display-only jackpots on the strip: 77 = ₱177, BAR BAR = ₱77. 0% chance: never a normal stop and never a wild hit (asserted at load)
+const JPVAL={seven:177,barbar:77};
 const CATNAME=["₱7 Common loot","₱17 Rare loot"];
 const BIG=1; // Rare loot (₱17) gets the big celebration
 // WILD round (admin only, never shown to players): 5% of plays land on WILD; those plays draw a wild CATEGORY instead of the normal prize
@@ -769,13 +768,18 @@ const WILD_RATE=0,WILD_PRIZES=[...PRIZES,777],WILD_WEIGHTS=[90,10,0],WILD_BIG=1;
 const TEST_PATTERN=false; // live: wild is a random 5% of plays. (true = test pattern normal, normal, wild, wild, …)
 // test-pattern position: on an agent link = the play index on that link; in demo/admin preview = a counter kept in localStorage that Reset does not clear
 function testIdx(){if(mode==="player")return plays().length;let n=plays().length;try{const k=BRAND.key+"-testcount";n=parseInt(localStorage.getItem(k),10)||0;localStorage.setItem(k,String(n+1))}catch(e){}return n}
-function playsFor(d){return (+d||0)>=PLAY_DEP?1:0}
+// how many plays this link is worth: the session says so, it is not divided out of a typed amount
+function playsFor(){return mode==="player"?((S&&S.playsTotal)||0):1}
 function php(n){n=Number(n);return "₱"+(Number.isInteger(n)?n.toLocaleString("en-US"):n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}))}
 function php2(n){return "₱"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}
 function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296}
 // the prize is drawn first, by weight; the light then stops on a cell of that tier
 function drawFrom(W){let r=rnd()*W.reduce((a,b)=>a+b,0);for(let i=0;i<W.length;i++){r-=W[i];if(r<0)return i}return 0} // a 0-weight entry can never be drawn
-function drawPrize(){return drawFrom(WEIGHTS)}
+// PRIZES is [7,17] and the index IS the tier. For a real player the amount is already drawn
+// SERVER-SIDE, so this returns the tier that pays exactly that amount. Demo/admin draw locally.
+function drawPrize(){
+  if(mode==="player"){const i=PRIZES.indexOf(Number(SRV&&SRV.amount));return i<0?0:i}
+  return drawFrom(WEIGHTS)}
 function drawWild(){return drawFrom(WILD_WEIGHTS)}
 // a saved play's bonus in pesos (wild plays carry their own total in centavos) and whether it gets the big celebration
 const amtOf=p=>p.wild?p.total/100:PRIZES[p.prize];
@@ -783,80 +787,68 @@ const bigOf=p=>p.wild?p.wprize>=WILD_BIG:p.prize===BIG;
 const reduce=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
 function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
 
-// ---------- player links ----------
-// link = #code.d<deposit>.<nonce>.<check>; the check stops casual edits to the deposit (number of plays)
-const SALT="cg~"+BRAND.key+"~26q4";
-const ADMIN_PASS_CHECK="1naiwd"; // h36(ADMIN_PASSWORD+SALT) -- shared admin password, hashed for BRAND.key "gamespot-cards"
-function h36(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}let g=h;for(let i=s.length-1;i>=0;i--){g^=s.charCodeAt(i)*31;g=Math.imul(g,2246822519)>>>0}return (h.toString(36)+g.toString(36)).slice(0,6)}
-function cleanCode(c){return (c||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,32)}
-// link = #code.d<deposit>.<nonce>.<YYYYMMDD issued, PH>.<check>
-// the check covers the date too, so the day a link was issued cannot be edited without breaking it
-const phDay=ms=>new Date((ms==null?Date.now():ms)+8*3600e3).toISOString().slice(0,10).replace(/-/g,"");
-const phMin=ms=>{const d=new Date((ms==null?Date.now():ms)+8*3600e3);return d.getUTCHours()*60+d.getUTCMinutes()};
-const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const fmtDay=d=>(+d.slice(6))+" "+MON[+d.slice(4,6)-1]+" "+d.slice(0,4);
-function makeToken(c){const body=c.code+".d"+c.deposit+"."+c.nonce+"."+c.day;return body+"."+h36(body+SALT)}
-function parseToken(t){const p=t.split(".");if(p.length!==5)return null;const [code,od,nonce,day,chk]=p;
-  if(!/^[a-z0-9]{1,32}$/.test(code)||!/^d\d{1,6}$/.test(od)||!/^[a-z0-9]{1,12}$/.test(nonce)||!/^\d{8}$/.test(day))return null;
-  if(h36(code+"."+od+"."+nonce+"."+day+SALT)!==chk)return null;return {code,deposit:+od.slice(1),nonce,day}}
-const raw=decodeURIComponent(location.hash.slice(1)).toLowerCase();
-const tok=parseToken(raw);
-// a genuine pre-expiry 4-part link, so it can be told apart from a typo and named in the message
-const legacy=!tok&&/^[a-z0-9]{1,32}\.d\d{1,6}\.[a-z0-9]{1,12}\.[a-z0-9]{1,8}$/.test(raw);
-// a plain anchor (#, #top) is still the demo; anything shaped like a token must prove itself
-let mode=raw==="admin"?"admin":tok?"player":raw.indexOf(".")>=0?(legacy?"expired":"bad"):"demo";
-let cfg=mode==="player"?tok:{code:"juan123",deposit:mode==="admin"?400:200,nonce:mode==="admin"?Date.now().toString(36):"demo",day:mode==="admin"?phDay():"00000000"};
-function storeKey(){return BRAND.key+":c2:"+mode+":"+makeToken(cfg)} // "w4": kundol layout (₱8.20 / ₱16.50 groups, 77 and BAR BAR display only), so plays saved under the old table are not reused
+// ---------- cg3 per-link play ----------
+// The hash is just the code the link maker handed out (or "admin"). No deposit and no check hash: the
+// server decides what a code is entitled to, so there is nothing in the URL worth forging.
+const RAW=decodeURIComponent(location.hash.slice(1)).trim().toLowerCase();
+const CODE=(RAW!=="admin"&&/^[a-z0-9][a-z0-9._-]{2,63}$/.test(RAW))?RAW:"";
+let mode=RAW==="admin"?"admin":(CODE?"player":"demo");
+let cfg={code:CODE||"juan123"};
+let S=null;      // the live session from GET /api/session/<code>
+let SRV=null;    // the play the SERVER drew for the board on screen
+let CONF={perPlay:200,maxPlays:5,turnover:1,dailyCap:10000,depFrom:"12:00",depTo:"21:00",
+          playFrom:"12:00",playUntil:"23:59"};
+let ADM=null;try{ADM=sessionStorage.getItem("gspot-adm-cg3")}catch(e){}
+let busyPlay=false,pollTimer=null;
+function cleanCode(c){return (c||"").trim().toLowerCase().replace(/[^a-z0-9._-]/g,"").slice(0,64)}
+function hm12(s){const a=String(s||"00:00").split(":"),h=+a[0],m=+a[1]||0;
+  return (((h+11)%12)+1)+":"+String(m).padStart(2,"0")+" "+(h>=12?"PM":"AM")}
+function hoursTxt(){return hm12(CONF.depFrom)+"–"+hm12(CONF.depTo)}
+function playEndTxt(){return hm12(CONF.playUntil)}
+async function api(path,opt){
+  const o=Object.assign({headers:{"Content-Type":"application/json"}},opt||{});
+  if(ADM)o.headers["X-Admin-Token"]=ADM;
+  o.cache="no-store";
+  let r,j={};
+  try{r=await fetch(path.replace(/^\//,""),o)}catch(e){return {ok:false,status:0,j:{}}}
+  try{j=await r.json()}catch(e){}
+  return {ok:r.ok,status:r.status,j:j};
+}
+// Any reason a play must not start. Independent of the server's computed `ready`: if the two ever
+// disagree the page refuses rather than letting a board run.
+function hardLock(s){
+  if(!s)return true;
+  return !s.exists||!!s.expired||!!s.stopped||!s.playOpen||!!s.capped
+    ||(s.playsTotal||0)<=0||(s.playsLeft||0)<=0||!s.ready;
+}
+async function refresh(){
+  if(mode!=="player")return;
+  const r=await api("/api/session/"+CODE);
+  if(r.ok&&r.j){S=r.j;if(S.config)CONF=Object.assign(CONF,S.config)}
+}
+// why the player cannot start right now, in their own words
+function lockLobby(){
+  $("count").hidden=true;setGo(false);$("play").innerHTML="";$("win").hidden=true;$("summary").hidden=true;
+  const say=(t,n)=>{$("range").textContent=t;$("note").textContent=n||""};
+  if(mode!=="player")return say("Waiting for a qualifying deposit.","Ask your agent for your personal game link.");
+  if(!S)return say("Checking your link…","");
+  if(!S.exists)return say("This link is not valid.","Ask your agent for your own game link.");
+  if(S.expired)return say("This link has expired.","It was issued on an earlier day. Deposit again between "
+    +hoursTxt()+" and ask your agent for a new link.");
+  if(S.stopped)return say("The game is paused.",S.stopNote||"Please try again later.");
+  if(!S.playOpen)return say("Closed for today.","The game runs until "+playEndTxt()+". Bukas na ulit.");
+  if(S.capped)return say("Daily bonus budget reached.","Bukas na ulit.");
+  if((S.playsTotal||0)<=0)return say("Waiting for a qualifying deposit.",
+    "One deposit of "+php(CONF.perPlay)+" or more between "+hoursTxt()+" = 1 play.");
+  if((S.playsLeft||0)<=0)return say("All plays used.",
+    "You have used all "+S.playsTotal+" play"+(S.playsTotal===1?"":"s")+" for today.");
+  return say("Almost there.",(S.missing&&S.missing.length)
+    ?("Kulang pa: "+S.missing.join(" at ")+". Nag-re-refresh ang page na ito mag-isa.")
+    :"Hintayin lang, inaayos pa ang deposit at turnover mo.");
+}
+// demo and admin previews keep their throwaway state locally; a player's state is the server's
+function storeKey(){return BRAND.key+":cg3:"+(CODE||"demo")+":"+mode}
 
-// ---------- server clock + day gate ----------
-// The device clock is NOT trusted: winding a phone back is one tap, and this page has no backend to
-// ask. /api/now is read from this same host first (whatever served this 460 KB page will answer a
-// 150-byte JSON) with the shared wins-ledger as an independent second try. The offset is held against
-// performance.now(), which is monotonic, so the reading cannot be moved after it lands.
-// If neither clock answers, play is REFUSED with a Try again button rather than falling back to the
-// device clock -- a check the player can switch off is not a check. Note this only blocks STARTING a
-// new play: one already saved and already posted to the ledger still renders its reward card.
-const LEDGER_BASE="https://wins-ledger-production.up.railway.app";
-const PLAY_FROM_MIN=720,DEP_FROM_MIN=720,DEP_TO_MIN=1260; // PH minutes: 12:00, 12:00, 21:00
-const HOURS_TXT="12 PM–9 PM",PLAY_END_TXT="11:59 PM";
-let T0=null,P0=null,SRVHM="",BOOT_DAY=null,clockState="wait"; // wait | ok | fail
-function fetchNow(base,ms){const c=new AbortController(),k=setTimeout(()=>c.abort(),ms);
-  return fetch(base+"/api/now",{signal:c.signal,cache:"no-store"})  // no custom headers: stays preflight-free
-    .then(r=>r.ok?r.json():Promise.reject(0))
-    .then(j=>{if(!j||!/^\d{8}$/.test(String(j.day))||typeof j.ms!=="number")return Promise.reject(0);return j})
-    .finally(()=>clearTimeout(k))}
-function loadClock(){clockState="wait";
-  const tries=[fetchNow(location.origin,3500),fetchNow(LEDGER_BASE,6000)];let left=tries.length;
-  return new Promise(res=>tries.forEach(pr=>pr.then(
-    j=>{if(clockState!=="ok"){clockState="ok";T0=j.ms;P0=performance.now();SRVHM=j.hm||"";if(BOOT_DAY===null)BOOT_DAY=phDay(j.ms);res(true)}},
-    ()=>{if(--left===0&&clockState!=="ok"){clockState="fail";res(false)}})))}
-function nowMs(){return T0+(performance.now()-P0)}
-function srvDay(){return clockState==="ok"?phDay(nowMs()):(clockState==="fail"?false:null)}
-function srvMin(){return clockState==="ok"?phMin(nowMs()):-1}
-// re-read rather than trust a reading older than 10 min (a page left open across midnight must re-check)
-function clockStale(){return clockState!=="ok"||performance.now()-P0>600000}
-// PURE on purpose: the smoke test table-tests the whole truth table without a browser or a real clock.
-// ld = the link's day, sd = the server day (null = still checking, false = unreachable), m = PH minutes.
-function gateReason(ld,sd,m){
-  if(mode==="expired")return {label:"LINK EXPIRED",note:"This link is from an earlier promo day and no longer works. Ask your agent for a new link after your next verified deposit."};
-  if(mode==="bad")return {label:"INVALID LINK",note:"This link is not valid. Ask your agent for your own game link."};
-  if(sd===null)return {label:"CHECKING…",note:"Checking the game clock. One moment…"};
-  if(sd===false)return {label:"CAN'T CHECK THE CLOCK",note:"We can't reach the game clock, so the game is paused. Check your internet, then tap Try again. If it keeps failing, message your agent.",retry:"Try again"};
-  if(ld!==sd)return {label:"LINK EXPIRED",note:"This link was for "+fmtDay(ld)+" and stopped working at "+PLAY_END_TXT+" that day. Deposit again between "+HOURS_TXT+" and ask your agent for a new link."};
-  if(m<PLAY_FROM_MIN)return {label:"NOT OPEN YET",note:"The game opens at 12 PM (Philippine time). Your link works until "+PLAY_END_TXT+" today."};
-  return null}
-function playGate(){return (mode==="demo"||mode==="admin")?null:gateReason(cfg&&cfg.day,srvDay(),srvMin())}
-// the day rolled while the page sat open: show what was already won, but no new play
-function midnightGrace(){return mode==="player"&&BOOT_DAY!==null&&cfg.day===BOOT_DAY&&srvDay()&&srvDay()!==cfg.day&&plays().length>0}
-function lockView(label,note,retry){
-  try{if(GAME.stop)GAME.stop()}catch(e){}
-  $("play").innerHTML="";$("win").hidden=true;$("summary").hidden=true;
-  $("resetBtn").hidden=true;$("count").hidden=false;$("count").textContent=label;
-  const ag=$("agree")&&$("agree").closest("label");if(ag)ag.hidden=true;
-  $("goBtn").hidden=!retry;$("goBtn").disabled=false;if(retry)$("goBtn").textContent=retry;
-  cheer("");$("note").textContent=note}
-function retryClock(){lockView("CHECKING…","Checking the game clock. One moment…");loadClock().then(()=>buildView())}
-addEventListener("visibilitychange",()=>{if(!document.hidden&&mode==="player"&&clockStale())loadClock().then(()=>buildView())});
 // ---------- sound ----------
 let actx=null,soundOn=true;
 try{soundOn=localStorage.getItem(BRAND.key+"-sound")!=="off"}catch(e){}
@@ -881,9 +873,9 @@ function cheer(text){const c=$("cheer");c.textContent=text;c.classList.remove("p
 function needAgree(){if($("agree").checked)return false;const l=$("agreeLbl");l.classList.remove("nudge");void l.offsetWidth;l.classList.add("nudge");cheer("Please tick the T&C box first.");return true}
 
 // ---------- game ----------
-// Power-Up Cards: 4 face-down power-up cards holding ₱7, ₱17, ₱77 and ₱777. Press START (or tap a card), the cards shuffle, pick 1 and it flips to show your bonus.
+// Power-Up Cards: 4 face-down power-up cards holding ₱7, ₱17, ₱77 and ₱177. Press START (or tap a card), the cards shuffle, pick 1 and it flips to show your bonus.
 // The bonus is drawn first (₱7 95% / ₱17 5%, weights admin only); the picked card always shows it.
-// The other 3 cards flip afterwards for show only and hold the remaining amounts; ₱77 and ₱777 are display only (0%), never won.
+// The other 3 cards flip afterwards for show only and hold the remaining amounts; ₱77 and ₱177 are display only (0%), never won.
 const GAME=(()=>{
   const NB=4;
   let wrap,cards=[],amtEl,timers=[],anim=false,waiting=false,pending=null,cur=null;
@@ -915,8 +907,8 @@ const GAME=(()=>{
   const ICON={7:"<svg viewBox='0 0 40 40' aria-hidden='true'><path d='M20 34 C9 26 4 20 4 13.5 C4 8.6 7.8 5 12.4 5 C15.6 5 18.4 6.8 20 9.6 C21.6 6.8 24.4 5 27.6 5 C32.2 5 36 8.6 36 13.5 C36 20 31 26 20 34Z' fill='#3ecf6a' stroke='#0e5a24' stroke-width='2'/><path d='M10 12 C10.6 9.8 12.4 8.6 14.4 8.6' stroke='#fff' stroke-width='2.4' stroke-linecap='round' fill='none' opacity='.7'/><path d='M17 17 h6 v-5 h0 M14 17 h12 M20 11 v12' stroke='#fff' stroke-width='3' stroke-linecap='round'/></svg>",
     17:"<svg viewBox='0 0 40 40' aria-hidden='true'><path d='M23 2 L7 23 H18 L15 38 L33 15 H22Z' fill='#ffcc2a' stroke='#0a4a5a' stroke-width='2' stroke-linejoin='round'/><path d='M21 7 L12 20' stroke='#e8fdff' stroke-width='2.4' stroke-linecap='round'/></svg>",
     77:"<svg viewBox='0 0 40 40' aria-hidden='true'><path d='M20 3 L34 9 C34 22 29 31 20 37 C11 31 6 22 6 9Z' fill='#e8b830' stroke='#2a0a6a' stroke-width='2' stroke-linejoin='round'/><path d='M20 11 l2.6 5.4 5.8.8 -4.2 4.1 1 5.8 -5.2-2.8 -5.2 2.8 1-5.8 -4.2-4.1 5.8-.8Z' fill='#fff3b0' stroke='#7a4a00' stroke-width='1'/></svg>",
-    777:"<svg viewBox='0 0 40 40' aria-hidden='true'><path d='M5 30 L3 11 L13 19 L20 6 L27 19 L37 11 L35 30Z' fill='#ffcc2a' stroke='#7a4a00' stroke-width='2' stroke-linejoin='round'/><rect x='5' y='30' width='30' height='5' rx='1.5' fill='#ffcc2a' stroke='#7a4a00' stroke-width='2'/><circle cx='20' cy='23' r='3' fill='#ff3d5a'/><circle cx='11' cy='25' r='2' fill='#ffcc2a'/><circle cx='29' cy='25' r='2' fill='#ffcc2a'/></svg>"};
-  const KIND={7:["COMMON","common"],17:["RARE","rare"],77:["EPIC","epic"],777:["LEGENDARY","legendary"]};
+    177:"<svg viewBox='0 0 40 40' aria-hidden='true'><path d='M5 30 L3 11 L13 19 L20 6 L27 19 L37 11 L35 30Z' fill='#ffcc2a' stroke='#7a4a00' stroke-width='2' stroke-linejoin='round'/><rect x='5' y='30' width='30' height='5' rx='1.5' fill='#ffcc2a' stroke='#7a4a00' stroke-width='2'/><circle cx='20' cy='23' r='3' fill='#ff3d5a'/><circle cx='11' cy='25' r='2' fill='#ffcc2a'/><circle cx='29' cy='25' r='2' fill='#ffcc2a'/></svg>"};
+  const KIND={7:["COMMON","common"],17:["RARE","rare"],77:["EPIC","epic"],177:["LEGENDARY","legendary"]};
   function setAmt(v,bump){amtEl.textContent=php2(v);if(bump){amtEl.classList.remove("bump");void amtEl.offsetWidth;amtEl.classList.add("bump")}}
   function countUp(v){const steps=reduce()?1:20;let j=0;const up=()=>{j++;setAmt(Math.round(v*100*j/steps)/100,true);if(j%4===0)beep(900+j*30,.04,.04,"square");if(j<steps)T(up,40)};up()}
   // a burst of sparks and coins out of a card (presentation only)
@@ -930,11 +922,11 @@ const GAME=(()=>{
     c.querySelector(".pc-amt").textContent=php2(val);c.dataset.tier=k[1];
     c.classList.remove("peek");c.classList.add("open",mine?"mine":"other");c.querySelector(".pc-tag").textContent=mine?"YOUR BONUS":"";
     if(quiet)c.classList.add("instant");else if(mine)T(()=>burst(c,k[1],k[1]==="rare"?26:16),300)}
-  // the other 3 cards hold the remaining amounts of the set ₱7 · ₱17 · ₱77 · ₱777, in a random order
+  // the other 3 cards hold the remaining amounts of the set ₱7 · ₱17 · ₱77 · ₱177, in a random order
   function othersFor(i,mine){const pool=[PRIZES[0],PRIZES[1],JPVAL.barbar,JPVAL.seven].filter(v=>v!==mine);
     for(let k=pool.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[pool[k],pool[j]]=[pool[j],pool[k]]}
     const o=[];for(let k=0,p=0;k<NB;k++)o.push(k===i?null:pool[p++]);return o}
-  // show the prize set face up before the shuffle (₱7 · ₱17 · ₱77 · ₱777 in that order)
+  // show the prize set face up before the shuffle (₱7 · ₱17 · ₱77 · ₱177 in that order)
   const SET=()=>[PRIZES[0],PRIZES[1],JPVAL.barbar,JPVAL.seven];
   function peek(){SET().forEach((v,k)=>{const c=cards[k];c.querySelector(".pc-amt").textContent=php2(v);c.dataset.tier=(KIND[v]||KIND[7])[1];c.classList.add("peek")})}
   function unpeek(){cards.forEach(c=>c.classList.remove("peek"))}
@@ -1037,7 +1029,7 @@ const GAME=(()=>{
       anim=true;cur={prize,done};wrap.classList.remove("done");
       const go=()=>{waiting=true;wrap.classList.add("live");cheer("Pick 1 card!");if(pending!=null){const p=pending;pending=null;p.classList.remove("queued");T(()=>pick(+p.dataset.i),reduce()?0:250)}};
       if(reduce()){unpeek();go();return}
-      wrap.classList.remove("deal");peek();cheer("These are the prizes: ₱7 · ₱17 · ₱77 · ₱777");
+      wrap.classList.remove("deal");peek();cheer("These are the prizes: ₱7 · ₱17 · ₱77 · ₱177");
       cards.forEach((c,k)=>T(()=>{c.classList.add("glint");beep(660+k*110,.06,.06,"triangle");T(()=>c.classList.remove("glint"),500)},150+k*220));
       T(()=>{unpeek();noise(.2,.08,2600);cheer("Flipping face down…")},1500);
       T(()=>{wrap.classList.add("shuffle","shuffling");cheer("Shuffling…");
@@ -1085,23 +1077,40 @@ const GAME=(()=>{
 // ---------- engine ----------
 // state = {plays:[{prize, cell, at, claimed}]}; each play is saved the moment START is pressed, before the lights run
 let state=null,busy=false,N=0;
-function save(){try{localStorage.setItem(storeKey(),JSON.stringify(state))}catch(e){}}
-function load(){try{const s=JSON.parse(localStorage.getItem(storeKey())||"null");return s&&Array.isArray(s.plays)?s:null}catch(e){return null}}
+function save(){
+  if(mode==="player"){const P=plays(),pl=P[P.length-1];
+    if(pl&&SRV)api("/api/plan/"+CODE,{method:"POST",body:JSON.stringify({id:SRV.id,plan:pl})});return}
+  try{localStorage.setItem(storeKey(),JSON.stringify(state))}catch(e){}}
+// Each paid play carries its cosmetic board in play.plan, so a refresh (or another device)
+// replays the same board instead of re-rolling, and clearing the browser grants nothing.
+function load(){
+  if(mode==="player"){
+    const ps=((S&&S.plays)||[]).map(p=>{
+      const amt=Number(p.amount);
+      const base=(p.plan&&p.plan.prize!=null)?Object.assign({},p.plan)
+        :{prize:Math.max(0,PRIZES.indexOf(amt)),cell:0};
+      if(base.cell==null)base.cell=0;
+      base.claimed=!!p.seen;base.__id=p.id;
+      return base});
+    return {plays:ps}}
+  try{const s=JSON.parse(localStorage.getItem(storeKey())||"null");
+    return s&&Array.isArray(s.plays)?s:null}catch(e){return null}}
 function renderMech(){
   const steps=["<b>Who can join:</b> GameSpot players with no deposit in the last 30+ days.",
     "<b>How to unlock:</b> First verified deposit after a Tele call (Voiso call + SMS). Your agent verifies your deposit and gives you your personal game link.",
     "<b>Validity:</b> 3 days from the call.",
     "<b>Every "+php(PLAY_DEP)+" deposit = 1 play.</b> For example, ₱1,000 = 5 plays, all on the personal link from your agent.",
     "<b>Only for slot games</b>. <b>Wager ×"+WAGER_X+"</b>: the bonus must be wagered "+WAGER_X+"× before it can be withdrawn.",
-    "<b>Hours:</b> deposit "+HOURS_TXT+". Play any time until "+PLAY_END_TXT+" the same day — your link expires at midnight. Max bonus <b>"+php(DAILY_CAP)+"</b> per day."];
+    "<b>Hours:</b> 1 PM–9 PM daily. Max bonus <b>"+php(DAILY_CAP)+"</b> per day."];
   $("mechSteps").innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
-  const how=["Tick the T&C box.","Press <b>START</b> (or tap a card). The 4 power-up cards shuffle. They hold <b>₱7</b>, <b>₱17</b>, <b>₱77</b> and <b>₱777</b>.","<b>Pick 1 card.</b> It flips and shows your bonus: <b>₱7</b> (power-up) or <b>₱17</b> (rare). <b>Every play wins.</b>","The other 3 cards then flip for show only. Amounts on cards you did not pick are not won, and the ₱77 (epic) and ₱777 (legendary) cards are display only.","Take a screenshot of your reward card and send it to your agent to get it credited."];
+  const how=["Tick the T&C box.","Press <b>START</b> (or tap a card). The 4 power-up cards shuffle. They hold <b>₱7</b>, <b>₱17</b>, <b>₱77</b> and <b>₱177</b>.","<b>Pick 1 card.</b> It flips and shows your bonus: <b>₱7</b> (power-up) or <b>₱17</b> (rare). <b>Every play wins.</b>","The other 3 cards then flip for show only. Amounts on cards you did not pick are not won, and the ₱77 (epic) and ₱177 (legendary) cards are display only.","Take a screenshot of your reward card and send it to your agent to get it credited."];
   $("howSteps").innerHTML=how.map(s=>"<li>"+s+"</li>").join("");
 }
 function plays(){return state?state.plays:[]}
 // one play: first 5% decides a wild play. Wild → a wild group is drawn (₱7 / ₱17 at 90/10; ₱777 weight 0) and the light hits every symbol of it once.
-// Not wild → the normal prize is drawn (₱7 / ₱17 at 90/10) and the light stops on a cell of that group. dragon chest (₱777) and golden controller (₱77) are display only, never drawn.
+// Not wild → the normal prize is drawn (₱7 / ₱17 at 90/10) and the light stops on a cell of that group. dragon chest (₱177) and golden controller (₱77) are display only, never drawn.
 function planPlay(){
+  if(mode==="player"){const prize=drawPrize();return {prize,cell:GAME.cellFor(prize)}}
   const forceWild=TEST_PATTERN?(testIdx()%4>=2):null; // TEST_PATTERN: 0,1 normal · 2,3 wild · repeat (normal plays still draw 90/10, wild plays 95/5)
   if(forceWild===null?rnd()<WILD_RATE:forceWild){const wprize=drawWild(),w=GAME.wildPlan(wprize);
     const total=w.parts.reduce((a,b)=>a+b,0);if(total!==Math.round(PRIZES[wprize]*100))throw new Error("wild total "+total+" ≠ group prize");
@@ -1113,12 +1122,19 @@ function buildView(){
   $("gameTitle").textContent=GAME.title;
   $("demoTag").hidden=mode!=="demo";
   $("resetBtn").hidden=!(mode==="demo"||mode==="admin");
-  if(!midnightGrace()){const g=playGate();if(g){lockView(g.label,g.note,g.retry);return}}
-  N=playsFor(cfg.deposit);
+  N=playsFor();
   $("win").hidden=true;$("summary").hidden=true;$("cheer").textContent="";busy=false;$("resetBtn").disabled=false;
   GAME.stop();
-  if(!N){$("range").textContent="Waiting for a qualifying deposit.";$("count").hidden=true;setGo(false);$("play").innerHTML="";$("note").textContent="Ask your agent for your personal game link.";return}
-  $("range").innerHTML="Every "+php(PLAY_DEP)+" deposit = 1 play · "+php(cfg.deposit)+" = <b>"+N+" play"+(N>1?"s":"")+"</b> · every play wins a bonus";
+  // The saved board is read FIRST: using the last play makes playsLeft 0, which is a hard lock,
+  // and the player must still be able to see the reward they just won.
+  if(mode==="player"){const st=load(),P=(st&&st.plays)||[];
+    if(!P.length&&hardLock(S)){lockLobby();return}}
+  if(!N){lockLobby();return}
+  $("range").innerHTML=(mode==="player"
+    ?("Deposits today ("+hoursTxt()+"): <b>"+php(S.dep||0)+"</b> · <b>"+N+" play"+(N>1?"s":"")
+      +"</b> · used <b>"+(S.playsUsed||0)+"</b> · left <b>"+(S.playsLeft||0)+"</b>")
+    :("One deposit of "+php(CONF.perPlay)+" or more = 1 play · <b>"+N+" play"+(N>1?"s":"")
+      +"</b> · every play wins a bonus"));
   state=load()||{plays:[]};
   const P=plays(),last=P[P.length-1];
   GAME.build($("play"));
@@ -1130,15 +1146,31 @@ function buildView(){
   cheer("Press START, then pick 1 card!");
   $("note").textContent="Tap a card or press START. Every play wins a bonus!";
 }
-function start(){
-  if(busy||GAME.running)return;
-  if(mode!=="demo"&&mode!=="admin"){
-    if(clockStale()){retryClock();return}
-    const g=playGate();if(g){lockView(g.label,g.note,g.retry);return}}
+async function start(){
+  if(busy||busyPlay||GAME.running)return;
   if(needAgree())return;
-  if(plays().length>=N)return;
-  const pl=Object.assign(planPlay(),{at:Date.now(),claimed:false}),idx=plays().length; // prize first, then a cell of that tier (or the wild layout)
-  state.plays.push(pl);save(); // saved before the animation, wild layout included
+  if(mode!=="player"){
+    if(plays().length>=N)return;
+    const pl=Object.assign(planPlay(),{at:Date.now(),claimed:false});
+    state.plays.push(pl);save();
+    return runBoard(pl,plays().length-1)}
+  // the server decides whether there is a play at all, and what it pays
+  if(hardLock(S)){await refresh();if(hardLock(S)){buildView();return}}
+  busyPlay=true;setGo(false);
+  const r=await api("/api/play/"+CODE,{method:"POST",body:JSON.stringify({})});
+  busyPlay=false;
+  if(!r.ok||!r.j||!r.j.play){
+    if(r.j&&r.j.exists)S=r.j;
+    cheer((r.j&&(r.j.msg||r.j.error))||"Hindi natuloy. Subukan ulit.");
+    buildView();return}
+  S=r.j;SRV=r.j.play;              // drawPrize() now returns the tier that pays SRV.amount
+  state=load();                    // server truth, including the play just granted
+  const idx=Math.max(0,state.plays.length-1);
+  const pl=Object.assign(planPlay(),{at:Date.now(),claimed:false});
+  state.plays[idx]=pl;save();      // the cosmetic board, stored so a refresh replays it
+  runBoard(pl,idx);
+}
+function runBoard(pl,idx){
   busy=true;$("resetBtn").disabled=true;
   const g=$("goBtn");g.classList.add("pressed");setTimeout(()=>{if(busy)setGo(false)},reduce()?0:160);
   beep(220,.12,.2,"square");beep(330,.1,.12,"square",.06);
@@ -1156,10 +1188,9 @@ function showResult(idx,celebrate){
   const more=idx+1<N;
   setGo(!celebrate,more?"Next play":"See my total");
   $("note").textContent=more?"Claim your reward, then the board resets for your next play.":"That was your last play.";
-  if(celebrate){if(mode==="player")postWin(pl);setTimeout(()=>openWin(idx),reduce()?50:250)}
+  // the win is recorded by the server (app.py posts to the shared ledger); never from here
+  if(celebrate)setTimeout(()=>openWin(idx),reduce()?50:250);
 }
-// every real win goes to the shared wins-ledger (brand slug "gspot", same as Treasure Spot); demo/admin previews never post
-function postWin(pl){try{fetch("https://wins-ledger-production.up.railway.app/api/win",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({brand:"gspot",game:"Power-Up Cards",name:"",code:cfg.code,amount:amtOf(pl),link:location.href})}).catch(()=>{})}catch(e){}}
 function nextRound(){
   const P=plays(),last=P[P.length-1];
   if(last&&!last.claimed){last.claimed=true;save()}
@@ -1176,7 +1207,7 @@ function showSummary(){
   cheer("Salamat! Thanks for playing.");
   $("note").textContent="All plays on this link are used. Ask your agent for a new link after your next deposit.";
 }
-$("goBtn").onclick=()=>{if(busy)return;if(clockState==="fail"){retryClock();return}const P=plays(),last=P[P.length-1];if(last&&!last.claimed&&$("win").hidden===false){nextRound();return}start()};
+$("goBtn").onclick=()=>{if(busy)return;const P=plays(),last=P[P.length-1];if(last&&!last.claimed&&$("win").hidden===false){nextRound();return}start()};
 $("resetBtn").onclick=()=>{if(busy||mode==="player")return;try{localStorage.removeItem(storeKey())}catch(e){}state=null;buildView()};
 $("showCard").onclick=()=>{const P=plays();if(P.length)openWin(P.length-1,true)};
 
@@ -1187,7 +1218,8 @@ function openWin(idx,quiet){
   const jp=$("jp"),a=$("jpAmt");jp.classList.toggle("big",big);
   $("jpTitle").textContent=big&&!pl.wild?"RARE POWER-UP!":"YOU WON!";$("jpSub").textContent="Power-Up Cards"+" · Play "+(idx+1)+" of "+N;
   $("jpLogo").src=$("wordmark").src;
-  const when=new Date(pl.at||Date.now()),ref=(makeToken(cfg).split(".").pop()+"-"+(idx+1)).toUpperCase();
+  const when=new Date(pl.at||Date.now());
+  const ref=String((pl&&pl.__id)||(SRV&&SRV.id)||(cfg.code+"-"+(idx+1))).toUpperCase();
   const rows=[["Player",mode==="demo"?"DEMO":cfg.code],["Promo","GameSpot Respawn Reward"],["Deposit",php(cfg.deposit)],["Play",(idx+1)+" of "+N],
     ["Result",pl.wild?"RESPAWN · "+CATNAME[pl.wprize]:GAME.result(pl.cell,pl.prize)],
     ...(pl.wild&&Array.isArray(pl.parts)?[["Respawn hits",pl.parts.map((c,k)=>GAME.label(pl.hits[k])+" "+php2(c/100)).join(" + ")+" = "+php2(amt)]]:[]),["Date",when.toLocaleString("en-PH",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"})],["Ref code",ref]];
@@ -1208,7 +1240,8 @@ function confetti(count,big){
   (function fr(now){c.clearRect(0,0,W,H);ps.forEach(p=>{p.vy+=.28;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;c.save();c.translate(p.x,p.y);c.rotate(p.a);c.fillStyle=p.c;c.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);c.restore()});
     if(now-s<4500&&!$("jp").hidden)confettiRAF=requestAnimationFrame(fr);else c.clearRect(0,0,W,H)})(s);
 }
-function closeWin(){if($("jp").hidden)return;$("jp").hidden=true;cancelAnimationFrame(confettiRAF);
+function closeWin(){
+  if(mode==="player"&&SRV&&!SRV.seen){SRV.seen=1;api("/api/seen/"+CODE,{method:"POST",body:JSON.stringify({id:SRV.id})})}if($("jp").hidden)return;$("jp").hidden=true;cancelAnimationFrame(confettiRAF);
   const P=plays();if(cardIdx===P.length-1&&P[cardIdx]&&!P[cardIdx].claimed)nextRound()}
 $("jpClose").onclick=closeWin;
 $("jp").addEventListener("click",e=>{if(e.target===$("jp"))closeWin()});
@@ -1226,21 +1259,14 @@ $("tncAgree").onclick=()=>{$("agree").checked=true;agreeChanged();closeTnc()};
 $("tnc").addEventListener("click",e=>{if(e.target===$("tnc"))closeTnc()});
 
 // ---------- link maker (owner and editors only) ----------
-function playerLink(){return location.href.split("#")[0].split("?")[0]+"?v=2#"+makeToken(cfg)}
+function playerLink(){return location.href.split("#")[0].split("?")[0]+"#"+cfg.code}
 function adminUI(){
   if(document.activeElement!==$("deposit"))$("deposit").value=cfg.deposit||"";
   if(document.activeElement!==$("code"))$("code").value=cfg.code;
   const n=playsFor(cfg.deposit),tb=$("aTier");
-  if(n){tb.className="tierbox";tb.innerHTML="<b>1 play</b> (one deposit of "+php(PLAY_DEP)+" or more = 1 play, a bigger deposit is still 1) on this one link · bonus per play <b>"+PRIZES.map(php2).join(" / ")+"</b> · the ₱77 and ₱777 cards are display only (never won)"}
-  else{tb.className="tierbox bad";tb.innerHTML="<b>Not qualified.</b> The minimum deposit is "+php(PLAY_DEP)+" (one deposit of "+php(PLAY_DEP)+" or more = 1 play). The game is locked on this link."}
+  if(n){tb.className="tierbox";tb.innerHTML="<b>"+n+" play"+(n>1?"s":"")+"</b> ("+php(cfg.deposit)+" ÷ "+php(PLAY_DEP)+") on this one link · bonus per play <b>"+PRIZES.map(php2).join(" / ")+"</b> · the ₱77 and ₱177 cards are display only (never won)"}
+  else{tb.className="tierbox bad";tb.innerHTML="<b>Not qualified.</b> The minimum deposit is "+php(PLAY_DEP)+" (1 play per "+php(PLAY_DEP)+"). The game is locked on this link."}
   $("plink").textContent=playerLink();
-  const noClock=clockState!=="ok",mm=srvMin(),amsg=$("aMsg");
-  if($("copyLink"))$("copyLink").disabled=noClock;
-  if($("copyMsg"))$("copyMsg").disabled=noClock;
-  if(noClock){amsg.textContent="Can't reach the game clock, so today's date can't be put in the link. Reload the page before making links."}
-  else if(mm<DEP_FROM_MIN||mm>=DEP_TO_MIN){amsg.textContent="Heads up: it is "+SRVHM+" server time, outside the "+HOURS_TXT+" deposit window. Only send this link if the deposit was verified inside the window. It still plays until "+PLAY_END_TXT+" today."}
-  else if(1439-mm<60){amsg.textContent="Only "+(1439-mm)+" minutes of play time left on this link - it stops at "+PLAY_END_TXT+" tonight."}
-  else if(amsg.textContent.indexOf("clock")>=0||amsg.textContent.indexOf("Heads up")>=0||amsg.textContent.indexOf("minutes of play")>=0){amsg.textContent=""}
 }
 function changed(){adminUI();buildView()}
 function formulaUI(){
@@ -1254,7 +1280,7 @@ function formulaUI(){
     const h=vals.map((v,i)=>{const pr=ws[i]/tw,u=n*pr,c=u*v;cost+=c;e+=pr*v;return "<tr><td>"+lab(v,i)+"</td><td>"+pct(pr*100)+"</td><td>"+nf(u)+"</td><td>"+php(r2(c))+"</td></tr>"}).join("")+
       "<tr class='sum'><td>Total</td><td>100%</td><td>"+nf(n)+"</td><td>"+php(r2(cost))+"</td></tr>";return [h,cost,e]};
   $("fNormPct").textContent=pct(pN*100);$("fWildPct").textContent=pct(pW*100);
-  // normal table also lists the display-only strip jackpots at 0%: ₱777 (77) and ₱77 (BAR BAR)
+  // normal table also lists the display-only strip jackpots at 0%: ₱177 (77) and ₱77 (BAR BAR)
   const NV=[...PRIZES,JPVAL.barbar,JPVAL.seven],NW=[...WEIGHTS,0,0],nlab=(v,i)=>i<PRIZES.length?php2(v):php2(v)+"* (display only)";
   const [hN,cN,eN]=table(NV,NW,U*pN,nlab),wlab=(v,i)=>v===777?"₱777* (tease)":CATNAME[i],[hW,cW,eW]=table(WILD_PRIZES,WILD_WEIGHTS,U*pW,wlab),[h1k]=table(WILD_PRIZES,WILD_WEIGHTS,1000,wlab);
   $("fRows").innerHTML=hN;$("fWild").innerHTML=hW;$("fWild1k").innerHTML=h1k;
@@ -1269,35 +1295,100 @@ function formulaUI(){
 }
 function flash(btn,txt){const o=btn.textContent;btn.textContent=txt;setTimeout(()=>btn.textContent=o,1500)}
 async function copyText(t,btn){try{await navigator.clipboard.writeText(t);flash(btn,"Copied")}catch(e){const r=document.createRange();r.selectNodeContents($("plink"));const s=getSelection();s.removeAllRanges();s.addRange(r);flash(btn,"Selected")}}
-function unlockAdmin(){
-  try{sessionStorage.setItem("admin-unlocked","1")}catch(e){}
-  $("adminLock").hidden=true;if(!$("adminBody").children.length)$("adminBody").appendChild($("adminTpl").content.cloneNode(true));$("adminBody").hidden=false;
-  $("code").addEventListener("input",e=>{cfg.code=cleanCode(e.target.value)||"player";$("plink").textContent=playerLink()});
-  $("deposit").addEventListener("input",e=>{const v=e.target.value;cfg.deposit=v===""?0:Math.max(0,Math.min(999999,Math.floor(+v)));changed()});
-  $("newLink").onclick=()=>{cfg.nonce=Date.now().toString(36);changed();$("aMsg").textContent="This is a new link. The player can play again with it; do not use the old one anymore."};
-  $("copyLink").onclick=()=>copyText(playerLink(),$("copyLink"));
-  $("copyMsg").onclick=()=>{const n=playsFor(cfg.deposit);if(!n){$("aMsg").textContent="Enter a qualifying deposit first.";return}copyText(LINK_NOTE+"\n\n"+BRAND.script+" You have 1 play on this link.\n\nPlay here: "+playerLink(),$("copyMsg"))};
-  $("fUsers").addEventListener("input",formulaUI);$("fDep").addEventListener("input",formulaUI);formulaUI();
-  adminUI();
-  if(clockState==="ok"){cfg.day=srvDay();changed()}
-  else{loadClock().then(()=>{if(clockState==="ok")cfg.day=srvDay();changed()})}
-}
 if(mode==="admin"){
+  // No claude.ai owner check and no local password hash: the password goes to POST /api/admin-login
+  // and the token it returns authorises /api/lookup and /api/link. The agent never types a deposit --
+  // the server reads the GameSpot deposits table, so a link cannot be made for a player who did not
+  // qualify, which is the whole point of the conversion.
   $("admin").hidden=false;$("previewLabel").hidden=false;
-  let alreadyUnlocked=false;
-  try{alreadyUnlocked=sessionStorage.getItem("admin-unlocked")==="1"}catch(e){}
-  if(alreadyUnlocked){unlockAdmin()}
-  else{
-    $("adminPassBtn").onclick=()=>{
-      const v=$("adminPassInput").value;
-      if(h36(v+SALT)===ADMIN_PASS_CHECK){unlockAdmin()}
-      else{$("adminGateMsg").textContent="Wrong password. Try again."}
-    };
-    $("adminPassInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("adminPassBtn").click()}});
+  let LOOK=null;
+  const gmsg=t=>{const m=$("adminGateMsg");if(m)m.textContent=t||""};
+  const amsg=t=>{const m=$("aMsg");if(m)m.textContent=t||""};
+  function showBody(){
+    $("adminLock").hidden=true;
+    if(!$("adminBody").children.length)$("adminBody").appendChild($("adminTpl").content.cloneNode(true));
+    $("adminBody").hidden=false;
+    wire();adminUI();
   }
+  window.canLink=()=>!!(LOOK&&LOOK.found&&(LOOK.playsTotal||0)>0);
+  window.adminUI=function(){
+    const tb=$("aTier");
+    if(tb){
+      if(!LOOK)tb.innerHTML="<b>Type a username and press Check.</b> Deposits and turnover are read from the GameSpot database.",tb.className="tierbox";
+      else if(!LOOK.found)tb.innerHTML="<b>Not found.</b> No GameSpot account matches that username, user ID or game ID.",tb.className="tierbox bad";
+      else if((LOOK.playsTotal||0)<=0){tb.className="tierbox bad";
+        tb.innerHTML="<b>Not qualified.</b> "+(LOOK.account||"")+" has no deposit of "+php(CONF.perPlay)
+          +" or more inside "+hoursTxt()+" today.<br>Deposits today: "
+          +((LOOK.deposits||[]).map(d=>php(d.amount)).join(", ")||"none");}
+      else{tb.className="tierbox";
+        tb.innerHTML="<b>"+(LOOK.name||LOOK.account||"")+" · "+LOOK.playsTotal+" play"
+          +(LOOK.playsTotal===1?"":"s")+"</b> · bonus per play <b>"+PRIZES.map(php2).join(" / ")
+          +"</b> · the ₱77 and ₱177 cards are display only (never won)"
+          +"<br>Deposits today: "+((LOOK.deposits||[]).map(d=>php(d.amount)).join(", ")||"none")
+          +"<br>Turnover: <b>"+php(LOOK.slot||0)+"</b> · needed for the next play: <b>"+php(LOOK.nextNeed||0)+"</b>"
+          +"<br>Used: <b>"+(LOOK.playsUsed||0)+"</b> · left: <b>"+(LOOK.playsLeft||0)+"</b>"
+          +(LOOK.ready?" · <b>ready to play</b>":"");}
+    }
+    const ok=canLink();
+    if($("plink"))$("plink").textContent=(ok&&cfg.code&&cfg.code!=="juan123")?playerLink():"—";
+    if($("copyLink"))$("copyLink").disabled=!ok;
+    if($("copyMsg"))$("copyMsg").disabled=!ok;
+  };
+  async function lookup(fresh){
+    const acct=($("code").value||"").trim();
+    if(!acct){LOOK=null;adminUI();amsg("Type a username first.");return}
+    amsg(fresh?"Making the link…":"Checking…");
+    const r=fresh?await api("/api/link",{method:"POST",body:JSON.stringify({account:acct,fresh:true})})
+                 :await api("/api/lookup?account="+encodeURIComponent(acct));
+    if(r.status===401||r.status===403){ADM=null;try{sessionStorage.removeItem("gspot-adm-cg3")}catch(e){}
+      $("adminBody").hidden=true;$("adminLock").hidden=false;gmsg("Session expired. Unlock again.");return}
+    if(!r.ok&&r.status!==404){LOOK=null;adminUI();amsg((r.j&&(r.j.msg||r.j.error))||"Could not reach the game server.");return}
+    LOOK=r.j||{};
+    if(LOOK.code)cfg.code=LOOK.code;
+    adminUI();
+    amsg(LOOK.found?(LOOK.code?"Link ready. Copy it and send it to the player.":"Checked. Press New link."):"Not found.");
+  }
+  function wire(){
+    if($("code")){
+      $("code").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();lookup(false)}});
+      $("code").addEventListener("input",()=>{LOOK=null;cfg.code="juan123";adminUI()});
+    }
+    if($("newLink"))$("newLink").onclick=()=>lookup(true);
+    if($("copyLink"))$("copyLink").onclick=()=>copyText(playerLink(),$("copyLink"));
+    if($("copyMsg"))$("copyMsg").onclick=()=>{
+      if(!canLink()){amsg("Check a qualifying player first.");return}
+      const n=LOOK.playsTotal||1;
+      copyText(BRAND.script+" You have "+n+" play"+(n>1?"s":"")+".\n\n"
+        +"⏰ Deposits count "+hoursTxt()+" (PH time). Use your plays today until "+playEndTxt()
+        +" — this link stops working at midnight.\n\nPlay here: "+playerLink(),$("copyMsg"));
+    };
+  }
+  $("adminPassBtn").onclick=async()=>{
+    const p=$("adminPassInput").value,b=$("adminPassBtn");
+    if(!p){gmsg("Enter the admin password.");return}
+    b.disabled=true;gmsg("Checking…");
+    const r=await api("/api/admin-login",{method:"POST",body:JSON.stringify({password:p})});
+    b.disabled=false;
+    if(!(r.ok&&r.j&&r.j.token)){gmsg("Wrong password.");return}
+    ADM=r.j.token;try{sessionStorage.setItem("gspot-adm-cg3",ADM)}catch(e){}
+    gmsg("");showBody();
+  };
+  $("adminPassInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("adminPassBtn").click()});
+  if(ADM)showBody();
 }
 buildView();
-loadClock().then(()=>buildView());
+// A player's page is driven by the session: paint once, again when the server answers, and keep
+// polling so a deposit or turnover landing a minute later unlocks START without a reload.
+if(mode==="player"){
+  refresh().then(()=>buildView());
+  pollTimer=setInterval(()=>{
+    if(busy||busyPlay||GAME.running)return;
+    refresh().then(()=>{if(!busy&&!busyPlay&&!GAME.running)buildView()});
+  },20000);
+  addEventListener("visibilitychange",()=>{
+    if(!document.hidden&&!busy&&!busyPlay&&!GAME.running)refresh().then(()=>buildView());
+  });
+}
 </script>
 
 </body></html>
