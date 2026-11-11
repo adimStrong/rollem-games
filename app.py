@@ -449,7 +449,8 @@ def get_config():
 def admin_login():
     payload = request.get_json(force=True, silent=True) or {}
     if not hmac.compare_digest(payload.get("password", ""), ADMIN_PASSWORD):
-        return jsonify({"error": "invalid"}), 403
+        # the page surfaces msg||error, so without a msg the agent just sees the word "invalid"
+        return jsonify({"error": "invalid", "msg": "Wrong password. Try again."}), 403
     return jsonify({"token": admin_token()})
 
 
