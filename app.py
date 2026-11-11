@@ -76,7 +76,7 @@ DAILY_CAP = int(os.environ.get("DAILY_CAP", "10000"))
 ROUNDS_PER_DAY = int(os.environ.get("ROUNDS_PER_DAY", "5"))   # 2026-10-30: max 5 claims/spins per player per day -- each round STRICTLY also requires its own new, unconsumed deposit (see canPick's need_amt>0 guard in summary() and the matching backend check in /api/pick); this is enforced BOTH in canPick (UI hint) and as a hard block in /api/pick (elif len(rows)>=ROUNDS_PER_DAY)
 DEP_FROM = os.environ.get("DEP_FROM", "12:00")   # deposits counted from (inclusive, HH:MM)
 DEP_TO = os.environ.get("DEP_TO", "21:00")       # deposits counted until (exclusive)
-PLAY_UNTIL = os.environ.get("PLAY_UNTIL", "21:00")
+PLAY_UNTIL = os.environ.get("PLAY_UNTIL", "23:59")   # spins stay usable to end of day; the link still dies at midnight (biz_date)
 MIN_PRIZE = min(p["amt"] for p in LIVE_PRIZES)
 MAX_PRIZE = max(p["amt"] for p in PRIZES)
 
@@ -719,6 +719,12 @@ def pick(code):
         cur_row = rows[-1] if rows else None
         user = {"user_id": sess["user_id"], "account": sess["account"], "real_name": sess["name"]}
         s = summary(cur, user, date)
+        if not s["playOpen"]:
+            # Same gate /api/spin has had all along (see below) -- without it a cabin could still be
+            # picked after PLAY_UNTIL, which only looked harmless while PLAY_UNTIL was 21:00 and the
+            # biz_date check was 3 hours away. Never rely on the frontend's canPick hint alone.
+            conn.rollback()
+            return jsonify({"error": "closed", "msg": "Sarado na ang laro para ngayong araw."}), 409
         need_amt = int(round(s["needAmt"]))
         if cur_row and cur_row["status"] == "open":
             cur.execute("UPDATE fw_spins SET cabin=%s, tier=0, need=%s WHERE id=%s", (cabin, need_amt, cur_row["id"]))
