@@ -479,10 +479,10 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
     <h3>Terms &amp; Conditions</h3>
     <ol>
       <li>Open to verified Time2Bet players aged 21 and above. Self-excluded, restricted or unverified accounts are not eligible.</li>
-      <li>Runs are unlocked by a qualifying deposit verified by a Time2Bet agent, made between 12 PM and 9 PM (Philippine time) on the day you play, and within the validity period of your offer. Pending, failed or reversed deposits do not qualify.</li>
+      <li>Runs are unlocked by a qualifying deposit verified by a Time2Bet agent, made between 2 PM and 9 PM and within the validity period of your offer. Pending, failed or reversed deposits do not qualify.</li>
       <li>Every ₱200 of one verified qualifying deposit gives 1 run (for example, ₱600 = 3 runs). The minimum deposit is ₱200.</li>
       <li>In each run you pick one of six horses before the race, and your horse's finishing place sets your prize. Prizes are random in every run, and which horse you pick makes no difference.</li>
-      <li>The promo runs daily: deposits qualify from 12 PM to 9 PM, and the runs on your link must be used by 11:59 PM the same day — your link expires at midnight and cannot be used the next day. Total promo bonus is capped at ₱10,000 per day; once the cap is reached, the promo closes for the day.</li>
+      <li>The promo runs daily from 2 PM to 9 PM. Total promo bonus is capped at ₱10,000 per day; once the cap is reached, the promo closes for the day.</li>
       <li>The number of runs on your player link is set by your verified deposit. Results are random and final once a race starts. Refreshing the page, reopening the link or using another device does not give another turn. Only the first result confirmed by your agent counts.</li>
       <li>Send a screenshot of your result to your agent. The bonus is credited after the agent verifies your deposit and result, within the time your agent announces.</li>
       <li>Only bets on slot games are valid for this promo. The bonus must be wagered 1× (Wager ×1) on slot games before it can be withdrawn.</li>
@@ -498,8 +498,8 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
 const BRAND={"key": "t2b", "name": "Time2Bet", "labels": ["6th place", "5th place", "4th place", "3rd place", "2nd place", "1st place"], "offers": {"Reactivation": {"name": "Time-In Bonus", "target": "No deposit in the last 30+ days", "trig": "First verified deposit after the Tele call (Voiso call + SMS)", "valid": "3 days from the call", "script": "Hi! It's time-in again at Time2Bet! Your deposit is verified, so you get a Time 2 Race. Pick your horse, and the place it finishes in sets your reward!"}, "VIP": {"name": "Prime Time VIP", "target": "Top depositors / VIP-tagged players", "trig": "Reached the monthly deposit target", "valid": "Monthly, credited on the 1st", "script": "You're now part of Prime Time VIP. You hit your monthly target, so you get a Time 2 Race for your rebate this month. I'm your VIP host."}, "Community": {"name": "Happy Hour Drop", "target": "Active members of the Time2Bet TG group", "trig": "Deposited during the announced Happy Hour (1 hour, at a random time each week)", "valid": "During Happy Hour only", "script": "Happy Hour Drop! You deposited during Happy Hour, so you get a Time 2 Race. Hope your horse finishes 1st!"}}, "confetti": ["#ffcc33", "#ffffff", "#5d8bff"], "confettiBig": ["#ffcc33", "#fff1b8", "#ffffff", "#5d8bff"]};
 // ---------- shared helpers ----------
 const $=id=>document.getElementById(id);
-// Campaign sheet: every ₱200 deposit = 1 run; slot games only; Wager ×1; deposit 12 PM–9 PM, runs usable until 11:59 PM the same day; max bonus ₱10,000/day
-const RUN_DEP=200,WAGER_X=1,DAILY_CAP=10000,HOURS="12 PM–9 PM";
+// Campaign sheet: every ₱200 deposit = 1 run; slot games only; Wager ×1; 2 PM–9 PM; max bonus ₱10,000/day
+const RUN_DEP=200,WAGER_X=1,DAILY_CAP=10000,HOURS="2 PM–9 PM";
 const PRIZES=[8.88,8.88,8.88,8.88,15.88,20.88]; // 6th,5th,4th,3rd,2nd,1st place
 const WEIGHTS=[30,20,20,20,5,5];                // % chance, same order (sum 100)
 function nSteps(){return PRIZES.length}
@@ -520,70 +520,17 @@ const SALT="cg~"+BRAND.key+"~26q4";
 const ADMIN_PASS_CHECK="mqxsis"; // h36(shared admin password + SALT) -- same as the previous T2B Derby page (BRAND.key "t2b")
 function h36(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}let g=h;for(let i=s.length-1;i>=0;i--){g^=s.charCodeAt(i)*31;g=Math.imul(g,2246822519)>>>0}return (h.toString(36)+g.toString(36)).slice(0,6)}
 function cleanCode(c){return (c||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,32)}
-// link = #code.<r|v|c><deposit>.<nonce>.<YYYYMMDD issued, PH>.<check>
-// the check covers the date too, so the day a link was issued cannot be edited
-const phDay=ms=>new Date((ms==null?Date.now():ms)+8*3600e3).toISOString().slice(0,10).replace(/-/g,"");
-const phMin=ms=>{const d=new Date((ms==null?Date.now():ms)+8*3600e3);return d.getUTCHours()*60+d.getUTCMinutes()};
-const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const fmtDay=d=>(+d.slice(6))+" "+MON[+d.slice(4,6)-1]+" "+d.slice(0,4);
-function makeToken(c){const body=c.code+"."+OK[c.offer]+c.deposit+"."+c.nonce+"."+c.day;return body+"."+h36(body+SALT)}
-function parseToken(t){const p=t.split(".");if(p.length!==5)return null;const [code,od,nonce,day,chk]=p;
-  if(!/^[a-z0-9]{1,32}$/.test(code)||!/^[rvc]\d{1,6}$/.test(od)||!/^[a-z0-9]{1,12}$/.test(nonce)||!/^\d{8}$/.test(day))return null;
-  if(h36(code+"."+od+"."+nonce+"."+day+SALT)!==chk)return null;return {code,offer:KO[od[0]],deposit:+od.slice(1),nonce,day}}
+function makeToken(c){const body=c.code+"."+OK[c.offer]+c.deposit+"."+c.nonce;return body+"."+h36(body+SALT)}
+function parseToken(t){const p=t.split(".");if(p.length!==4)return null;const [code,od,nonce,chk]=p;
+  if(!/^[a-z0-9]{1,32}$/.test(code)||!/^[rvc]\d{1,6}$/.test(od)||!/^[a-z0-9]{1,12}$/.test(nonce))return null;
+  if(h36(code+"."+od+"."+nonce+SALT)!==chk)return null;return {code,offer:KO[od[0]],deposit:+od.slice(1),nonce}}
 const raw=decodeURIComponent(location.hash.slice(1)).toLowerCase();
 const tok=parseToken(raw);
-const legacy=!tok&&/^[a-z0-9]{1,32}\.[rvc]\d{1,6}\.[a-z0-9]{1,12}\.[a-z0-9]{1,8}$/.test(raw);
-// a plain anchor (#, #top) is still the demo; anything shaped like a token must prove itself
-let mode=raw==="admin"?"admin":tok?"player":raw.indexOf(".")>=0?(legacy?"expired":"bad"):"demo";
-let cfg=mode==="player"?tok:{code:"juan123",offer:"Reactivation",deposit:500,nonce:mode==="admin"?Date.now().toString(36):"demo",day:mode==="admin"?phDay():"00000000"};
+let mode=raw==="admin"?"admin":tok?"player":"demo";
+let cfg=mode==="player"?tok:{code:"juan123",offer:"Reactivation",deposit:500,nonce:mode==="admin"?Date.now().toString(36):"demo"};
 let run=0; // which run of this link is on screen (0-based)
-function storeKey(k){return BRAND.key+":v2:"+mode+":"+makeToken(cfg)+":run"+(k==null?run:k)}
+function storeKey(k){return BRAND.key+":"+mode+":"+makeToken(cfg)+":run"+(k==null?run:k)}
 
-// ---------- server clock + day gate ----------
-// The device clock is NOT trusted: winding a phone back is one tap, and this page has no backend to
-// ask. /api/now is read from this same host first (whatever served this page will answer) with the
-// shared wins-ledger as an independent second try, and the offset is held against performance.now(),
-// which is monotonic, so the reading cannot be moved after it lands.
-// If neither clock answers, play is REFUSED with a Try again button rather than falling back to the
-// device clock. This only blocks STARTING a run: one already saved and posted still renders.
-const LEDGER_BASE="https://wins-ledger-production.up.railway.app";
-const PLAY_FROM_MIN=720,DEP_FROM_MIN=720,DEP_TO_MIN=1260; // PH minutes: 12:00, 12:00, 21:00
-const HOURS_TXT="12 PM–9 PM",PLAY_END_TXT="11:59 PM";
-const LINK_NOTE="⏰ Deposits count from 12 PM to 9 PM (PH time). Use your runs today until 11:59 PM — this link stops working at midnight (hindi na gagana bukas).";
-let T0=null,P0=null,SRVHM="",BOOT_DAY=null,clockState="wait"; // wait | ok | fail
-function fetchNow(base,ms){const c=new AbortController(),k=setTimeout(()=>c.abort(),ms);
-  return fetch(base+"/api/now",{signal:c.signal,cache:"no-store"})  // no custom headers: stays preflight-free
-    .then(r=>r.ok?r.json():Promise.reject(0))
-    .then(j=>{if(!j||!/^\d{8}$/.test(String(j.day))||typeof j.ms!=="number")return Promise.reject(0);return j})
-    .finally(()=>clearTimeout(k))}
-function loadClock(){clockState="wait";
-  const tries=[fetchNow(location.origin,3500),fetchNow(LEDGER_BASE,6000)];let left=tries.length;
-  return new Promise(res=>tries.forEach(pr=>pr.then(
-    j=>{if(clockState!=="ok"){clockState="ok";T0=j.ms;P0=performance.now();SRVHM=j.hm||"";if(BOOT_DAY===null)BOOT_DAY=phDay(j.ms);res(true)}},
-    ()=>{if(--left===0&&clockState!=="ok"){clockState="fail";res(false)}})))}
-function nowMs(){return T0+(performance.now()-P0)}
-function srvDay(){return clockState==="ok"?phDay(nowMs()):(clockState==="fail"?false:null)}
-function srvMin(){return clockState==="ok"?phMin(nowMs()):-1}
-function clockStale(){return clockState!=="ok"||performance.now()-P0>600000}
-// PURE on purpose: the smoke test table-tests the whole truth table with no browser clock involved
-function gateReason(ld,sd,m){
-  if(mode==="expired")return {label:"LINK EXPIRED",note:"This link is from an earlier promo day and no longer works. Ask your agent for a new link after your next verified deposit."};
-  if(mode==="bad")return {label:"INVALID LINK",note:"This link is not valid. Ask your agent for your own game link."};
-  if(sd===null)return {label:"CHECKING…",note:"Checking the game clock. One moment…"};
-  if(sd===false)return {label:"CAN'T CHECK THE CLOCK",note:"We can't reach the game clock, so the game is paused. Check your internet, then tap Try again. If it keeps failing, message your agent.",retry:"Try again"};
-  if(ld!==sd)return {label:"LINK EXPIRED",note:"This link was for "+fmtDay(ld)+" and stopped working at "+PLAY_END_TXT+" that day. Deposit again between "+HOURS_TXT+" and ask your agent for a new link."};
-  if(m<PLAY_FROM_MIN)return {label:"NOT OPEN YET",note:"The game opens at 12 PM (Philippine time). Your link works until "+PLAY_END_TXT+" today."};
-  return null}
-function playGate(){return (mode==="demo"||mode==="admin")?null:gateReason(cfg&&cfg.day,srvDay(),srvMin())}
-function lockView(label,note,retry){
-  try{if(GAME.stop)GAME.stop()}catch(e){}
-  $("play").innerHTML="";$("win").hidden=true;
-  $("resetBtn").hidden=true;$("range").textContent=label;
-  const ag=$("agree")&&$("agree").closest("label");if(ag)ag.hidden=true;
-  $("goBtn").hidden=!retry;$("goBtn").disabled=false;if(retry)$("goBtn").textContent=retry;
-  $("cheer").textContent="";$("note").textContent=note}
-function retryClock(){lockView("CHECKING…","Checking the game clock. One moment…");loadClock().then(()=>buildView())}
-addEventListener("visibilitychange",()=>{if(!document.hidden&&mode==="player"&&clockStale())loadClock().then(()=>buildView())});
 // ---------- sound ----------
 let actx=null,soundOn=true;
 try{soundOn=localStorage.getItem(BRAND.key+"-sound")!=="off"}catch(e){}
@@ -843,7 +790,7 @@ function renderMech(){
   const steps=["<b>Every ₱200 deposit = 1 run.</b> For example, a ₱600 deposit = 3 runs.",
     "<b>Only for slot games.</b> Wager ×1: the bonus must be wagered 1× before it can be withdrawn.",
     "<b>"+HOURS+" daily only.</b> Max promo bonus: "+php(DAILY_CAP)+" per day.",
-    "<b>Who can join:</b> "+off.target+".","<b>How to unlock:</b> "+off.trig+". Your agent will verify your deposit and send you your personal game link.","<b>Offer validity (when you can deposit):</b> "+off.valid+"."]
+    "<b>Who can join:</b> "+off.target+".","<b>How to unlock:</b> "+off.trig+". Your agent will verify your deposit and send you your personal game link.","<b>Validity:</b> "+off.valid+"."]
     .concat(GAME.how.map(s=>"<b>"+GAME.label+":</b> "+s))
     .concat(["<b>Prize:</b> Based on your horse's finishing place in each run. Prizes are random in every game.",
       "<b>Claiming:</b> Screenshot the result of each run and send it to your agent. The bonus is credited after verification, with Wager ×1 on slot games before withdrawal.",
@@ -860,7 +807,6 @@ function buildView(){
   $("gameTitle").textContent=GAME.title;
   $("demoTag").hidden=mode!=="demo";
   $("resetBtn").hidden=!(mode==="demo"||mode==="admin");
-  {const g=playGate();if(g){lockView(g.label,g.note,g.retry);return}}
   $("play").innerHTML="";$("win").hidden=true;$("cheer").textContent="";
   busy=false;$("resetBtn").disabled=false;
   $("goBtn").hidden=!GAME.btn;$("goBtn").textContent=GAME.btn||"";
@@ -887,7 +833,7 @@ function finishView(celebrate){
   cheer(!r.win?"So close! No win this time.":r.big?"JACKPOT!":"You Won!");
   if(celebrate&&r.win){if(mode==="player")postWin(r.amt,r.label);setTimeout(()=>openWin(r.amt,r.big,r.label),reduce()?50:450)}
 }
-$("goBtn").onclick=()=>{if(busy)return;if(clockState==="fail"){retryClock();return}if(mode!=="demo"&&mode!=="admin"){if(clockStale()){retryClock();return}const g=playGate();if(g){lockView(g.label,g.note,g.retry);return}}if(state&&state.step!=null){if(run<runsFor(cfg.deposit)-1){if(GAME.stop)GAME.stop();buildView();$("goBtn").focus()}return}if(GAME.go)GAME.go(ctx)};
+$("goBtn").onclick=()=>{if(busy)return;if(state&&state.step!=null){if(run<runsFor(cfg.deposit)-1){if(GAME.stop)GAME.stop();buildView();$("goBtn").focus()}return}if(GAME.go)GAME.go(ctx)};
 $("resetBtn").onclick=()=>{if(busy||!(mode==="demo"||mode==="admin"))return;try{localStorage.removeItem(storeKey())}catch(e){}state=null;if(GAME.stop)GAME.stop();buildView();$("goBtn").focus()};
 
 // ---------- win pop-up ----------
@@ -923,7 +869,7 @@ $("tncLink").onclick=e=>{e.preventDefault();$("tnc").open=true;$("tnc").scrollIn
 // Turnover: t2b_days/<YYYYMMDD Manila>/players/<code> = {code, dep, to, by, at, link?} (admin and agents read and write; players never).
 const ADMIN_ACCT="95b6f66d9dc1edb088bf74d97e2ba658d5e0f255a6a0783cf8a6cde1b2cb0a51";
 const MIN_DEP=RUN_DEP,TO_MULT=WAGER_X,AG_RE=/^[a-z0-9_.-]{3,24}$/,SESS="t2b-adm-v1";
-const DAY=phDay(); // one clock helper in this file; the turnover roster below is hidden anyway
+const DAY=new Date(Date.now()+8*3600e3).toISOString().slice(0,10).replace(/-/g,"");
 async function sha(s){try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}catch(e){return "x"+h36(s)+h36(s+"#")}}
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const num=v=>Math.max(0,Math.min(9999999,Math.floor(+String(v).replace(/[^\d.]/g,"")||0)));
@@ -948,21 +894,18 @@ function canLink(){return !!(who&&cleanCode($("code").value)&&tierFor(cfg.offer,
 /* inside claude.ai the page runs on a sandbox address, so links point at the public artifact URL; a self-hosted copy links to itself */
 // (artifact URL removed: this copy is self-hosted on the t2b service)
 const pageBase=()=>location.href.split("#")[0]; // self-hosted: links point at this page
-function playerLink(){return pageBase().split("?")[0]+"?v=2#"+makeToken(cfg)}
+function playerLink(){return pageBase()+"#"+makeToken(cfg)}
 function adminUI(){
   const box=$("aOffers");box.innerHTML="";
   OFFERS.forEach(o=>{const b=el("button","chip",BRAND.offers[o].name+" <small>("+o+")</small>");b.type="button";b.setAttribute("aria-pressed",cfg.offer===o);b.onclick=()=>{cfg.offer=o;changed()};box.appendChild(b)});
   const off=BRAND.offers[cfg.offer];
-  $("offerBox").innerHTML="<strong></strong><p><b>Who it's for:</b> <span class='o1'></span></p><p><b>How to unlock:</b> <span class='o2'></span></p><p><b>Offer validity (when you can deposit):</b> <span class='o3'></span></p><p><b>Your link:</b> valid only on the day it is sent; it stops working at 11:59 PM that day.</p>";
+  $("offerBox").innerHTML="<strong></strong><p><b>Who it's for:</b> <span class='o1'></span></p><p><b>How to unlock:</b> <span class='o2'></span></p><p><b>Validity:</b> <span class='o3'></span></p>";
   $("offerBox").querySelector("strong").textContent=off.name;$("offerBox").querySelector(".o1").textContent=off.target;$("offerBox").querySelector(".o2").textContent=off.trig;$("offerBox").querySelector(".o3").textContent=off.valid;
   const r=curRow(),tb=$("aTier"),t=tierFor(cfg.offer,cfg.deposit);
   if(!$("code").value.trim()){tb.className="tierbox";tb.textContent="Type the player's username and deposit to make the link.";}
   else if(!t){tb.className="tierbox bad";tb.innerHTML="<b>Enter the deposit.</b> Minimum is "+php(RUN_DEP)+" (1 run per "+php(RUN_DEP)+")."}
   else{tb.className="tierbox";tb.innerHTML="<b>Link ready · "+t.runs+(t.runs===1?" run":" runs")+"</b> ("+php(cfg.deposit)+" ÷ "+php(RUN_DEP)+"). Check the deposit and the 1× slot turnover yourself before sending."+(r?" Saved today: deposit "+php(r.dep)+(r.to==null?"":" · TO "+php(r.to)+(eligible(r)?" · eligible":" · not eligible yet"))+(r.link?" · link sent by "+esc(r.link.by):""):"")}
-  const noClock=clockState!=="ok",mm=srvMin(),ok=!!canLink()&&!noClock;$("plink").textContent=ok?playerLink():"—";$("copyLink").disabled=!ok;$("copyMsg").disabled=!ok;
-  if(noClock){$("aMsg").textContent="Can't reach the game clock, so today's date can't be put in the link. Reload the page before making links."}
-  else if(mm<DEP_FROM_MIN||mm>=DEP_TO_MIN){$("aMsg").textContent="Heads up: it is "+SRVHM+" server time, outside the "+HOURS_TXT+" deposit window. Only send this link if the deposit was verified inside the window. It still plays until "+PLAY_END_TXT+" today."}
-  else if(1439-mm<60){$("aMsg").textContent="Only "+(1439-mm)+" minutes of play time left on this link - it stops at "+PLAY_END_TXT+" tonight."}
+  const ok=!!canLink();$("plink").textContent=ok?playerLink():"—";$("copyLink").disabled=!ok;$("copyMsg").disabled=!ok;
 }
 function changed(){adminUI();buildView()}
 function renderDbNote(){const n=$("dbNote");
@@ -1036,7 +979,7 @@ if(mode==="admin"){
     m.textContent="Saved "+n+" player"+(n===1?"":"s")+"."+(bad.length?" Skipped "+bad.length+": "+bad.slice(0,3).join(" · ")+(bad.length>3?"…":""):"");if(!bad.length)$("bulkIn").value="";loadCode($("code").value)};
   $("newLink").onclick=()=>{cfg.nonce=Date.now().toString(36);changed();$("aMsg").textContent="This is a new link. The player can play again with it; stop using the old one."};
   $("copyLink").onclick=()=>{if(!canLink())return;copyText(playerLink(),$("copyLink"));logLink()};
-  $("copyMsg").onclick=()=>{if(!canLink())return;copyText(BRAND.offers[cfg.offer].script+"\n\n"+LINK_NOTE+"\n\nPlay here: "+playerLink(),$("copyMsg"));logLink()};
+  $("copyMsg").onclick=()=>{if(!canLink())return;copyText(BRAND.offers[cfg.offer].script+"\n\nPlay here: "+playerLink(),$("copyMsg"));logLink()};
   ["fxUsers","fxDep"].forEach(id=>$(id).addEventListener("input",fxUI));
   // agents (main admin only)
   $("agGen").onclick=()=>{const a="abcdefghjkmnpqrstuvwxyz23456789",r=new Uint32Array(8);crypto.getRandomValues(r);$("agP").value="ag-"+[...r].map(x=>a[x%a.length]).join("").replace(/(.{4})/,"$1-")};
@@ -1052,12 +995,9 @@ if(mode==="admin"){
     try{if(t){const a=agents.get(t.dataset.tog);await acol().doc(a.u).update({active:a.active===false})}
       if(d){if(d.dataset.sure!=="1"){d.dataset.sure="1";d.textContent="Tap again to remove";setTimeout(()=>{d.dataset.sure="";d.textContent="Remove"},3000);return}await acol().doc(d.dataset.del).delete();m.textContent="Agent removed."}}
     catch(err){m.textContent="Couldn't change it. Only the page owner or an editor on claude.ai can manage agents."}});
-  if(clockState==="ok"){if(cfg.day!==srvDay()){cfg.day=srvDay()}}
-  else{loadClock().then(()=>{if(clockState==="ok")cfg.day=srvDay();adminUI()})}
   const s=getSess();if(s){who=s;showBody()}
 }
 buildView();
-loadClock().then(()=>buildView());
 </script>
 
 </body></html>
