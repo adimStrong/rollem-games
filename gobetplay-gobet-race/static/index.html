@@ -174,8 +174,8 @@ textarea{width:100%;min-height:180px;resize:vertical;font:600 16px/1.4 var(--bod
       <div class="gbrules">
         <h3>How it works</h3>
         <ul>
-          <li>Every <b>&#8369;200</b> deposit made between <b>12:00 PM and 9:00 PM</b> (Philippine time) = <b>1 free race</b>, up to <b>5 per day</b>.</li>
-          <li>Each race unlocks once your turnover for the day reaches <b>1&times; that deposit</b> &mdash; bets on any game count. Your deposits and turnover are read from your account automatically.</li>
+          <li><b>One deposit of &#8369;200 or more</b> made between <b>12:00 PM and 9:00 PM</b> (Philippine time) = <b>1 free race</b>, up to <b>5 per day</b>. A bigger deposit is still 1 race &mdash; deposit again for another race.</li>
+          <li>Each race unlocks once your turnover for the day reaches <b>1&times; that deposit</b> &mdash; bets on any game count. So a &#8369;5,000 deposit needs &#8369;5,000 of turnover before its race opens. Your deposits and turnover are read from your account automatically.</li>
           <li>Ask your agent for your personal link. It works until <b>11:59 PM</b> on the day it was issued and <b>expires at midnight</b>.</li>
           <li>Prizes go by finishing place. <b>1st (&#8369;177) and 2nd (&#8369;77) are display only and can never be won.</b></li>
           <li>Total bonus paid by this promo is capped at <b>&#8369;10,000 per day</b> for all players.</li>
@@ -1477,8 +1477,9 @@ function renderAdmin(){
   $('admLogin').hidden=NET.authed;$('admBody').hidden=!NET.authed;
   if(!NET.authed)return;
   relabelAdmin();
-  $('admStatus').textContent=CONF.game+' · '+php(CONF.perPlay)+' = 1 race (max '+CONF.maxPlays
-    +'/day) · deposits '+hoursTxt()+' · play until '+playEndTxt();
+  $('admStatus').textContent=CONF.game+' · 1 deposit of '+php(CONF.perPlay)+' or more = 1 race'
+    +(CONF.entryMode==='deposit'?' (a bigger deposit is still 1)':'')+' · max '+CONF.maxPlays
+    +'/day · deposits '+hoursTxt()+' · play until '+playEndTxt();
   $('admStart').hidden=!(ALOOK&&ALOOK.found);$('admStart').disabled=!(ALOOK&&ALOOK.found);
   $('admNew').hidden=!(ALOOK&&ALOOK.found&&ALOOK.code);
   if(!ALOOK){$('admList').innerHTML='<li class="empty">Type a player’s username or user ID and press Check.</li>';return}
@@ -1500,8 +1501,8 @@ function renderAdmin(){
 function script(url){
   return '🏁 COMMUNITY GAME — '+CONF.game.toUpperCase()+'\n\n'
     +'🕛 Deposit Hours: '+hoursTxt()+' · Play until '+playEndTxt()+'\n\nHOW TO JOIN\n\n'
-    +'• Every '+php(CONF.perPlay)+' deposit = 1 FREE RACE\n'
-    +'• Maximum of '+CONF.maxPlays+' FREE RACES per player per day.\n'
+    +'• One deposit of '+php(CONF.perPlay)+' or more = 1 FREE RACE (a bigger deposit is still 1 race)\n'
+    +'• Maximum of '+CONF.maxPlays+' FREE RACES per player per day — deposit again for another race.\n'
     +'• Bets on any game count toward the turnover requirement.\n'
     +'• Each race unlocks once you complete the '+CONF.turnover+'× turnover requirement.\n'
     +'• Deposits count only between '+hoursTxt()+'. Use your races until '+playEndTxt()+' the same day.\n'
