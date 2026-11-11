@@ -1,6 +1,6 @@
 """Seed a throwaway Postgres with TamasaPH-shaped tables (tamasa-retention = Gobetplay/POTS schema subset) + today's rows.
 Usage: python tests/fixture_tms.py [dsn]   (default postgresql://postgres:cgtest@localhost:55442/cg)
-PER_PLAY=200, TURNOVER_MULT=1, WAGER_CATS=all, window 13:00-21:00. Turnover = the fresher of bets_daily (game_type ALL,
+PER_PLAY=200, TURNOVER_MULT=1, WAGER_CATS=all, window 12:00-21:00. Turnover = the fresher of bets_daily (game_type ALL,
 loop-refreshed) and bets_daily_category (category 'all', link-sync refreshed):
   juan123  (1001) dep 400 @13:30 (+300 @10:00 outside window, +999 Failed) -> 2 plays; bets_daily 350 but link row 400 -> 400:
            play1 (need 200) & play2 (need 400) unlocked
@@ -43,7 +43,7 @@ cur.executemany("INSERT INTO users VALUES (%s,%s,%s,%s,%s,%s)", [
 D = lambda n, uid, acct, amt, st, hm, d=today: (n, uid, acct, amt, st, f"{d} {hm}:00", d)
 cur.executemany("INSERT INTO deposits VALUES (%s,%s,%s,%s,%s,%s,%s)", [
     D("o1", 1001, "juan123", 400, "Success", "13:30"),
-    D("o2", 1001, "juan123", 300, "Success", "10:00"),   # outside window (before 13:00)
+    D("o2", 1001, "juan123", 300, "Success", "10:00"),   # outside window (before 12:00)
     D("o3", 1001, "juan123", 999, "Failed", "16:00"),    # not Success
     D("o4", 1001, "juan123", 200, "Success", "21:00"),   # exactly 21:00 -> excluded (window end exclusive)
     D("o5", 1002, "maria_x", 200, "Success", "14:00"),

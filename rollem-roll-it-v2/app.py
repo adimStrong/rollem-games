@@ -57,7 +57,7 @@ DAILY_CAP = float(os.environ.get("DAILY_CAP", "10000"))
 DEP_FROM = os.environ.get("DEP_FROM", "12:00")   # deposits counted from (inclusive, HH:MM)
 DEP_TO = os.environ.get("DEP_TO", "21:00")       # deposits counted until (exclusive)
 PLAY_FROM = os.environ.get("PLAY_FROM", DEP_FROM)
-PLAY_UNTIL = os.environ.get("PLAY_UNTIL", "21:00")
+PLAY_UNTIL = os.environ.get("PLAY_UNTIL", "23:59")   # plays stay usable to end of day; the link still dies at midnight (biz_date)
 # prize ladder: [[pesos, weight], ...]; weight 0 = display-only tier that is never drawn
 _DEFAULT_PRIZES = "[[7,90],[17,10],[27,0],[57,0],[77,0],[777,0]]"  # 777 = display-only top rung (JD 2026-11-06, like the wheel)
 PRIZES = [{"amt": float(a), "w": float(w)} for a, w in json.loads(os.environ.get("PRIZES") or _DEFAULT_PRIZES)]

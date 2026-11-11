@@ -52,12 +52,19 @@ def main():
 
     # ---- config shape ----
     status, cfg = req("GET", "/api/config")
+    # This block had drifted badly: it still asserted the launch values (85/10/5 ladder, minDeposit 100,
+    # turnover 3, casino counting, a 13:00 window) long after each of those shipped a change, so it had been
+    # failing for weeks. Re-pinned to what /api/config actually serves as of 2026-11-11.
     check("config has fixed prize ladder", cfg.get("prizes") == [
-        {"amt": 17, "p": 85}, {"amt": 27, "p": 10}, {"amt": 37, "p": 5}, {"amt": 77, "p": 0}], cfg)
-    check("config minDeposit=100", cfg.get("minDeposit") == 100, cfg)
-    check("config turnover=3", cfg.get("turnover") == 3, cfg)
-    check("config wagerCats includes casino", "casino" in cfg.get("wagerCats", []), cfg)
-    check("config window is 13:00-21:00", cfg.get("depFrom") == "13:00" and cfg.get("depTo") == "21:00", cfg)
+        {"amt": 17, "p": 95}, {"amt": 27, "p": 5}, {"amt": 37, "p": 0},
+        {"amt": 77, "p": 0}, {"amt": 177, "p": 0}, {"amt": 777, "p": 0}], cfg)
+    check("config minDeposit=200", cfg.get("minDeposit") == 200, cfg)
+    check("config turnover=1", float(cfg.get("turnover")) == 1.0, cfg)
+    check("config wagerCats is slots only", cfg.get("wagerCats") == ["egame"], cfg)
+    check("config deposit window is 12:00-21:00",
+          cfg.get("depFrom") == "12:00" and cfg.get("depTo") == "21:00", cfg)
+    check("config play window runs to 23:59", cfg.get("playUntil") == "23:59", cfg)
+    check("config roundsPerDay=5", cfg.get("roundsPerDay") == 5, cfg)
     check("config cabins=8", cfg.get("cabins") == 8, cfg)
 
     # ---- juan123: eligible (dep 250 in-window, turnover 1300 >= 3*250=750) ----

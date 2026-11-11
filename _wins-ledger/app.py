@@ -63,6 +63,78 @@ def amount_ok(brand: str, amount: float) -> bool:
     return brand in RANGE_BRANDS and WHEEL_RANGE[0] <= amount <= WHEEL_RANGE[1]
 VALID_BRANDS = {"gopyesta", "pots", "rollem", "winforlife", "cow", "tamasa", "gspot", "t2b"}
 
+# ---- the two backend-less (static) games: day expiry enforced at the payout boundary ----
+# gspot and t2b have no server of their own, so their play window and one-day link expiry are gated in
+# the browser (2026-11-11). A client gate alone can be defeated by a stale cached page, so the SAME rule
+# is re-checked here, where the money is actually decided: a win whose link token is missing, forged,
+# from another day, or outside the play window never becomes a row. The player might see the animation;
+# they will not see a payout. The five backend-verified games post server-side with no token in the link
+# and are untouched by this.
+# The brand slug and the page's BRAND.key differ (the mismatch that once locked GameSpot's admin out),
+# so the SALT key is mapped explicitly rather than derived from the slug.
+TOKEN_BRANDS = {"gspot": "gamespot-cards", "t2b": "t2b"}
+TOKEN_PLAY_FROM = os.environ.get("TOKEN_PLAY_FROM", "12:00")    # PH, inclusive
+TOKEN_PLAY_UNTIL = os.environ.get("TOKEN_PLAY_UNTIL", "23:59")  # PH, inclusive
+# OFF by default, and that is deliberate. This file can deploy before the gspot/t2b pages do, and the
+# pages that are live until then still post pre-expiry 4-part links -- enforcing immediately would reject
+# the wins of players who did nothing wrong. Set TOKEN_GATE=1 on the ledger service in the same batch
+# that ships the new pages, not before.
+TOKEN_GATE = os.environ.get("TOKEN_GATE", "") not in ("", "0", "off", "false")
+
+
+def h36(s: str) -> str:
+    """Python port of the games' h36() link hash (tools/h36.py). FNV-1a forward + a reversed pass, base36."""
+    m = 0xFFFFFFFF
+    h = 2166136261
+    for ch in s:
+        h ^= ord(ch)
+        h = (h * 16777619) & m
+    g = h
+    for ch in reversed(s):
+        g = (g ^ (ord(ch) * 31)) & m
+        g = (g * 2246822519) & m
+
+    def b36(n):
+        d = "0123456789abcdefghijklmnopqrstuvwxyz"
+        out = ""
+        while n:
+            out = d[n % 36] + out
+            n //= 36
+        return out or "0"
+
+    return (b36(h) + b36(g))[:6]
+
+
+def ph_now():
+    """(YYYYMMDD, HH:MM) in PH time. UTC+8, no DST -- same convention as ph_date_ms."""
+    t = time.gmtime(time.time() + 8 * 3600)
+    return time.strftime("%Y%m%d", t), time.strftime("%H:%M", t)
+
+
+def token_link_ok(brand: str, link: str):
+    """(ok, reason) for a static game's posted link. The token is the fragment of the player URL:
+    gspot  code.d<dep>.<nonce>.<YYYYMMDD>.<check>
+    t2b    code.<r|v|c><dep>.<nonce>.<YYYYMMDD>.<check>
+    Only the check hash and the date are inspected -- the deposit/offer parts are the agent's business."""
+    if not TOKEN_GATE:
+        return True, ""                      # inert until the new static pages are live (see TOKEN_GATE)
+    key = TOKEN_BRANDS.get(brand)
+    if not key:
+        return True, ""                      # not a token-carrying brand: nothing to check
+    frag = link.split("#", 1)[1] if "#" in link else ""
+    parts = frag.lower().split(".")
+    if len(parts) != 5:
+        return False, "token"                # missing, or a pre-expiry 4-part link
+    body = ".".join(parts[:4])
+    if h36(body + "cg~" + key + "~26q4") != parts[4]:
+        return False, "token"                # forged or edited (the date is inside the hashed body)
+    day, hm = ph_now()
+    if parts[3] != day:
+        return False, "expired"
+    if not (TOKEN_PLAY_FROM <= hm <= TOKEN_PLAY_UNTIL):
+        return False, "closed"
+    return True, ""
+
 
 @app.after_request
 def add_cors_headers(response):
@@ -152,6 +224,11 @@ def record_win():
     if brand not in VALID_BRANDS or not amount_ok(brand, amount) or not code:
         return jsonify({"error": "invalid payload"}), 400
 
+    ok, why = token_link_ok(brand, link)
+    if not ok:
+        # Rejected, not stored: the static games' day/window rule, re-checked server-side.
+        return jsonify({"error": why}), 400
+
     with db() as conn, conn.cursor() as cur:
         cur.execute(
             "INSERT INTO wins (brand, game, player_name, code, amount, link, created_at) "
@@ -159,6 +236,26 @@ def record_win():
             (brand, game, name, code, amount, link, int(time.time() * 1000)),
         )
     return jsonify({"ok": True})
+
+
+@app.route("/api/now", methods=["GET"])
+def server_now():
+    """PH server clock for the backend-less static games (gspot, t2b). They gate play on the PH date and
+    must not trust the player's device clock, which is one tap away from being wound back. No auth (it
+    leaks the time) and deliberately NO database call, so it stays cheap and can never exhaust the
+    connection pool. no-store matters: a cached clock would silently un-expire every link."""
+    t = time.time()
+    ph = time.gmtime(t + 8 * 3600)
+    resp = jsonify({
+        "ms": int(t * 1000),                          # epoch ms, UTC
+        "date": time.strftime("%Y-%m-%d", ph),        # PH calendar date
+        "day": time.strftime("%Y%m%d", ph),           # the token's day part
+        "hm": time.strftime("%H:%M", ph),             # PH wall clock, for the admin hints
+        "min": ph.tm_hour * 60 + ph.tm_min,           # PH minutes since midnight
+        "tz": "Asia/Manila",
+    })
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
 
 
 @app.route("/api/wins", methods=["GET"])
