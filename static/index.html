@@ -306,7 +306,7 @@ body{background:radial-gradient(70% 45% at 50% 0%,rgba(150,90,255,.38),transpare
     <h3>ROLL IT Terms &amp; Conditions</h3>
     <ol>
       <li>Open to verified Roll'em players aged 21 and above. Self-excluded, restricted or unverified accounts are not eligible.</li>
-      <li>Every ₱200 of verified deposit made between 12:00 PM and 9:00 PM gives 1 roll (for example ₱400 = 2 rolls), up to 5 rolls per player per day. Your rolls are on the personal link from your agent; your deposits are checked automatically from your account. Pending, failed or reversed deposits do not qualify.</li>
+      <li>One deposit of ₱200 or more made between 12:00 PM and 9:00 PM gives 1 roll — a bigger deposit is still 1 roll, and two ₱300 deposits are 2 rolls, up to 5 rolls per player per day. Your rolls are on the personal link from your agent; your deposits are checked automatically from your account. Pending, failed or reversed deposits do not qualify.</li>
       <li>Each roll unlocks only once your turnover for the day reaches 1× the deposit for that roll (₱200 deposit → ₱200 in bets, ₱400 → ₱400, and so on). Bets on any game count. Turnover is read from your account and refreshes every few minutes.</li>
       <li>The promo runs daily: deposits count from 12:00 PM to 9:00 PM, and the rolls on your link must be used by 11:59 PM the same day — your link expires at midnight and cannot be used the next day. Total bonus paid by this promo is capped at ₱10,000 per day for all players; once the cap is reached, new rolls wait for the next day.</li>
       <li>Each roll's bonus is set at random by the system the moment you press Roll: ₱7.50, ₱17.65 or ₱27 (the top prize, the rarest result). The 3 dice then land on a total that matches it: 3–11 for ₱7.50, 12–16 for ₱17.65, 17–18 for ₱27. Prizes up to ₱777 may be offered during special promos. This is an animated promo game only, not a bet.</li>
@@ -344,7 +344,7 @@ const BRAND_SCRIPT=()=>`🎲 COMMUNITY GAME — ROLL IT
 
 HOW TO JOIN
 
-• Every ${php(CONF.perPlay)} deposit = 1 FREE PLAY
+• One deposit of ${php(CONF.perPlay)} or more = 1 FREE PLAY (a bigger deposit is still 1)
 • Maximum of ${CONF.maxPlays} FREE PLAYS per player per day.
 • ${anyGame()?"Bets on any game count toward the turnover requirement.":"Only slot games qualify for this promotion."}
 • Each FREE PLAY unlocks once you complete the ${CONF.turnover}× turnover requirement.
@@ -503,7 +503,7 @@ async function refresh(force){if(mode!=="player")return;let r=null;try{r=await f
   if(!r)return;if(r.config){CONF=r.config;syncOdds()}S=r;const sig=sigOf(r);if(force||sig!==lastSig){lastSig=sig;buildView()}}
 function oddsText(){return CONF.prizes.map(p=>php2(p.amt)+" ("+p.p+"%)").join(" · ")}
 function renderMech(){
-  const steps=["<b>Every "+php(CONF.perPlay)+" deposit = 1 play</b>, up to <b>"+CONF.maxPlays+" plays per day</b>. E.g. "+php(CONF.perPlay*2)+" = 2 plays, all on the personal link from your agent. Deposits count from "+hours()+".",
+  const steps=["<b>One deposit of "+php(CONF.perPlay)+" or more = 1 play</b>, up to <b>"+CONF.maxPlays+" plays per day</b>. A bigger deposit is still 1 play \u2014 deposit again for another. Deposits count from "+hours()+".",
     "<b>"+wagerRule()+"</b> Each play unlocks once your "+wagerLabel()+" reaches <b>"+CONF.turnover+"× the deposit</b> ("+php(CONF.perPlay)+" deposit → "+php(CONF.perPlay*CONF.turnover)+" in bets). Your deposits and turnover are checked automatically from your account — nothing to send.",
     "<b>Hours:</b> deposits count "+hours()+" · play until "+playEnd()+" daily. <b>Max bonus:</b> "+php(CONF.dailyCap)+" per day for all players.",
     "<b>How to get your link:</b> ask your agent after you deposit. Your link works until "+playEnd()+" on the day it was issued, then expires at midnight; deposit again and your next play unlocks on the same link.",
