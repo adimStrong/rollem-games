@@ -907,6 +907,14 @@ function newRace(spec){
   if(spec&&spec.no)raceNo=spec.no;else raceNo++;$('raceNo').textContent=raceNo;
   racers.forEach(r=>scene.remove(r.obj));tagsEl.innerHTML='';
   const pl=spec?spec.entries.map((e,i)=>`#${i+1} ${e.userId}`):players.slice(0,MAX_SLOTS),np=pl.length,taken=new Set(pl),HN=spec?Array.from({length:HOUSE_N},(_,k)=>`#${np+k+1}`):Array.from({length:Math.max(0,FIELD-np)},()=>botName(taken)),names=[...pl,...HN],n=names.length;
+  if(spec&&n===0){ // empty lobby: nothing to build, and the crash picker below cannot cope with an empty field
+    racers=[];finished=[];raceT=0;state='lobby';phaseT=0;syncBtns();
+    $('count').textContent='0';$('slots').innerHTML='';renderOdds(0);
+    $('lobbyTitle').textContent=`Race ${raceNo} · 0 players`;
+    $('lhint').textContent='No players in this race yet.';
+    $('oddsNote').textContent='Prizes go by finishing place.';
+    $('lobbyNext').textContent='Waiting for your agent to add players. Ask your agent to add your User ID.';
+    $('lobby').hidden=false;$('result').hidden=true;board.hidden=true;big.hidden=true;return}
   const out=spec&&spec.outcome,R=out?mulberry(out.seed):Math.random;
   buildField(spec?MAX_SLOTS+HOUSE_N:FIELD);
   MODEL_ORDER=[...Array(Math.max(1,JOCKEYS.length)).keys()];for(let k=MODEL_ORDER.length-1;k>0;k--){const q=rint(k+1);[MODEL_ORDER[k],MODEL_ORDER[q]]=[MODEL_ORDER[q],MODEL_ORDER[k]];}
@@ -1302,9 +1310,9 @@ try{NET.token=sessionStorage.getItem('gbr-admin');}catch(e){}
 const nowS=()=>Date.now()+NET.off;
 async function netStart(){
   try{const r=await fetch('api/race',{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();if(!j||!j.id)throw 0;
-    NET.on=true;document.body.classList.add('online');if(location.hash==='#admin')openAdmin();applyNet(j);setInterval(poll,1000);}
+    NET.on=true;document.body.classList.add('online');if(location.hash==='#admin')openAdmin();setInterval(poll,1000);try{applyNet(j)}catch(e){console.error('applyNet',e)}}
   catch(e){NET.on=false;}}
-async function poll(){try{const r=await fetch('api/race',{cache:'no-store'});if(r.ok)applyNet(await r.json());}catch(e){}}
+async function poll(){try{const r=await fetch('api/race',{cache:'no-store'});if(r.ok){const j=await r.json();try{applyNet(j)}catch(e){console.error('applyNet',e)}}}catch(e){}}
 function specOf(j){return {no:j.no,entries:j.entries,outcome:j.outcome||null};}
 function applyNet(j){
   NET.off=j.serverNow-Date.now();const prev=NET.race;NET.race=j;
