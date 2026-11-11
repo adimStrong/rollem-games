@@ -139,6 +139,9 @@ textarea{width:100%;min-height:180px;resize:vertical;font:600 16px/1.4 var(--bod
 .gbrules h3{margin:0 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .gbrules ul{margin:0;padding-left:18px;display:grid;gap:3px;font-size:12.5px;line-height:1.35}
 .gbrules .gbtnc{margin:6px 0 0;font-size:11px;line-height:1.35;color:var(--muted)}
+.gbgoal{margin:8px 0 0;font-size:13px;line-height:1.4}
+.gbgoal b{color:var(--green,#aeff40)}
+.gbwin{margin:8px 0 0;font:800 20px/1.2 inherit;color:var(--green,#aeff40)}
 </style>
 </head>
 <body>
@@ -169,15 +172,15 @@ textarea{width:100%;min-height:180px;resize:vertical;font:600 16px/1.4 var(--bod
         <table class="prizes" aria-label="Prizes and player chances"><thead><tr><th>Place</th><th>Prize</th><th>Player chance</th></tr></thead><tbody id="prizeBody"></tbody></table>
         <p class="lhint" id="oddsNote"></p>
       <div class="gbrules">
-        <h3>How to join</h3>
+        <h3>How it works</h3>
         <ul>
-          <li>Every <b>&#8369;200</b> deposit made between <b>12:00 PM and 9:00 PM</b> (Philippine time) = <b>1 race entry</b>.</li>
-          <li>Maximum <b>5 entries</b> per player per day. Each entry needs <b>1&times; turnover</b> of the deposit first &mdash; bets on any game count.</li>
-          <li>Your agent adds your User ID to the next race. Races run until <b>11:59 PM</b>; entries do not carry over to the next day.</li>
-          <li>Prizes go by finishing place. <b>1st (&#8369;177) and 2nd (&#8369;77) are display only and can never be won by a player.</b></li>
+          <li>Every <b>&#8369;200</b> deposit made between <b>12:00 PM and 9:00 PM</b> (Philippine time) = <b>1 free race</b>, up to <b>5 per day</b>.</li>
+          <li>Each race unlocks once your turnover for the day reaches <b>1&times; that deposit</b> &mdash; bets on any game count. Your deposits and turnover are read from your account automatically.</li>
+          <li>Ask your agent for your personal link. It works until <b>11:59 PM</b> on the day it was issued and <b>expires at midnight</b>.</li>
+          <li>Prizes go by finishing place. <b>1st (&#8369;177) and 2nd (&#8369;77) are display only and can never be won.</b></li>
           <li>Total bonus paid by this promo is capped at <b>&#8369;10,000 per day</b> for all players.</li>
         </ul>
-        <p class="gbtnc">Wins are recorded automatically and credited the following day at 1:00 PM after verification. Results are final: the race is decided by the server the moment the agent presses Start, and replaying or reloading the page does not change it. This is an animated promo game only, not a bet.</p>
+        <p class="gbtnc">Your bonus is drawn by the server the moment you press Start and is recorded automatically &mdash; it is credited the following day at 1:00 PM after verification. Refreshing or reopening your link shows the same race again and never gives an extra one. This is an animated promo game only, not a bet.</p>
       </div>
         <p class="next" id="lobbyNext">Press Start to begin the race.</p>
       </div>
@@ -907,16 +910,8 @@ function newRace(spec){
   if(spec&&spec.no)raceNo=spec.no;else raceNo++;$('raceNo').textContent=raceNo;
   racers.forEach(r=>scene.remove(r.obj));tagsEl.innerHTML='';
   const pl=spec?spec.entries.map((e,i)=>`#${i+1} ${e.userId}`):players.slice(0,MAX_SLOTS),np=pl.length,taken=new Set(pl),HN=spec?Array.from({length:HOUSE_N},(_,k)=>`#${np+k+1}`):Array.from({length:Math.max(0,FIELD-np)},()=>botName(taken)),names=[...pl,...HN],n=names.length;
-  if(spec&&n===0){ // empty lobby: nothing to build, and the crash picker below cannot cope with an empty field
-    racers=[];finished=[];raceT=0;state='lobby';phaseT=0;syncBtns();
-    $('count').textContent='0';$('slots').innerHTML='';renderOdds(0);
-    $('lobbyTitle').textContent=`Race ${raceNo} · 0 players`;
-    $('lhint').textContent='No players in this race yet.';
-    $('oddsNote').textContent='Prizes go by finishing place.';
-    $('lobbyNext').textContent='Waiting for your agent to add players. Ask your agent to add your User ID.';
-    $('lobby').hidden=false;$('result').hidden=true;board.hidden=true;big.hidden=true;return}
   const out=spec&&spec.outcome,R=out?mulberry(out.seed):Math.random;
-  buildField(spec?MAX_SLOTS+HOUSE_N:FIELD);
+  buildField(spec?Math.max(FIELD,(spec.entries||[]).length):FIELD);
   MODEL_ORDER=[...Array(Math.max(1,JOCKEYS.length)).keys()];for(let k=MODEL_ORDER.length-1;k>0;k--){const q=rint(k+1);[MODEL_ORDER[k],MODEL_ORDER[q]]=[MODEL_ORDER[q],MODEL_ORDER[k]];}
   LASH.count=n*LSEG;
   // House racers always finish 1st-3rd (shown openly in the prize table); players share 4th and below at random
@@ -949,7 +944,7 @@ function newRace(spec){
   $('oddsNote').textContent=`Prizes go by finishing place.`;
   $('slots').innerHTML=racers.map(r=>`<div class="slot${r.house?' house':''}" style="--c:${hex(r.color)}"><span>Carabao ${esc(r.name)}</span>${r.house?'<em>House</em>':''}</div>`).join('');
   $('lobbyTitle').textContent=NET.on?`Race ${raceNo} · ${np} player${np===1?'':'s'}`:`Carabaos #1 to #${n}`;
-  $('lobbyNext').textContent=NET.on?(NET.authed?'Add players in the Admin panel, then press Start.':'Waiting for your agent to start the race. Ask your agent to add your User ID if it is not on the list.'):'Press Start to begin the race.';
+  $('lobbyNext').textContent=mode==='player'?'Hinahanda ang karera mo…':(mode==='admin'?'Admin preview — this is what the player sees.':'Press Start to begin the race.');
   $('lobby').hidden=false;$('result').hidden=true;board.hidden=true;big.hidden=true;
   for(const c of confP)c.p.y=-50;snapCam=true;
 }
@@ -1287,10 +1282,10 @@ function showResults(){
     +racers.filter(isDQ).map(r=>`<li style="background:#4a1e14"><span>DQ</span><i style="background:${hex(r.color)}"></i><span>${esc(r.name)} · cart broke</span><span>–</span></li>`).join('');
   setTimeout(()=>{if(state==='result')$('result').hidden=false;},1800);
 }
-function startRace(){if(NET.on){if(NET.authed)adminCall(state==='result'?'/api/admin/new':'/api/admin/start','POST');return;}if($('slots').contains(document.activeElement)){document.activeElement.blur();applySlotNames();}audioInit();AU.lastCount=0;if(state==='result')newRace();if(players.length<2){$('lobby').hidden=false;return;}if(state!=='lobby')return;state='count';phaseT=3;$('lobby').hidden=true;board.hidden=false;syncBtns();}
-function syncBtns(){if(NET.on){const a=NET.authed;$('startBtn').hidden=!a;$('resetBtn').hidden=!a;if(a){$('startBtn').disabled=!((state==='lobby'&&(NET.race?.entries?.length||0)>=2)||state==='result');$('startBtn').textContent=state==='result'?'New race':'Start';}return;}$('startBtn').disabled=!((state==='lobby'&&players.length>=2)||state==='result');}
-$('startBtn').onclick=startRace;
-$('resetBtn').onclick=()=>{if(NET.on){if(NET.authed)adminCall('/api/admin/new','POST');return;}newRace();};
+function startRace(){if(mode!=='demo'){if(mode==='player')startPlay();return;}if($('slots').contains(document.activeElement)){document.activeElement.blur();applySlotNames();}audioInit();AU.lastCount=0;if(state==='result')newRace();if(players.length<2){$('lobby').hidden=false;return;}if(state!=='lobby')return;state='count';phaseT=3;$('lobby').hidden=true;board.hidden=false;syncBtns();}
+function syncBtns(){const m=(typeof mode!=='undefined')?mode:'demo';if(m==='player'){$('startBtn').hidden=false;$('resetBtn').hidden=true;$('startBtn').textContent='START';$('startBtn').disabled=!((typeof SESS!=='undefined'&&SESS&&SESS.ready)&&state==='lobby'&&!(typeof busyPlay!=='undefined'&&busyPlay));return;}if(m==='admin'){$('startBtn').hidden=true;$('resetBtn').hidden=true;return;}$('startBtn').hidden=false;$('resetBtn').hidden=false;$('startBtn').disabled=!((state==='lobby'&&players.length>=2)||state==='result');}
+/* startBtn is bound in netStart(), per mode */
+$('resetBtn').onclick=()=>{if(mode!=='demo')return;newRace();};
 window.TamarawRace.start=startRace;window.TamarawRace.reset=()=>newRace();
 window.__dbg={cam:null,get state(){return state},set phase(v){phaseT=v},set rt(v){raceT=v},snap(){snapCam=true},racers:()=>racers};
 function renderOdds(np){
@@ -1305,58 +1300,280 @@ function applySlotNames(){const vals=[...document.querySelectorAll('.sname')].ma
 $('slots').addEventListener('focusout',e=>{if(!e.target.classList.contains('sname'))return;setTimeout(()=>{if(!$('slots').contains(document.activeElement))applySlotNames();},0);});
 $('slots').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList.contains('sname')){e.preventDefault();const nx=document.querySelector(`.sname[data-i="${+e.target.dataset.i+1}"]`);if(nx)nx.focus();else{e.target.blur();applySlotNames();}}});
 // ================= online mode: the admin backend decides the race, every screen plays it in sync
-const NET={on:false,race:null,off:0,built:null,authed:false,token:null};
-try{NET.token=sessionStorage.getItem('gbr-admin');}catch(e){}
+// ================= per-link play (cg3 model): one player per link, the server draws the prize
+// The dev export ran ONE shared race filled by an agent from a roster. Rejected 2026-11-11: every other
+// game here is one player per link. So: the agent makes a link, the player runs their OWN race on the
+// preset 8-carabao field, the SERVER draws the amount, and this browser only arranges a finishing order
+// that matches it. That arrangement is stored as the cosmetic `plan`, so a refresh replays the same race
+// instead of re-rolling -- the same contract as the clam bed in Pearl Mine and the pocket in Spin For Life.
+const RAW=decodeURIComponent(location.hash.slice(1)).trim().toLowerCase();
+const CODE=(RAW!=='admin'&&/^[a-z0-9][a-z0-9._-]{2,63}$/.test(RAW))?RAW:'';
+let mode=RAW==='admin'?'admin':(CODE?'player':'demo');
+// NET is kept (shrunken) because syncBtns() and hud() above still read NET.on / NET.authed
+const NET={on:mode!=='demo',off:0,authed:false,token:null,race:null};
+try{NET.token=sessionStorage.getItem('gbr-admin')}catch(e){}
 const nowS=()=>Date.now()+NET.off;
-async function netStart(){
-  try{const r=await fetch('api/race',{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();if(!j||!j.id)throw 0;
-    NET.on=true;document.body.classList.add('online');if(location.hash==='#admin')openAdmin();setInterval(poll,1000);try{applyNet(j)}catch(e){console.error('applyNet',e)}}
-  catch(e){NET.on=false;}}
-async function poll(){try{const r=await fetch('api/race',{cache:'no-store'});if(r.ok){const j=await r.json();try{applyNet(j)}catch(e){console.error('applyNet',e)}}}catch(e){}}
-function specOf(j){return {no:j.no,entries:j.entries,outcome:j.outcome||null};}
-function applyNet(j){
-  NET.off=j.serverNow-Date.now();const prev=NET.race;NET.race=j;
-  const lobbyKey=j.id+':'+j.entries.map(e=>e.userId).join(',');
-  if(j.status==='lobby'){
-    if(NET.built!==lobbyKey||state!=='lobby'){NET.built=lobbyKey;newRace(specOf(j));}
-  }else{
-    const key=j.id+':run';
-    if(NET.built!==key){NET.built=key;newRace(specOf(j));$('lobby').hidden=true;board.hidden=false;audioInit();AU.lastCount=0;
-      const t=nowS();if(t<j.startAt){state='count';phaseT=(j.startAt-t)/1000;}else{state='race';raceT=(t-j.startAt)/1000;big.hidden=true;}}
-    else if(state==='race'){const exp=(nowS()-j.startAt)/1000;if(Math.abs(exp-raceT)>.4)raceT=exp;}
-    else if(state==='count'){phaseT=(j.startAt-nowS())/1000;}
-  }
-  syncBtns();renderAdmin();
+let CONF={perPlay:200,maxPlays:5,turnover:1,dailyCap:10000,depFrom:'12:00',depTo:'21:00',playFrom:'12:00',playUntil:'23:59',prizes:[{amt:7,p:95},{amt:27,p:5}],maxPrize:177,game:'GoBet Race',brandLabel:'GoBetplay'};
+let SESS=null,CUR=null,PLAN=null,busyPlay=false,pollTimer=null;
+
+function php(n){const v=Number(n)||0;return '₱'+(Number.isInteger(v)?v.toLocaleString('en-US'):v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}))}
+function hm12(s){const a=String(s||'00:00').split(':'),h=+a[0],m=+a[1]||0,ap=h>=12?'PM':'AM',hh=((h+11)%12)+1;return hh+':'+String(m).padStart(2,'0')+' '+ap}
+function hoursTxt(){return hm12(CONF.depFrom)+'–'+hm12(CONF.depTo)}
+function playEndTxt(){return hm12(CONF.playUntil)}
+function setMsg(el,t){const e=$(el);if(e)e.textContent=t||''}
+
+async function api(path,opt){
+  const o=Object.assign({headers:{'Content-Type':'application/json'}},opt||{});
+  if(NET.token)o.headers['X-Admin-Token']=NET.token;
+  o.cache='no-store';
+  const r=await fetch(path.replace(/^\//,''),o);
+  let j={};try{j=await r.json()}catch(e){}
+  return {ok:r.ok,status:r.status,j:j};
 }
-// ---- admin panel (#admin)
-async function adminCall(path,method='GET',body){
-  try{const r=await fetch(path.replace(/^\//,''),{method,headers:{'Content-Type':'application/json','X-Admin-Token':NET.token||''},body:body?JSON.stringify(body):undefined});
-    const j=await r.json().catch(()=>({}));if(r.status===403&&path!=='/api/admin-login'){NET.authed=false;NET.token=null;try{sessionStorage.removeItem('gbr-admin')}catch(e){}renderAdmin();throw new Error('Please log in again.');}
-    if(!r.ok)throw new Error(j.msg||j.error||'Something went wrong. Try again.');if(j&&j.id&&j.entries)applyNet(j);return j;}
-  catch(e){admMsg(e.message,true);return null;}}
-function admMsg(t,err){const m=$('admMsg');if(m){m.textContent=t||'';m.className='amsg'+(err?' err':'');}}
-function openAdmin(){$('admin').hidden=false;if(NET.token){NET.authed=true;loadHistory();}renderAdmin();}
-function renderAdmin(){const a=$('admin');if(!a||a.hidden)return;
-  $('admLogin').hidden=NET.authed;$('admBody').hidden=!NET.authed;if(!NET.authed)return;
-  const j=NET.race||{entries:[],status:'lobby'};const lobby=j.status==='lobby';
-  $('admStatus').textContent=lobby?`Race ${j.no} · open for players (${j.entries.length}/${j.maxEntries||5})`:j.status==='running'?`Race ${j.no} · running`:`Race ${j.no} · finished`;
-  $('admAddForm').hidden=!lobby;
-  $('admList').innerHTML=j.entries.length?j.entries.map((e,i)=>`<li><b>#${i+1}</b><span>${esc(e.userId)}${e.username?` <small>${esc(e.username)}</small>`:''}</span>${lobby?`<button type="button" data-rm="${i}" aria-label="Remove ${esc(e.userId)}">Remove</button>`:''}</li>`).join(''):'<li class="empty">No players yet. Add a User ID above.</li>';
-  $('admStart').hidden=!lobby;$('admStart').disabled=j.entries.length<2;$('admNew').hidden=lobby;$('admNew').disabled=j.status==='running';
-  if(j.status==='done'&&j.results)$('admLast').innerHTML='<h4>Results</h4><ol>'+j.results.map(r=>`<li>${r.place?ORD_EN[r.place-1]:'DQ'} · #${r.carabao} ${r.house?'House':esc(r.userId)} · ${r.prize}</li>`).join('')+'</ol>';else $('admLast').innerHTML='';
-  $('admCsv').href='api/admin/history.csv?token='+encodeURIComponent(NET.token||'');}
-async function loadHistory(){const j=await adminCall('/api/admin/history');if(!j)return;
-  $('admHist').innerHTML=j.races.slice(0,15).map(r=>{const top=(r.results||[]).find(x=>!x.house&&x.place);return `<li>Race ${r.no} · ${(r.entries||[]).length} players · top player ${top?esc(top.userId)+' ('+ORD_EN[top.place-1]+')':'none'}</li>`;}).join('')||'<li class="empty">No finished races yet.</li>';}
-$('admLoginForm').addEventListener('submit',async e=>{e.preventDefault();const j=await adminCall('/api/admin-login','POST',{password:$('admPass').value});
-  if(j&&j.token){NET.token=j.token;NET.authed=true;try{sessionStorage.setItem('gbr-admin',j.token)}catch(e){}$('admPass').value='';admMsg('');syncBtns();renderAdmin();loadHistory();}});
-$('admAddForm').addEventListener('submit',async e=>{e.preventDefault();const j=await adminCall('/api/admin/entry','POST',{userId:$('admUid').value.trim(),username:$('admUname').value.trim()});
-  if(j){admMsg(`Added ${$('admUid').value.trim()}.`);$('admUid').value='';$('admUname').value='';$('admUid').focus();}});
-$('admList').addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(b)adminCall('/api/admin/entry/'+b.dataset.rm,'DELETE');});
-$('admStart').onclick=()=>adminCall('/api/admin/start','POST').then(j=>{if(j)admMsg('Race started.');});
-$('admNew').onclick=()=>adminCall('/api/admin/new','POST').then(j=>{if(j){admMsg('New race open for players.');loadHistory();}});
+
+// ---- the cosmetic plan: a finishing order that matches the amount the SERVER already drew ----------
+// PRIZES (above) is the prize BY PLACE: [177,77,27,7,7,7,7,7]. The player is always lane 0.
+function placeIndexFor(amount){
+  const a=Number(amount);
+  const exact=PRIZES.indexOf(a);
+  if(exact<0)return 3;                              // unknown amount: treat as the 4th-place band
+  const band=[];for(let i=0;i<PRIZES.length;i++)if(PRIZES[i]===a)band.push(i);
+  return band[Math.floor(Math.random()*band.length)];  // P7 spans 4th-8th, so spread it
+}
+function botNames(n){const t=new Set(),out=[];while(out.length<n){const b=botName(t);out.push(b)}return out}
+function makePlan(amount){
+  const n=FIELD,myPlace=placeIndexFor(amount);
+  const others=[];for(let i=1;i<n;i++)others.push(i);
+  for(let i=others.length-1;i>0;i--){const q=Math.floor(Math.random()*(i+1));const x=others[i];others[i]=others[q];others[q]=x;}
+  const order=new Array(n);order[myPlace]=0;
+  let k=0;for(let q=0;q<n;q++)if(order[q]===undefined)order[q]=others[k++];
+  const times=[15];for(let q=1;q<n;q++)times.push(times[q-1]+rnd(.06,.5)*(q<4?1:.6));
+  const surge=order[1+Math.floor(Math.random()*Math.min(2,n-1))];
+  // only carabaos finishing BEHIND the player may crash, so a crash can never move the player's place
+  const pool=order.slice(myPlace+1).filter(ri=>ri!==surge);
+  for(let i=pool.length-1;i>0;i--){const q=Math.floor(Math.random()*(i+1));const x=pool[i];pool[i]=pool[q];pool[q]=x;}
+  const slots=[rnd(4.2,6.2),rnd(8,9.6)],nc=Math.random()<.5?1:2;
+  const crashes=pool.slice(0,nc).map((ri,j)=>({idx:ri,t:+slots[j].toFixed(3)}));
+  return {v:1,amount:Number(amount),place:myPlace+1,seed:(Math.random()*2147483646|0)+1,
+          names:botNames(n-1),order:order,times:times.map(t=>+t.toFixed(3)),surge:surge,crashes:crashes};
+}
+function planOk(p,amount){
+  if(!p||p.v!==1||!Array.isArray(p.order)||p.order.length!==FIELD)return false;
+  if(!Array.isArray(p.times)||p.times.length!==FIELD||!Array.isArray(p.names)||p.names.length!==FIELD-1)return false;
+  const s=[...p.order].sort((a,b)=>a-b);for(let i=0;i<FIELD;i++)if(s[i]!==i)return false;
+  return p.order.indexOf(0)+1===p.place&&PRIZES[p.place-1]===Number(amount);
+}
+function specFor(plan){
+  const me=(SESS&&SESS.account)||'you';
+  return {no:(CUR&&CUR.play_no)||1,
+          entries:[{userId:me}].concat(plan.names.map(nm=>({userId:nm}))),
+          outcome:{seed:plan.seed,order:plan.order,times:plan.times,surge:plan.surge,crashes:plan.crashes}};
+}
+
+// ---- lobby / goal rendering -----------------------------------------------------------------------
+function goalEl(){let g=document.getElementById('gbgoal');if(!g){g=document.createElement('p');g.className='gbgoal';g.id='gbgoal';const c=$('lhint');if(c&&c.parentNode)c.parentNode.insertBefore(g,c.nextSibling);}return g}
+function renderLobby(){
+  if(mode!=='player')return;
+  const g=goalEl();
+  if(!SESS||!SESS.exists){g.innerHTML='Checking your link…';$('lobbyNext').textContent='';return}
+  if(SESS.expired){g.innerHTML='<b>This link has expired.</b> It was for another day. Ask your agent for a new link.';
+    $('lobbyTitle').textContent='Link expired';$('lobbyNext').textContent='';$('startBtn').disabled=true;return}
+  if(SESS.stopped){g.innerHTML='<b>The game is paused right now.</b>'+(SESS.stopNote?' ('+esc(SESS.stopNote)+')':'');$('startBtn').disabled=true;return}
+  const left=SESS.playsLeft||0,used=SESS.playsUsed||0,tot=SESS.playsTotal||0;
+  $('lobbyTitle').textContent='Para kay '+esc(SESS.name||SESS.account)+' 🏁';
+  $('lhint').textContent='8 carabaos sa karera. Ang premyo ay base sa pwesto ng iyong carabao.';
+  g.innerHTML='Deposit ngayon ('+hoursTxt()+'): <b>'+php(SESS.dep)+'</b> → <b>'+tot+'</b> race'+(tot===1?'':'s')
+    +' · nagamit <b>'+used+'</b> · natitira <b>'+left+'</b><br>Turnover ngayon: <b>'+php(SESS.slot)+'</b>';
+  if(!SESS.playOpen){$('lobbyNext').textContent='Sarado na ang laro ngayong araw ('+hm12(CONF.playFrom)+'–'+playEndTxt()+'). Bukas na ulit.';$('startBtn').disabled=true;return}
+  if(SESS.capped){$('lobbyNext').textContent='Naabot na ang daily bonus budget. Bukas na ulit.';$('startBtn').disabled=true;return}
+  if(SESS.ready){$('lobbyNext').textContent='Pindutin ang START para tumakbo ang carabao mo.';$('startBtn').disabled=false;$('startBtn').textContent='START';return}
+  $('startBtn').disabled=true;
+  $('lobbyNext').textContent=(SESS.missing&&SESS.missing.length)?('Kulang pa: '+SESS.missing.join(' at ')+'. Nag-re-refresh ang page na ito mag-isa.')
+    :'Hintayin lang, inaayos pa ang deposit at turnover mo.';
+}
+
+// ---- replay an already-paid race, so a refresh never re-rolls -------------------------------------
+function replay(play){
+  CUR=play;PLAN=play.plan;
+  if(!planOk(PLAN,play.amount)){PLAN=makePlan(play.amount);savePlan(play.id,PLAN);}
+  newRace(specFor(PLAN));
+  $('lobby').hidden=true;board.hidden=true;
+  finishView(play);
+}
+function finishView(play){
+  // jump straight to the finished state: show the field as it ended, plus the real amount won
+  try{if(typeof GAME!=='undefined'&&GAME.stop)GAME.stop()}catch(e){}
+  state='result';raceT=0;
+  racers.forEach((r,i)=>{r.done=true;r.place=PLAN.order.indexOf(i)+1;r.d=r.L;r.T=PLAN.times[r.place-1];});
+  finished=[...racers].sort((a,b)=>a.place-b.place);
+  $('resTitle').textContent=(PLAN.place<=2?'':'')+'Ikaw: '+ORD_EN[PLAN.place-1]+' · '+php(play.amount);
+  $('resList').innerHTML=finished.map((r,i)=>'<li><span>'+ORD_EN[i]+'</span><i style="background:'+hex(r.color)+'"></i>'
+    +'<span style="overflow:hidden;text-overflow:ellipsis">'+esc(r.name)+(PLAN.order[i]===0?' ← ikaw':'')+'</span>'
+    +'<span>'+(r.T||0).toFixed(2)+' s</span><span class="pz">'+(PRIZES[i]!=null?php(PRIZES[i]):'')+'</span></li>').join('');
+  $('resNext').innerHTML='<span class="gbwin">Panalo ka ng '+php(play.amount)+'!</span><br>'
+    +'Naitala na ito. I-credit bukas ng 1:00 PM pagkatapos ma-verify.'
+    +((SESS&&SESS.playsLeft>0)?'<br>May <b>'+SESS.playsLeft+'</b> race pa ang natitira — i-refresh ang page.':'');
+  $('result').hidden=false;board.hidden=true;big.hidden=true;
+  if(!play.seen)api('/api/seen/'+CODE,{method:'POST',body:JSON.stringify({id:play.id})});
+}
+async function savePlan(id,plan){try{await api('/api/plan/'+CODE,{method:'POST',body:JSON.stringify({id:id,plan:plan})})}catch(e){}}
+
+// ---- START: the server draws, then this browser arranges a race that matches it -------------------
+async function startPlay(){
+  if(busyPlay||mode!=='player'||!SESS||!SESS.ready)return;
+  busyPlay=true;$('startBtn').disabled=true;$('lobbyNext').textContent='Hinahanda ang karera…';
+  const r=await api('/api/play/'+CODE,{method:'POST',body:JSON.stringify({})});
+  busyPlay=false;
+  if(!r.ok||!r.j||!r.j.play){SESS=r.j&&r.j.exists?r.j:SESS;renderLobby();
+    $('lobbyNext').textContent=(r.j&&(r.j.msg||r.j.error))||'Hindi natuloy. Subukan ulit.';return}
+  SESS=r.j;CUR=r.j.play;PLAN=makePlan(CUR.amount);
+  savePlan(CUR.id,PLAN);
+  newRace(specFor(PLAN));
+  audioInit();AU.lastCount=0;
+  $('lobby').hidden=true;board.hidden=false;$('result').hidden=true;
+  state='count';phaseT=3;syncBtns();
+}
+
+// the dev page calls showResults() from its frame loop; wrap it to show the real amount afterwards
+const _showResults=showResults;
+showResults=function(){_showResults();if(mode==='player'&&CUR&&PLAN)setTimeout(()=>finishView(CUR),1800);};
+
+// ---- session poll ---------------------------------------------------------------------------------
+function unseenPlay(s){const p=(s&&s.plays)||[];for(let i=p.length-1;i>=0;i--)if(p[i].status==='paid'&&!p[i].seen)return p[i];return null}
+async function pollSession(){
+  if(mode!=='player')return;
+  const r=await api('/api/session/'+CODE);
+  if(!r.ok||!r.j)return;
+  const was=SESS;SESS=r.j;
+  if(SESS.config)CONF=Object.assign(CONF,SESS.config);
+  if(SESS.serverTime)NET.race={serverTime:SESS.serverTime};
+  if(state==='count'||state==='race')return;            // never disturb a running race
+  const u=unseenPlay(SESS);
+  if(u&&(!CUR||CUR.id!==u.id)){replay(u);return}
+  if(!u&&state!=='result')renderLobby();
+  if(!was)renderLobby();
+}
+
+// ---- admin: the cg3 link maker (replaces the roster panel) ----------------------------------------
+let ALOOK=null;
+function openAdmin(){$('admin').hidden=false;if(NET.token){NET.authed=true;}renderAdmin();}
+function admMsg(t,err){const m=$('admMsg');if(m){m.textContent=t||'';m.className='amsg'+(err?' err':'')}}
+function relabelAdmin(){
+  const u=$('admUid');if(u){u.placeholder='e.g. juan123, 482910 or GPxxxx';}
+  const lu=document.querySelector('label[for=admUid]');if(lu)lu.textContent='Player username, user ID or game ID';
+  // hide only the unused username field and its label -- NOT its row, which also holds the submit
+  // button, and certainly not its parent form, which is where admUid itself lives
+  const ln=document.querySelector('label[for=admUname]');if(ln)ln.hidden=true;
+  const un=$('admUname');if(un)un.hidden=true;
+  const sb=$('admAddForm')&&$('admAddForm').querySelector('button[type=submit]');if(sb)sb.textContent='Check';
+  if($('admStart'))$('admStart').textContent='Make link';
+  if($('admNew'))$('admNew').textContent='New link';
+  const csv=$('admCsv');if(csv)csv.hidden=true;
+  const h=document.querySelector('.ahist')&&document.querySelector('.ahist').previousElementSibling;
+  if(h&&h.tagName==='H4')h.textContent='Links today';
+}
+function renderAdmin(){
+  const a=$('admin');if(!a||a.hidden)return;
+  $('admLogin').hidden=NET.authed;$('admBody').hidden=!NET.authed;
+  if(!NET.authed)return;
+  relabelAdmin();
+  $('admStatus').textContent=CONF.game+' · '+php(CONF.perPlay)+' = 1 race (max '+CONF.maxPlays
+    +'/day) · deposits '+hoursTxt()+' · play until '+playEndTxt();
+  $('admStart').hidden=!(ALOOK&&ALOOK.found);$('admStart').disabled=!(ALOOK&&ALOOK.found);
+  $('admNew').hidden=!(ALOOK&&ALOOK.found&&ALOOK.code);
+  if(!ALOOK){$('admList').innerHTML='<li class="empty">Type a player’s username or user ID and press Check.</li>';return}
+  if(!ALOOK.found){$('admList').innerHTML='<li class="empty">Not found: <b>'+esc(ALOOK.account||'')+'</b>. Check the spelling.</li>';return}
+  $('admList').innerHTML='<li><b>'+esc(ALOOK.account)+'</b>'+(ALOOK.name&&ALOOK.name!==ALOOK.account?' <small>'+esc(ALOOK.name)+'</small>':'')
+    +(ALOOK.gameId?' <small>game ID '+esc(ALOOK.gameId)+'</small>':'')+'</li>'
+    +'<li>Deposit today ('+hoursTxt()+'): <b>'+php(ALOOK.dep)+'</b> → <b>'+(ALOOK.playsTotal||0)+'</b> race(s)</li>'
+    +'<li>Turnover today: <b>'+php(ALOOK.slot)+'</b>'+(ALOOK.betOk?' ✓':' — needs '+php(ALOOK.nextNeed))+'</li>'
+    +'<li>Used <b>'+(ALOOK.playsUsed||0)+'</b> of <b>'+(ALOOK.playsTotal||0)+'</b> · ready to play: <b>'+(ALOOK.ready?'YES':'no')+'</b></li>'
+    +((ALOOK.missing&&ALOOK.missing.length)?'<li>Not yet: '+ALOOK.missing.map(esc).join(' · ')+'</li>':'');
+  if(ALOOK.code){
+    const url=location.href.split('#')[0]+'#'+ALOOK.code;
+    $('admLast').innerHTML='<h4>Player link</h4><div class="linkrow"><code id="plink">'+esc(url)+'</code></div>'
+      +'<div class="arow"><button type="button" id="cpLink">Copy link</button><button type="button" id="cpMsg">Copy message + link</button></div>';
+    $('cpLink').onclick=()=>copyTxt(url,'Link copied.');
+    $('cpMsg').onclick=()=>copyTxt(script(url),'Message + link copied.');
+  } else $('admLast').innerHTML='';
+}
+function script(url){
+  return '🏁 COMMUNITY GAME — '+CONF.game.toUpperCase()+'\n\n'
+    +'🕛 Deposit Hours: '+hoursTxt()+' · Play until '+playEndTxt()+'\n\nHOW TO JOIN\n\n'
+    +'• Every '+php(CONF.perPlay)+' deposit = 1 FREE RACE\n'
+    +'• Maximum of '+CONF.maxPlays+' FREE RACES per player per day.\n'
+    +'• Bets on any game count toward the turnover requirement.\n'
+    +'• Each race unlocks once you complete the '+CONF.turnover+'× turnover requirement.\n'
+    +'• Deposits count only between '+hoursTxt()+'. Use your races until '+playEndTxt()+' the same day.\n'
+    +'• Prizes up to '+php(CONF.maxPrize)+'!\n\n🎁 BONUS DISTRIBUTION\nBonus rewards will be distributed the following day at 1:00 PM.\n\n'
+    +'📌 TERMS & CONDITIONS\nDeposits made between '+hoursTxt()+' count toward this promo. Races can be used until '
+    +playEndTxt()+' on the same day. Your link and any unused races expire at midnight and cannot be used the next day. '
+    +'1st and 2nd place are display only and can never be won.\n\n🔗 Play here: '+url;
+}
+function copyTxt(t,okmsg){
+  const done=()=>admMsg(okmsg);
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,()=>admMsg('Copy failed — select it by hand.',true));
+  else{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done()}catch(e){admMsg('Copy failed.',true)}ta.remove()}
+}
+async function doLookup(){
+  const acct=($('admUid').value||'').trim();
+  if(!acct){admMsg('Type a username or user ID.',true);return}
+  admMsg('Checking…');
+  const r=await api('/api/lookup?account='+encodeURIComponent(acct));
+  if(!r.ok){admMsg((r.j&&(r.j.msg||r.j.error))||'Lookup failed.',true);ALOOK=null;renderAdmin();return}
+  ALOOK=r.j;ALOOK.account=ALOOK.account||acct;admMsg('');renderAdmin();
+}
+async function makeLink(fresh){
+  if(!ALOOK||!ALOOK.found)return;
+  admMsg('Making the link…');
+  const r=await api('/api/link',{method:'POST',body:JSON.stringify({account:ALOOK.account,fresh:!!fresh})});
+  if(!r.ok){admMsg((r.j&&(r.j.msg||r.j.error))||'Could not make a link.',true);return}
+  ALOOK=Object.assign({found:true},r.j);admMsg(fresh?'New link. Same progress — it is tied to the account, not the link.':'The link is ready.');renderAdmin();
+}
+async function loadLinksToday(){
+  const r=await api('/api/links-today');
+  if(!r.ok||!r.j||!r.j.players){$('admHist').innerHTML='';return}
+  const rows=r.j.players||[];
+  $('admHist').innerHTML=rows.length?rows.slice(0,15).map(p=>'<li>'+esc(p.account)+' · '+(p.plays||0)+' race(s) · won '+php(p.won||0)+'</li>').join('')
+    :'<li class="empty">No links issued today yet.</li>';
+}
+$('admLoginForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const r=await api('/api/admin-login',{method:'POST',body:JSON.stringify({password:$('admPass').value})});
+  if(!r.ok||!r.j||!r.j.token){admMsg((r.j&&(r.j.msg||r.j.error==='invalid'?'Wrong password. Try again.':r.j.error))||'Login failed.',true);return}
+  NET.token=r.j.token;NET.authed=true;try{sessionStorage.setItem('gbr-admin',NET.token)}catch(e){}
+  $('admPass').value='';admMsg('');renderAdmin();loadLinksToday();
+});
+$('admAddForm').addEventListener('submit',e=>{e.preventDefault();doLookup();});
+$('admStart').onclick=()=>makeLink(false);
+$('admNew').onclick=()=>makeLink(true);
 $('admClose').onclick=()=>{$('admin').hidden=true;};
-$('admLogout').onclick=()=>{NET.authed=false;NET.token=null;try{sessionStorage.removeItem('gbr-admin')}catch(e){}syncBtns();renderAdmin();};
-addEventListener('hashchange',()=>{if(location.hash==='#admin'&&NET.on)openAdmin();});
+$('admLogout').onclick=()=>{NET.authed=false;NET.token=null;try{sessionStorage.removeItem('gbr-admin')}catch(e){}renderAdmin();};
+// `mode` is decided once, at parse time, from the hash. So changing the hash in the SAME tab -- which
+// is exactly what happens when an agent clicks the link they just generated -- would leave the page
+// still in admin mode showing no Start button. Reload on any real hash change.
+addEventListener('hashchange',()=>{
+  const r=decodeURIComponent(location.hash.slice(1)).trim().toLowerCase();
+  if(r!==RAW){location.reload();return}
+  if(r==='admin')openAdmin();
+});
+
+// ---- boot (same name the dev's boot() already calls) ----------------------------------------------
+async function netStart(){
+  if(mode==='admin'){openAdmin();if(NET.token)loadLinksToday();
+    try{const c=await api('/api/config');if(c.ok&&c.j)CONF=Object.assign(CONF,c.j)}catch(e){}
+    renderAdmin();return;}
+  if(mode!=='player'){ // plain URL: the dev page's own local demo, nothing recorded
+    $('startBtn').onclick=startRace;
+    $('lobbyNext').textContent='Demo lang ito. Humingi ng personal na link sa agent mo para makapanalo.';
+    return;}
+  try{const c=await api('/api/config');if(c.ok&&c.j)CONF=Object.assign(CONF,c.j)}catch(e){}
+  $('startBtn').onclick=startPlay;$('resetBtn').hidden=true;
+  await pollSession();
+  if(pollTimer)clearInterval(pollTimer);
+  pollTimer=setInterval(()=>{pollSession().catch(()=>{})},2500);
+}
+
 let booted=false;const boot=()=>{if(booted)return;booted=true;repaintLogos();$('poster').hidden=true;newRace();requestAnimationFrame(frame);netStart();};
 Promise.all([logoReady,jockeyReady]).then(boot);setTimeout(boot,4000);
 })();
