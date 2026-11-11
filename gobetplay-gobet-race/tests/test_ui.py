@@ -82,6 +82,7 @@ for _ in range(80):
 print("backend up on", B)
 
 codes = []
+play_ids = set()   # cg_plays ids this run created, so cleanup never touches anyone else's
 
 
 def qualified():
@@ -152,8 +153,14 @@ with sync_playwright() as pw:
         ok(acct in lst and "Deposit today" in lst, "lookup shows the player's real deposit + turnover", lst[:220])
         ok("ready to play" in lst and "YES" in lst, "the player reads as ready", lst[:300])
 
+        # "New link" (fresh=true), never "Make link": /api/link REUSES an account's existing code for
+        # the day, so plain Make-link can hand the test the very code a real player is already playing
+        # on -- which is how an earlier run came to delete production play rows it had not created.
         page.click("#admStart")
         wait("document.getElementById('plink')", 60000, "the generated link")
+        page.click("#admNew")
+        page.wait_for_timeout(2500)
+        wait("document.getElementById('plink')", 60000, "the fresh link")
         link = txt("#plink").strip()
         ok(link.startswith(B) and "#" in link, "a player link was generated", link)
         code = link.split("#", 1)[1]
@@ -222,8 +229,9 @@ with sync_playwright() as pw:
         ok(len(posts) == n_posts, "the refresh posted no extra win", len(posts))
 
         with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT play_no, amount_c, plan IS NOT NULL AS has_plan, seen FROM cg_plays WHERE code=%s", (code,))
+            cur.execute("SELECT id, play_no, amount_c, plan IS NOT NULL AS has_plan, seen FROM cg_plays WHERE code=%s", (code,))
             dbrows = [dict(r) for r in cur.fetchall()]
+            play_ids.update(r["id"] for r in dbrows)
         ok(len(dbrows) == 1, "exactly one play was recorded for the whole flow", dbrows)
         if dbrows:
             ok(dbrows[0]["has_plan"], "the cosmetic race arrangement was saved for replay", dbrows[0])
@@ -240,10 +248,16 @@ with sync_playwright() as pw:
     br.close()
 
 # ---------- cleanup: leave the platform DB as it was found ----------
+# Delete by the ids THIS RUN created. Deleting by code is what destroyed real production play rows
+# once already: a code can be shared with whoever else is playing that account today.
 with db() as conn, conn.cursor() as cur:
+    if play_ids:
+        cur.execute("DELETE FROM cg_plays WHERE id = ANY(%s)", (list(play_ids),))
     for c in codes:
-        cur.execute("DELETE FROM cg_plays WHERE code=%s", (c,))
-        cur.execute("DELETE FROM cg_sessions WHERE code=%s", (c,))
+        # the session row is safe to drop by code: this run is the only thing that used a fresh code,
+        # and a leftover cg_sessions row with no plays is inert anyway
+        cur.execute("DELETE FROM cg_sessions WHERE code=%s AND NOT EXISTS "
+                    "(SELECT 1 FROM cg_plays p WHERE p.code=cg_sessions.code)", (c,))
     cur.execute("SELECT COUNT(*) FROM cg_plays"); plays_left = cur.fetchone()[0]
     cur.execute("SELECT COUNT(*) FROM cg_sessions"); sess_left = cur.fetchone()[0]
 print("   (cleaned %d code(s); cg_plays left %d, cg_sessions left %d)" % (len(codes), plays_left, sess_left))
