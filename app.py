@@ -54,6 +54,16 @@ MAX_PLAYS = int(os.environ.get("MAX_PLAYS", "5"))          # plays per player pe
 TURNOVER_MULT = float(os.environ.get("TURNOVER_MULT", "1"))
 WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame").split(",") if c.strip()]
 DAILY_CAP = float(os.environ.get("DAILY_CAP", "10000"))
+# How many plays a day's deposits buy:
+#   "amount"  (default, and what pots/tamasa/winforlife/rollem have always done): the day's qualifying
+#             TOTAL divided by PER_PLAY -- so a single P1,000 deposit buys 5 plays, and two P150
+#             deposits buy 1 even though neither alone qualifies.
+#   "deposit" (GoBetplay, JD 2026-11-11): ONE Success deposit of PER_PLAY or more = exactly ONE play,
+#             whatever its size -- the same rule the gopyesta wheel uses. Two deposits is two plays,
+#             never five, and a P1,000 deposit is still one play. Each play's turnover requirement is
+#             then TURNOVER_MULT x the cumulative value of the qualifying deposits up to that play, so
+#             a big deposit has to be wagered in full before its single play unlocks.
+ENTRY_MODE = os.environ.get("ENTRY_MODE", "amount")
 DEP_FROM = os.environ.get("DEP_FROM", "12:00")   # deposits counted from (inclusive, HH:MM)
 DEP_TO = os.environ.get("DEP_TO", "21:00")       # deposits counted until (exclusive)
 PLAY_FROM = os.environ.get("PLAY_FROM", DEP_FROM)
@@ -87,6 +97,7 @@ CONFIG = {
     "brand": BRAND, "brandLabel": BRAND_LABEL, "game": GAME_NAME, "platform": PLATFORM, "version": "cg3",
     "prizes": _pct(PRIZES), "wildRate": WILD_RATE, "wildPrizes": _pct(WILD_PRIZES),
     "perPlay": PER_PLAY, "maxPlays": MAX_PLAYS, "turnover": TURNOVER_MULT, "wagerCats": WAGER_CATS,
+    "entryMode": ENTRY_MODE,
     "dailyCap": DAILY_CAP, "depFrom": DEP_FROM, "depTo": DEP_TO, "playFrom": PLAY_FROM, "playUntil": PLAY_UNTIL,
     "maxPrize": MAX_PRIZE, "minPrize": MIN_PRIZE,
 }
@@ -297,9 +308,17 @@ def summary(cur, user, date):
     slot_today, other, synced = platform.slot_turnover(cur, uid, date, WAGER_CATS)
     rows = plays_for(cur, uid, date)
     used = len(rows)
-    plays_total = min(int(dep_total // PER_PLAY), MAX_PLAYS) if PER_PLAY > 0 else 0
     next_no = used + 1
-    need = PER_PLAY * TURNOVER_MULT * next_no          # cumulative slot turnover needed for the NEXT play
+    if ENTRY_MODE == "deposit":
+        # one qualifying deposit = one play, whatever its size
+        quals = [d for d in deps if d["amount"] >= PER_PLAY]
+        plays_total = min(len(quals), MAX_PLAYS)
+        # play k unlocks on TURNOVER_MULT x the cumulative value of qualifying deposits 1..k
+        need = TURNOVER_MULT * sum(d["amount"] for d in quals[:next_no])
+    else:
+        quals = deps
+        plays_total = min(int(dep_total // PER_PLAY), MAX_PLAYS) if PER_PLAY > 0 else 0
+        need = PER_PLAY * TURNOVER_MULT * next_no      # cumulative slot turnover needed for the NEXT play
     t = now()
     hm = hm_of(t)
     dep_ok = used < plays_total
@@ -309,7 +328,10 @@ def summary(cur, user, date):
     if used >= MAX_PLAYS:
         missing.append("tapos na ang %d plays mo ngayong araw" % MAX_PLAYS)
     elif not dep_ok:
-        missing.append("mag-deposit pa ng ₱%s" % f"{PER_PLAY * next_no - dep_total:,.0f}")
+        if ENTRY_MODE == "deposit":
+            missing.append("mag-deposit pa ng ₱%s pataas (bawat deposit = 1 play)" % f"{PER_PLAY:,.0f}")
+        else:
+            missing.append("mag-deposit pa ng ₱%s" % f"{PER_PLAY * next_no - dep_total:,.0f}")
     if not bet_ok:
         missing.append("%s pa ng ₱%s" % (WAGER_VERB, f"{need - slot_today:,.0f}"))
     wg = wager(cur, uid)
