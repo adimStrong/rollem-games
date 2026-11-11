@@ -503,7 +503,7 @@ const RUN_DEP=200,WAGER_X=1,DAILY_CAP=10000,HOURS="2 PM–9 PM",MAX_RUNS=5;
 const PRIZES=[8.88,8.88,8.88,8.88,15.88,20.88]; // 6th,5th,4th,3rd,2nd,1st place
 const WEIGHTS=[30,20,20,20,5,5];                // % chance, same order (sum 100)
 function nSteps(){return PRIZES.length}
-function runsFor(d){return Math.max(0,Math.min(MAX_RUNS,Math.floor((+d||0)/RUN_DEP)))}
+function runsFor(d){return (+d||0)>=RUN_DEP?1:0}
 function php(n){n=Number(n);return "₱"+n.toLocaleString("en-US",n%1?{minimumFractionDigits:2,maximumFractionDigits:2}:{maximumFractionDigits:2})}
 function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296}
 function drawStep(){const W=(GAME&&GAME.weights)||WEIGHTS;let r=rnd()*W.reduce((a,b)=>a+b,0);for(let i=0;i<W.length;i++){r-=W[i];if(r<0)return i}return 0}
@@ -794,7 +794,7 @@ function renderMech(){
     .concat(GAME.how.map(s=>"<b>"+GAME.label+":</b> "+s))
     .concat(["<b>Prize:</b> Based on your horse's finishing place in each run. Prizes are random in every game.",
       "<b>Claiming:</b> Screenshot the result of each run and send it to your agent. The bonus is credited after verification, with Wager ×1 on slot games before withdrawal.",
-      "<b>Runs per link:</b> Based on your verified deposit (1 run per ₱200). Even if you refresh or reset, only the first result confirmed by your agent counts."]);
+      "<b>Runs per link:</b> One run per link. One deposit of ₱200 or more = 1 run — a bigger deposit is still 1 run, so deposit again and ask your agent for another link (max 5 a day). Even if you refresh or reset, only the first result confirmed by your agent counts."]);
   $("mechSteps").innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
 }
 function loadRun(k){try{return JSON.parse(localStorage.getItem(storeKey(k))||"null")}catch(e){return null}}
@@ -903,8 +903,8 @@ function adminUI(){
   $("offerBox").querySelector("strong").textContent=off.name;$("offerBox").querySelector(".o1").textContent=off.target;$("offerBox").querySelector(".o2").textContent=off.trig;$("offerBox").querySelector(".o3").textContent=off.valid;
   const r=curRow(),tb=$("aTier"),t=tierFor(cfg.offer,cfg.deposit);
   if(!$("code").value.trim()){tb.className="tierbox";tb.textContent="Type the player's username and deposit to make the link.";}
-  else if(!t){tb.className="tierbox bad";tb.innerHTML="<b>Enter the deposit.</b> Minimum is "+php(RUN_DEP)+" (1 run per "+php(RUN_DEP)+")."}
-  else{tb.className="tierbox";tb.innerHTML="<b>Link ready · "+t.runs+(t.runs===1?" run":" runs")+"</b> ("+php(cfg.deposit)+" ÷ "+php(RUN_DEP)+"). Check the deposit and the 1× slot turnover yourself before sending."+(r?" Saved today: deposit "+php(r.dep)+(r.to==null?"":" · TO "+php(r.to)+(eligible(r)?" · eligible":" · not eligible yet"))+(r.link?" · link sent by "+esc(r.link.by):""):"")}
+  else if(!t){tb.className="tierbox bad";tb.innerHTML="<b>Enter the deposit.</b> Minimum is "+php(RUN_DEP)+" (one deposit of "+php(RUN_DEP)+" or more = 1 run)."}
+  else{tb.className="tierbox";tb.innerHTML="<b>Link ready · 1 run</b> (one deposit of "+php(RUN_DEP)+" or more = 1 run; a bigger deposit is still 1). Check the deposit and the 1× slot turnover yourself before sending."+(r?" Saved today: deposit "+php(r.dep)+(r.to==null?"":" · TO "+php(r.to)+(eligible(r)?" · eligible":" · not eligible yet"))+(r.link?" · link sent by "+esc(r.link.by):""):"")}
   const ok=!!canLink();$("plink").textContent=ok?playerLink():"—";$("copyLink").disabled=!ok;$("copyMsg").disabled=!ok;
 }
 function changed(){adminUI();buildView()}
