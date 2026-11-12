@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>All Sites — Winnings Report</title>
+<style>
+:root{--bg:#0f1220;--panel:#171b2e;--line:#2d3350;--ink:#f1f3fb;--mute:#9aa3c7;--bulb:#ffcf5a;--ok:#49d17a;--bad:#ff5d7a;--warn:#f5b84a;--acc:#6ea8fe}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:16px}
+.wrap{max-width:1180px;margin:0 auto}
+h1{font-size:18px;margin:0 0 4px}
+h2{font-size:13px;margin:0 0 10px;color:var(--mute);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.sub{color:var(--mute);font-size:13px;margin:0 0 20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:4px}
+input,select{font:600 15px/1 inherit;background:rgba(0,0,0,.35);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+.field{flex:1;min-width:140px}
+button{font:700 13px/1 inherit;background:var(--bulb);color:#241405;border:none;border-radius:8px;padding:10px 16px;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.chip{font:600 12px/1 inherit;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--mute);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--acc);color:#06101f;border-color:var(--acc)}
+.chip .n{opacity:.75;margin-left:4px}
+.tiles{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:130px}
+.tile b{display:block;font-size:22px;color:var(--bulb)}
+.tile.pend b{color:var(--warn)} .tile.ok b{color:var(--ok)}
+.tile span{color:var(--mute);font-size:11.5px;text-transform:uppercase;letter-spacing:.5px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:4px}
+th{text-align:left;color:var(--mute);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top}
+tr:hover td{background:rgba(255,255,255,.03)}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
+tr.tot td{font-weight:700;border-top:1px solid var(--line);color:var(--ink)}
+.err{color:var(--bad)}
+.hint{color:var(--mute);font-size:12.5px;margin-top:8px}
+.live{display:inline-flex;align-items:center;gap:6px;color:var(--ok);font-size:12px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.st{font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.st.pending{background:rgba(245,184,74,.15);color:var(--warn)}
+.st.sent_to_risk{background:rgba(73,209,122,.15);color:var(--ok)}
+.st.revoked{background:rgba(255,93,122,.15);color:var(--bad);text-decoration:line-through}
+tr.revoked td{opacity:.55}
+.brand{display:inline-block;padding:2px 8px;border-radius:999px;background:#242938;font-size:11.5px;font-weight:600;white-space:nowrap}
+.brand a{color:inherit;text-decoration:none}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:var(--mute)}
+.amt{color:var(--bulb);font-weight:700;font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="main">
+  <h1 id="title">All Sites — Winnings Report</h1>
+  <p class="sub">Every win recorded in the Wins Ledger across all community games, for the Risk team: who won, on which site, how much, and whether it has been sent to Risk. <span class="live" id="liveTag"><span class="dot"></span>auto-updating</span></p>
+  <div class="card">
+    <div class="btnrow">
+      <div class="field"><label for="from">From</label><input id="from" type="date"></div>
+      <div class="field"><label for="to">To</label><input id="to" type="date"></div>
+      <div class="field"><label for="status">Status</label><select id="status"><option value="">All statuses</option><option value="pending">Pending only</option><option value="sent_to_risk">Sent to Risk only</option><option value="revoked">Revoked only</option></select></div>
+      <button id="loadBtn">Load</button>
+      <button class="ghost" id="todayBtn" type="button">Today</button>
+      <button class="ghost" id="weekBtn" type="button">Last 7 days</button>
+      <button class="ghost" id="csvBtn" type="button">Download CSV</button>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+  <div class="tiles" id="tiles" hidden></div>
+  <div class="card" id="sitesCard" hidden>
+    <h2>Per site</h2>
+    <div class="scroll"><table id="sites"><thead><tr><th>Site</th><th>Game</th><th class="r">Players</th><th class="r">Wins</th><th class="r">Pending</th><th class="r">Sent to Risk</th><th class="r">Revoked</th><th class="r">Pending ₱</th><th class="r">Total ₱</th></tr></thead><tbody></tbody></table></div>
+  </div>
+  <div class="card" id="resultCard">
+    <h2>Wins</h2>
+    <p class="hint" id="status_msg">Naglo-load…</p>
+    <div class="scroll"><table id="tbl" hidden>
+      <thead><tr><th>Time (PH)</th><th>Site</th><th>Player</th><th>Game</th><th class="r">Won</th><th>Status</th><th>Note</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table></div>
+    <p class="hint" id="updatedAt"></p>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const PARTS=location.pathname.split("/").filter(Boolean); // report / all / <token>
+const TOKEN=PARTS[2]||"";
+const REFRESH_MS=30000;
+const STATUS={pending:"Pending",sent_to_risk:"Sent to Risk",revoked:"Revoked"};
+let brand="", last=null;
+function peso(v){const n=Number(v||0);return "₱"+n.toLocaleString("en-PH",{minimumFractionDigits:Number.isInteger(n)?0:2,maximumFractionDigits:2})}
+function todayStr(){return new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Manila"})}
+function daysAgo(n){const d=new Date(Date.now()-n*864e5);return d.toLocaleDateString("en-CA",{timeZone:"Asia/Manila"})}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function when(ms){return new Date(Number(ms)).toLocaleString("en-PH",{timeZone:"Asia/Manila",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}
+
+async function load(){
+  const from=$("from").value||todayStr(),to=$("to").value||todayStr();
+  $("status_msg").textContent="Naglo-load…";$("status_msg").className="hint";
+  let r,j;
+  const q="?from="+encodeURIComponent(from)+"&to="+encodeURIComponent(to)+(brand?"&brand="+encodeURIComponent(brand):"")+($("status").value?"&status="+encodeURIComponent($("status").value):"");
+  try{r=await fetch("/api/report/all/"+encodeURIComponent(TOKEN)+q);j=await r.json().catch(()=>({}))}
+  catch(e){$("status_msg").textContent="Connection error.";$("status_msg").className="hint err";return}
+  if(!r.ok){$("tbl").hidden=true;$("tiles").hidden=true;$("sitesCard").hidden=true;$("status_msg").textContent=j.error||"Error";$("status_msg").className="hint err";$("liveTag").hidden=true;return}
+  last=j;
+  const t=j.totals||{};
+  $("tiles").hidden=false;
+  $("tiles").innerHTML="<div class='tile'><b>"+(t.wins||0)+"</b><span>Wins</span></div>"+
+    "<div class='tile pend'><b>"+(t.pending||0)+"</b><span>Pending payout</span></div>"+
+    "<div class='tile ok'><b>"+(t.sent_to_risk||0)+"</b><span>Sent to Risk</span></div>"+
+    "<div class='tile'><b>"+(t.players||0)+"</b><span>Players</span></div>"+
+    "<div class='tile pend'><b>"+peso(t.pending_amount)+"</b><span>Pending ₱</span></div>"+
+    "<div class='tile'><b>"+peso(t.amount)+"</b><span>Total ₱ (not revoked)</span></div>"+
+    (t.revoked?"<div class='tile'><b>"+t.revoked+"</b><span>Revoked</span></div>":"");
+  // brand chips, with counts for the loaded range (counts come from by_brand which ignores the brand chip)
+  const by=(j.by_brand||[]);
+  $("chips").innerHTML="<button class='chip' data-b='' aria-pressed='"+(brand===""?"true":"false")+"'>All sites<span class='n'>"+(by.reduce((a,b)=>a+b.wins,0))+"</span></button>"+
+    by.map(b=>"<button class='chip' data-b='"+esc(b.brand)+"' aria-pressed='"+(brand===b.brand?"true":"false")+"'>"+esc(b.label)+"<span class='n'>"+b.wins+"</span></button>").join("");
+  // per-site table (only when not narrowed, otherwise it is a single row)
+  const rows=brand?by.filter(b=>b.brand===brand):by.filter(b=>b.wins||b.revoked);
+  $("sitesCard").hidden=!rows.length;
+  const T=rows.reduce((a,b)=>({players:a.players+b.players,wins:a.wins+b.wins,pending:a.pending+b.pending,sent:a.sent+b.sent_to_risk,rev:a.rev+b.revoked,pamt:a.pamt+b.pending_amount,amt:a.amt+b.amount}),{players:0,wins:0,pending:0,sent:0,rev:0,pamt:0,amt:0});
+  $("sites").querySelector("tbody").innerHTML=rows.map(b=>"<tr><td><span class='brand'>"+esc(b.label)+"</span></td><td>"+esc(b.game||"—")+"</td><td class='r'>"+b.players+"</td><td class='r'>"+b.wins+"</td><td class='r'>"+b.pending+"</td><td class='r'>"+b.sent_to_risk+"</td><td class='r'>"+b.revoked+"</td><td class='r'>"+peso(b.pending_amount)+"</td><td class='r amt'>"+peso(b.amount)+"</td></tr>").join("")+
+    (rows.length>1?"<tr class='tot'><td>Total</td><td></td><td class='r'>"+T.players+"</td><td class='r'>"+T.wins+"</td><td class='r'>"+T.pending+"</td><td class='r'>"+T.sent+"</td><td class='r'>"+T.rev+"</td><td class='r'>"+peso(T.pamt)+"</td><td class='r amt'>"+peso(T.amt)+"</td></tr>":"");
+  const wins=j.wins||[];
+  if(!wins.length){$("tbl").hidden=true;$("status_msg").textContent="Walang panalo sa petsang ito.";$("status_msg").className="hint";
+    $("updatedAt").textContent="Last checked: "+new Date().toLocaleTimeString("en-PH",{timeZone:"Asia/Manila"});return}
+  $("status_msg").textContent="";
+  $("tbody").innerHTML=wins.map(w=>{
+    const who=(w.player_name?esc(w.player_name):"")+(w.code?" <span class='mono'>"+esc(w.code)+"</span>":"");
+    return "<tr class='"+w.status+"'><td>"+esc(when(w.at))+"</td><td><span class='brand'>"+esc(w.label||w.brand)+"</span></td><td>"+(who||"—")+"</td><td>"+esc(w.game)+"</td><td class='r amt'>"+peso(w.amount)+"</td><td><span class='st "+w.status+"'>"+(STATUS[w.status]||w.status)+"</span></td><td>"+esc(w.note||"")+"</td></tr>"}).join("");
+  $("tbl").hidden=false;
+  $("updatedAt").textContent="Last updated: "+new Date().toLocaleTimeString("en-PH",{timeZone:"Asia/Manila"})+" · "+wins.length+" rows";
+}
+function csv(){
+  if(!last||!last.wins||!last.wins.length){alert("Walang rows na i-export.");return}
+  const q=s=>'"'+String(s??"").replace(/"/g,'""')+'"';
+  const lines=[["date_ph","site","game","player_name","code","amount","status","note"].join(",")];
+  last.wins.forEach(w=>lines.push([new Date(Number(w.at)).toLocaleString("en-PH",{timeZone:"Asia/Manila"}),w.label||w.brand,w.game,w.player_name,w.code,w.amount,STATUS[w.status]||w.status,w.note||""].map(q).join(",")));
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+lines.join("\n")],{type:"text/csv"}));
+  a.download="wins-all-sites-"+($("from").value||todayStr())+"_"+($("to").value||todayStr())+".csv";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href);
+}
+$("chips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;brand=b.dataset.b;load()});
+$("loadBtn").onclick=load;
+$("status").onchange=load;
+$("todayBtn").onclick=()=>{const t=todayStr();$("from").value=t;$("to").value=t;load()};
+$("weekBtn").onclick=()=>{$("from").value=daysAgo(6);$("to").value=todayStr();load()};
+$("csvBtn").onclick=csv;
+const t0=todayStr();$("from").value=t0;$("to").value=t0;
+load();setInterval(load,REFRESH_MS);
+</script>
+</body>
+</html>
