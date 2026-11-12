@@ -61,7 +61,7 @@ def amount_ok(brand: str, amount: float) -> bool:
     if amount in VALID_AMOUNTS:
         return True
     return brand in RANGE_BRANDS and WHEEL_RANGE[0] <= amount <= WHEEL_RANGE[1]
-VALID_BRANDS = {"gopyesta", "pots", "rollem", "winforlife", "cow", "tamasa", "gspot", "t2b"}
+VALID_BRANDS = {"gopyesta", "pots", "rollem", "winforlife", "cow", "tamasa", "gspot", "t2b", "gobetplay"}
 
 
 @app.after_request
@@ -312,7 +312,7 @@ def delete_wins_by_player():
 # equivalent lives here: every win posted for the brand in a PH date range. The token is derived from the admin password,
 # so no new Railway variable is needed: base64url(HMAC-SHA256(ADMIN_PASSWORD, "report:" + brand))[:32].
 BRAND_LABELS = {"gopyesta": "Gopyesta", "pots": "POTS", "rollem": "Roll'em", "winforlife": "Win For Life", "cow": "COW88",
-                "tamasa": "TamasaPH", "gspot": "GameSpot", "t2b": "Time2Bet"}
+                "tamasa": "TamasaPH", "gspot": "GameSpot", "t2b": "Time2Bet", "gobetplay": "GoBetPlay"}
 
 
 def report_token(brand: str) -> str:
