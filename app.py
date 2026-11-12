@@ -53,7 +53,7 @@ def date_range_clauses(args, clauses, params):
             params.append(to_ms)
 
 
-RANGE_BRANDS = {"gopyesta", "pots", "tamasa", "gspot", "winforlife", "rollem", "t2b"}  # pots (2026-11-06): Pearl Mine server-drawn ladder P7/P17 -- 7 is not in VALID_AMOUNTS; gspot (2026-11-09): Power-Up Cards pays P7/P17; winforlife P8.20/P16.50/P26 + rollem P7.50/P17.65/P27 (dev builds 2026-11-09)
+RANGE_BRANDS = {"gopyesta", "pots", "tamasa", "gspot", "winforlife", "rollem", "t2b", "gobetplay"}  # gobetplay (2026-11-12): GoBet Race, any P1-1000  # pots (2026-11-06): Pearl Mine server-drawn ladder P7/P17 -- 7 is not in VALID_AMOUNTS; gspot (2026-11-09): Power-Up Cards pays P7/P17; winforlife P8.20/P16.50/P26 + rollem P7.50/P17.65/P27 (dev builds 2026-11-09)
 # tamasa (2026-11-07): Swerte Lights pays P8.20 / P16.50 (centavo prizes), so `amount` is a decimal (DOUBLE PRECISION) from now on
 
 
@@ -321,36 +321,71 @@ def report_token(brand: str) -> str:
     return base64.urlsafe_b64encode(digest).decode().rstrip("=")[:32]
 
 
+ALL_REPORT = "all"   # /report/all/<token>: every site on one page, for the Risk team (2026-11-12)
+
+
 def report_access_ok(brand: str, token: str) -> bool:
-    return brand in VALID_BRANDS and bool(token) and hmac.compare_digest(token, report_token(brand))
+    return (brand in VALID_BRANDS or brand == ALL_REPORT) and bool(token) and hmac.compare_digest(token, report_token(brand))
 
 
 @app.route("/report/<brand>/<token>", methods=["GET"])
 def brand_report_page(brand, token):
     if not report_access_ok(brand, token):
         return "Not found", 404
-    return send_from_directory(STATIC_DIR, "report-brand.html")
+    return send_from_directory(STATIC_DIR, "report-all.html" if brand == ALL_REPORT else "report-brand.html")
+
+
+def _status_of(r):
+    return "revoked" if r["revoked"] else ("sent_to_risk" if r["claimed"] else "pending")
+
+
+def _totals(wins):
+    valid = [w for w in wins if w["status"] != "revoked"]
+    return {"wins": len(valid), "revoked": len(wins) - len(valid),
+            "pending": sum(1 for w in valid if w["status"] == "pending"),
+            "sent_to_risk": sum(1 for w in valid if w["status"] == "sent_to_risk"),
+            "players": len({(w["player_name"] or w["code"]).lower() for w in valid}),
+            "amount": round(sum(float(w["amount"]) for w in valid), 2),
+            "pending_amount": round(sum(float(w["amount"]) for w in valid if w["status"] == "pending"), 2)}
 
 
 @app.route("/api/report/<brand>/<token>", methods=["GET"])
 def brand_report_api(brand, token):
     if not report_access_ok(brand, token):
         return jsonify({"error": "not found"}), 404
-    clauses, params = ["brand=%s"], [brand]
+    clauses, params = [], []
+    if brand != ALL_REPORT:
+        clauses, params = ["brand=%s"], [brand]
+    elif request.args.get("brand") in VALID_BRANDS:          # the all-sites page can narrow to one site
+        clauses, params = ["brand=%s"], [request.args.get("brand")]
+    status = request.args.get("status", "")
+    if status == "pending":
+        clauses.append("claimed=FALSE AND revoked=FALSE")
+    elif status == "sent_to_risk":
+        clauses.append("claimed=TRUE AND revoked=FALSE")
+    elif status == "revoked":
+        clauses.append("revoked=TRUE")
     date_range_clauses(request.args, clauses, params)
-    where = "WHERE " + " AND ".join(clauses)
+    where = ("WHERE " + " AND ".join(clauses)) if clauses else ""
     with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        cur.execute(f"SELECT id, game, player_name, code, amount, created_at, claimed, revoked, note FROM wins {where} "
-                    "ORDER BY created_at DESC LIMIT 2000", params)
+        cur.execute(f"SELECT id, brand, game, player_name, code, amount, created_at, claimed, revoked, note FROM wins {where} "
+                    "ORDER BY created_at DESC LIMIT 5000", params)
         rows = cur.fetchall()
     wins = []
     for r in rows:
-        wins.append({"id": r["id"], "game": r["game"], "player_name": r["player_name"], "code": r["code"], "amount": r["amount"],
-                     "at": r["created_at"], "status": "revoked" if r["revoked"] else ("sent_to_risk" if r["claimed"] else "pending"),
-                     "note": r["note"]})
-    valid = [w for w in wins if w["status"] != "revoked"]
-    totals = {"wins": len(valid), "revoked": len(wins) - len(valid), "players": len({(w["player_name"] or w["code"]).lower() for w in valid}),
-              "amount": round(sum(float(w["amount"]) for w in valid), 2)}
+        wins.append({"id": r["id"], "brand": r["brand"], "label": BRAND_LABELS.get(r["brand"], r["brand"]), "game": r["game"],
+                     "player_name": r["player_name"], "code": r["code"], "amount": r["amount"],
+                     "at": r["created_at"], "status": _status_of(r), "note": r["note"]})
+    totals = _totals(wins)
+    if brand == ALL_REPORT:
+        by_brand = []
+        for b in sorted(VALID_BRANDS, key=lambda k: BRAND_LABELS.get(k, k).lower()):
+            bw = [w for w in wins if w["brand"] == b]
+            games = sorted({w["game"] for w in bw if w["game"]})
+            by_brand.append({"brand": b, "label": BRAND_LABELS.get(b, b), "game": games[0] if len(games) == 1 else ", ".join(games),
+                             **_totals(bw)})
+        return jsonify({"brand": ALL_REPORT, "label": "All sites", "game": "", "wins": wins, "totals": totals,
+                        "by_brand": by_brand, "brands": {b: BRAND_LABELS.get(b, b) for b in VALID_BRANDS}})
     game = wins[0]["game"] if wins else ""
     return jsonify({"brand": brand, "label": BRAND_LABELS.get(brand, brand), "game": game, "wins": wins, "totals": totals})
 
@@ -361,7 +396,9 @@ def report_links():
     if not require_admin():
         return jsonify({"error": "forbidden"}), 403
     base = request.url_root.rstrip("/")
-    return jsonify({b: f"{base}/report/{b}/{report_token(b)}" for b in sorted(VALID_BRANDS)})
+    links = {b: f"{base}/report/{b}/{report_token(b)}" for b in sorted(VALID_BRANDS)}
+    links[ALL_REPORT] = f"{base}/report/{ALL_REPORT}/{report_token(ALL_REPORT)}"
+    return jsonify(links)
 
 
 @app.route("/")
