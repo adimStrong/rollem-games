@@ -38,8 +38,11 @@ BRANDS = [
     {"key": "tamasa",     "label": "Tamasa",       "game": "Swerte Lights",      "kind": "cg3",    "url": "https://tamasa-production.up.railway.app"},
     {"key": "winforlife", "label": "Win For Life", "game": "Spin For Life",      "kind": "cg3",    "url": "https://winforlife-production.up.railway.app"},
     {"key": "rollem",     "label": "Roll'em",      "game": "Roll It",            "kind": "cg3",    "url": "https://rollem-production.up.railway.app"},
-    {"key": "gspot",      "label": "GameSpot",     "game": "Power-Up Cards",     "kind": "ledger", "url": "https://gspot-production.up.railway.app"},
-    {"key": "t2b",        "label": "Time2Bet",     "game": "Time 2 Race",        "kind": "ledger", "url": "https://t2b-production.up.railway.app"},
+    # gspot + t2b moved from the static pages to the cg3 backend on 2026-11-11/12 (home PC); gobetplay = GoBet Race, cg3.
+    # A cg3 brand whose DSN_<KEY> is not set falls back to the ledger (wins only) when LEDGER_REPORT_<KEY> / DSN_LEDGER exists.
+    {"key": "gspot",      "label": "GameSpot",     "game": "Power-Up Cards",     "kind": "cg3",    "url": "https://gspot-production.up.railway.app"},
+    {"key": "t2b",        "label": "Time2Bet",     "game": "Time 2 Race",        "kind": "cg3",    "url": "https://t2b-production.up.railway.app"},
+    {"key": "gobetplay",  "label": "GoBetPlay",    "game": "GoBet Race",         "kind": "cg3",    "url": "https://gobetplay-production.up.railway.app"},
 ]
 
 _cache = {"at": 0.0, "payload": None}
@@ -156,10 +159,12 @@ def build():
         if item["config"].get("game"):
             item["game"] = item["config"]["game"]
         try:
-            if b["kind"] == "ledger":
+            dsn = os.environ.get("DSN_" + b["key"].upper(), "")
+            ledger_ok = bool(os.environ.get("DSN_LEDGER") or os.environ.get("LEDGER_REPORT_" + b["key"].upper()))
+            if b["kind"] == "ledger" or (not dsn and ledger_ok):
                 days = ledger_days(b)
+                item["kind"] = "ledger"          # wins only on this source; the page says links are not tracked
             else:
-                dsn = os.environ.get("DSN_" + b["key"].upper(), "")
                 if not dsn:
                     raise ValueError("DSN_" + b["key"].upper() + " not set")
                 days = game_days(b, dsn)
