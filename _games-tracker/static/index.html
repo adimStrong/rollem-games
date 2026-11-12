@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Games Tracker</title>
+<style>
+:root{
+  color-scheme:light;
+  --plane:#f9f9f7; --surface:#fcfcfb; --panel:#ffffff;
+  --ink:#0b0b0b; --ink-2:#52514e; --ink-3:#898781;
+  --grid:#e1e0d9; --rule:#c3c2b7; --hair:rgba(11,11,11,.10);
+  --accent:#6250d6; --accent-soft:rgba(98,80,214,.10);
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6;
+  --good:#006300; --warn:#fab219; --crit:#d03b3b;
+  --f1:#86b6ef; --f2:#3987e5; --f3:#1c5cab;   /* ordinal funnel steps 250 / 400 / 550 */
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --plane:#0d0d0d; --surface:#1a1a19; --panel:#1f1f1e;
+  --ink:#f0efec; --ink-2:#c3c2b7; --ink-3:#898781;
+  --grid:#2c2c2a; --rule:#383835; --hair:rgba(255,255,255,.10);
+  --accent:#9085e9; --accent-soft:rgba(144,133,233,.14);
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9;
+  --good:#0ca30c; --warn:#fab219; --crit:#d03b3b;
+  --f1:#6da7ec; --f2:#3987e5; --f3:#184f95;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --plane:#0d0d0d; --surface:#1a1a19; --panel:#1f1f1e;
+  --ink:#f0efec; --ink-2:#c3c2b7; --ink-3:#898781;
+  --grid:#2c2c2a; --rule:#383835; --hair:rgba(255,255,255,.10);
+  --accent:#9085e9; --accent-soft:rgba(144,133,233,.14);
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9;
+  --good:#0ca30c; --warn:#fab219; --crit:#d03b3b;
+  --f1:#6da7ec; --f2:#3987e5; --f3:#184f95;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);font-family:var(--sans);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+.eyebrow{font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.num{font-variant-numeric:tabular-nums}
+header.top{padding:18px 20px 12px;border-bottom:1px solid var(--hair);background:var(--panel);display:flex;flex-wrap:wrap;gap:14px 32px;align-items:flex-end}
+header.top h1{margin:2px 0 4px;font-size:21px;font-weight:650;letter-spacing:-.012em}
+header.top p.sub{margin:0;color:var(--ink-2);max-width:62ch}
+.stats{display:flex;gap:22px;margin-left:auto;flex-wrap:wrap}
+.stat .v{font-size:21px;font-weight:650;letter-spacing:-.01em}
+.stat .k{font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.stat .d{font-size:10.5px;color:var(--ink-3)}
+.bar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:8px 20px;background:var(--panel);border-bottom:1px solid var(--hair);font-size:11.5px;color:var(--ink-3)}
+.bar b{color:var(--ink-2)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--s1);display:inline-block;animation:pulse 2.4s ease-in-out infinite}
+.dot.err{background:var(--crit);animation:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{font:inherit;font-size:11.5px;font-weight:600;border:1px solid var(--rule);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:3px 11px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+button.refresh{margin-left:auto;font:inherit;font-size:11.5px;font-weight:600;border:1px solid var(--rule);background:var(--surface);color:var(--ink-2);border-radius:6px;padding:5px 10px;cursor:pointer}
+button.refresh:hover{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.errband{background:var(--crit);color:#fff;padding:7px 20px;font-size:12px;font-weight:600;display:none}
+main{padding:16px 20px 28px;display:grid;gap:16px}
+section.block{background:var(--panel);border:1px solid var(--hair);border-radius:10px;padding:14px 16px;min-width:0}
+section.block h2{font-size:12.5px;font-weight:650;margin:0 0 10px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+section.block h2 small{font-weight:500;color:var(--ink-3);font-size:11px}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:9px;min-width:0;border-top:3px solid var(--sc)}
+.card.err{border-color:var(--crit)}
+.card .head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card .head .name{font-size:14.5px;font-weight:650;letter-spacing:-.01em}
+.card .head .game{font-size:11px;color:var(--ink-3)}
+.card .head .links{margin-left:auto;display:flex;gap:8px;font-size:11px;font-weight:600}
+.card .head .links a{text-decoration:none}
+.hero{display:flex;align-items:baseline;gap:8px}
+.hero .v{font-size:26px;font-weight:650;letter-spacing:-.02em;line-height:1}
+.hero .k{font-size:11px;color:var(--ink-3)}
+.funnel{display:grid;gap:5px}
+.fr{display:grid;grid-template-columns:78px 1fr 92px;gap:8px;align-items:center;font-size:11px;color:var(--ink-3)}
+.fr .lab{font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr .trk{height:12px;background:var(--grid);border-radius:4px;overflow:hidden}
+.fr .trk i{display:block;height:100%;border-radius:0 4px 4px 0;min-width:0}
+.fr .val{text-align:right;white-space:nowrap}
+.fr .val b{color:var(--ink);font-weight:650;font-size:12px}
+.fr .val span{color:var(--ink-3);margin-left:4px}
+.fr.na .trk{background:repeating-linear-gradient(135deg,var(--grid) 0 4px,transparent 4px 8px)}
+.mini{display:flex;gap:14px;flex-wrap:wrap;border-top:1px solid var(--hair);padding-top:8px;margin-top:auto}
+.mini span{font-size:11px;color:var(--ink-3)}
+.mini b{font-weight:650;color:var(--ink-2);font-size:12px;margin-right:3px}
+.cap{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink-3)}
+.cap .m{flex:1;height:6px;background:var(--grid);border-radius:3px;overflow:hidden}
+.cap .m i{display:block;height:100%;background:var(--sc)}
+.cap .m i.hot{background:var(--crit)}
+.note{font-size:10.5px;color:var(--ink-3);font-style:italic}
+
+.chartbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.legend{display:flex;gap:12px;flex-wrap:wrap}
+.lg{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2)}
+.lg i{width:10px;height:10px;border-radius:50%;display:block;flex:none;background:var(--c)}
+.chart{position:relative;height:240px}
+.chart svg{width:100%;height:100%;display:block;overflow:visible}
+.chart .gl{stroke:var(--grid);stroke-width:1}
+.chart .ax{stroke:var(--rule);stroke-width:1}
+.chart text{font-family:var(--sans);font-size:10px;fill:var(--ink-3)}
+.chart text.t{font-variant-numeric:tabular-nums}
+.chart rect.seg{stroke:var(--panel);stroke-width:2;paint-order:stroke}
+.chart rect.hit{fill:transparent;cursor:crosshair}
+.tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:7px 9px;font-size:11px;color:var(--ink-2);box-shadow:0 4px 14px rgba(0,0,0,.12);display:none;min-width:150px;z-index:5}
+.tip b{color:var(--ink)}
+.tip .r{display:flex;justify-content:space-between;gap:12px}
+.tip .r i{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;background:var(--c)}
+.empty{color:var(--ink-3);font-size:12px;padding:6px 0}
+
+table.lst{border-collapse:collapse;width:100%;font-size:11.5px}
+table.lst th,table.lst td{text-align:right;padding:5px 8px;border-bottom:1px solid var(--grid);vertical-align:top;white-space:nowrap}
+table.lst th{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+table.lst th:first-child,table.lst td:first-child,table.lst th:nth-child(2),table.lst td:nth-child(2){text-align:left}
+table.lst td.b b{display:inline-flex;align-items:center;gap:6px}
+table.lst td.b b i{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--c)}
+table.lst tr.tot td{font-weight:650;border-top:2px solid var(--rule);color:var(--ink)}
+@media (max-width:760px){header.top{padding:14px 16px} main{padding:12px 16px 24px} .stats{margin-left:0;gap:16px} .stat .v{font-size:18px} .chart{height:200px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="errband" id="errband"></div>
+<header class="top">
+  <div>
+    <div class="eyebrow">Rollem Games &middot; community games &middot; live from the game databases</div>
+    <h1>Games Tracker &mdash; all sites, link &rarr; play &rarr; win</h1>
+    <p class="sub">How each site's community game converts: links the agents made, players who actually played,
+    players who won, and the pesos paid out. Agent-verified games (GameSpot, Time2Bet) only report wins.</p>
+  </div>
+  <div class="stats" id="stats"></div>
+</header>
+<div class="bar">
+  <span><span class="dot" id="syncdot"></span> <b id="syncstate">loading&hellip;</b></span>
+  <span>Manila day <b id="today">&mdash;</b></span>
+  <div class="tabs" role="tablist" id="periods">
+    <button role="tab" data-p="today" aria-selected="true">Today</button>
+    <button role="tab" data-p="yesterday">Yesterday</button>
+    <button role="tab" data-p="7d">7 days</button>
+    <button role="tab" data-p="30d">30 days</button>
+    <button role="tab" data-p="all">All</button>
+  </div>
+  <button class="refresh" id="refreshbtn">Refresh now</button>
+</div>
+<main>
+  <section class="block">
+    <h2>Conversion by site <small id="cardsub">selected period &middot; funnel bars are scaled to players linked</small></h2>
+    <div class="cards" id="cards"></div>
+  </section>
+  <section class="block">
+    <h2>Daily trend <small>last 30 days, stacked by site</small></h2>
+    <div class="chartbar">
+      <div class="tabs" role="tablist" id="metrics">
+        <button role="tab" data-m="played" aria-selected="true">Players who played</button>
+        <button role="tab" data-m="plays">Plays</button>
+        <button role="tab" data-m="won">&#8369; paid</button>
+        <button role="tab" data-m="links">Links made</button>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div class="chart" id="chart"><div class="tip" id="tip"></div></div>
+  </section>
+  <section class="block">
+    <h2>Daily breakdown <small id="tblsub">selected period, one row per site and day</small></h2>
+    <div style="overflow-x:auto"><table class="lst" id="tbl"><thead><tr>
+      <th>Day</th><th>Site</th><th>Links</th><th>Linked</th><th>Played</th><th>Played %</th><th>Plays</th><th>Winners</th><th>&#8369; paid</th><th>Avg prize</th><th>&#8369; deposits</th>
+    </tr></thead><tbody></tbody></table></div>
+  </section>
+</main>
+<script>
+const SLOT = {gopyesta:"--s1", pots:"--s2", tamasa:"--s3", winforlife:"--s4", rollem:"--s5", gspot:"--s6", t2b:"--s7"};
+let DATA = null, period = "today", metric = "played";
+const esc = s => (s||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const peso = n => "₱" + (Math.round(n*100)/100).toLocaleString(undefined,{minimumFractionDigits: n%1?2:0, maximumFractionDigits:2});
+const pct = (a,b) => b ? Math.round(a/b*100)+"%" : "—";
+const fmtD = iso => { const d=new Date(iso+"T00:00:00"); return d.toLocaleDateString(undefined,{month:"short",day:"numeric"}); };
+const addDays = (iso,n) => { const d=new Date(iso+"T00:00:00"); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); };
+
+function range(){
+  const t = DATA.today;
+  if(period==="today") return [t,t];
+  if(period==="yesterday") return [addDays(t,-1), addDays(t,-1)];
+  if(period==="7d") return [addDays(t,-6), t];
+  if(period==="30d") return [addDays(t,-29), t];
+  return [DATA.since, t];
+}
+function sumDays(days, from, to){
+  const s = {links:0, linked:0, plays:0, played:0, winners:0, won:0, seen:0, dep:0, days:0, links_na:false};
+  for(const [d,r] of Object.entries(days)){
+    if(d<from || d>to) continue;
+    s.days++;
+    for(const k of ["plays","played","winners","won","seen","dep"]) s[k] += r[k]||0;
+    if(r.links===null) s.links_na = true; else { s.links += r.links||0; s.linked += r.linked||0; }
+  }
+  return s;
+}
+function periodLabel(){ const [a,b]=range(); return a===b ? fmtD(a) : fmtD(a)+" – "+fmtD(b); }
+
+function renderStats(){
+  const [a,b]=range(); const T={links:0,linked:0,plays:0,played:0,winners:0,won:0}; let na=false;
+  DATA.brands.forEach(br=>{ const s=sumDays(br.days,a,b); for(const k in T) T[k]+=s[k]; if(s.links_na) na=true; });
+  const tiles=[["Links made",T.links+(na?"+":""), "DB games"],["Players linked",T.linked+(na?"+":""),""],["Played",T.played,pct(T.played,T.linked)+" of linked"],
+    ["Winners",T.winners,""],["Plays",T.plays,""],["₱ paid",peso(T.won),T.plays?peso(T.won/T.plays)+" avg":""]];
+  document.getElementById("stats").innerHTML = tiles.map(([k,v,d])=>`<div class="stat"><div class="v num">${v}</div><div class="k">${k}</div>${d?`<div class="d">${d}</div>`:""}</div>`).join("");
+  document.getElementById("cardsub").textContent = periodLabel()+" · funnel bars are scaled to players linked";
+  document.getElementById("tblsub").textContent = periodLabel()+", one row per site and day";
+}
+
+function renderCards(){
+  const [a,b]=range();
+  document.getElementById("cards").innerHTML = DATA.brands.map(br=>{
+    const s=sumDays(br.days,a,b); const c=br.config||{};
+    const base = s.links_na ? Math.max(s.played,1) : Math.max(s.linked,1);
+    const rows = [
+      ["Linked", s.links_na?null:s.linked, "--f1", s.links_na?"not tracked":`${s.links} link${s.links===1?"":"s"}`],
+      ["Played", s.played, "--f2", s.links_na?"":pct(s.played,s.linked)],
+      ["Won", s.winners, "--f3", pct(s.winners,s.played)],
+    ].map(([l,v,col,sub])=>`<div class="fr ${v===null?"na":""}"><span class="lab">${l}</span><span class="trk" title="${l}: ${v===null?"not tracked":v}">${v===null?"":`<i style="width:${Math.min(v/base*100,100)}%;background:var(${col})"></i>`}</span><span class="val">${v===null?`<span>${sub}</span>`:`<b>${v}</b><span>${sub}</span>`}</span></div>`).join("");
+    const todayS = sumDays(br.days, DATA.today, DATA.today);
+    const cap = c.cap ? `<div class="cap"><span>cap today</span><span class="m"><i class="${todayS.won/c.cap>=0.9?"hot":""}" style="width:${Math.min(todayS.won/c.cap*100,100)}%"></i></span><span class="num">${peso(todayS.won)} / ${peso(c.cap)}</span></div>` : "";
+    const last = br.last_day ? `last play ${fmtD(br.last_day)}` : "no plays yet";
+    return `<article class="card ${br.ok?"":"err"}" style="--sc:var(${SLOT[br.key]})">
+      <div class="head"><span class="name">${esc(br.label)}</span><span class="game">${esc(br.game)}</span>
+        <span class="links"><a href="${br.url}" target="_blank" rel="noopener">Game &nearr;</a>${br.report_url?`<a href="${br.report_url}" target="_blank" rel="noopener">Report &nearr;</a>`:""}</span></div>
+      <div class="hero"><span class="v num">${peso(s.won)}</span><span class="k">paid &middot; ${s.plays} play${s.plays===1?"":"s"} &middot; ${s.winners} winner${s.winners===1?"":"s"}</span></div>
+      <div class="funnel">${rows}</div>
+      ${cap}
+      <div class="mini"><span><b>${s.plays?peso(s.won/s.plays):"—"}</b>avg prize</span>${br.kind==="cg3"?`<span><b>${peso(s.dep)}</b>deposits behind plays</span>`:""}<span>${last}</span></div>
+      ${br.kind==="ledger"?`<div class="note">Agent-verified game: links are made in the page, only wins are recorded.</div>`:""}
+      ${br.ok?"":`<div class="note" style="color:var(--crit)">source error: ${esc(br.error||"")}${br.stale?" (showing last good data)":""}</div>`}
+    </article>`;
+  }).join("");
+}
+
+function renderLegend(){
+  document.getElementById("legend").innerHTML = DATA.brands.map(b=>`<span class="lg" style="--c:var(${SLOT[b.key]})"><i></i>${esc(b.label)}</span>`).join("");
+}
+
+function renderChart(){
+  const el=document.getElementById("chart"); const tip=document.getElementById("tip");
+  const W=el.clientWidth||900, H=el.clientHeight||240, padL=44, padR=8, padT=10, padB=26;
+  const days=[]; for(let i=29;i>=0;i--) days.push(addDays(DATA.today,-i));
+  const series = DATA.brands.map(b=>({key:b.key,label:b.label,vals:days.map(d=>{ const r=b.days[d]; if(!r) return 0; const v=r[metric]; return v===null?0:(v||0); })}));
+  const totals = days.map((d,i)=>series.reduce((a,s)=>a+s.vals[i],0));
+  const max = Math.max(...totals, 1);
+  const nice = v => { const p=Math.pow(10,Math.floor(Math.log10(v))); const f=v/p; const n = f<=1?1:f<=2?2:f<=5?5:10; return n*p; };
+  const top = nice(max); const ticks=[0,0.25,0.5,0.75,1].map(t=>t*top);
+  const iw=W-padL-padR, ih=H-padT-padB, bw=iw/days.length, gap=Math.min(4,bw*0.25);
+  const y = v => padT + ih - (v/top)*ih;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${metric} per day by site">`;
+  ticks.forEach(t=>{ svg += `<line class="gl" x1="${padL}" x2="${W-padR}" y1="${y(t)}" y2="${y(t)}"/><text class="t" x="${padL-6}" y="${y(t)+3.5}" text-anchor="end">${metric==="won"?"₱":""}${t>=1000?(t/1000)+"k":Math.round(t*100)/100}</text>`; });
+  svg += `<line class="ax" x1="${padL}" x2="${W-padR}" y1="${y(0)}" y2="${y(0)}"/>`;
+  days.forEach((d,i)=>{
+    let acc=0; const x=padL+i*bw+gap/2, w=bw-gap;
+    series.forEach(s=>{ const v=s.vals[i]; if(!v) return; const y1=y(acc+v), y0=y(acc); acc+=v;
+      svg += `<rect class="seg" x="${x}" y="${y1}" width="${w}" height="${Math.max(y0-y1,0)}" rx="${acc===totals[i]?3:0}" fill="var(${SLOT[s.key]})"/>`; });
+    if(totals[i]>0) svg += `<text class="t" x="${x+w/2}" y="${y(totals[i])-4}" text-anchor="middle">${metric==="won"?peso(totals[i]):totals[i]}</text>`;
+    if(i%5===0 || i===days.length-1) svg += `<text x="${x+w/2}" y="${H-8}" text-anchor="middle">${fmtD(d)}</text>`;
+    svg += `<rect class="hit" x="${padL+i*bw}" y="${padT}" width="${bw}" height="${ih}" data-i="${i}"/>`;
+  });
+  svg += `</svg>`;
+  el.innerHTML = svg; el.appendChild(tip);
+  el.querySelectorAll("rect.hit").forEach(r=>{
+    r.addEventListener("mousemove", e=>{
+      const i=+r.dataset.i; const rows=series.filter(s=>s.vals[i]>0).map(s=>`<div class="r" style="--c:var(${SLOT[s.key]})"><span><i></i>${esc(s.label)}</span><b>${metric==="won"?peso(s.vals[i]):s.vals[i]}</b></div>`).join("");
+      tip.innerHTML = `<b>${fmtD(days[i])}</b> &middot; ${metric==="won"?peso(totals[i]):totals[i]} total${rows?"<div style='height:4px'></div>"+rows:"<div class='empty'>nothing that day</div>"}`;
+      tip.style.display="block"; const bx=el.getBoundingClientRect();
+      let left=e.clientX-bx.left+12; if(left+170>bx.width) left=e.clientX-bx.left-182;
+      tip.style.left=left+"px"; tip.style.top=Math.max(0,e.clientY-bx.top-10)+"px";
+    });
+    r.addEventListener("mouseleave", ()=>tip.style.display="none");
+  });
+}
+
+function renderTable(){
+  const [a,b]=range(); const rows=[]; const T={links:0,linked:0,played:0,plays:0,winners:0,won:0,dep:0};
+  DATA.brands.forEach(br=>{ Object.keys(br.days).sort().reverse().forEach(d=>{ if(d<a||d>b) return; const r=br.days[d]; if(!r.plays && !r.links) return; rows.push({d,br,r});
+    for(const k in T) T[k]+= (r[k]===null?0:(r[k]||0)); }); });
+  rows.sort((x,y)=> x.d===y.d ? DATA.brands.indexOf(x.br)-DATA.brands.indexOf(y.br) : (x.d<y.d?1:-1));
+  const tb=document.querySelector("#tbl tbody");
+  if(!rows.length){ tb.innerHTML=`<tr><td colspan="11" class="empty" style="text-align:left">No links or plays in this period.</td></tr>`; return; }
+  const na = v => v===null ? "—" : v;
+  tb.innerHTML = rows.map(({d,br,r})=>`<tr><td>${fmtD(d)}</td><td class="b"><b style="--c:var(${SLOT[br.key]})"><i></i>${esc(br.label)}</b></td>
+    <td class="num">${na(r.links)}</td><td class="num">${na(r.linked)}</td><td class="num">${r.played}</td><td class="num">${r.linked?pct(r.played,r.linked):"—"}</td>
+    <td class="num">${r.plays}</td><td class="num">${r.winners}</td><td class="num">${peso(r.won)}</td><td class="num">${r.plays?peso(r.won/r.plays):"—"}</td><td class="num">${br.kind==="cg3"?peso(r.dep):"—"}</td></tr>`).join("")
+    + `<tr class="tot"><td>Total</td><td></td><td class="num">${T.links}</td><td class="num">${T.linked}</td><td class="num">${T.played}</td><td class="num">${pct(T.played,T.linked)}</td><td class="num">${T.plays}</td><td class="num">${T.winners}</td><td class="num">${peso(T.won)}</td><td class="num">${T.plays?peso(T.won/T.plays):"—"}</td><td class="num">${peso(T.dep)}</td></tr>`;
+}
+
+function renderAll(data){
+  DATA=data;
+  renderStats(); renderCards(); renderLegend(); renderChart(); renderTable();
+  document.getElementById("today").textContent = fmtD(data.today);
+  const errband=document.getElementById("errband"), dot=document.getElementById("syncdot"), state=document.getElementById("syncstate");
+  const bad = data.brands.filter(b=>!b.ok).map(b=>b.label);
+  if(bad.length){ errband.style.display="block"; errband.textContent="Could not read: "+bad.join(", ")+" — their cards show the last data that loaded."; dot.classList.add("err"); state.textContent="partial sync"; }
+  else { errband.style.display="none"; dot.classList.remove("err"); state.textContent="synced "+new Date(data.fetched_at).toLocaleTimeString(); }
+}
+async function poll(force){
+  try{ const r=await fetch(force?"/api/refresh":"/api/data",{cache:"no-store"}); renderAll(await r.json()); }
+  catch(e){ document.getElementById("syncstate").textContent="sync error"; document.getElementById("syncdot").classList.add("err"); }
+}
+document.getElementById("periods").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; period=b.dataset.p;
+  document.querySelectorAll("#periods button").forEach(x=>x.setAttribute("aria-selected", x===b?"true":"false")); if(DATA){ renderStats(); renderCards(); renderTable(); } });
+document.getElementById("metrics").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; metric=b.dataset.m;
+  document.querySelectorAll("#metrics button").forEach(x=>x.setAttribute("aria-selected", x===b?"true":"false")); if(DATA) renderChart(); });
+document.getElementById("refreshbtn").addEventListener("click", ()=>poll(true));
+window.addEventListener("resize", ()=>{ clearTimeout(window.__rt); window.__rt=setTimeout(()=>DATA&&renderChart(),150); });
+poll(false);
+setInterval(()=>poll(false), 60000);
+</script>
+</body>
+</html>
