@@ -1,6 +1,6 @@
 """Seed a throwaway Postgres with Tamasa-shaped tables (tms-sync db.py / pull_player_daily.py) + today's rows.
 Usage: python tests/fixture_tms.py [dsn]   (default postgresql://postgres:cgtest@localhost:55442/cg)
-PER_PLAY=200, TURNOVER_MULT=1, window 13:00-21:00:
+PER_PLAY=200, TURNOVER_MULT=1, window 12:00-21:00:
   juan123  dep 400 @13:30 (+300 @10:00 outside window, +999 Pending) -> 2 plays; turnover 400 -> play1 (200) & play2 (400) unlocked
   maria_x  dep 200 @14:00 -> 1 play; turnover 100 -> locked
   pedro    dep 2000 @16:00 -> 10 -> capped at 5; turnover 5000

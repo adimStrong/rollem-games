@@ -216,7 +216,7 @@ h2{font:800 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
     <h2>Link maker · Lucky Ferris Wheel</h2>
     <p class="hintp" id="adminGate">Sinusuri ang access…</p>
     <div id="adminBody" hidden style="display:grid;gap:14px">
-      <p class="hintp">I-type ang <b>username, user ID, o in-game ID</b> ng player (hal. GPEjnwNa). Kukunin ng system mula sa database ang Success deposits (12PM&ndash;9PM) at slot/casino turnover niya ngayong araw. <b>Deposit na ₱200 pataas + turnover na 1&times; ng deposit = iikot ang gulong</b>, server ang nagde-decide ng premyo (₱17/₱27/₱37, bihirang-bihira ₱177) at naitatala agad sa wins ledger. May 1&times; turnover pa ang bonus bago ma-clear.</p>
+      <p class="hintp">I-type ang <b>username, user ID, o in-game ID</b> ng player (hal. GPEjnwNa). Kukunin ng system mula sa database ang Success deposits (<span class="dhrs">12:00 PM&ndash;9:00 PM</span>) at turnover niya ngayong araw. Ang link ay pwedeng gamitin hanggang <span class="phrs">11:59 PM</span> ngayong araw lang — expired na bukas. <b>Deposit na ₱200 pataas + turnover na 1&times; ng deposit = iikot ang gulong</b>, server ang nagde-decide ng premyo (₱17/₱27/₱37, bihirang-bihira ₱177) at naitatala agad sa wins ledger. May 1&times; turnover pa ang bonus bago ma-clear.</p>
       <label class="field"><span>Player username, user ID, o in-game ID</span><div class="btnrow"><input class="inp" id="acct" type="text" autocomplete="off" spellcheck="false" placeholder="hal. juan123, 482910, o GPEjnwNa" style="flex:1;min-width:0"><button class="btn small" id="lookupBtn" type="button">Check</button></div></label>
       <div class="tierbox" id="aTier"></div>
       <div class="offerbox" id="offerBox" hidden></div>
@@ -256,7 +256,7 @@ h2{font:800 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
     <aside class="stack">
       <div class="panel">
         <h2>🎡 Community Game — Lucky Ferris Wheel</h2>
-        <p style="margin:0;color:var(--mute);font-size:13px">🕛 Event Hours: <b style="color:var(--ink)">12:00 PM–9:00 PM</b></p>
+        <p style="margin:0;color:var(--mute);font-size:13px">🕛 Deposit Hours: <b style="color:var(--ink)" class="dhrs">12:00 PM–9:00 PM</b> · Play until <b style="color:var(--ink)" class="phrs">11:59 PM</b></p>
         <div>
           <p style="margin:0 0 6px;font-weight:800;color:var(--bulb);font-size:13px;letter-spacing:.04em;text-transform:uppercase">How to join</p>
           <ul class="rules">
@@ -264,7 +264,7 @@ h2{font:800 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
             <li>Maximum of 5 FREE SPINS per player.</li>
             <li>Only slot games qualify for this promotion.</li>
             <li>FREE SPIN will unlock once you complete the 1× turnover requirement.</li>
-            <li>Request your Lucky Ferris Wheel link and use your spins within the event hours 12:00 - 9:00 PM</li>
+            <li>Deposits count only between <span class="dhrs">12:00 PM–9:00 PM</span>. Ask your agent for your link and use your spins until <span class="phrs">11:59 PM</span> the same day.</li>
           </ul>
         </div>
         <div>
@@ -273,7 +273,7 @@ h2{font:800 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
         </div>
         <div>
           <p style="margin:0 0 4px;font-weight:800;color:var(--bulb);font-size:13px;letter-spacing:.04em;text-transform:uppercase">📌 Terms &amp; conditions</p>
-          <p style="margin:0;font-size:12.5px;color:var(--mute)">Players must request their spin link and use their spins between 12:00 PM and 9:00 PM. Failure to request a link or use the spins before the event ends will invalidate bonus eligibility. Unused spins cannot be claimed or used after the event.</p>
+          <p style="margin:0;font-size:12.5px;color:var(--mute)">Deposits made between <span class="dhrs">12:00 PM–9:00 PM</span> count toward this promo. Spins can be used until <span class="phrs">11:59 PM</span> on the same day. Your link and any unused spins expire at midnight and cannot be used the next day.</p>
         </div>
       </div>
     </aside>
@@ -297,10 +297,19 @@ const peso=v=>"₱"+Number(v||0).toLocaleString("en-PH",{maximumFractionDigits:0
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 function flash(msg){const t=document.createElement("div");t.className="flash";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
-let CONF={cabins:8,prizes:[{amt:17,p:95},{amt:27,p:5},{amt:37,p:0},{amt:77,p:0},{amt:177,p:0},{amt:777,p:0}],minDeposit:200,turnover:1,maxPrize:777,roundsPerDay:999};
+let CONF={cabins:8,prizes:[{amt:17,p:95},{amt:27,p:5},{amt:37,p:0},{amt:77,p:0},{amt:177,p:0},{amt:777,p:0}],minDeposit:200,turnover:1,maxPrize:777,roundsPerDay:5,depFrom:"12:00",depTo:"21:00",playUntil:"23:59"};
+// The server has always published depFrom/depTo/playUntil in /api/config; until 2026-11-11 this page
+// ignored all three and hardcoded the hours as prose in two duplicated places, which is exactly how the
+// text drifted out of sync with the real gate. hours() = the DEPOSIT window; playEnd() = how long the
+// spins stay usable. Never use hours() to say when a player may spin.
+function hm12(s){const [h,m]=String(s||"00:00").split(":").map(Number);const ap=h>=12?"PM":"AM",hh=((h+11)%12)+1;return hh+":"+String(m||0).padStart(2,"0")+" "+ap}
+function hours(){return hm12(CONF.depFrom)+"–"+hm12(CONF.depTo)}
+function playEnd(){return hm12(CONF.playUntil)}
+// rewrites every window span on the page from the live config (called on boot, after /api/config)
+function renderHours(){document.querySelectorAll(".dhrs").forEach(e=>e.textContent=hours());document.querySelectorAll(".phrs").forEach(e=>e.textContent=playEnd())}
 const BRAND={key:"gopyesta",name:"Gopyesta",script:()=>`🎡 COMMUNITY GAME — LUCKY FERRIS WHEEL
 
-🕛 Event Hours: 12:00 PM–9:00 PM
+🕛 Deposit Hours: ${hours()} · Play until ${playEnd()}
 
 HOW TO JOIN
 
@@ -308,13 +317,13 @@ HOW TO JOIN
 • Maximum of 5 FREE SPINS per player.
 • Only slot games qualify for this promotion.
 • FREE SPIN will unlock once you complete the 1× turnover requirement.
-• Request your Lucky Ferris Wheel link and use your spins within the event hours 12:00 - 9:00 PM
+• Deposits count only between ${hours()}. Ask your agent for your Lucky Ferris Wheel link and use your spins until ${playEnd()} the same day.
 
 🎁 BONUS DISTRIBUTION
 Bonus rewards will be distributed the following day at 1:00 PM.
 
 📌 TERMS & CONDITIONS
-Players must request their spin link and use their spins between 12:00 PM and 9:00 PM. Failure to request a link or use the spins before the event ends will invalidate bonus eligibility. Unused spins cannot be claimed or used after the event.`};
+Deposits made between ${hours()} count toward this promo. Spins can be used until ${playEnd()} on the same day. Your link and any unused spins expire at midnight and cannot be used the next day.`};
 
 // ---------- player links ----------
 // #admin = link maker; #<account>-<hex> = a server-side session for one account/day; anything else = demo
@@ -615,7 +624,7 @@ function renderLookup(){
   const c=l.cur;
   const st=c?(c.status==="paid"?"<b>UMIKOT NA</b> — Cabin "+c.cabin+" · bonus <b>"+peso(c.amount)+"</b> ("+esc(c.spun_at||"")+")":(l.ready?"<b>ABOT NA ANG GOAL</b> — Cabin "+c.cabin+", iikot pag binuksan ng player ang link":"<b>Goal in progress</b> — Cabin "+c.cabin+" (turnover target "+peso(c.need)+")")):"<b>Wala pang napiling cabin</b>";
   tb.className="tierbox"+(c||l.depOk?"":" bad");
-  tb.innerHTML=st+"<br>"+esc(l.account)+(l.name&&l.name!==l.account?" ("+esc(l.name)+")":"")+"<br>Deposit ngayon (12PM-9PM): <b>"+peso(l.dep)+"</b>"+(l.depOk?" ✓":" (kulang sa "+peso(CONF.minDeposit)+")")+" · Turnover ngayong araw: <b>"+peso(l.slotToday)+"</b> (parehong makikita sa backoffice) · para sa susunod na goal: <b>"+peso(l.slot)+"</b>"+(c&&c.status==="open"?(l.betOk?" ✓":" / "+peso(l.needAmt||c.need)):"")+" · ibang laro "+peso(l.other)+(l.syncedAt?" <small>(bets sync "+esc(String(l.syncedAt).slice(11,16))+")</small>":"")+"<br><small>Mga link na ginawa ngayong araw: <b>"+(l.linksIssued||0)+"</b> · ikot: <b>"+(l.roundsUsed||0)+"</b></small>";
+  tb.innerHTML=st+"<br>"+esc(l.account)+(l.name&&l.name!==l.account?" ("+esc(l.name)+")":"")+"<br>Deposit ngayon ("+hours()+"): <b>"+peso(l.dep)+"</b>"+(l.depOk?" ✓":" (kulang sa "+peso(CONF.minDeposit)+")")+" · Turnover ngayong araw: <b>"+peso(l.slotToday)+"</b> (parehong makikita sa backoffice) · para sa susunod na goal: <b>"+peso(l.slot)+"</b>"+(c&&c.status==="open"?(l.betOk?" ✓":" / "+peso(l.needAmt||c.need)):"")+" · ibang laro "+peso(l.other)+(l.syncedAt?" <small>(bets sync "+esc(String(l.syncedAt).slice(11,16))+")</small>":"")+"<br><small>Mga link na ginawa ngayong araw: <b>"+(l.linksIssued||0)+"</b> · ikot: <b>"+(l.roundsUsed||0)+"</b></small>";
   const w=l.wager||{};
   const odds=CONF.prizes.map(p=>peso(p.amt)+" ("+p.p+"%)").join(" · ");
   ob.innerHTML="<strong>Detalye</strong>"+(l.missing&&l.missing.length?"<p>Kulang pa: "+l.missing.map(esc).join(" at ")+"</p>":"")+"<p>Turnover: "+(w.bonus?"bonus <b>"+peso(w.bonus)+"</b> · "+peso(w.done)+" / "+peso(w.need)+" pa":"wala")+" · cleared "+peso(w.cleared||0)+"</p><p>Mga bonus: "+(l.hist&&l.hist.length?l.hist.slice(0,5).map(h=>esc(h.day)+" "+peso(h.amount)+(h.cleared?" ✓":"")).join(", "):"wala pa")+"</p><p class='small'>Server time "+esc(l.serverTime)+" · premyo (cosmetic ang cabin): "+odds+"</p>";
@@ -657,7 +666,9 @@ if(mode==="admin"){
 
 /* ---------- boot ---------- */
 (async function boot(){
+  renderHours();
   try{const r=await fetch("/api/config");if(r.ok)CONF=await r.json()}catch(e){}
+  renderHours();
   if(CONF.cabins&&CONF.cabins!==N)buildGondolas(CONF.cabins);
   if(mode!=="player"){$("demoTag").hidden=false;$("who").innerHTML=`Para kay <b>Juan</b> 🎉 <span class="gid">demo</span>`}
   refresh();

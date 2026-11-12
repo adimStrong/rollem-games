@@ -247,7 +247,7 @@ body{background:radial-gradient(70% 45% at 50% 0%,rgba(47,227,154,.25),transpare
     <h2>Link maker · Spin For Life</h2>
     <p class="hint" id="adminGate">Checking access…</p>
     <div id="adminBody" hidden style="display:grid;gap:14px">
-      <p class="hint">Type the player's <b>username, user ID, or game ID</b>. The system reads their Success deposits (<span class="hrs">1:00 PM–9:00 PM</span>) and turnover for today straight from the Win For Life database. <b>Every <span class="perplay">₱200</span> deposit = 1 play (max <span class="maxplays">5</span>/day); each play unlocks after 1× turnover on <span class="wgame">any game</span>.</b> The server draws the prize (₱8.20 / ₱16.50 / ₱26) and records it in the wins ledger at once.</p>
+      <p class="hint">Type the player's <b>username, user ID, or game ID</b>. The system reads their Success deposits (<span class="hrs">12:00 PM–9:00 PM</span>) and turnover for today straight from the Win For Life database. <b>Every <span class="perplay">₱200</span> deposit = 1 play (max <span class="maxplays">5</span>/day); each play unlocks after 1× turnover on <span class="wgame">any game</span>.</b> The server draws the prize (₱8.20 / ₱16.50 / ₱26) and records it in the wins ledger at once. The link stays playable until <span class="phrs">11:59 PM</span> today and expires at midnight.</p>
       <label class="field"><span>Player username, user ID, or game ID</span><div class="btnrow"><input class="inp" id="acct" type="text" autocomplete="off" spellcheck="false" placeholder="e.g. juan123 or 482910" style="flex:1;min-width:0"><button class="btn small" id="lookupBtn" type="button">Check</button></div></label>
       <div class="tierbox" id="aTier"></div>
       <div class="offerbox" id="offerBox" hidden></div>
@@ -329,9 +329,9 @@ body{background:radial-gradient(70% 45% at 50% 0%,rgba(47,227,154,.25),transpare
     <h3>Terms &amp; Conditions</h3>
     <ol>
       <li>Open to verified Win For Life players aged 21 and above. Self-excluded, restricted or unverified accounts are not eligible.</li>
-      <li>Every ₱200 of verified deposit made between 1:00 PM and 9:00 PM gives 1 spin (for example ₱400 = 2 spins), up to 5 spins per player per day. Your spins are on the personal link from your agent; your deposits are checked automatically from your account. Pending, failed or reversed deposits do not qualify.</li>
+      <li>One deposit of ₱200 or more made between 12:00 PM and 9:00 PM gives 1 spin — a bigger deposit is still 1 spin, and two ₱300 deposits are 2 spins, up to 5 spins per player per day. Your spins are on the personal link from your agent; your deposits are checked automatically from your account. Pending, failed or reversed deposits do not qualify.</li>
       <li>Each spin unlocks only once your turnover for the day reaches 1× the deposit for that spin (₱200 deposit → ₱200 in bets, ₱400 → ₱400, and so on). Bets on any game count. Turnover is read from your account and refreshes every few minutes.</li>
-      <li>The promo runs daily from 1:00 PM to 9:00 PM. Total bonus paid by this promo is capped at ₱15,000 per day for all players; once the cap is reached, new spins wait for the next day.</li>
+      <li>The promo runs daily: deposits count from 12:00 PM to 9:00 PM, and the spins on your link must be used by 11:59 PM the same day — your link expires at midnight and cannot be used the next day. Total bonus paid by this promo is capped at ₱15,000 per day for all players; once the cap is reached, new spins wait for the next day.</li>
       <li>Each spin's bonus is set at random by the system the moment you press SPIN: ₱8.20, ₱16.50 or ₱26 (the Kampeon jackpot, the rarest result). The wheel then stops on a pocket of that prize. How many pockets show an amount on the wheel does not reflect your actual chances. The ₱77, ₱177, ₱188 and ₱777 JACKPOT pockets are for display only and can never be won. This is an animated promo game only, not a live roulette or a bet.</li>
       <li>Results are final once you press SPIN. Refreshing the page, reopening the link or using another device does not give extra spins or a new bonus; an unclaimed spin is shown again as it was.</li>
       <li>Every win is recorded automatically. The bonus is credited the following day at 1:00 PM after verification and must be wagered 1× (1× wagering) before it can be withdrawn.</li>
@@ -348,32 +348,37 @@ body{background:radial-gradient(70% 45% at 50% 0%,rgba(47,227,154,.25),transpare
 // Server-driven build (2026-11-09, cg3 "plays" model like POTS Pearl Mine / Tamasa Swerte Lights): the admin looks the player up
 // in the Win For Life retention database, deposits and turnover are read live, and the prize is drawn by the server (POST /api/play).
 // Nothing about the amount is decided in this browser; the board layout is cosmetic and saved with POST /api/plan.
-let CONF={brand:"winforlife",brandLabel:"Win For Life",game:"Spin For Life",perPlay:200,maxPlays:5,turnover:1,dailyCap:15000,depFrom:"13:00",depTo:"21:00",playFrom:"13:00",playUntil:"21:00",
+let CONF={brand:"winforlife",brandLabel:"Win For Life",game:"Spin For Life",perPlay:200,maxPlays:5,turnover:1,dailyCap:15000,depFrom:"12:00",depTo:"21:00",playFrom:"12:00",playUntil:"23:59",
   prizes:[{amt:8.2,p:90},{amt:16.5,p:5},{amt:26,p:5}],wildRate:0,wildPrizes:[],wagerCats:["all"],maxPrize:777};
 function hm12(s){const [h,m]=String(s||"00:00").split(":").map(Number);const ap=h>=12?"PM":"AM",hh=((h+11)%12)+1;return hh+":"+String(m||0).padStart(2,"0")+" "+ap}
+// hours() = the DEPOSIT window (a deposit only counts as a play inside it); playHours()/playEnd() = how long
+// the plays themselves stay usable. These two used to be the same string; since 2026-11-11 they differ
+// (deposit 12:00-21:00, play to 23:59), so never use hours() to describe when a player may play.
 function hours(){return hm12(CONF.depFrom)+"–"+hm12(CONF.depTo)}
+function playHours(){return hm12(CONF.playFrom)+"–"+hm12(CONF.playUntil)}
+function playEnd(){return hm12(CONF.playUntil)}
 const anyGame=()=>(CONF.wagerCats||[]).some(c=>String(c).toLowerCase()==="all");
 const wagerLabel=()=>anyGame()?"turnover":"slot turnover";
 const wagerRule=()=>anyGame()?"Bets on any game count.":"Only slot games qualify.";
 const PROMO_NAME="Win For Life Spin For Life Bonus";
 const BRAND_SCRIPT=()=>`🍀 COMMUNITY GAME — SPIN FOR LIFE
 
-🕐 Event Hours: ${hours()}
+🕐 Deposit Hours: ${hours()} · Play until ${playEnd()}
 
 HOW TO JOIN
 
-• Every ${php(CONF.perPlay)} deposit = 1 FREE PLAY
+• One deposit of ${php(CONF.perPlay)} or more = 1 FREE PLAY (a bigger deposit is still 1)
 • Maximum of ${CONF.maxPlays} FREE PLAYS per player per day.
 • ${anyGame()?"Bets on any game count toward the turnover requirement.":"Only slot games qualify for this promotion."}
 • Each FREE PLAY unlocks once you complete the ${CONF.turnover}× turnover requirement.
-• Request your Spin For Life link and use your plays within the event hours ${hours()}
+• Deposits count only between ${hours()}. Ask your agent for your Spin For Life link and use your plays until ${playEnd()} the same day.
 • Prizes up to ${php(CONF.maxPrize||777)}!
 
 🎁 BONUS DISTRIBUTION
 Bonus rewards will be distributed the following day at 1:00 PM.
 
 📌 TERMS & CONDITIONS
-Players must request their game link and use their plays between ${hours()}. Failure to request a link or use the plays before the event ends will invalidate bonus eligibility. Unused plays cannot be claimed or used after the event.`;
+Deposits made between ${hours()} count toward this promo. Plays can be used until ${playEnd()} on the same day. Your link and any unused plays expire at midnight and cannot be used the next day.`;
 // prize ladder = the server's prize table (amounts ascending as configured); the demo draws locally with the same weights
 let PRIZES=CONF.prizes.map(p=>p.amt),WEIGHTS=CONF.prizes.map(p=>p.p);
 const BIG=()=>2;
@@ -604,10 +609,10 @@ async function refresh(force){if(mode!=="player")return;let r=null;try{r=await f
   if(!r)return;if(r.config){CONF=r.config;syncOdds()}S=r;const sig=sigOf(r);if(force||sig!==lastSig){lastSig=sig;buildView()}}
 function oddsText(){return CONF.prizes.map(p=>php2(p.amt)+" ("+p.p+"%)").join(" · ")}
 function renderMech(){
-  const steps=["<b>Every "+php(CONF.perPlay)+" deposit = 1 play</b>, up to <b>"+CONF.maxPlays+" plays per day</b>. E.g. "+php(CONF.perPlay*2)+" = 2 plays, all on the personal link from your agent. Deposits count from "+hours()+".",
+  const steps=["<b>One deposit of "+php(CONF.perPlay)+" or more = 1 play</b>, up to <b>"+CONF.maxPlays+" plays per day</b>. A bigger deposit is still 1 play \u2014 deposit again for another. Deposits count from "+hours()+".",
     "<b>"+wagerRule()+"</b> Each play unlocks once your "+wagerLabel()+" reaches <b>"+CONF.turnover+"× the deposit</b> ("+php(CONF.perPlay)+" deposit → "+php(CONF.perPlay*CONF.turnover)+" in bets). Your deposits and turnover are checked automatically from your account — nothing to send.",
-    "<b>Hours:</b> "+hours()+" daily. <b>Max bonus:</b> "+php(CONF.dailyCap)+" per day for all players.",
-    "<b>How to get your link:</b> ask your agent after you deposit. Your link keeps working for the whole day; deposit again and your next play unlocks on the same link.",
+    "<b>Hours:</b> deposits count "+hours()+" · play until "+playEnd()+" daily. <b>Max bonus:</b> "+php(CONF.dailyCap)+" per day for all players.",
+    "<b>How to get your link:</b> ask your agent after you deposit. Your link works until "+playEnd()+" on the day it was issued, then expires at midnight; deposit again and your next play unlocks on the same link.",
     "<b>Prize:</b> The bonus is random on every spin and is set when you press SPIN (₱8.20, ₱16.50 or ₱26 — Kampeon, the jackpot). The wheel then stops on a pocket of that prize. The ₱77, ₱177, ₱188 and ₱777 JACKPOT pockets are display-only and can never be won.",
     "<b>Claiming:</b> Your win is recorded the moment it is revealed. The bonus is credited the following day at 1:00 PM and must be wagered "+CONF.turnover+"× before it can be withdrawn.",
     "<b>Results are final.</b> Refreshing or reopening the link does not give extra plays; an unclaimed play is shown again."];
@@ -620,7 +625,7 @@ const HOWTO="Press SPIN! Wherever the gold pointer lands is your bonus. Every sp
 function rangeText(){return "Every "+php(CONF.perPlay)+" deposit = 1 play · <b>"+N+" play"+(N===1?"":"s")+"</b> today ("+php(S.dep)+" deposited) · every play wins a bonus"}
 function lockView(label,msg){GAME.build($("play"));$("range").textContent="";$("count").hidden=false;$("count").textContent=label;setGo(false);cheer("");$("note").textContent=msg}
 function lockReason(){
-  if(!S.playOpen)return {cheer:"Game closed for today.",note:"Spin For Life is open "+hm12(CONF.playFrom)+"–"+hm12(CONF.playUntil)+" daily. Come back tomorrow."};
+  if(!S.playOpen)return {cheer:"Game closed for today.",note:"Spin For Life is open "+playHours()+" daily. Come back tomorrow — ask your agent for a new link after your next deposit."};
   if(S.capped)return {cheer:"Daily bonus budget reached.",note:"Today's "+php(CONF.dailyCap)+" bonus budget is used up. Try again tomorrow."};
   if(!S.betOk){const need=Math.max(0,S.nextNeed-S.slot);return {cheer:"Finish your turnover first.",note:"Play "+(S.playsUsed+1)+" unlocks once your "+wagerLabel()+" today reaches "+php(S.nextNeed)+" — bet "+php(need)+" more (now "+php(S.slot)+"). This page refreshes on its own."}}
   return {cheer:"Not ready yet.",note:(S.missing||[]).join(" · ")||"Please wait a moment."}}
@@ -806,6 +811,7 @@ async function setCap(){const v=parseInt($("capInput").value,10);if(!(v>=0)){$("
 function unlockAdmin(){
   $("adminGate").hidden=true;$("adminBody").hidden=false;
   document.querySelectorAll("#adminBody .hrs").forEach(e=>e.textContent=hours());
+  document.querySelectorAll("#adminBody .phrs").forEach(e=>e.textContent=playEnd());
   document.querySelectorAll("#adminBody .perplay").forEach(e=>e.textContent=php(CONF.perPlay));
   document.querySelectorAll("#adminBody .maxplays").forEach(e=>e.textContent=CONF.maxPlays);
   document.querySelectorAll("#adminBody .wgame").forEach(e=>e.textContent=anyGame()?"any game":"slot games");

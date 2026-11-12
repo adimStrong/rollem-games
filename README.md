@@ -13,9 +13,17 @@ service deployed from its own branch in this repo.
 | `tamasa` | Triple Tama (slot) | Tamasa | Flask + Postgres (live admin↔player sync) |
 | `gspot` | Power-Up Cards (was Treasure Spot / Gagamba Spot / Loot Drop) | GameSpot | static |
 | `t2b` | Time 2 Race (6-horse race; was T2B Derby) — `time2bet-time2race/` | Time2Bet | static (agent-verified; different console vendor) |
+| `gobetplay` | GoBet Race (3D carabao race) — `gobetplay-gobet-race/` | GoBetplay | Flask + Postgres (platform-verified from the gobetplay-retention DB) |
 
 `dice-roll-tester/` and `raffle-wheel/` are not deployed as community games (internal tool /
 no dedicated brand).
+
+**GoBet Race is the one game that is not one-player-per-link.** It is a shared live event: an agent adds
+up to 5 qualified players to the open lobby and presses Start, and every page on the same URL replays one
+server-drawn outcome (`GET /api/race`, polled once a second). The field is always 8 lanes and the empty
+ones are filled with plausible usernames, because **1st (₱177) and 2nd (₱77) always go to those fillers** —
+a real player can only place 3rd (₱27, 5%) or lower (₱7), i.e. the same ₱8.00 expected cost per entry as
+the other brands. There is no link token, so nothing to expire; entries are keyed to the day instead.
 
 ## Mechanic (all 8 games, same rules)
 
