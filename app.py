@@ -55,7 +55,8 @@ def today_str():
 
 
 def _row():
-    return {"links": 0, "linked": 0, "plays": 0, "played": 0, "winners": 0, "won": 0.0, "seen": 0, "dep": 0.0}
+    # cleared = prize money whose turnover condition is met (payable by Risk); won - cleared is still wagering
+    return {"links": 0, "linked": 0, "plays": 0, "played": 0, "winners": 0, "won": 0.0, "seen": 0, "dep": 0.0, "cleared": 0.0}
 
 
 def _q(dsn, sql, args=()):
@@ -75,24 +76,22 @@ def game_days(brand, dsn):
                      "FROM cg_sessions WHERE biz_date >= %s GROUP BY 1", (SINCE,)):
         d = days.setdefault(r["biz_date"], _row())
         d["links"], d["linked"] = int(r["links"]), int(r["linked"])
-    if brand["kind"] == "cg3":
-        rows = _q(dsn, "SELECT biz_date, COUNT(*) AS plays, COUNT(DISTINCT user_id) AS played, "
-                       "COALESCE(SUM(amount_c),0)/100.0 AS won, "
-                       "COUNT(DISTINCT user_id) FILTER (WHERE amount_c > 0) AS winners, "
-                       "COALESCE(SUM(CASE WHEN seen > 0 THEN 1 ELSE 0 END),0) AS seen "
-                       "FROM cg_plays WHERE status='paid' AND biz_date >= %s GROUP BY 1", (SINCE,))
-        deps = _q(dsn, "SELECT biz_date, COALESCE(SUM(dep),0) AS dep FROM (SELECT biz_date, user_id, MAX(dep) AS dep "
-                       "FROM cg_plays WHERE status='paid' AND biz_date >= %s GROUP BY 1,2) x GROUP BY 1", (SINCE,))
-        for r in deps:
-            days.setdefault(r["biz_date"], _row())["dep"] = float(r["dep"])
-    else:  # fw2 (gopyesta): entry_no / step / prize, no deposit column
-        rows = _q(dsn, "SELECT biz_date, COUNT(*) AS plays, COUNT(DISTINCT user_id) AS played, "
-                       "COALESCE(SUM(prize),0) AS won, COUNT(DISTINCT user_id) FILTER (WHERE prize > 0) AS winners, "
-                       "COUNT(*) AS seen FROM cg_plays WHERE biz_date >= %s GROUP BY 1", (SINCE,))
+    # cg3 games keep plays in cg_plays (amount_c centavos); the GoPyesta Lucky Ferris Wheel (fw2) keeps its spins in
+    # fw_spins (amount pesos, status 'open' = cabin picked but not yet spun, 'paid' = spun and prize awarded).
+    table, amount, paid = ("cg_plays", "amount_c/100.0", "status='paid'") if brand["kind"] == "cg3" else ("fw_spins", "amount", "status='paid'")
+    rows = _q(dsn, f"SELECT biz_date, COUNT(*) AS plays, COUNT(DISTINCT user_id) AS played, "
+                   f"COALESCE(SUM({amount}),0) AS won, COUNT(DISTINCT user_id) FILTER (WHERE {amount} > 0) AS winners, "
+                   f"COALESCE(SUM(CASE WHEN seen > 0 THEN 1 ELSE 0 END),0) AS seen, "
+                   f"COALESCE(SUM({amount}) FILTER (WHERE cleared_at IS NOT NULL),0) AS cleared "
+                   f"FROM {table} WHERE {paid} AND biz_date >= %s GROUP BY 1", (SINCE,))
+    deps = _q(dsn, f"SELECT biz_date, COALESCE(SUM(dep),0) AS dep FROM (SELECT biz_date, user_id, MAX(dep) AS dep "
+                   f"FROM {table} WHERE {paid} AND biz_date >= %s GROUP BY 1,2) x GROUP BY 1", (SINCE,))
+    for r in deps:
+        days.setdefault(r["biz_date"], _row())["dep"] = float(r["dep"])
     for r in rows:
         d = days.setdefault(r["biz_date"], _row())
         d.update(plays=int(r["plays"]), played=int(r["played"]), won=float(r["won"]),
-                 winners=int(r["winners"]), seen=int(r["seen"]))
+                 winners=int(r["winners"]), seen=int(r["seen"]), cleared=float(r["cleared"]))
     return days
 
 

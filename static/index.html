@@ -191,11 +191,11 @@ function range(){
   return [DATA.since, t];
 }
 function sumDays(days, from, to){
-  const s = {links:0, linked:0, plays:0, played:0, winners:0, won:0, seen:0, dep:0, days:0, links_na:false};
+  const s = {links:0, linked:0, plays:0, played:0, winners:0, won:0, seen:0, dep:0, cleared:0, days:0, links_na:false};
   for(const [d,r] of Object.entries(days)){
     if(d<from || d>to) continue;
     s.days++;
-    for(const k of ["plays","played","winners","won","seen","dep"]) s[k] += r[k]||0;
+    for(const k of ["plays","played","winners","won","seen","dep","cleared"]) s[k] += r[k]||0;
     if(r.links===null) s.links_na = true; else { s.links += r.links||0; s.linked += r.linked||0; }
   }
   return s;
@@ -231,8 +231,8 @@ function renderCards(){
       <div class="hero"><span class="v num">${peso(s.won)}</span><span class="k">paid &middot; ${s.plays} play${s.plays===1?"":"s"} &middot; ${s.winners} winner${s.winners===1?"":"s"}</span></div>
       <div class="funnel">${rows}</div>
       ${cap}
-      <div class="mini"><span><b>${s.plays?peso(s.won/s.plays):"—"}</b>avg prize</span>${br.kind==="cg3"?`<span><b>${peso(s.dep)}</b>deposits behind plays</span>`:""}<span>${last}</span></div>
-      ${br.kind==="ledger"?`<div class="note">Agent-verified game: links are made in the page, only wins are recorded.</div>`:""}
+      <div class="mini"><span><b>${s.plays?peso(s.won/s.plays):"—"}</b>avg prize</span>${br.kind!=="ledger"?`<span title="prize money whose turnover condition is met; the rest is still wagering"><b>${peso(s.cleared)}</b>cleared for payout</span><span><b>${peso(s.dep)}</b>deposits behind plays</span>`:""}<span>${last}</span></div>
+      ${br.kind==="ledger"?`<div class="note">Wins only on this source: links are not tracked here.</div>`:""}
       ${br.ok?"":`<div class="note" style="color:var(--crit)">source error: ${esc(br.error||"")}${br.stale?" (showing last good data)":""}</div>`}
     </article>`;
   }).join("");
@@ -288,7 +288,7 @@ function renderTable(){
   const na = v => v===null ? "—" : v;
   tb.innerHTML = rows.map(({d,br,r})=>`<tr><td>${fmtD(d)}</td><td class="b"><b style="--c:var(${SLOT[br.key]})"><i></i>${esc(br.label)}</b></td>
     <td class="num">${na(r.links)}</td><td class="num">${na(r.linked)}</td><td class="num">${r.played}</td><td class="num">${r.linked?pct(r.played,r.linked):"—"}</td>
-    <td class="num">${r.plays}</td><td class="num">${r.winners}</td><td class="num">${peso(r.won)}</td><td class="num">${r.plays?peso(r.won/r.plays):"—"}</td><td class="num">${br.kind==="cg3"?peso(r.dep):"—"}</td></tr>`).join("")
+    <td class="num">${r.plays}</td><td class="num">${r.winners}</td><td class="num">${peso(r.won)}</td><td class="num">${r.plays?peso(r.won/r.plays):"—"}</td><td class="num">${br.kind!=="ledger"?peso(r.dep):"—"}</td></tr>`).join("")
     + `<tr class="tot"><td>Total</td><td></td><td class="num">${T.links}</td><td class="num">${T.linked}</td><td class="num">${T.played}</td><td class="num">${pct(T.played,T.linked)}</td><td class="num">${T.plays}</td><td class="num">${T.winners}</td><td class="num">${peso(T.won)}</td><td class="num">${T.plays?peso(T.won/T.plays):"—"}</td><td class="num">${peso(T.dep)}</td></tr>`;
 }
 
