@@ -391,7 +391,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(26px,7.5vw,38
       <div class="offerbox" id="offerBox" hidden></div>
       <div class="field"><span>Player link</span>
         <div class="linkrow"><code id="plink">—</code></div>
-        <div class="btnrow"><button class="btn small" id="copyLink" type="button">Copy link</button><button class="btn small" id="copyMsg" type="button">Copy message + link</button><button class="btn small ghost" id="newLink" type="button">New link</button></div>
+        <div class="btnrow"><button class="btn small" id="copyLink" type="button">Copy link</button><button class="btn small" id="copyMsg" type="button">Copy message + link</button><button class="btn small ghost" id="newLink" type="button" disabled>Make link</button></div>
       </div>
       <p class="hint" id="aMsg"></p>
       <div class="fx" hidden>
@@ -965,7 +965,7 @@ $("tncLink").onclick=e=>{e.preventDefault();$("tnc").open=true;$("tnc").scrollIn
 // No local password hash and no claude.ai database: the password goes to POST /api/admin-login and
 // the token it returns authorises /api/lookup and /api/link. The agent never types a deposit -- the
 // server reads the Time2Bet deposits table, so a link cannot be issued to a player who did not qualify.
-let who=null,LOOK=null;
+let who=null,LOOK=null;if(mode==="admin"){$("admin").hidden=false;$("previewLabel").hidden=false} // #admin: show the link maker above the preview (the cg3 port had dropped this)
 const pageBase=()=>location.href.split("#")[0].split("?")[0];
 function playerLink(){return pageBase()+"#"+cfg.code}
 function admMsg(t){const m=$("aMsg");if(m)m.textContent=t||""}
@@ -1002,8 +1002,8 @@ function tierBox(){
 function adminUI(){
   tierBox();
   const ok=canLink();
-  $("plink").textContent=(ok&&cfg.code&&cfg.code!=="juan123")?playerLink():"—";
-  $("copyLink").disabled=!ok;$("copyMsg").disabled=!ok;
+  const hasCode=!!(ok&&cfg.code&&cfg.code!=="juan123");$("plink").textContent=hasCode?playerLink():"—";
+  $("copyLink").disabled=!hasCode;$("copyMsg").disabled=!hasCode;$("newLink").disabled=!ok;$("newLink").textContent=hasCode?"New link":"Make link";
 }
 async function lookup(fresh){
   const acct=$("code").value.trim();
