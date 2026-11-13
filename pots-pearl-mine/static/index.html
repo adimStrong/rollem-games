@@ -1284,7 +1284,7 @@ const GAME=(()=>{
     rest.forEach((tile,j)=>{const role=roleOf(pl,tile),go=()=>{openTile(tile,role,"rv");if(!quick&&role.t==="b77"){beep(1568,.6,.035,"sine",0);beep(2349,.6,.02,"sine",.08)}};quick?go():T(go,80+j*45)});
     const fin=()=>{stage.classList.remove("live","tense","auto","shake");stage.classList.add("done");hudPaint(foundCents(pl),pl.vals.length,false);colPaint()};
     if(quick){fin();if(!fast){T(()=>{const cb=hooks&&hooks.done;hooks=null;if(cb)cb()},300)}return}
-    T(()=>{fin();chime(pl.step>=1);cheer(pl.vals.length+" pearls · "+php(NUMS[pl.step])+"! So close to the black ₱77 pearl…")},120+rest.length*45);
+    T(()=>{fin();chime(pl.step>=1);cheer(pl.vals.length+" pearls · "+php(amtOf(pl))+"! So close to the black ₱77 pearl…")},120+rest.length*45);
     T(()=>{const cb=hooks&&hooks.done;hooks=null;if(cb)cb()},120+rest.length*45+2000)}
   const G={
     live:false,NUMS,
@@ -1336,23 +1336,24 @@ const GAME=(()=>{
 let S=null,busy=false,N=0,cur=null,demoPlays=[],planQ=Promise.resolve(),lastSig="";
 const DEMO_N=2;
 async function post(path,body){const r=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})});const j=await r.json().catch(()=>({}));return{status:r.status,...j}}
-function stepOf(amt){const i=NUMS.indexOf(Math.round(Number(amt)));return i>=0?i:0}
-function makePlan(amt){const step=stepOf(amt),k=step?5+Math.floor(rnd()*3):3+Math.floor(rnd()*4);return {vals:splitVals(NUMS[step],k,step?10:6),perm:shuffle(Array.from({length:TILES},(_,i)=>i)),taps:[],end:null}}
+const isMS=a=>Number(a)>Math.max(...NUMS); // milestone prize (P198 / P288): above the whole ladder, server-drawn
+function stepOf(amt){const i=NUMS.indexOf(Math.round(Number(amt)));return i>=0?i:(isMS(amt)?1:0)}
+function makePlan(amt){const step=stepOf(amt),ms=isMS(amt),k=ms?7:step?5+Math.floor(rnd()*3):3+Math.floor(rnd()*4);return {vals:ms?splitVals(Number(amt),k,Math.ceil(Number(amt)*2/k)+8):splitVals(NUMS[step],k,step?10:6),perm:shuffle(Array.from({length:TILES},(_,i)=>i)),taps:[],end:null}}
 function planOf(pl){const p={vals:pl.vals,perm:pl.perm,taps:pl.taps,end:pl.end||null};if(pl.collect!=null)p.collect=pl.collect;if(pl.dec)p.dec=pl.dec;return p}
-function validPlan(p,step){if(!p||!Array.isArray(p.vals)||!Array.isArray(p.perm)||!Array.isArray(p.taps))return false;
-  const k=p.vals.length;if(k<1||k>12||p.vals.some(v=>!Number.isInteger(v)||v<50||v%50)||p.vals.reduce((a,b)=>a+b,0)!==NUMS[step]*100)return false;
+function validPlan(p,step,amt){if(!p||!Array.isArray(p.vals)||!Array.isArray(p.perm)||!Array.isArray(p.taps))return false;
+  const k=p.vals.length;if(k<1||k>12||p.vals.some(v=>!Number.isInteger(v)||v<50||v%50)||p.vals.reduce((a,b)=>a+b,0)!==(amt!=null&&isMS(amt)?Math.round(Number(amt)*100):NUMS[step]*100))return false;
   if(p.perm.length!==TILES||new Set(p.perm).size!==TILES||p.perm.some(x=>!Number.isInteger(x)||x<0||x>=TILES))return false;
   if(new Set(p.taps).size!==p.taps.length||p.taps.some(x=>!Number.isInteger(x)||x<0||x>=TILES)||p.taps.length>k+1)return false;
   if(p.end==="urchin")return p.taps.length===k+1;if(p.end==="collect")return p.taps.length===k;return p.end==null&&p.taps.length<=k}
 // server PLAY row -> local play object (same shape the GAME module expects). A row without a usable plan (the plan POST never
 // landed) is shown as a finished board with all its pearls collected — the amount is the server's either way.
-function toPlay(row){const step=stepOf(row.amount);let p=row.plan&&validPlan(row.plan,step)?row.plan:null;
+function toPlay(row){const step=stepOf(row.amount);let p=row.plan&&validPlan(row.plan,step,row.amount)?row.plan:null;
   if(!p){p=makePlan(row.amount);p.taps=p.perm.slice(0,p.vals.length);p.collect=0;p.end="collect"}
   const pl={id:row.id,no:row.play_no,step,amount:row.amount,vals:p.vals.slice(),perm:p.perm.slice(),taps:p.taps.slice(),end:p.end||null,collect:p.collect,dec:p.dec,at:row.at,seen:!!row.seen};
   if(pl.end&&!decoyOK(pl))decoyPlan(pl);else if(!pl.end&&pl.dec)delete pl.dec;return pl}
 function savePlan(){if(!cur||mode!=="player"||!cur.id)return;const body={id:cur.id,plan:planOf(cur)};planQ=planQ.then(()=>post("/api/plan/"+encodeURIComponent(code),body)).catch(()=>{})}
 function playList(){if(mode!=="player")return demoPlays;if(!S||!S.plays)return [];return S.plays.map(r=>cur&&cur.id===r.id?cur:toPlay(r))}
-const amtOf=p=>NUMS[p.step];
+const amtOf=p=>p.amount!=null?Number(p.amount):NUMS[p.step];
 const labelOf=p=>p.vals.length+" pearls found";
 function sigOf(r){return JSON.stringify([r.exists,r.expired,r.stopped,r.stopNote,r.playOpen,r.capped,r.ready,r.betOk,r.depOk,r.playsUsed,r.playsTotal,(r.missing||[]).join("|"),(r.plays||[]).map(p=>p.id+":"+p.seen+":"+(p.plan?1:0))])}
 async function refresh(force){if(mode!=="player")return;let r=null;try{r=await fetch("/api/session/"+encodeURIComponent(code)).then(r=>r.json())}catch(e){}
