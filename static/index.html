@@ -1336,7 +1336,7 @@ async function api(path,opt){
 function placeIndexFor(amount){
   const a=Number(amount);
   const exact=PRIZES.indexOf(a);
-  if(exact<0)return 3;                              // unknown amount: treat as the 4th-place band
+  if(exact<0)return a>Math.max(...PRIZES)?0:3;          // milestone (P198 / P288) = 1st place; other unknown: 4th band                              // unknown amount: treat as the 4th-place band
   const band=[];for(let i=0;i<PRIZES.length;i++)if(PRIZES[i]===a)band.push(i);
   return band[Math.floor(Math.random()*band.length)];  // P7 spans 4th-8th, so spread it
 }
@@ -1361,7 +1361,7 @@ function planOk(p,amount){
   if(!p||p.v!==1||!Array.isArray(p.order)||p.order.length!==FIELD)return false;
   if(!Array.isArray(p.times)||p.times.length!==FIELD||!Array.isArray(p.names)||p.names.length!==FIELD-1)return false;
   const s=[...p.order].sort((a,b)=>a-b);for(let i=0;i<FIELD;i++)if(s[i]!==i)return false;
-  return p.order.indexOf(0)+1===p.place&&PRIZES[p.place-1]===Number(amount);
+  return p.order.indexOf(0)+1===p.place&&(PRIZES[p.place-1]===Number(amount)||(Number(amount)>Math.max(...PRIZES)&&p.place===1));
 }
 function specFor(plan){
   const me=(SESS&&SESS.account)||'you';
