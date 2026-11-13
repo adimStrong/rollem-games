@@ -205,6 +205,30 @@ def hm_of(t):
     return t.strftime("%H:%M")
 
 
+
+# ---- milestone prizes (JD 2026-11-14) — same rule as the cg3 games --------------------------------
+# Nth paid spin of THIS wheel (all time, all players): every 50th pays P288, every 30th P198 (50 wins
+# ties). Advisory lock serialises the count; if the day's cap cannot cover it the normal draw stands.
+MILESTONES = sorted(([int(n), int(a)] for n, a in json.loads(os.environ.get("MILESTONES") or "[[50,288],[30,198]]")),
+                    key=lambda m: -m[0])
+MAX_WIN = int(float(os.environ.get("MAX_WIN", "300")))   # JD: "no win above 300" — hard ceiling on any spin
+assert all(a <= MAX_WIN for _, a in MILESTONES), "a MILESTONES amount is above MAX_WIN"
+_MS_LOCK = int(hashlib.sha256(("fw2-milestone:" + os.environ.get("BRAND", "gopyesta")).encode()).hexdigest()[:15], 16)
+
+
+def milestone_prize(cur) -> int:
+    if not MILESTONES:
+        return 0
+    cur.execute("SELECT pg_advisory_xact_lock(%s)", (_MS_LOCK,))
+    cur.execute("SELECT COUNT(*) AS n FROM fw_spins WHERE status='paid'")
+    row = cur.fetchone()
+    n = int((row["n"] if isinstance(row, dict) else row[0]) or 0) + 1
+    for every, amt in MILESTONES:
+        if every > 0 and n % every == 0:
+            return amt
+    return 0
+
+
 def pick_prize() -> int:
     """Weighted random draw over the live (p > 0) prizes, matching the raw export's pickPrize()."""
     tot = sum(p["p"] for p in LIVE_PRIZES)
@@ -788,6 +812,11 @@ def spin(code):
             conn.rollback()
             return jsonify({"error": "locked", "msg": "Tapusin muna ang goal: " + " at ".join(s["missing"]) + ".", **out}), 409
         amount = pick_prize()
+        ms_amt = milestone_prize(cur)
+        if ms_amt and s["capUsed"] + ms_amt <= s["dailyCap"]:
+            amount = ms_amt
+        if amount > MAX_WIN:                  # hard ceiling: never pay above MAX_WIN, whatever the config says
+            amount = min(p["amt"] for p in LIVE_PRIZES)
         if s["capUsed"] + amount > s["dailyCap"]:
             conn.rollback()
             return jsonify({"error": "cap", "msg": "Naabot na ang daily bonus budget. Subukan ulit bukas.", **out}), 409
