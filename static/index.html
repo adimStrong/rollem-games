@@ -510,7 +510,7 @@ function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/
 // SERVER-SIDE, so this returns the place index that pays exactly that amount; P8.88 sits at 0-3 and
 // the race collapses those to 3rd, so 3 is the right index for it. Demo/admin still draw locally.
 function drawStep(){
-  if(mode==="player"){const i=PRIZES.lastIndexOf(Number(SRV&&SRV.amount));return i<0?3:Math.max(i,3)}
+  if(mode==="player"){const a=Number(SRV&&SRV.amount),i=PRIZES.lastIndexOf(a);return i<0?(a>Math.max(...PRIZES)?PRIZES.length-1:3):Math.max(i,3)}  // milestone (above the ladder) = 1st place
   const W=(GAME&&GAME.weights)||WEIGHTS;let r=rnd()*W.reduce((a,b)=>a+b,0);
   for(let i=0;i<W.length;i++){r-=W[i];if(r<0)return i}return 0}
 function shuffle(a){for(let k=a.length-1;k>0;k--){const j=Math.floor(rnd()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
@@ -897,7 +897,7 @@ async function refresh(){
   const r=await api("/api/session/"+CODE);
   if(r.ok&&r.j){S=r.j;if(S.config)CONF=Object.assign(CONF,S.config)}
 }
-function result(){return GAME.outcome?GAME.outcome(state):{win:true,amt:ladder[state.step],idx:state.step,big:state.step===ladder.length-1,label:BRAND.labels[state.step]}}
+function result(){if(GAME.outcome)return GAME.outcome(state);const ps=(mode==="player"&&S&&S.plays)||[],real=mode==="player"?Number((SRV&&SRV.amount)||(ps[run]&&ps[run].amount)):NaN,ms=isFinite(real)&&real>Math.max(...ladder),amt=isFinite(real)&&real>0?real:ladder[state.step];return {win:true,amt,idx:state.step,big:ms||state.step===ladder.length-1,label:BRAND.labels[state.step]+(ms?" \u00b7 Milestone prize":"")}}
 function finishView(celebrate){
   const r=result();
   $("win").classList.toggle("lost",!r.win);$("win").querySelector("small").textContent=r.win?"Your bonus":"Result";
