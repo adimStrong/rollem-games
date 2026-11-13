@@ -93,6 +93,38 @@ def _pct(ps):
     return out
 
 
+
+# ---- milestone prizes (JD 2026-11-13) ------------------------------------------------------------
+# Counted per game, all time, across all players: the Nth paid play of THIS game. When N hits a
+# milestone the play pays that amount instead of the normal draw. Largest "every" is checked first, so
+# with the defaults play 150 pays P288 (both 30 and 50 divide it). A transaction-scoped advisory lock
+# serialises the count so two simultaneous plays can never both become "the 30th". If the day's cap
+# cannot cover the milestone the play falls back to the normal draw (that milestone is skipped).
+MILESTONES = sorted(([int(n), float(a)] for n, a in json.loads(os.environ.get("MILESTONES") or "[[50,288],[30,198]]")),
+                    key=lambda m: -m[0])
+# Hard ceiling on ANY single paid play (JD: "no win above 300"). Display-only rungs (P777 decoys) are
+# never drawn; this guard also stops a mis-typed PRIZES/MILESTONES env from ever paying more.
+MAX_WIN = float(os.environ.get("MAX_WIN", "300"))
+MAX_WIN_C = int(round(MAX_WIN * 100))
+MILESTONE_TIER = 99   # tier sentinel stored on cg_plays for a milestone play (not an index into PRIZES)
+assert all(a <= MAX_WIN for _, a in MILESTONES), "a MILESTONES amount is above MAX_WIN"
+_MS_LOCK = int(hashlib.sha256(("cg3-milestone:" + os.environ.get("BRAND", "")).encode()).hexdigest()[:15], 16)
+
+
+def milestone_prize(cur):
+    """Centavos of the milestone the NEXT paid play hits, or 0. Call inside the play transaction."""
+    if not MILESTONES:
+        return 0
+    cur.execute("SELECT pg_advisory_xact_lock(%s)", (_MS_LOCK,))
+    cur.execute("SELECT COUNT(*) AS n FROM cg_plays WHERE status='paid'")
+    row = cur.fetchone()
+    n = int((row["n"] if isinstance(row, dict) else row[0]) or 0) + 1
+    for every, amt in MILESTONES:
+        if every > 0 and n % every == 0:
+            return int(round(amt * 100))
+    return 0
+
+
 CONFIG = {
     "brand": BRAND, "brandLabel": BRAND_LABEL, "game": GAME_NAME, "platform": PLATFORM, "version": "cg3",
     "prizes": _pct(PRIZES), "wildRate": WILD_RATE, "wildPrizes": _pct(WILD_PRIZES),
@@ -101,6 +133,7 @@ CONFIG = {
     "dailyCap": DAILY_CAP, "depFrom": DEP_FROM, "depTo": DEP_TO, "playFrom": PLAY_FROM, "playUntil": PLAY_UNTIL,
     "maxPrize": MAX_PRIZE, "minPrize": MIN_PRIZE,
 }
+CONFIG.update({"milestones": [{"every": n, "amt": a} for n, a in MILESTONES], "maxWin": MAX_WIN})
 
 
 # ---------------------------------------------------------------- helpers
@@ -609,6 +642,11 @@ def play(code):
             conn.rollback()
             return jsonify({"error": "locked", "msg": "Tapusin muna ang goal: " + " at ".join(s["missing"]) + ".", **out}), 409
         amount_c, tier, wild = pick_prize()
+        ms_c = milestone_prize(cur)
+        if ms_c and s["capUsed"] + ms_c / 100 <= s["dailyCap"]:
+            amount_c, tier, wild = ms_c, MILESTONE_TIER, False
+        if amount_c > MAX_WIN_C:              # hard ceiling: never pay above MAX_WIN, whatever the config says
+            amount_c, tier, wild = int(round(min(p["amt"] for p in LIVE_PRIZES) * 100)), 0, False
         if s["capUsed"] + amount_c / 100 > s["dailyCap"]:
             conn.rollback()
             return jsonify({"error": "cap", "msg": "Naabot na ang daily bonus budget. Subukan ulit bukas.", **out}), 409

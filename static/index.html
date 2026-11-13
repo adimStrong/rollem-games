@@ -777,13 +777,16 @@ function rnd(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/
 function drawFrom(W){let r=rnd()*W.reduce((a,b)=>a+b,0);for(let i=0;i<W.length;i++){r-=W[i];if(r<0)return i}return 0} // a 0-weight entry can never be drawn
 // PRIZES is [7,17] and the index IS the tier. For a real player the amount is already drawn
 // SERVER-SIDE, so this returns the tier that pays exactly that amount. Demo/admin draw locally.
+// milestone prize (P198 / P288) sits above the ladder: register it as an extra LEGENDARY value so every
+// PRIZES[prize] lookup (card face, win card, totals) shows the real amount the server paid
+function prizeIdx(a){a=Number(a);let i=PRIZES.indexOf(a);if(i<0&&a>Math.max(PRIZES[0],PRIZES[1])){PRIZES.push(a);i=PRIZES.length-1;KIND[a]=["MILESTONE","legendary"];if(typeof ICON!=="undefined"&&!ICON[a])ICON[a]=ICON[JPVAL.seven]||ICON[17]}return i<0?0:i}
 function drawPrize(){
-  if(mode==="player"){const i=PRIZES.indexOf(Number(SRV&&SRV.amount));return i<0?0:i}
+  if(mode==="player"){return prizeIdx(SRV&&SRV.amount)}
   return drawFrom(WEIGHTS)}
 function drawWild(){return drawFrom(WILD_WEIGHTS)}
 // a saved play's bonus in pesos (wild plays carry their own total in centavos) and whether it gets the big celebration
 const amtOf=p=>p.wild?p.total/100:PRIZES[p.prize];
-const bigOf=p=>p.wild?p.wprize>=WILD_BIG:p.prize===BIG;
+const bigOf=p=>p.wild?p.wprize>=WILD_BIG:p.prize>=BIG;
 const reduce=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
 function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
 
@@ -933,7 +936,7 @@ const GAME=(()=>{
   function pick(i){
     if(!cur||!waiting)return;waiting=false;pending=null;wrap.classList.remove("live");
     const pl=plays()[plays().length-1];pl.cell=i;pl.others=othersFor(i,PRIZES[cur.prize]);save(); // pick + show-only faces saved before the flip
-    const big=cur.prize===BIG,amt=PRIZES[cur.prize];cards[i].classList.add("picked");if(!reduce())wrap.classList.add("focus");
+    const big=cur.prize>=BIG,amt=PRIZES[cur.prize];cards[i].classList.add("picked");if(!reduce())wrap.classList.add("focus");
     cheer("Flipping card "+(i+1)+"…");beep(520,.1,.12,"square");
     T(()=>{noise(.25,.12,3000);flip(i,amt,true);T(()=>{bonusChime(big);countUp(amt);cheer((big?"RARE! ":"POWER-UP! ")+php2(amt));if(big&&!reduce())wrap.classList.add("rarefx")},reduce()?0:380);
       let d=reduce()?0:1300;pl.others.forEach((v,k)=>{if(v==null)return;T(()=>{flip(k,v,false);beep(600,.05,.04,"triangle")},d);d+=reduce()?0:260});
@@ -1088,7 +1091,8 @@ function load(){
     const ps=((S&&S.plays)||[]).map(p=>{
       const amt=Number(p.amount);
       const base=(p.plan&&p.plan.prize!=null)?Object.assign({},p.plan)
-        :{prize:Math.max(0,PRIZES.indexOf(amt)),cell:0};
+        :{prize:prizeIdx(amt),cell:0};
+      if(!base.wild&&amt>Math.max(PRIZES[0],PRIZES[1]))base.prize=prizeIdx(amt);   // milestone: index of the real amount
       if(base.cell==null)base.cell=0;
       base.claimed=!!p.seen;base.__id=p.id;
       return base});
