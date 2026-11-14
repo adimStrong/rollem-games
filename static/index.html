@@ -627,7 +627,7 @@ function renderLookup(){
   tb.innerHTML=st+"<br>"+esc(l.account)+(l.name&&l.name!==l.account?" ("+esc(l.name)+")":"")+"<br>Deposit ngayon ("+hours()+"): <b>"+peso(l.dep)+"</b>"+(l.depOk?" ✓":" (kulang sa "+peso(CONF.minDeposit)+")")+" · Turnover ngayong araw: <b>"+peso(l.slotToday)+"</b> (parehong makikita sa backoffice) · para sa susunod na goal: <b>"+peso(l.slot)+"</b>"+(c&&c.status==="open"?(l.betOk?" ✓":" / "+peso(l.needAmt||c.need)):"")+" · ibang laro "+peso(l.other)+(l.syncedAt?" <small>(bets sync "+esc(String(l.syncedAt).slice(11,16))+")</small>":"")+"<br><small>Mga link na ginawa ngayong araw: <b>"+(l.linksIssued||0)+"</b> · ikot: <b>"+(l.roundsUsed||0)+"</b></small>";
   const w=l.wager||{};
   const odds=CONF.prizes.map(p=>peso(p.amt)+" ("+p.p+"%)").join(" · ");
-  ob.innerHTML="<strong>Detalye</strong>"+(l.missing&&l.missing.length?"<p>Kulang pa: "+l.missing.map(esc).join(" at ")+"</p>":"")+"<p>Turnover: "+(w.bonus?"bonus <b>"+peso(w.bonus)+"</b> · "+peso(w.done)+" / "+peso(w.need)+" pa":"wala")+" · cleared "+peso(w.cleared||0)+"</p><p>Mga bonus: "+(l.hist&&l.hist.length?l.hist.slice(0,5).map(h=>esc(h.day)+" "+peso(h.amount)+(h.cleared?" ✓":"")).join(", "):"wala pa")+"</p><p class='small'>Server time "+esc(l.serverTime)+" · premyo (cosmetic ang cabin): "+odds+"</p>";
+  ob.innerHTML="<strong>Detalye</strong>"+(l.missing&&l.missing.length?"<p>Kulang pa: "+l.missing.map(esc).join(" at ")+"</p>":"")+"<p>Turnover: "+(w.bonus?"bonus <b>"+peso(w.bonus)+"</b> · "+peso(w.done)+" / "+peso(w.need)+" pa":"wala")+" · cleared "+peso(w.cleared||0)+"</p><p>Mga bonus: "+(l.hist&&l.hist.length?l.hist.slice(0,5).map(h=>esc(h.day)+" "+peso(h.amount)+(h.cleared?" ✓":"")).join(", "):"wala pa")+"</p>"+(c&&c.status==="open"?(l.betOverride?"<p style=\"color:#2e7d32\"><b>✓ Spin enabled ng admin</b> (bet check skipped para sa round na ito)"+(l.betOverrideNote?" — "+esc(l.betOverrideNote):"")+" <button type=\"button\" class=\"linkbtn\" onclick=\"enableSpin(false)\">Undo</button></p>":(!l.betOk?"<p><button type=\"button\" id=\"enableSpinBtn\" onclick=\"enableSpin(true)\">Enable spin (skip bet check)</button><br><small>Gamitin lang kung na-verify sa backoffice na abot na ang turnover pero hindi pa nagsi-sync. Isang round lang; deposit, oras at budget ay chine-check pa rin.</small></p>":"")):"")+"<p class='small'>Server time "+esc(l.serverTime)+" · premyo (cosmetic ang cabin): "+odds+"</p>";
   $("makeLink").disabled=!!l.capped;
   $("plink").textContent=playerLink();
 }
@@ -638,6 +638,14 @@ if(mode==="admin"){
   async function loadCap(){const r=await api("/api/cap");if(r.ok){capState=r.j;renderCap()}}
   async function doLookup(){const a=$("acct").value.trim();if(!a)return;$("aMsg").textContent="Hinahanap…";const r=await api("/api/lookup?account="+encodeURIComponent(a));$("aMsg").textContent=r.ok?"":(r.j.error||"Error");look=r.ok?r.j:null;renderLookup();loadCap()}
   async function makeLink(fresh){if(!look||!look.found)return;$("aMsg").textContent="Gumagawa ng link…";const r=await api("/api/link",{method:"POST",body:JSON.stringify({account:look.account,fresh:!!fresh})});if(!r.ok){$("aMsg").textContent=r.j.msg||r.j.error||"Error";loadCap();return}look=Object.assign({found:true},r.j);renderLookup();loadLinksToday();$("aMsg").textContent=fresh?"Bagong link. Pareho pa rin ang goal — nakatali ito sa account, hindi sa link.":"Handa na ang link."}
+  window.enableSpin=async function(on){if(!look||!look.found)return;let note="";
+    if(on){if(!confirm("I-enable ang spin ni "+look.account+" kahit kulang ang synced turnover? (para sa round na ito lang)"))return;
+      note=prompt("Dahilan / na-check sa backoffice (hal. 'BO turnover 1,992'):","");if(note===null)return}
+    else if(!confirm("Alisin ang spin override ni "+look.account+"?"))return;
+    $("aMsg").textContent="Sine-save…";
+    const r=await api("/api/enable-spin",{method:"POST",body:JSON.stringify({account:look.account,enable:!!on,note})});
+    if(!r.ok){$("aMsg").textContent=r.j.msg||r.j.error||"Error";return}
+    look=Object.assign({found:true},r.j);renderLookup();$("aMsg").textContent=on?"Naka-enable na ang spin — puwede nang paikutin ng player.":"Inalis ang override."};
   async function setCap(){const v=parseInt($("capInput").value,10);if(!(v>=0)){$("capMsg").textContent="Ilagay ang bagong budget (whole number).";return}if(!confirm("Gawing "+peso(v)+" ang daily budget ngayong araw?"))return;const r=await api("/api/cap",{method:"POST",body:JSON.stringify({dailyCap:v})});$("capMsg").textContent=r.ok?"Na-update ang budget ngayong araw.":(r.j.msg||r.j.error||"Error");if(r.ok){capState=r.j;renderCap();$("capInput").value="";if(look&&look.found)doLookup()}}
   function unlockAdmin(){
     $("adminGate").hidden=true;$("adminBody").hidden=false;
