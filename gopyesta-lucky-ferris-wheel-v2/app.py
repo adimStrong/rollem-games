@@ -180,6 +180,10 @@ def init_db():
         )
         cur.execute("CREATE INDEX IF NOT EXISTS fw_spins_date_idx ON fw_spins (biz_date, status)")
         cur.execute("CREATE INDEX IF NOT EXISTS fw_spins_user_idx ON fw_spins (user_id, status)")
+        # Admin "enable spin" override for ONE open round (bet sync lagging/broken): skips only the
+        # turnover check. Deposit, play window, cap, kill switch still apply. Audit = time + note.
+        cur.execute("ALTER TABLE fw_spins ADD COLUMN IF NOT EXISTS bet_override BIGINT")
+        cur.execute("ALTER TABLE fw_spins ADD COLUMN IF NOT EXISTS bet_override_note TEXT")
         cur.execute(
             """
             CREATE TABLE IF NOT EXISTS fw_kill_switch (
@@ -393,7 +397,8 @@ def summary(cur, user, date: str):
     # (found 2026-10-29 via a real player: round 1 needed ₱200, round 2 was wrongly requiring
     # ₱625 absolute instead of ₱200 more on top of what round 1 already covered).
     need_amt = max(0.0, max(MIN_DEPOSIT, dep_total) * TURNOVER_MULT - prior_need)
-    bet_ok = slot >= need_amt
+    override = bool(cur_row and cur_row["status"] == "open" and cur_row.get("bet_override"))
+    bet_ok = slot >= need_amt or override
     play_open = hm <= PLAY_UNTIL
     missing = []
     if not dep_ok:
@@ -436,6 +441,8 @@ def summary(cur, user, date: str):
         "needAmt": need_amt,
         "depOk": dep_ok,
         "betOk": bet_ok,
+        "betOverride": override,
+        "betOverrideNote": (cur_row.get("bet_override_note") or "") if override else "",
         "ready": bool(cur_row) and cur_row["status"] == "open" and dep_ok and bet_ok and play_open,
         "missing": missing,
         "wager": wg,
@@ -651,6 +658,38 @@ def links_today():
     return jsonify({"from": date_from, "to": date_to, "players": rows})
 
 
+@app.route("/api/enable-spin", methods=["POST"])
+def enable_spin():
+    """Admin fallback when the bet sync lags: POST {account, note, enable=true|false} marks the
+    player's CURRENT OPEN round as turnover-satisfied. One round only; deposit/window/cap/kill
+    switch still apply. enable=false removes the override."""
+    if not require_admin():
+        return jsonify({"error": "forbidden"}), 403
+    payload = request.get_json(force=True, silent=True) or {}
+    account = (payload.get("account") or "").strip()
+    enable = payload.get("enable", True) is not False
+    note = str(payload.get("note") or "").strip()[:200]
+    date = today()
+    with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        user = find_user(cur, account)
+        if not user:
+            return jsonify({"error": "account not found"}), 404
+        rows = spins_for(cur, user["user_id"], date)
+        cur_row = rows[-1] if rows else None
+        if not cur_row or cur_row["status"] != "open":
+            return jsonify({"error": "no_open_round",
+                            "msg": "Walang bukas na round — kailangan munang pumili ng cabin ang player."}), 409
+        cur.execute("UPDATE fw_spins SET bet_override=%s, bet_override_note=%s WHERE id=%s AND status='open'",
+                    (ms() if enable else None, note if enable else None, cur_row["id"]))
+        s = summary(cur, user, date)
+        cur.execute("SELECT code FROM cg_sessions WHERE user_id=%s AND biz_date=%s ORDER BY created_at DESC LIMIT 1",
+                    (user["user_id"], date))
+        row = cur.fetchone()
+    s["found"] = True
+    s["code"] = row["code"] if row else None
+    return jsonify(s)
+
+
 @app.route("/api/stop", methods=["GET", "POST"])
 def stop_switch():
     """Global emergency stop — GET: current state. POST {stopped, note}: halt (or resume) ALL
@@ -823,7 +862,9 @@ def spin(code):
         cur.execute(
             "UPDATE fw_spins SET status='paid', amount=%s, dep=%s, slot=%s, slot_base=%s, spun_at=%s, code=%s "
             "WHERE id=%s AND status='open'",
-            (amount, s["dep"], s["slot"], s["slotToday"], ms(), code, c["id"]),
+            # slot_base = slotToday + any turnover shortfall: an admin-overridden round still "uses up"
+            # its full target, so bets that sync late can't also count toward the next round.
+            (amount, s["dep"], s["slot"], s["slotToday"] + max(0.0, s["needAmt"] - s["slot"]), ms(), code, c["id"]),
         )
         if cur.rowcount != 1:
             conn.rollback()
