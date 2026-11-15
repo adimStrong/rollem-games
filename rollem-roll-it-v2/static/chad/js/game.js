@@ -534,7 +534,7 @@ function hud(){$('score').textContent=score;const tl=Math.ceil(timeLeft);$('time
 
 function spawn(){if(S.filter(p=>p.state!=='down'||p.pop>.3).length>=3)return;const free=S.filter(p=>p.state==='down'&&p.pop<.05);if(!free.length)return;const p=free[Math.random()*free.length|0],prog=1-timeLeft/GAME_T;
   const r=Math.random(),el=GAME_T-timeLeft;if(goldIdx<2&&el>=goldAt[goldIdx]){p.type='gold';goldIdx++}else p.type=prog>.15&&r<.1?'tnt':'head';const busy=S.filter(q=>q!==p&&q.pop>.05).map(q=>q.face),pool=BALD.filter(k=>!busy.includes(k));p.face=pool.length?pool[Math.random()*pool.length|0]:BALD[Math.random()*BALD.length|0];
-  Object.assign(p,{react:null,bump:0,bumpT:0,band:0,ouch:0,state:'up',t:0,dur:Math.round(lerp(36,16,Math.pow(prog,1.3))*(p.type==='gold'?.8:1)),popT:1,rot:0,rotV:0,lx:0,lxV:0,tint:0,ko:0,soot:0,dizzy:0,hitQ:0});
+  Object.assign(p,{react:null,bump:0,bumpT:0,band:0,ouch:0,state:'up',t:0,dur:Math.round(lerp(30,10,Math.pow(prog,1.3))*(p.type==='gold'?.8:1)),popT:1,rot:0,rotV:0,lx:0,lxV:0,tint:0,ko:0,soot:0,dizzy:0,hitQ:0});
   Object.assign(p.hat,{on:true,fly:false});sfx('pop')}
 
 function rate(rt){return rt<=22?{t:'PERFECT!',m:3,c:'#ffffff'}:rt<=40?{t:'GREAT!',m:2,c:'#5dff8a'}:{t:'GOOD',m:1,c:'#ffd23f'}}
