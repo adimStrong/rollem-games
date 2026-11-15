@@ -3,13 +3,14 @@ import csv
 import hashlib
 import hmac
 import io
+import json
 import os
 import time
 from datetime import datetime, timedelta
 
 import psycopg2
 import psycopg2.extras
-from flask import Flask, Response, jsonify, request, send_from_directory
+from flask import Flask, Response, jsonify, redirect, request, send_from_directory
 
 app = Flask(__name__, static_folder=None)
 
@@ -431,7 +432,21 @@ def report_access_ok(brand: str, token: str) -> bool:
 def brand_report_page(brand, token):
     if not report_access_ok(brand, token):
         return "Not found", 404
+    # 2026-11-15: per-brand links open the game's own GoPyesta-format report (links, plays, won,
+    # deposit, dep. count, turnover). GAME_REPORTS = Railway var JSON {brand: share-url}; the URLs
+    # carry share tokens, so they live only in the env, never in git. ?view=wins = old wins-only page.
+    target = _game_reports().get(brand)
+    if target and brand != ALL_REPORT and request.args.get("view") != "wins":
+        return redirect(target, code=302)
     return send_from_directory(STATIC_DIR, "report-all.html" if brand == ALL_REPORT else "report-brand.html")
+
+
+def _game_reports() -> dict:
+    try:
+        m = json.loads(os.environ.get("GAME_REPORTS") or "{}")
+        return {k: v for k, v in m.items() if isinstance(v, str) and v.startswith("https://")}
+    except ValueError:
+        return {}
 
 
 def _status_of(r):
