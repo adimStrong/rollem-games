@@ -732,6 +732,14 @@ def chad_page():
     return _nostore(send_from_directory(os.path.join(STATIC_DIR, "chad"), "index.html", max_age=0))
 
 
+@app.route("/chad/admin")
+def chad_admin_page():
+    """Chad Smash's own link maker for agents. Same backend: /api/lookup + /api/link, same entries as Roll It."""
+    if not CHAD_SMASH:
+        return jsonify({"error": "not_found"}), 404
+    return _nostore(send_from_directory(os.path.join(STATIC_DIR, "chad"), "admin.html", max_age=0))
+
+
 @app.route("/health")
 def health():
     return jsonify({"ok": True, "game": GAME_NAME, "brand": BRAND, "platform": PLATFORM, "time": now().isoformat()})

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Chad Smash · Link Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@700;800;900&display=swap">
+<style>
+:root{--bg:#140a2a;--panel:#22123f;--line:#ffffff1f;--gold:#ffcc33;--gold-d:#a8640a;--red:#e2343f;--ok:#5dff8a;--ink:#fff8ec;--muted:#d8c9f2;
+  --display:'Lilita One','Arial Black',system-ui,sans-serif;--body:'Nunito',system-ui,sans-serif;color-scheme:dark}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 0,#3a1a6a,var(--bg) 70%);color:var(--ink);font-family:var(--body);padding:20px 16px 40px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1{font:400 clamp(28px,8vw,40px) var(--display);margin:0;color:var(--gold);text-align:center;text-shadow:0 3px 0 var(--red)}
+.sub{margin:0;text-align:center;color:var(--muted);font-weight:800;font-size:13px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.card h2{margin:0;font:400 20px var(--display);color:var(--gold)}
+label{font-size:12px;font-weight:900;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input{flex:1;min-width:0;font:800 16px var(--body);padding:11px 12px;border-radius:12px;border:1px solid #ffffff33;background:#0c0620;color:var(--ink)}
+.btn{font:400 17px var(--display);letter-spacing:.5px;padding:10px 18px;border-radius:12px;border:0;cursor:pointer;background:var(--gold);color:#3a1d00;box-shadow:0 4px 0 var(--gold-d)}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--gold-d)}
+.btn.ghost{background:#ffffff14;color:var(--ink);box-shadow:none;border:1px solid #ffffff33}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.msg{min-height:1.2em;margin:0;font-weight:800;font-size:13px;color:var(--muted)}
+.msg.bad{color:#ffb4bc}
+.status{font-size:14px;line-height:1.55;font-weight:700}
+.status b{color:var(--ink)}
+.pill{display:inline-block;font-size:12px;font-weight:900;padding:3px 9px;border-radius:999px;margin-right:4px}
+.pill.ok{background:#5dff8a22;color:var(--ok)}.pill.no{background:#e2343f2a;color:#ffb4bc}
+code{display:block;word-break:break-all;background:#0c0620;border:1px dashed #ffcc3366;border-radius:10px;padding:10px;font-size:14px;color:var(--gold)}
+.note{font-size:12px;color:var(--muted);font-weight:700;line-height:1.5;margin:0}
+a{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>CHAD SMASH</h1>
+  <p class="sub">Roll'em · Link maker for agents</p>
+
+  <section class="card" id="gate">
+    <h2>Admin login</h2>
+    <label for="pw">Password</label>
+    <div class="row"><input id="pw" type="password" autocomplete="current-password"><button class="btn" id="loginBtn" type="button">Log in</button></div>
+    <p class="msg" id="gateMsg"></p>
+  </section>
+
+  <section class="card" id="panel" hidden>
+    <h2>Make a player link</h2>
+    <label for="acct">Player username, user ID or game ID</label>
+    <div class="row"><input id="acct" autocomplete="off" spellcheck="false"><button class="btn" id="checkBtn" type="button">Check</button></div>
+    <p class="msg" id="aMsg" aria-live="polite"></p>
+    <div class="status" id="status" hidden></div>
+    <div class="row" id="makeRow" hidden><button class="btn" id="makeBtn" type="button">Make Chad Smash link</button></div>
+    <div id="linkBox" hidden>
+      <label>Player link</label>
+      <code id="link"></code>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="copyLink" type="button">Copy link</button>
+        <button class="btn" id="copyMsg" type="button">Copy message + link</button>
+        <button class="btn ghost" id="newLink" type="button">New link</button>
+      </div>
+    </div>
+    <p class="note">Same backend as Roll It: one entry per qualifying deposit, shared by both games. A player who used an entry in Roll It can't use it again here, and the reverse is also true. Budget and stop switch are on the <a href="/#admin">Roll It admin page</a>.</p>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const php=n=>{n=Number(n||0);return "₱"+(Number.isInteger(n)?n.toLocaleString("en-US"):n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}))};
+let token="",look=null,CONF={perPlay:200,maxPlays:5,turnover:1};
+try{token=sessionStorage.getItem("cg-admin-token")||""}catch(e){}
+async function api(path,opts){opts=opts||{};const r=await fetch(path,Object.assign({},opts,{headers:{"Content-Type":"application/json","X-Admin-Token":token}}));
+  const j=await r.json().catch(()=>({}));if(r.status===403){logout();throw new Error("forbidden")}return{ok:r.ok,j}}
+function logout(){token="";try{sessionStorage.removeItem("cg-admin-token")}catch(e){}$("panel").hidden=true;$("gate").hidden=false;$("gateMsg").textContent="Please log in again."}
+function unlock(){$("gate").hidden=true;$("panel").hidden=false;$("acct").focus()}
+async function login(){$("gateMsg").textContent="Checking…";$("gateMsg").className="msg";
+  const r=await fetch("/api/admin-login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:$("pw").value})});
+  if(!r.ok){$("gateMsg").textContent="Wrong password.";$("gateMsg").className="msg bad";return}
+  token=(await r.json()).token;try{sessionStorage.setItem("cg-admin-token",token)}catch(e){}$("gateMsg").textContent="";unlock()}
+const link=()=>look&&look.code?location.origin+"/chad/#"+look.code:"";
+function message(){return "🔨 CHAD SMASH — Roll'em\nSmash Chad in 15 seconds — every play wins a bonus! 🎉\n• "+php(CONF.perPlay)+" deposit = 1 entry (max "+CONF.maxPlays+"/day)\n• "+(CONF.turnover||1)+"x turnover bago ma-unlock\n• Same entry as Roll It — isang game lang per entry\n\n🔗 Play here: "+link()}
+function render(){
+  const st=$("status"),l=look;$("linkBox").hidden=!(l&&l.code);$("makeRow").hidden=!(l&&l.found&&!l.code);st.hidden=!(l&&l.found);
+  if(!l||!l.found){if(l&&!l.found){$("aMsg").textContent="Not found: "+l.account+". Use the username, user ID or game ID.";$("aMsg").className="msg bad"}return}
+  const used=l.playsUsed||0,tot=l.playsTotal||0,deps=l.deposits||[];
+  st.innerHTML="<b>"+esc(l.name)+"</b> · "+esc(l.account)+(l.gameId?" · "+esc(l.gameId):"")+"<br>"
+    +"Deposits today: <b>"+php(l.dep)+"</b> ("+deps.length+") · entries <b>"+used+" used / "+tot+"</b> (both games)<br>"
+    +"Turnover today: <b>"+php(l.slot)+"</b>"+(l.syncedAt?" <small>(synced "+esc(String(l.syncedAt).slice(11,16))+")</small>":"")+"<br>"
+    +(l.ready?"<span class='pill ok'>READY</span> next play can start now":"<span class='pill no'>NOT READY</span> "+esc((l.missing||[]).join(" · ")||(l.capped?"daily budget used up":l.stopped?"game paused":"")))
+    +(l.capped?"<br><span class='pill no'>BUDGET</span> today's bonus budget is used up":"");
+  $("link").textContent=link();$("makeBtn").disabled=!!l.capped}
+async function check(){const a=$("acct").value.trim();if(!a)return;$("aMsg").className="msg";$("aMsg").textContent="Checking…";
+  try{const r=await api("/api/lookup?account="+encodeURIComponent(a));look=r.ok?r.j:null;$("aMsg").textContent=r.ok?"":(r.j.error||"Error");render()}catch(e){}}
+async function make(fresh){if(!look||!look.found)return;$("aMsg").className="msg";$("aMsg").textContent="Making link…";
+  try{const r=await api("/api/link",{method:"POST",body:JSON.stringify({account:look.account,fresh:!!fresh})});
+    if(!r.ok){$("aMsg").textContent=r.j.msg||r.j.error||"Error";$("aMsg").className="msg bad";return}
+    look=Object.assign({found:true},r.j);render();$("aMsg").textContent=fresh?"New link made. Entries stay the same — they belong to the account, not the link.":"Link ready."}catch(e){}}
+async function copy(text,btn){try{await navigator.clipboard.writeText(text)}catch(e){const t=document.createElement("textarea");t.value=text;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove()}
+  const o=btn.textContent;btn.textContent="Copied!";setTimeout(()=>btn.textContent=o,1500)}
+$("loginBtn").onclick=login;$("pw").addEventListener("keydown",e=>{if(e.key==="Enter")login()});
+$("checkBtn").onclick=check;$("acct").addEventListener("keydown",e=>{if(e.key==="Enter")check()});
+$("makeBtn").onclick=()=>make(false);$("newLink").onclick=()=>make(true);
+$("copyLink").onclick=()=>copy(link(),$("copyLink"));$("copyMsg").onclick=()=>copy(message(),$("copyMsg"));
+fetch("/api/config").then(r=>r.json()).then(j=>{if(j&&j.perPlay)CONF=j}).catch(()=>{});
+if(token)unlock();
+</script>
+</body>
+</html>
