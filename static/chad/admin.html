@@ -34,6 +34,7 @@ input{flex:1;min-width:0;font:800 16px var(--body);padding:11px 12px;border-radi
 code{display:block;word-break:break-all;background:#0c0620;border:1px dashed #ffcc3366;border-radius:10px;padding:10px;font-size:14px;color:var(--gold)}
 .note{font-size:12px;color:var(--muted);font-weight:700;line-height:1.5;margin:0}
 a{color:var(--gold)}
+.preview{width:100%;height:min(980px,calc(100vw*1.75 + 220px));border:0;border-radius:14px;background:#140a2a;display:block}
 </style>
 </head>
 <body>
@@ -65,6 +66,12 @@ a{color:var(--gold)}
       </div>
     </div>
     <p class="note">Same backend as Roll It: one entry per qualifying deposit, shared by both games. A player who used an entry in Roll It can't use it again here, and the reverse is also true. Budget and stop switch are on the <a href="/#admin">Roll It admin page</a>.</p>
+  </section>
+
+  <section class="card" id="previewCard">
+    <h2>Preview · test the game</h2>
+    <p class="note">This is the demo version: play as much as you like. No reward, nothing recorded, no entries used. Players see the same game when they open their link.</p>
+    <iframe class="preview" src="/chad/" title="Chad Smash demo preview" loading="lazy" allow="autoplay"></iframe>
   </section>
 </div>
 <script>
