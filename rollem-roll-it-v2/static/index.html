@@ -238,6 +238,9 @@ body{background:radial-gradient(70% 45% at 50% 0%,rgba(150,90,255,.38),transpare
       <div class="field" id="linkField" hidden><span>Player link</span>
         <div class="linkrow"><code id="plink"></code></div>
         <div class="btnrow"><button class="btn small" id="copyLink" type="button">Copy link</button><button class="btn small" id="copyMsg" type="button">Copy message + link</button><button class="btn small ghost" id="newLink" type="button">New link</button></div>
+        <div id="chadField" hidden style="margin-top:12px"><span>Chad Smash link <small>(same entry as Roll It — the player uses it in one game only)</small></span>
+          <div class="linkrow"><code id="clink"></code></div>
+          <div class="btnrow"><button class="btn small" id="copyChad" type="button">Copy Chad Smash link</button><button class="btn small" id="copyChadMsg" type="button">Copy message + Chad Smash link</button></div></div>
       </div>
       <p class="hint" id="aMsg"></p>
       <div class="offerbox" id="capBox"><strong>Daily budget</strong><p id="capText">…</p><div class="btnrow"><div class="money" style="flex:1;min-width:0"><span>₱</span><input class="inp" id="capInput" type="number" min="0" step="100" inputmode="numeric" placeholder="new budget for today"></div><button class="btn small ghost" id="capBtn" type="button">Raise budget</button></div><p class="hint" id="capMsg"></p></div>
@@ -645,6 +648,8 @@ let adminToken="";
 try{adminToken=sessionStorage.getItem("cg-admin-token")||""}catch(e){}
 let look=null,capState=null;
 function playerLink(){return look&&look.code?location.href.split("#")[0]+"#"+look.code:""}
+function chadLinkUrl(){return look&&look.code?location.origin+"/chad/#"+look.code:""}
+function chadMsg(){return "🔨 CHAD SMASH — Roll'em\nSmash Chad in 15 seconds — every play wins a bonus! 🎉\n• "+php(CONF.perPlay)+" deposit = 1 entry (max "+CONF.maxPlays+"/day)\n• "+(CONF.turnover||1)+"x turnover bago ma-unlock\n• Same entry as Roll It — pili ka lang ng isang game per entry\n\n🔗 Play here: "+chadLinkUrl()}
 async function api(path,opts){
   const r=await fetch(path,Object.assign({headers:{"Content-Type":"application/json","X-Admin-Token":adminToken}},opts||{}));
   const j=await r.json().catch(()=>({}));
@@ -697,6 +702,7 @@ function renderLookup(){
     +"<p class='small'>Server time "+esc(l.serverTime)+" · prizes: "+oddsText()+" (dice total 3–11 / 12–16 / 17–18 is picked to match the drawn prize)</p>";
   $("makeLink").disabled=!!l.capped;
   $("plink").textContent=playerLink();
+  $("chadField").hidden=!(CONF&&CONF.chad&&l&&l.code);$("clink").textContent=chadLinkUrl();
 }
 function flashBtn(btn,txt){const o=btn.textContent;btn.textContent=txt;setTimeout(()=>btn.textContent=o,1500)}
 async function copyText(t,btn){try{await navigator.clipboard.writeText(t);flashBtn(btn,"Copied")}catch(e){const r=document.createRange();r.selectNodeContents($("plink"));const s=getSelection();s.removeAllRanges();s.addRange(r);flashBtn(btn,"Selected")}}
@@ -719,6 +725,8 @@ function unlockAdmin(){
   $("stopBtn").onclick=toggleStop;
   $("linksRefreshBtn").onclick=loadLinksToday;
   $("copyLink").onclick=()=>copyText(playerLink(),$("copyLink"));
+  $("copyChad").onclick=()=>copyText(chadLinkUrl(),$("copyChad"));
+  $("copyChadMsg").onclick=()=>{if(!chadLinkUrl()){$("aMsg").textContent="Make a link first.";return}copyText(chadMsg(),$("copyChadMsg"))};
   $("copyMsg").onclick=()=>{if(!playerLink()){$("aMsg").textContent="Make a link first.";return}copyText(BRAND_SCRIPT()+"\n\n🔗 Play here: "+playerLink(),$("copyMsg"))};
   renderLookup();loadCap();loadLinksToday();
 }
