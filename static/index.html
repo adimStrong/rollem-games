@@ -263,6 +263,7 @@ body{background:radial-gradient(70% 45% at 50% 0%,rgba(150,90,255,.38),transpare
     <div class="play" id="play"></div>
     <label class="agree" id="agreeLbl"><input type="checkbox" id="agree"><span>I have read and agree to the ROLL IT <button type="button" class="linkbtn" id="tncLink">Terms &amp; Conditions</button>.</span></label>
     <div class="acts"><button class="btn" id="goBtn" type="button">Roll the dice</button><button class="btn ghost" id="resetBtn" type="button">Reset</button></div>
+    <p style="text-align:center;margin:10px 0 0"><a id="chadLink" hidden href="/chad/" style="display:inline-block;font-weight:800;font-size:14px;color:inherit;padding:8px 14px;border:1px solid currentColor;border-radius:999px;text-decoration:none;opacity:.9">🔨 Or play Chad Smash instead (same entry)</a></p>
     <div class="win" id="win" hidden>
       <small>Your bonus</small>
       <strong id="amt"></strong>
@@ -495,7 +496,7 @@ const r2=n=>Math.round(Number(n)*100)/100;
 function tierOf(amt){const a=r2(amt);let best=0,d=Infinity;PRIZES.forEach((p,i)=>{const x=Math.abs(p-a);if(x<d){d=x;best=i}});return best}
 function fromServer(row,fresh){const amount=Number(row.amount),tier=tierOf(amount);
   let p=!fresh&&row.plan&&GAME.validPlan(row.plan,tier)?row.plan:null;if(!p)p=GAME.planFor(tier);
-  return {id:row.id,no:row.play_no,amount,tier,plan:p,at:row.at,seen:!!row.seen,done:!fresh}}
+  return {id:row.id,no:row.play_no,amount,tier,plan:p,at:row.at,seen:!!row.seen||row.game==="chad",done:!fresh}} // a Chad Smash play is revealed on its own page, never re-rolled here
 function savePlan(){if(!cur||mode!=="player"||!cur.id)return;const body={id:cur.id,plan:Object.assign({},cur.plan,{v:1,tier:cur.tier,done:!!cur.done})};planQ=planQ.then(()=>post("/api/plan/"+encodeURIComponent(code),body)).catch(()=>{})}
 function playList(){if(mode!=="player")return demoPlays;if(!S||!S.plays)return [];return S.plays.map(r=>cur&&cur.id===r.id?cur:fromServer(r,false))}
 function sigOf(r){return JSON.stringify([r.exists,r.expired,r.stopped,r.stopNote,r.playOpen,r.capped,r.ready,r.betOk,r.depOk,r.playsUsed,r.playsTotal,(r.missing||[]).join("|"),(r.plays||[]).map(p=>p.id+":"+p.seen+":"+(p.plan?1:0))])}
@@ -525,6 +526,7 @@ function lockReason(){
   return {cheer:"Not ready yet.",note:(S.missing||[]).join(" · ")||"Please wait a moment."}}
 function buildView(){
   renderMech();
+  {const cl=$("chadLink");if(cl){cl.hidden=!(CONF&&CONF.chad)||mode==="admin";cl.href="/chad/"+(code?"#"+code:"")}}
   $("gameTitle").textContent=GAME.title;
   $("demoTag").hidden=mode==="player";
   $("resetBtn").hidden=mode==="player";
