@@ -1,0 +1,12 @@
+/* Roll'em link bridge: who-line, entry status, reward line, footer and the switch-game link */
+.rg-who{margin:0;font-weight:800;font-size:13px;color:var(--muted);text-align:center}
+.rg-who b{color:var(--ink)}
+.rg-status{margin:0;font-weight:800;font-size:13px;max-width:34ch;color:var(--ink);min-height:1em}
+.rg-status.bad{color:#ffb4bc}
+.rg-reward{font:400 28px var(--display);color:var(--gold)}
+.rg-reward small{display:block;font:800 12px var(--body);color:var(--muted);letter-spacing:.04em}
+.rg-foot{margin:0;font-size:12px;font-weight:700;color:var(--muted);text-align:center;line-height:1.4;background:var(--panel);border-radius:12px;padding:8px 12px}
+.rg-who{background:#0008;border-radius:999px;padding:3px 12px}
+.rg-switch{align-self:center;font:900 13px var(--body);color:var(--gold);text-decoration:none;padding:8px 14px;border:1px solid #ffcc3366;border-radius:999px;background:#ffffff0d}
+.rg-switch:hover{background:#ffffff1a}
+.btn[disabled]{opacity:.55;cursor:not-allowed;transform:none}

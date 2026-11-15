@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chad Smash · Roll'em</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@700;800;900&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/rg.css">
+</head>
+<body>
+<h1>CHAD SMASH</h1>
+<p class="rg-who" id="rgWho" hidden></p>
+<div class="wrap">
+  <div class="hud">
+    <div class="stat"><span>HITS</span><b id="score">0</b></div>
+    <div class="stat time"><span>TIME</span><b id="time">15.0</b></div>
+  </div>
+  <div class="stage">
+    <canvas id="g3" aria-hidden="true"></canvas>
+    <canvas id="c" aria-label="3D carnival booth with nine holes"></canvas>
+    <div class="overlay" id="ov">
+      <h2>Smash Them All!</h2>
+      <div class="faces" id="faceRow"></div>
+      <div class="mech" id="mech"><span>Deposit 200 = 1 entry</span><span>1x wagering</span><span>Slot games only</span><span>Max 5 entries per player per day</span></div>
+      <div class="rules">
+        <div>You have <i>15 seconds</i>. Smash every head that pops up.</div>
+        <div>Fast hits are <i>PERFECT</i> and score more.</div>
+        <div>Hit the <i>Gold Chad</i> with the crown for a royal smash.</div>
+        <div>Never smash the <i>bomb</i>.</div>
+      </div>
+      <p class="rg-status" id="rgStatus" aria-live="polite"></p>
+      <button class="btn" id="start">START</button>
+    </div>
+    <button class="snd" id="snd" aria-pressed="true">SOUND ON</button>
+  </div>
+  <div class="panel"><span id="combo">Combo x0</span><span id="hits">Hits 0</span></div>
+  <p class="rg-foot" id="rgFoot"></p>
+  <a class="rg-switch" id="rgSwitch" href="/">🎲 Play Roll It instead</a>
+</div>
+<script src="js/three.min.js"></script>
+<script src="js/rg.js"></script>
+<script src="js/game.js"></script>
+<script>RG.init()</script>
+</body>
+</html>

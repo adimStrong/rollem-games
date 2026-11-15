@@ -28,7 +28,7 @@ from zoneinfo import ZoneInfo
 
 import psycopg2
 import psycopg2.extras
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, redirect, request, send_from_directory
 
 app = Flask(__name__, static_folder=None)
 
@@ -134,6 +134,11 @@ CONFIG = {
     "maxPrize": MAX_PRIZE, "minPrize": MIN_PRIZE,
 }
 CONFIG.update({"milestones": [{"every": n, "amt": a} for n, a in MILESTONES], "maxWin": MAX_WIN})
+# Chad Smash second game (2026-11-15, Roll'em only): CHAD_SMASH=1 serves /chad/ and accepts {"game":"chad"} on
+# /api/play. Same entries, gate, cap, milestones and MAX_WIN as the main game; the SERVER draws the prize.
+CHAD_SMASH = os.environ.get("CHAD_SMASH", "0") == "1"
+CHAD_NAME = "Chad Smash"
+CONFIG.update({"chad": CHAD_SMASH, "chadName": CHAD_NAME})
 
 
 # ---------------------------------------------------------------- helpers
@@ -231,6 +236,9 @@ def init_db():
         )
         cur.execute("CREATE INDEX IF NOT EXISTS cg_plays_date_idx ON cg_plays (biz_date, status)")
         cur.execute("CREATE INDEX IF NOT EXISTS cg_plays_user_idx ON cg_plays (user_id, status)")
+        # which game used the entry ('' = this service's own game, 'chad' = Chad Smash). Entries are shared:
+        # one qualifying deposit = one play in EITHER game, never both (same play_no sequence).
+        cur.execute("ALTER TABLE cg_plays ADD COLUMN IF NOT EXISTS game TEXT NOT NULL DEFAULT ''")
         cur.execute(
             """
             CREATE TABLE IF NOT EXISTS cg_kill_switch (
@@ -313,7 +321,7 @@ def pub_play(r):
             "status": r["status"], "seen": int(r["seen"] or 0), "need": float(r["need"] or 0),
             "dep": float(r["dep"] or 0), "slot": float(r["slot"] or 0),
             "at": datetime.fromtimestamp(r["created_at"] / 1000, TZ).strftime("%Y-%m-%d %H:%M") if r.get("created_at") else None,
-            "cleared": bool(r.get("cleared_at"))}
+            "cleared": bool(r.get("cleared_at")), "game": r.get("game") or ""}
 
 
 def wager(cur, user_id):
@@ -612,6 +620,8 @@ def get_session(code):
 @app.route("/api/play/<code>", methods=["POST"])
 def play(code):
     """START: create + pay play N+1 if its deposit and cumulative turnover are in. Server draws the prize."""
+    payload = request.get_json(force=True, silent=True) or {}
+    game = "chad" if CHAD_SMASH and payload.get("game") == "chad" else ""
     conn = db(autocommit=False)
     try:
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -652,9 +662,9 @@ def play(code):
             return jsonify({"error": "cap", "msg": "Naabot na ang daily bonus budget. Subukan ulit bukas.", **out}), 409
         play_no = s["playsUsed"] + 1
         cur.execute(
-            "INSERT INTO cg_plays (code, user_id, account, biz_date, play_no, amount_c, tier, wild, status, need, dep, slot, created_at) "
-            "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,'paid',%s,%s,%s,%s) RETURNING *",
-            (code, sess["user_id"], sess["account"], date, play_no, amount_c, tier, wild, s["nextNeed"], s["dep"], s["slot"], ms()),
+            "INSERT INTO cg_plays (code, user_id, account, biz_date, play_no, amount_c, tier, wild, status, need, dep, slot, created_at, game) "
+            "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,'paid',%s,%s,%s,%s,%s) RETURNING *",
+            (code, sess["user_id"], sess["account"], date, play_no, amount_c, tier, wild, s["nextNeed"], s["dep"], s["slot"], ms(), game),
         )
         row = dict(cur.fetchone())
         out, s = _session_state(cur, sess)
@@ -664,7 +674,7 @@ def play(code):
         return jsonify({"error": "race", "msg": "Subukan ulit."}), 409
     finally:
         conn.close()
-    post_ledger({"brand": BRAND, "game": GAME_NAME, "name": sess["account"], "code": code,
+    post_ledger({"brand": BRAND, "game": CHAD_NAME if game == "chad" else GAME_NAME, "name": sess["account"], "code": code,
                  "amount": pesos(amount_c), "link": request.headers.get("Referer", "")})
     return jsonify({"ok": True, "played": True, "play": pub_play(row), **out})
 
@@ -710,6 +720,16 @@ def _nostore(resp):
 @app.route("/")
 def index():
     return _nostore(send_from_directory(STATIC_DIR, "index.html", max_age=0))
+
+
+@app.route("/chad")
+@app.route("/chad/")
+def chad_page():
+    if not CHAD_SMASH:
+        return jsonify({"error": "not_found"}), 404
+    if not request.path.endswith("/"):
+        return redirect("/chad/", code=301)
+    return _nostore(send_from_directory(os.path.join(STATIC_DIR, "chad"), "index.html", max_age=0))
 
 
 @app.route("/health")
