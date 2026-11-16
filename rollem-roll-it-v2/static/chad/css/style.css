@@ -23,7 +23,11 @@ canvas{display:block;width:100%;height:100%;touch-action:manipulation;cursor:poi
 #g3,#c{position:absolute;inset:0;width:100%;height:100%}
 #g3{pointer-events:none}
 #c{cursor:none}
-.overlay{position:absolute;inset:0;background:#0c0620e0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:20px}
+.overlay{position:absolute;inset:0;background:#0c0620e0;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:20px;overflow-y:auto}
+/* children must not flex-shrink: on short screens that squeezes text under the button; scroll instead */
+.overlay>*{flex-shrink:0}
+.overlay>:first-child{margin-top:auto}
+.overlay>:last-child{margin-bottom:auto}
 .overlay h2{font-family:var(--display);font-weight:400;margin:0;font-size:clamp(28px,8vw,40px);color:var(--gold);text-shadow:0 3px 0 var(--red)}
 .overlay p{margin:0;font-weight:800;max-width:32ch}
 .faces{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
@@ -36,4 +40,13 @@ canvas{display:block;width:100%;height:100%;touch-action:manipulation;cursor:poi
 .res{display:grid;grid-template-columns:auto auto;gap:4px 16px;font-weight:800;font-variant-numeric:tabular-nums;text-align:left}
 .res span{color:var(--muted)}
 .panel{background:var(--panel);border-radius:14px;padding:10px 12px;display:flex;justify-content:space-between;gap:8px;font-weight:900;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-variant-numeric:tabular-nums}
-.snd{position:absolute;right:10px;bottom:10px;font:900 11px var(--body);letter-spacing:.06em;padding:5px 9px;border-radius:8px;border:1px solid #fff5;background:#0008;color:var(--ink);cursor:pointer}
+.snd{position:absolute;right:10px;top:10px;font:900 11px var(--body);letter-spacing:.06em;padding:5px 9px;border-radius:8px;border:1px solid #fff5;background:#0008;color:var(--ink);cursor:pointer}
+/* phones: tighter overlay so the whole briefing + START fit without scrolling */
+@media (max-width:430px){
+  .overlay{gap:8px;padding:14px}
+  .overlay h2{font-size:clamp(24px,7vw,32px)}
+  .faces canvas{width:46px;height:46px}
+  .rules{font-size:12px}
+  .mech span{font-size:10px}
+  .btn{font-size:19px;padding:10px 26px}
+}
