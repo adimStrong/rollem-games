@@ -564,7 +564,7 @@ function tap(ev){const r=cv.getBoundingClientRect(),px=(ev.clientX-r.left)/r.wid
 
 let goldIdx=0,goldAt=[2,9];
 function startGame(){goldIdx=0;goldAt=[1.5+Math.random()*4,8+Math.random()*4];ac();S.forEach((p,i)=>Object.assign(p,slot(i)));timeLeft=GAME_T;score=0;combo=0;bestCombo=0;hits=0;perfects=0;taps=0;spawnIn=4;rush=0;parts=[];texts=[];swings=[];
-  $('ov').hidden=true;hud();
+  $('ov').hidden=true;const _ar=$('againRow');if(_ar){_ar.hidden=true;_ar.innerHTML=''}hud();
   setTimeout(()=>{sfx('ding');playing=true},900)}
 // prize by hits in one game: 300 = 188, 150 = 88, 100 = 58, 50 = 27, anything lower = 17
 function prizeFor(n){return n>=300?188:n>=150?88:n>=100?58:n>=50?27:17}
@@ -574,7 +574,8 @@ function endGame(){playing=false;S.forEach(p=>{if(p.state==='up'){p.state='down'
   const acc=taps?Math.round(hits/taps*100):0,stars=hits>=25?3:hits>=15?2:hits>=6?1:0;
   setTimeout(()=>{const ov=$('ov');ov.hidden=false;ov.innerHTML=`<h2>TIME UP!</h2><div style="font-size:30px;letter-spacing:4px;color:var(--gold)">${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</div>
     <div class="res"><span>Hits</span><b>${hits}</b><span>Perfect hits</span><b>${perfects}</b><span>Best combo</span><b>x${bestCombo}</b><span>Accuracy</span><b>${acc}%</b></div>${window.RG?RG.resultHTML(hits):`<div style="font:400 26px var(--display);color:var(--gold)">Your reward: ${prizeFor(hits)}</div>
-    <button class="btn" id="again">PLAY AGAIN</button>`}`;if(window.RG)RG.afterResult();else $('again').onclick=startGame},1800)}
+    <button class="btn" id="again">PLAY AGAIN</button>`}`;if(window.RG)RG.afterResult();else $('again').onclick=startGame;
+    const row=$('againRow'),ab=$('again');if(row&&ab){row.innerHTML='';row.appendChild(ab);row.hidden=false}},1800)}
 
 function update(){T++;
   if(playing){timeLeft-=1/60;if(timeLeft<=0){timeLeft=0;hud();endGame()}else{if(--spawnIn<=0){spawn();const prog=1-timeLeft/GAME_T;spawnIn=Math.max(2,Math.round(lerp(22,3,Math.pow(prog,1.6))*(.75+Math.random()*.5)))}if(T%3===0)hud();if(!rush&&timeLeft<=5){rush=1}}}

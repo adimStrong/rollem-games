@@ -36,6 +36,7 @@ window.RG = (function () {
       + "<p class='rg-status'>Recorded automatically — no screenshot needed. Credited the next day at 1:00 PM.</p>"
       + "<button class='btn' id='again'>" + (again || "OK") + "</button>";
     claim(pl); el("again").onclick = backToStart;
+    const row = el("againRow"); if (row) { row.innerHTML = ""; row.appendChild(el("again")); row.hidden = false; }
   }
   async function claim(pl) {
     if (!pl) return;
@@ -45,6 +46,7 @@ window.RG = (function () {
   }
   function backToStart() {
     pending = null; busy = false;
+    const row = el("againRow"); if (row) { row.hidden = true; row.innerHTML = ""; }
     const ov = el("ov"); ov.innerHTML = startHTML; ov.hidden = false;
     if (typeof faceRow === "function") try { faceRow() } catch (e) {}
     el("start").onclick = onStart; mech(); render(); load();
