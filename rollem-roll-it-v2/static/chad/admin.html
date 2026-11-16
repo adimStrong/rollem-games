@@ -68,6 +68,25 @@ a{color:var(--gold)}
     <p class="note">Same backend as Roll It: one entry per qualifying deposit, shared by both games. A player who used an entry in Roll It can't use it again here, and the reverse is also true. Budget and stop switch are on the <a href="/#admin">Roll It admin page</a>.</p>
   </section>
 
+  <section class="card" id="promoCard" hidden>
+    <h2>Promo free link</h2>
+    <p class="note">Para sa giveaway: site players lang, <b>ISANG libreng laro</b>, walang deposit o turnover na kailangan. Mamamatay ang link mamayang hatinggabi. Ang panalo ay kasama pa rin sa daily budget.</p>
+    <label for="pAcct">Player username, user ID or game ID</label>
+    <div class="row"><input id="pAcct" autocomplete="off" spellcheck="false"></div>
+    <label for="pTg">Telegram username</label>
+    <div class="row"><input id="pTg" autocomplete="off" spellcheck="false" placeholder="@username"><button class="btn" id="pMakeBtn" type="button">Make free link</button></div>
+    <p class="msg" id="pMsg" aria-live="polite"></p>
+    <div id="pLinkBox" hidden>
+      <label>Promo link</label>
+      <code id="pLink"></code>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="pCopyLink" type="button">Copy link</button>
+        <button class="btn" id="pCopyMsg" type="button">Copy message + link</button>
+      </div>
+    </div>
+    <div id="pList"></div>
+  </section>
+
   <section class="card" id="previewCard">
     <h2>Preview · test the game</h2>
     <p class="note">This is the demo version: play as much as you like. No reward, nothing recorded, no entries used. Players see the same game when they open their link.</p>
@@ -82,8 +101,8 @@ let token="",look=null,CONF={perPlay:200,maxPlays:5,turnover:1};
 try{token=sessionStorage.getItem("cg-admin-token")||""}catch(e){}
 async function api(path,opts){opts=opts||{};const r=await fetch(path,Object.assign({},opts,{headers:{"Content-Type":"application/json","X-Admin-Token":token}}));
   const j=await r.json().catch(()=>({}));if(r.status===403){logout();throw new Error("forbidden")}return{ok:r.ok,j}}
-function logout(){token="";try{sessionStorage.removeItem("cg-admin-token")}catch(e){}$("panel").hidden=true;$("gate").hidden=false;$("gateMsg").textContent="Please log in again."}
-function unlock(){$("gate").hidden=true;$("panel").hidden=false;$("acct").focus()}
+function logout(){token="";try{sessionStorage.removeItem("cg-admin-token")}catch(e){}$("panel").hidden=true;$("promoCard").hidden=true;$("gate").hidden=false;$("gateMsg").textContent="Please log in again."}
+function unlock(){$("gate").hidden=true;$("panel").hidden=false;$("promoCard").hidden=false;$("acct").focus();pList()}
 async function login(){$("gateMsg").textContent="Checking…";$("gateMsg").className="msg";
   const r=await fetch("/api/admin-login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:$("pw").value})});
   if(!r.ok){$("gateMsg").textContent="Wrong password.";$("gateMsg").className="msg bad";return}
@@ -112,6 +131,18 @@ $("loginBtn").onclick=login;$("pw").addEventListener("keydown",e=>{if(e.key==="E
 $("checkBtn").onclick=check;$("acct").addEventListener("keydown",e=>{if(e.key==="Enter")check()});
 $("makeBtn").onclick=()=>make(false);$("newLink").onclick=()=>make(true);
 $("copyLink").onclick=()=>copy(link(),$("copyLink"));$("copyMsg").onclick=()=>copy(message(),$("copyMsg"));
+async function pMake(){const a=$("pAcct").value.trim(),tg=$("pTg").value.trim();
+  if(!a||!tg){$("pMsg").textContent="Kailangan ang game username AT Telegram username.";$("pMsg").className="msg bad";return}
+  $("pMsg").className="msg";$("pMsg").textContent="Making promo link…";
+  try{const r=await api("/api/free-link",{method:"POST",body:JSON.stringify({account:a,tg:tg})});
+    if(!r.ok){$("pMsg").textContent=r.j.msg||r.j.error||"Error";$("pMsg").className="msg bad";return}
+    $("pLink").textContent=location.origin+"/chad/#"+r.j.code;$("pLinkBox").hidden=false;
+    $("pMsg").textContent="Free link ready para kay "+(r.j.name||r.j.account)+" · TG @"+r.j.tg;pList()}catch(e){}}
+function pMessage(){return "🎁 FREE PLAY — Roll'em promo\nIsang LIBRENG Chad Smash para sa'yo — walang deposit at walang turnover na kailangan!\n• 1 free play, siguradong may bonus\n• Valid ngayong araw lang\n\n🔗 Play here: "+$("pLink").textContent}
+async function pList(){try{const r=await api("/api/free-links");if(!r.ok)return;const rows=r.j.links||[];
+  $("pList").innerHTML=rows.length?"<label>Today's promo links</label>"+rows.map(l=>"<div class='status'>@"+esc(l.tg||"?")+" · <b>"+esc(l.account)+"</b> · "+(l.used?"<span class='pill ok'>PLAYED</span> "+php(l.amount)+" ("+esc(l.game)+" "+esc(l.usedAt)+")":"<span class='pill no'>NOT YET PLAYED</span> made "+esc(l.madeAt))+"</div>").join(""):""}catch(e){}}
+$("pMakeBtn").onclick=pMake;$("pTg").addEventListener("keydown",e=>{if(e.key==="Enter")pMake()});
+$("pCopyLink").onclick=()=>copy($("pLink").textContent,$("pCopyLink"));$("pCopyMsg").onclick=()=>copy(pMessage(),$("pCopyMsg"));
 fetch("/api/config").then(r=>r.json()).then(j=>{if(j&&j.perPlay)CONF=j}).catch(()=>{});
 if(token)unlock();
 </script>
