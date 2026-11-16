@@ -729,22 +729,27 @@ function unlockAdmin(){
   $("copyChad").onclick=()=>copyText(chadLinkUrl(),$("copyChad"));
   $("copyChadMsg").onclick=()=>{if(!chadLinkUrl()){$("aMsg").textContent="Make a link first.";return}copyText(chadMsg(),$("copyChadMsg"))};
   $("copyMsg").onclick=()=>{if(!playerLink()){$("aMsg").textContent="Make a link first.";return}copyText(BRAND_SCRIPT()+"\n\n🔗 Play here: "+playerLink(),$("copyMsg"))};
-  $("pMakeBtn").onclick=makeFreeLink;
-  $("pTg").addEventListener("keydown",e=>{if(e.key==="Enter")makeFreeLink()});
+  $("pMakeBtn").onclick=()=>makeFreeLink(false);
+  $("pTg").addEventListener("keydown",e=>{if(e.key==="Enter")makeFreeLink(false)});
   $("pCopyLink").onclick=()=>copyText($("pLink").textContent,$("pCopyLink"));
   $("pCopyMsg").onclick=()=>{if(!$("pLink").textContent){$("pMsg").textContent="Make a free link first.";return}copyText(promoMsg(),$("pCopyMsg"))};
   renderLookup();loadCap();loadLinksToday();loadFreeLinks();
 }
-async function makeFreeLink(){const a=$("pAcct").value.trim(),tg=$("pTg").value.trim();
+async function makeFreeLink(force){const a=$("pAcct").value.trim(),tg=$("pTg").value.trim();
   if(!a||!tg){$("pMsg").textContent="Kailangan ang game username AT Telegram username.";return}
   $("pMsg").textContent="Making the promo link…";
-  const r=await api("/api/free-link",{method:"POST",body:JSON.stringify({account:a,tg:tg})});
-  if(!r.ok){$("pMsg").textContent=r.j.msg||r.j.error||"Error";return}
+  const r=await api("/api/free-link",{method:"POST",body:JSON.stringify({account:a,tg:tg,force:!!force})});
+  if(!r.ok){
+    if(r.j.needForce&&!force){
+      if(confirm(r.j.msg+"\n\nGawan pa rin ng FREE link si \""+a+"\" (UNVERIFIED)?")){makeFreeLink(true)}
+      else{$("pMsg").textContent="Hindi ginawa ang link."}
+      return}
+    $("pMsg").textContent=r.j.msg||r.j.error||"Error";return}
   $("pLink").textContent=location.origin+"/#"+r.j.code;$("pLinkField").hidden=false;
-  $("pMsg").textContent="Free link ready para kay "+(r.j.name||r.j.account)+" · TG @"+r.j.tg;loadFreeLinks()}
+  $("pMsg").textContent="Free link ready para kay "+(r.j.name||r.j.account)+" · TG @"+r.j.tg+(r.j.verified===false?" · ⚠️ UNVERIFIED account":"");loadFreeLinks()}
 function promoMsg(){return "🎁 FREE PLAY — Roll'em promo\nIsang LIBRENG laro para sa'yo — walang deposit at walang turnover na kailangan!\n• 1 free play, siguradong may bonus\n• Pwede sa Roll It o Chad Smash\n• Valid ngayong araw lang\n\n🔗 Play here: "+$("pLink").textContent}
 async function loadFreeLinks(){const r=await api("/api/free-links");if(!r.ok)return;const rows=r.j.links||[];
-  $("pList").innerHTML=rows.length?rows.map(l=>"<p class='hint'>@"+esc(l.tg||"?")+" · <b>"+esc(l.account)+"</b> · "+(l.used?"PLAYED "+php(l.amount)+" ("+esc(l.game)+" "+esc(l.usedAt)+")":"not yet played · made "+esc(l.madeAt))+"</p>").join(""):""}
+  $("pList").innerHTML=rows.length?rows.map(l=>"<p class='hint'>@"+esc(l.tg||"?")+" · <b>"+esc(l.account)+"</b>"+(l.verified===false?" · ⚠️ UNVERIFIED":"")+" · "+(l.used?"PLAYED "+php(l.amount)+" ("+esc(l.game)+" "+esc(l.usedAt)+")":"not yet played · made "+esc(l.madeAt))+"</p>").join(""):""}
 function initAdmin(){
   $("admin").hidden=false;$("previewLabel").hidden=false;
   if(adminToken){unlockAdmin();return}

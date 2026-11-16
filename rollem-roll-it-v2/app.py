@@ -512,6 +512,7 @@ def make_free_link():
     payload = request.get_json(force=True, silent=True) or {}
     account = (payload.get("account") or "").strip()
     tg = (payload.get("tg") or "").strip().lstrip("@")[:64]
+    force = bool(payload.get("force"))
     if not account:
         return jsonify({"error": "account required", "msg": "Ilagay ang game username ng player."}), 400
     if not tg:
@@ -521,9 +522,22 @@ def make_free_link():
         stopped, stop_note = kill_switch_status(cur)
         if stopped:
             return jsonify({"error": "stopped", "msg": "Hinarang ang laro ngayon" + (f" ({stop_note})" if stop_note else "") + " — hindi makakagawa ng promo link."}), 409
-        user = platform.find_user(cur, account)
+        try:
+            user = platform.find_user(cur, account)
+            lookup_down = False
+        except Exception:
+            user = None
+            lookup_down = True
+        if not user and not force:
+            # special case (JD 2026-11-16): a brand-new register, or the roster sync is down — the admin
+            # can confirm and force the link through unverified (synthetic negative user_id).
+            msg = ("Hindi ma-check ang player — mukhang down ang database/sync. " if lookup_down
+                   else "Hindi makita ang player na iyan sa database — baka bagong register o hindi pa naka-sync. ")
+            return jsonify({"error": "account not found", "needForce": True,
+                            "msg": msg + "Pwede mo itong i-FORCE kung sigurado kang totoo ang account."}), 404
         if not user:
-            return jsonify({"error": "account not found", "msg": "Hindi makita ang player na iyan — site players lang ang pwede."}), 404
+            uid = -int(hashlib.sha256(account.lower().encode()).hexdigest()[:12], 16)
+            user = {"user_id": uid, "account": account, "real_name": ""}
         ci = cap_info(cur, date)
         if ci["capped"]:
             return jsonify({"error": "cap", "msg": "Naabot na ang daily budget — hindi makakagawa ng promo link.", **ci}), 409
@@ -541,7 +555,8 @@ def make_free_link():
         if not code:
             return jsonify({"error": "retry", "msg": "Subukan ulit."}), 500
     return jsonify({"ok": True, "code": code, "account": user["account"],
-                    "name": user["real_name"] or user["account"], "tg": tg, **ci})
+                    "name": user["real_name"] or user["account"], "tg": tg,
+                    "verified": user["user_id"] > 0, **ci})
 
 
 @app.route("/api/free-links", methods=["GET"])
@@ -557,14 +572,14 @@ def free_links():
     if not _valid_iso_date(date_to):
         date_to = t
     with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        cur.execute("SELECT s.code, s.account, s.name, s.tg, s.created_at, s.biz_date, "
+        cur.execute("SELECT s.code, s.account, s.name, s.tg, s.created_at, s.biz_date, s.user_id, "
                     "p.amount_c, p.created_at AS used_at, p.game "
                     "FROM cg_sessions s LEFT JOIN cg_plays p ON p.code = s.code "
                     "WHERE s.free AND s.biz_date BETWEEN %s AND %s ORDER BY s.created_at DESC LIMIT 500",
                     (date_from, date_to))
         rows = cur.fetchall()
     links = [{"code": r["code"], "account": r["account"], "name": r["name"] or r["account"], "tg": r["tg"] or "",
-              "day": r["biz_date"], "used": r["amount_c"] is not None,
+              "day": r["biz_date"], "used": r["amount_c"] is not None, "verified": int(r["user_id"]) > 0,
               "amount": pesos(r["amount_c"]) if r["amount_c"] is not None else 0,
               "game": (CHAD_NAME if r.get("game") == "chad" else GAME_NAME) if r["amount_c"] is not None else "",
               "madeAt": datetime.fromtimestamp(r["created_at"] / 1000, TZ).strftime("%H:%M"),
@@ -675,21 +690,32 @@ def _pub(s):
 
 def _session_state(cur, sess):
     date = today()
+    if sess.get("free"):
+        # promo link: a self-contained one-play state tied to THIS code. Reads NOTHING from the platform
+        # tables so promo links keep working even when the roster/deposit sync is down or the player is a
+        # brand-new register that has not synced yet (forced links have a negative synthetic user_id).
+        cur.execute("SELECT * FROM cg_plays WHERE code=%s ORDER BY play_no", (sess["code"],))
+        rows = [dict(r) for r in cur.fetchall()]
+        used = len(rows)
+        ci = cap_info(cur, date)
+        t = now()
+        play_open = PLAY_FROM <= hm_of(t) <= PLAY_UNTIL
+        expired = sess["biz_date"] != date
+        plays = [pub_play(r) for r in rows]
+        s = {"plays": plays, "playsUsed": used, "playsTotal": 1, "playsLeft": max(0, 1 - used),
+             "nextNeed": 0, "depOk": used == 0, "betOk": True, "missing": [],
+             "ready": used == 0 and not expired and play_open and not ci["stopped"] and not ci["capped"],
+             "dep": 0, "slot": 0, "other": 0, "syncedAt": None,
+             "wager": {"bonus": 0, "need": 0, "done": 0, "cleared": sum(r["amount_c"] for r in rows) / 100},
+             "hist": plays, "week": [], "windowOpen": False, "playOpen": play_open,
+             "serverTime": t.strftime("%Y-%m-%d %H:%M"), **ci}
+        out = {"exists": True, "code": sess["code"], "name": sess["name"] or sess["account"], "account": sess["account"],
+               "expired": expired, "free": True, "tg": sess.get("tg") or "", "config": CONFIG, **_pub(s)}
+        return out, s
     user = {"user_id": sess["user_id"], "account": sess["account"], "real_name": sess["name"]}
     s = summary(cur, user, date)
     out = {"exists": True, "code": sess["code"], "name": sess["name"] or sess["account"], "account": sess["account"],
            "expired": sess["biz_date"] != date, "config": CONFIG, **_pub(s)}
-    if sess.get("free"):
-        # promo link: its own one-play world — no deposit/turnover gate, progress tied to THIS code
-        cur.execute("SELECT * FROM cg_plays WHERE code=%s ORDER BY play_no", (sess["code"],))
-        rows = [dict(r) for r in cur.fetchall()]
-        used = len(rows)
-        out.update({"free": True, "tg": sess.get("tg") or "",
-                    "plays": [pub_play(r) for r in rows], "playsUsed": used, "playsTotal": 1,
-                    "playsLeft": max(0, 1 - used), "nextNeed": 0, "depOk": used == 0, "betOk": True,
-                    "missing": [],
-                    "ready": used == 0 and not out["expired"] and s["playOpen"] and not s["stopped"] and not s["capped"]})
-        s = dict(s, playsUsed=used, depOk=used == 0, betOk=True, nextNeed=0, missing=[])
     return out, s
 
 
