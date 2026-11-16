@@ -116,7 +116,7 @@ def milestone_prize(cur):
     if not MILESTONES:
         return 0
     cur.execute("SELECT pg_advisory_xact_lock(%s)", (_MS_LOCK,))
-    cur.execute("SELECT COUNT(*) AS n FROM cg_plays WHERE status='paid'")
+    cur.execute("SELECT COUNT(*) AS n FROM cg_plays WHERE status='paid' AND NOT free")
     row = cur.fetchone()
     n = int((row["n"] if isinstance(row, dict) else row[0]) or 0) + 1
     for every, amt in MILESTONES:
@@ -242,6 +242,12 @@ def init_db():
             """
         )
         cur.execute("INSERT INTO cg_kill_switch (id, stopped) VALUES (1, FALSE) ON CONFLICT (id) DO NOTHING")
+        # promo free links (JD 2026-11-16, ported from rollem): site player + TG username, ONE play, no
+        # deposit/turnover gate, same-day expiry. Free plays count against the daily cap but never advance
+        # or claim milestones. Forced (unverified) links carry a synthetic negative user_id.
+        cur.execute("ALTER TABLE cg_sessions ADD COLUMN IF NOT EXISTS free BOOLEAN NOT NULL DEFAULT FALSE")
+        cur.execute("ALTER TABLE cg_sessions ADD COLUMN IF NOT EXISTS tg TEXT NOT NULL DEFAULT ''")
+        cur.execute("ALTER TABLE cg_plays ADD COLUMN IF NOT EXISTS free BOOLEAN NOT NULL DEFAULT FALSE")
         platform.ensure_schema(cur)
 
 
@@ -272,12 +278,13 @@ def pick_prize():
 
 
 def plays_for(cur, user_id, date):
-    cur.execute("SELECT * FROM cg_plays WHERE user_id=%s AND biz_date=%s ORDER BY play_no", (user_id, date))
+    # regular entries only — free promo plays never consume (or count toward) the deposit-funded sequence
+    cur.execute("SELECT * FROM cg_plays WHERE user_id=%s AND biz_date=%s AND NOT free ORDER BY play_no", (user_id, date))
     return [dict(r) for r in cur.fetchall()]
 
 
 def links_issued_today(cur, user_id, date) -> int:
-    cur.execute("SELECT COUNT(*) AS n FROM cg_sessions WHERE user_id=%s AND biz_date=%s", (user_id, date))
+    cur.execute("SELECT COUNT(*) AS n FROM cg_sessions WHERE user_id=%s AND biz_date=%s AND NOT free", (user_id, date))
     return int(cur.fetchone()["n"])
 
 
@@ -309,7 +316,7 @@ def cap_info(cur, date):
 
 def pub_play(r):
     return {"id": r["id"], "day": r["biz_date"], "play_no": r["play_no"], "amount": pesos(r["amount_c"]),
-            "tier": int(r["tier"] or 0), "wild": bool(r.get("wild")), "plan": r.get("plan"),
+            "tier": int(r["tier"] or 0), "wild": bool(r.get("wild")), "plan": r.get("plan"), "free": bool(r.get("free")),
             "status": r["status"], "seen": int(r["seen"] or 0), "need": float(r["need"] or 0),
             "dep": float(r["dep"] or 0), "slot": float(r["slot"] or 0),
             "at": datetime.fromtimestamp(r["created_at"] / 1000, TZ).strftime("%Y-%m-%d %H:%M") if r.get("created_at") else None,
@@ -445,7 +452,7 @@ def lookup():
         if not user:
             return jsonify({"found": False, "account": account, **cap_info(cur, date)})
         s = summary(cur, user, date)
-        cur.execute("SELECT code FROM cg_sessions WHERE user_id=%s AND biz_date=%s ORDER BY created_at DESC LIMIT 1",
+        cur.execute("SELECT code FROM cg_sessions WHERE user_id=%s AND biz_date=%s AND NOT free ORDER BY created_at DESC LIMIT 1",
                     (user["user_id"], date))
         row = cur.fetchone()
     s["found"] = True
@@ -474,7 +481,7 @@ def make_link():
             return jsonify({"error": "cap", "msg": "Naabot na ang daily budget — hindi makakagawa ng link. Taasan ang budget kung kailangan.", **ci}), 409
         code = None
         if not fresh:
-            cur.execute("SELECT code FROM cg_sessions WHERE user_id=%s AND biz_date=%s ORDER BY created_at DESC LIMIT 1",
+            cur.execute("SELECT code FROM cg_sessions WHERE user_id=%s AND biz_date=%s AND NOT free ORDER BY created_at DESC LIMIT 1",
                         (user["user_id"], date))
             row = cur.fetchone()
             if row:
@@ -487,6 +494,90 @@ def make_link():
     s["found"] = True
     s["code"] = code
     return jsonify(s)
+
+
+@app.route("/api/free-link", methods=["POST"])
+def make_free_link():
+    """Promo free link (JD 2026-11-16, ported from rollem): site player + TG username -> ONE free play
+    today, no deposit or turnover needed. Each call makes a NEW link; the win still comes off the daily
+    budget. Unknown accounts need force=true (admin-confirmed) and are marked unverified."""
+    if not require_admin():
+        return jsonify({"error": "forbidden"}), 403
+    payload = request.get_json(force=True, silent=True) or {}
+    account = (payload.get("account") or "").strip()
+    tg = (payload.get("tg") or "").strip().lstrip("@")[:64]
+    force = bool(payload.get("force"))
+    if not account:
+        return jsonify({"error": "account required", "msg": "Ilagay ang game username ng player."}), 400
+    if not tg:
+        return jsonify({"error": "tg required", "msg": "Ilagay ang Telegram username ng player."}), 400
+    date = today()
+    with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        stopped, stop_note = kill_switch_status(cur)
+        if stopped:
+            return jsonify({"error": "stopped", "msg": "Hinarang ang laro ngayon" + (f" ({stop_note})" if stop_note else "") + " — hindi makakagawa ng promo link."}), 409
+        try:
+            user = platform.find_user(cur, account)
+            lookup_down = False
+        except Exception:
+            user = None
+            lookup_down = True
+        if not user and not force:
+            msg = ("Hindi ma-check ang player — mukhang down ang database/sync. " if lookup_down
+                   else "Hindi makita ang player na iyan sa database — baka bagong register o hindi pa naka-sync. ")
+            return jsonify({"error": "account not found", "needForce": True,
+                            "msg": msg + "Pwede mo itong i-FORCE kung sigurado kang totoo ang account."}), 404
+        if not user:
+            uid = -int(hashlib.sha256(account.lower().encode()).hexdigest()[:12], 16)
+            user = {"user_id": uid, "account": account, "real_name": ""}
+        ci = cap_info(cur, date)
+        if ci["capped"]:
+            return jsonify({"error": "cap", "msg": "Naabot na ang daily budget — hindi makakagawa ng promo link.", **ci}), 409
+        code = None
+        for _ in range(4):
+            attempt = clean_code(user["account"]) + "-f" + secrets.token_hex(2)
+            try:
+                cur.execute("INSERT INTO cg_sessions (code, user_id, account, name, biz_date, created_at, free, tg) "
+                            "VALUES (%s,%s,%s,%s,%s,%s,TRUE,%s)",
+                            (attempt, user["user_id"], user["account"], user["real_name"] or "", date, ms(), tg))
+                code = attempt
+                break
+            except psycopg2.IntegrityError:
+                continue
+        if not code:
+            return jsonify({"error": "retry", "msg": "Subukan ulit."}), 500
+    return jsonify({"ok": True, "code": code, "account": user["account"],
+                    "name": user["real_name"] or user["account"], "tg": tg,
+                    "verified": user["user_id"] > 0, **ci})
+
+
+@app.route("/api/free-links", methods=["GET"])
+def free_links():
+    """Today's (or [from,to]) promo free links with their used/unused state, newest first."""
+    if not require_admin_or_share_token():
+        return jsonify({"error": "forbidden"}), 403
+    t = today()
+    date_from = request.args.get("from") or t
+    date_to = request.args.get("to") or t
+    if not _valid_iso_date(date_from):
+        date_from = t
+    if not _valid_iso_date(date_to):
+        date_to = t
+    with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute("SELECT s.code, s.account, s.name, s.tg, s.created_at, s.biz_date, s.user_id, "
+                    "p.amount_c, p.created_at AS used_at "
+                    "FROM cg_sessions s LEFT JOIN cg_plays p ON p.code = s.code "
+                    "WHERE s.free AND s.biz_date BETWEEN %s AND %s ORDER BY s.created_at DESC LIMIT 500",
+                    (date_from, date_to))
+        rows = cur.fetchall()
+    links = [{"code": r["code"], "account": r["account"], "name": r["name"] or r["account"], "tg": r["tg"] or "",
+              "day": r["biz_date"], "used": r["amount_c"] is not None, "verified": int(r["user_id"]) > 0,
+              "amount": pesos(r["amount_c"]) if r["amount_c"] is not None else 0,
+              "game": GAME_NAME if r["amount_c"] is not None else "",
+              "madeAt": datetime.fromtimestamp(r["created_at"] / 1000, TZ).strftime("%H:%M"),
+              "usedAt": datetime.fromtimestamp(r["used_at"] / 1000, TZ).strftime("%H:%M") if r.get("used_at") else ""}
+             for r in rows]
+    return jsonify({"from": date_from, "to": date_to, "links": links})
 
 
 @app.route("/api/cap", methods=["GET", "POST"])
@@ -534,12 +625,12 @@ def links_today():
         date_to = t
     with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
         cur.execute("SELECT user_id, account, MAX(name) AS name, MAX(created_at) AS last_link_at, COUNT(*) AS links_issued "
-                    "FROM cg_sessions WHERE biz_date BETWEEN %s AND %s GROUP BY user_id, account", (date_from, date_to))
+                    "FROM cg_sessions WHERE biz_date BETWEEN %s AND %s AND NOT free GROUP BY user_id, account", (date_from, date_to))
         players = {r["user_id"]: dict(r) for r in cur.fetchall()}
         if players:
             cur.execute("SELECT user_id, COUNT(DISTINCT code) AS links, COUNT(*) AS rounds, "
                         "COALESCE(SUM(amount_c) FILTER (WHERE status='paid'),0) AS won "
-                        "FROM cg_plays WHERE biz_date BETWEEN %s AND %s GROUP BY user_id", (date_from, date_to))
+                        "FROM cg_plays WHERE biz_date BETWEEN %s AND %s AND NOT free GROUP BY user_id", (date_from, date_to))
             for r in cur.fetchall():
                 if r["user_id"] in players:
                     players[r["user_id"]].update(links=int(r["links"]), rounds=int(r["rounds"]), won=pesos(int(r["won"])))
@@ -591,6 +682,28 @@ def _pub(s):
 
 def _session_state(cur, sess):
     date = today()
+    if sess.get("free"):
+        # promo link: a self-contained one-play state tied to THIS code. Reads NOTHING from the platform
+        # tables so promo links keep working even when the roster/deposit sync is down or the player is a
+        # brand-new register that has not synced yet (forced links have a negative synthetic user_id).
+        cur.execute("SELECT * FROM cg_plays WHERE code=%s ORDER BY play_no", (sess["code"],))
+        rows = [dict(r) for r in cur.fetchall()]
+        used = len(rows)
+        ci = cap_info(cur, date)
+        t = now()
+        play_open = PLAY_FROM <= hm_of(t) <= PLAY_UNTIL
+        expired = sess["biz_date"] != date
+        plays = [pub_play(r) for r in rows]
+        s = {"plays": plays, "playsUsed": used, "playsTotal": 1, "playsLeft": max(0, 1 - used),
+             "nextNeed": 0, "depOk": used == 0, "betOk": True, "missing": [],
+             "ready": used == 0 and not expired and play_open and not ci["stopped"] and not ci["capped"],
+             "dep": 0, "slot": 0, "other": 0, "syncedAt": None,
+             "wager": {"bonus": 0, "need": 0, "done": 0, "cleared": sum(r["amount_c"] for r in rows) / 100},
+             "hist": plays, "week": [], "windowOpen": False, "playOpen": play_open,
+             "serverTime": t.strftime("%Y-%m-%d %H:%M"), **ci}
+        out = {"exists": True, "code": sess["code"], "name": sess["name"] or sess["account"], "account": sess["account"],
+               "expired": expired, "free": True, "tg": sess.get("tg") or "", "config": CONFIG, **_pub(s)}
+        return out, s
     user = {"user_id": sess["user_id"], "account": sess["account"], "real_name": sess["name"]}
     s = summary(cur, user, date)
     out = {"exists": True, "code": sess["code"], "name": sess["name"] or sess["account"], "account": sess["account"],
@@ -631,6 +744,34 @@ def play(code):
         if not s["playOpen"]:
             conn.rollback()
             return jsonify({"error": "closed", "msg": "Sarado na ang laro para ngayong araw.", **out}), 409
+        if sess.get("free"):
+            # promo free play: no deposit/turnover gate, ONE play per link, no milestone, cap still applies
+            cur.execute("SELECT COUNT(*) AS n FROM cg_plays WHERE code=%s", (sess["code"],))
+            if int(cur.fetchone()["n"]):
+                conn.rollback()
+                return jsonify({"error": "done", "msg": "Nagamit na ang promo link na ito — isang laro lang bawat link. Salamat!", **out}), 409
+            amount_c, tier, wild = pick_prize()
+            if amount_c > MAX_WIN_C:
+                amount_c, tier, wild = int(round(min(p["amt"] for p in LIVE_PRIZES) * 100)), 0, False
+            if s["capUsed"] + amount_c / 100 > s["dailyCap"]:
+                conn.rollback()
+                return jsonify({"error": "cap", "msg": "Naabot na ang daily bonus budget. Subukan ulit bukas.", **out}), 409
+            # free plays live at play_no >= 100 so they never collide with the deposit-funded 1..MAX_PLAYS
+            cur.execute("SELECT COALESCE(MAX(play_no),99)+1 AS n FROM cg_plays WHERE user_id=%s AND biz_date=%s AND play_no>=100",
+                        (sess["user_id"], date))
+            play_no = int(cur.fetchone()["n"])
+            t_ms = ms()
+            cur.execute(
+                "INSERT INTO cg_plays (code, user_id, account, biz_date, play_no, amount_c, tier, wild, status, need, dep, slot, created_at, free, cleared_at) "
+                "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,'paid',0,0,0,%s,TRUE,%s) RETURNING *",
+                (code, sess["user_id"], sess["account"], date, play_no, amount_c, tier, wild, t_ms, t_ms),
+            )
+            row = dict(cur.fetchone())
+            out, s = _session_state(cur, sess)
+            conn.commit()
+            post_ledger({"brand": BRAND, "game": GAME_NAME, "name": sess["account"], "code": code,
+                         "amount": pesos(amount_c), "link": request.headers.get("Referer", ""), "promo": True})
+            return jsonify({"ok": True, "played": True, "play": pub_play(row), **out})
         if s["playsUsed"] >= MAX_PLAYS:
             conn.rollback()
             return jsonify({"error": "done", "msg": "Tapos na ang plays mo ngayong araw. Balik bukas.", **out}), 409
