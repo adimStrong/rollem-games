@@ -131,17 +131,22 @@ $("loginBtn").onclick=login;$("pw").addEventListener("keydown",e=>{if(e.key==="E
 $("checkBtn").onclick=check;$("acct").addEventListener("keydown",e=>{if(e.key==="Enter")check()});
 $("makeBtn").onclick=()=>make(false);$("newLink").onclick=()=>make(true);
 $("copyLink").onclick=()=>copy(link(),$("copyLink"));$("copyMsg").onclick=()=>copy(message(),$("copyMsg"));
-async function pMake(){const a=$("pAcct").value.trim(),tg=$("pTg").value.trim();
+async function pMake(force){const a=$("pAcct").value.trim(),tg=$("pTg").value.trim();
   if(!a||!tg){$("pMsg").textContent="Kailangan ang game username AT Telegram username.";$("pMsg").className="msg bad";return}
   $("pMsg").className="msg";$("pMsg").textContent="Making promo link…";
-  try{const r=await api("/api/free-link",{method:"POST",body:JSON.stringify({account:a,tg:tg})});
-    if(!r.ok){$("pMsg").textContent=r.j.msg||r.j.error||"Error";$("pMsg").className="msg bad";return}
+  try{const r=await api("/api/free-link",{method:"POST",body:JSON.stringify({account:a,tg:tg,force:!!force})});
+    if(!r.ok){
+      if(r.j.needForce&&!force){
+        if(confirm(r.j.msg+"\n\nGawan pa rin ng FREE link si \""+a+"\" (UNVERIFIED)?")){pMake(true)}
+        else{$("pMsg").textContent="Hindi ginawa ang link."}
+        return}
+      $("pMsg").textContent=r.j.msg||r.j.error||"Error";$("pMsg").className="msg bad";return}
     $("pLink").textContent=location.origin+"/chad/#"+r.j.code;$("pLinkBox").hidden=false;
-    $("pMsg").textContent="Free link ready para kay "+(r.j.name||r.j.account)+" · TG @"+r.j.tg;pList()}catch(e){}}
+    $("pMsg").textContent="Free link ready para kay "+(r.j.name||r.j.account)+" · TG @"+r.j.tg+(r.j.verified===false?" · ⚠️ UNVERIFIED account":"");pList()}catch(e){}}
 function pMessage(){return "🎁 FREE PLAY — Roll'em promo\nIsang LIBRENG Chad Smash para sa'yo — walang deposit at walang turnover na kailangan!\n• 1 free play, siguradong may bonus\n• Valid ngayong araw lang\n\n🔗 Play here: "+$("pLink").textContent}
 async function pList(){try{const r=await api("/api/free-links");if(!r.ok)return;const rows=r.j.links||[];
-  $("pList").innerHTML=rows.length?"<label>Today's promo links</label>"+rows.map(l=>"<div class='status'>@"+esc(l.tg||"?")+" · <b>"+esc(l.account)+"</b> · "+(l.used?"<span class='pill ok'>PLAYED</span> "+php(l.amount)+" ("+esc(l.game)+" "+esc(l.usedAt)+")":"<span class='pill no'>NOT YET PLAYED</span> made "+esc(l.madeAt))+"</div>").join(""):""}catch(e){}}
-$("pMakeBtn").onclick=pMake;$("pTg").addEventListener("keydown",e=>{if(e.key==="Enter")pMake()});
+  $("pList").innerHTML=rows.length?"<label>Today's promo links</label>"+rows.map(l=>"<div class='status'>@"+esc(l.tg||"?")+" · <b>"+esc(l.account)+"</b>"+(l.verified===false?" <span class='pill no'>UNVERIFIED</span>":"")+" · "+(l.used?"<span class='pill ok'>PLAYED</span> "+php(l.amount)+" ("+esc(l.game)+" "+esc(l.usedAt)+")":"<span class='pill no'>NOT YET PLAYED</span> made "+esc(l.madeAt))+"</div>").join(""):""}catch(e){}}
+$("pMakeBtn").onclick=()=>pMake(false);$("pTg").addEventListener("keydown",e=>{if(e.key==="Enter")pMake(false)});
 $("pCopyLink").onclick=()=>copy($("pLink").textContent,$("pCopyLink"));$("pCopyMsg").onclick=()=>copy(pMessage(),$("pCopyMsg"));
 fetch("/api/config").then(r=>r.json()).then(j=>{if(j&&j.perPlay)CONF=j}).catch(()=>{});
 if(token)unlock();
