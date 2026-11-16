@@ -440,6 +440,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(34px,10vw,50p
       <p class="hint" id="aMsg"></p>
       <div class="offerbox" id="capBox"><strong>Daily budget</strong><p id="capText">…</p><div class="btnrow"><div class="money" style="flex:1;min-width:0"><span>₱</span><input class="inp" id="capInput" type="number" min="0" step="100" inputmode="numeric" placeholder="new budget for today"></div><button class="btn small ghost" id="capBtn" type="button">Raise budget</button></div><p class="hint" id="capMsg"></p></div>
       <div class="offerbox" id="stopBox" style="border-color:var(--bad)"><strong>Emergency stop</strong><p id="stopText">…</p><div class="btnrow"><button class="btn small" id="stopBtn" type="button" style="background:var(--bad);color:#fff">STOP ALL</button></div><p class="hint" id="stopMsg">Blocks every new link and play for all players until resumed.</p></div>
+      <div class="offerbox" id="promoBox"><strong>Promo free link</strong><p class="hint">Para sa giveaway: site players lang, <b>ISANG libreng laro</b>, walang deposit o turnover na kailangan. Mamamatay ang link sa hatinggabi; ang panalo ay kasama pa rin sa daily budget.</p><div class="btnrow"><input class="inp" id="pAcct" type="text" autocomplete="off" spellcheck="false" placeholder="game username / user ID" style="flex:1;min-width:0"><input class="inp" id="pTg" type="text" autocomplete="off" spellcheck="false" placeholder="@telegram" style="flex:1;min-width:0"><button class="btn small" id="pMakeBtn" type="button">Make free link</button></div><p class="hint" id="pMsg"></p><div class="field" id="pLinkField" hidden><span>Promo link</span><div class="linkrow"><code id="pLink"></code></div><div class="btnrow"><button class="btn small" id="pCopyLink" type="button">Copy link</button><button class="btn small" id="pCopyMsg" type="button">Copy message + link</button></div></div><div id="pList"></div></div>
       <div class="offerbox" id="linksTodayBox"><div class="btnrow" style="justify-content:space-between"><strong>Links today</strong><button class="btn small ghost" id="linksRefreshBtn" type="button">Refresh</button></div><div id="linksTodayList"><p class="hint">Loading…</p></div></div>
     </div>
   </section>
@@ -989,7 +990,7 @@ function renderMech(){
 }
 function setGo(show,text){const g=$("goBtn");g.hidden=!show;if(text)g.textContent=text;g.disabled=false;g.classList.remove("pressed");g.classList.toggle("startbtn",text==null||text==="START")}
 const HOWTO="The light runs around the board and stops on your bonus. Every play wins!";
-function rangeText(){return "Every "+php(CONF.perPlay)+" deposit = 1 play · <b>"+N+" play"+(N===1?"":"s")+"</b> today ("+php(S.dep)+" deposited) · every play wins a bonus"}
+function rangeText(){if(S&&S.free)return "🎁 <b>Promo FREE PLAY</b> · isang libreng laro · walang deposit o turnover na kailangan";return "Every "+php(CONF.perPlay)+" deposit = 1 play · <b>"+N+" play"+(N===1?"":"s")+"</b> today ("+php(S.dep)+" deposited) · every play wins a bonus"}
 function lockView(label,msg){GAME.build($("play"));$("range").textContent="";$("count").hidden=false;$("count").textContent=label;setGo(false);cheer("");$("note").textContent=msg}
 function lockReason(){
   if(!S.playOpen)return {cheer:"Game closed for today.",note:"Swerte Lights is open "+playHours()+" daily. Come back tomorrow — ask your agent for a new link after your next deposit."};
@@ -1082,7 +1083,7 @@ function showSummary(){
   $("sumList").innerHTML="";P.forEach((p,i)=>{const li=el("li");li.textContent="Play "+(i+1)+": "+php2(amtOf(p))+(p.wild?" · Wild":"");$("sumList").appendChild(li)});
   $("summary").hidden=false;
   cheer("Thanks for playing Swerte Lights!");
-  $("note").textContent=mode==="player"&&S.playsUsed>=CONF.maxPlays?"You used all "+CONF.maxPlays+" plays for today. Come back tomorrow!":mode==="player"?"All plays from today's deposit are used. Deposit again ("+php(CONF.perPlay)+" = 1 play) and this page unlocks your next play.":"Demo over. Press Reset to try again.";
+  $("note").textContent=mode==="player"&&S.free?"Tapos na ang promo play mo — salamat sa paglalaro! Ang bonus ay makikredito bukas ng 1:00 PM.":mode==="player"&&S.playsUsed>=CONF.maxPlays?"You used all "+CONF.maxPlays+" plays for today. Come back tomorrow!":mode==="player"?"All plays from today's deposit are used. Deposit again ("+php(CONF.perPlay)+" = 1 play) and this page unlocks your next play.":"Demo over. Press Reset to try again.";
 }
 $("goBtn").onclick=()=>{if(busy)return;if(cur&&!cur.seen&&!$("win").hidden){nextRound();return}start()};
 $("resetBtn").onclick=()=>{if(busy||mode==="player")return;demoPlays=[];cur=null;buildView()};
@@ -1215,8 +1216,27 @@ function unlockAdmin(){
   $("linksRefreshBtn").onclick=loadLinksToday;
   $("copyLink").onclick=()=>copyText(playerLink(),$("copyLink"));
   $("copyMsg").onclick=()=>{if(!playerLink()){$("aMsg").textContent="Make a link first.";return}copyText(BRAND.script()+"\n\n🔗 Play here: "+playerLink(),$("copyMsg"))};
-  renderLookup();loadCap();loadLinksToday();
+  $("pMakeBtn").onclick=()=>makeFreeLink(false);
+  $("pTg").addEventListener("keydown",e=>{if(e.key==="Enter")makeFreeLink(false)});
+  $("pCopyLink").onclick=()=>copyText($("pLink").textContent,$("pCopyLink"));
+  $("pCopyMsg").onclick=()=>{if(!$("pLink").textContent){$("pMsg").textContent="Make a free link first.";return}copyText(promoMsg(),$("pCopyMsg"))};
+  renderLookup();loadCap();loadLinksToday();loadFreeLinks();
 }
+async function makeFreeLink(force){const a=$("pAcct").value.trim(),tg=$("pTg").value.trim();
+  if(!a||!tg){$("pMsg").textContent="Kailangan ang game username AT Telegram username.";return}
+  $("pMsg").textContent="Making the promo link…";
+  const r=await api("/api/free-link",{method:"POST",body:JSON.stringify({account:a,tg:tg,force:!!force})});
+  if(!r.ok){
+    if(r.j.needForce&&!force){
+      if(confirm(r.j.msg+"\n\nGawan pa rin ng FREE link si \""+a+"\" (UNVERIFIED)?")){makeFreeLink(true)}
+      else{$("pMsg").textContent="Hindi ginawa ang link."}
+      return}
+    $("pMsg").textContent=r.j.msg||r.j.error||"Error";return}
+  $("pLink").textContent=location.origin+"/#"+r.j.code;$("pLinkField").hidden=false;
+  $("pMsg").textContent="Free link ready para kay "+(r.j.name||r.j.account)+" · TG @"+r.j.tg+(r.j.verified===false?" · ⚠️ UNVERIFIED account":"");loadFreeLinks()}
+function promoMsg(){return "🎁 FREE PLAY — "+((CONF&&(CONF.brandLabel||CONF.brand))||"")+" promo\nIsang LIBRENG "+((CONF&&CONF.game)||"laro")+" para sa'yo — walang deposit at walang turnover na kailangan!\n• 1 free play, siguradong may bonus\n• Valid ngayong araw lang\n\n🔗 Play here: "+$("pLink").textContent}
+async function loadFreeLinks(){const r=await api("/api/free-links");if(!r.ok)return;const rows=r.j.links||[];
+  $("pList").innerHTML=rows.length?rows.map(l=>"<p class='hint'>@"+esc(l.tg||"?")+" · <b>"+esc(l.account)+"</b>"+(l.verified===false?" · ⚠️ UNVERIFIED":"")+" · "+(l.used?"PLAYED "+php(l.amount)+" ("+esc(l.usedAt)+")":"not yet played · made "+esc(l.madeAt))+"</p>").join(""):""}
 function initAdmin(){
   $("admin").hidden=false;$("previewLabel").hidden=false;
   if(adminToken){unlockAdmin();return}
