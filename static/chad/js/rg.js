@@ -64,6 +64,11 @@ window.RG = (function () {
     if (S.stopped) { status("The game is paused by the admin right now." + (S.stopNote ? " (" + S.stopNote + ")" : ""), true); setStart(false); return; }
     if (!S.playOpen) { status("Game closed for today. Come back tomorrow.", true); setStart(false); return; }
     if (S.capped) { status("Today's bonus budget is used up. Try again tomorrow.", true); setStart(false); return; }
+    if (S.free) {
+      if (S.playsUsed >= 1) { status("Nagamit na ang promo link na ito — isang laro lang. Salamat sa paglalaro!", true); setStart(false); return; }
+      status("🎁 FREE PLAY promo — isang libreng laro, walang deposit o turnover na kailangan. Good luck!");
+      setStart(true, "START (FREE)"); return;
+    }
     const used = S.playsUsed, total = S.playsTotal, max = (CONF && CONF.maxPlays) || 5;
     if (used >= max) { status("You used all " + max + " plays for today (Roll It + Chad Smash). Come back tomorrow!", true); setStart(false); return; }
     if (!total || used >= total) { status("No entry left. Deposit " + php(CONF && CONF.perPlay) + " or more for your next play — this page unlocks on its own."); setStart(false); return; }
