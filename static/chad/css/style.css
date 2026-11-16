@@ -43,7 +43,7 @@ canvas{display:block;width:100%;height:100%;touch-action:manipulation;cursor:poi
 .snd{position:absolute;right:10px;top:10px;font:900 11px var(--body);letter-spacing:.06em;padding:5px 9px;border-radius:8px;border:1px solid #fff5;background:#0008;color:var(--ink);cursor:pointer}
 /* phones: tighter overlay so the whole briefing + START fit without scrolling */
 @media (max-width:430px){
-  .overlay{gap:8px;padding:14px}
+  .overlay{gap:8px;padding:14px;padding-top:46px} /* clear the sound toggle when the overlay scrolls from the top */
   .overlay h2{font-size:clamp(24px,7vw,32px)}
   .faces canvas{width:46px;height:46px}
   .rules{font-size:12px}
