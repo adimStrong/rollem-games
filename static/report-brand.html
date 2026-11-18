@@ -66,7 +66,7 @@ const PARTS=location.pathname.split("/").filter(Boolean); // report / <brand> / 
 const BRAND=PARTS[1]||"",TOKEN=PARTS[2]||"";
 const REFRESH_MS=30000;
 const STATUS={pending:"Pending",sent_to_risk:"Sent to Risk",revoked:"Revoked"};
-function peso(v){const n=Number(v||0);return "₱"+n.toLocaleString("en-PH",{minimumFractionDigits:Number.isInteger(n)?0:2,maximumFractionDigits:2})}
+function peso(v){return "₱"+Number(v||0).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2})}
 function todayStr(){return new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Manila"})}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
