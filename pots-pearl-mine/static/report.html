@@ -68,7 +68,7 @@ const $=id=>document.getElementById(id);
 let token="";
 try{token=sessionStorage.getItem("cg-admin-token")||""}catch(e){}
 
-function peso(v){return "₱"+Number(v||0).toLocaleString("en-PH",{maximumFractionDigits:0})}
+function peso(v){return "₱"+Number(v||0).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2})}
 function todayStr(){
   const d=new Date();
   return d.toLocaleDateString("en-CA",{timeZone:"Asia/Manila"}); // en-CA gives YYYY-MM-DD
