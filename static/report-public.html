@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -60,7 +60,7 @@ const $=id=>document.getElementById(id);
 const TOKEN=location.pathname.split("/").filter(Boolean).pop();
 const REFRESH_MS=30000;
 
-function peso(v){return "₱"+Number(v||0).toLocaleString("en-PH",{maximumFractionDigits:0})}
+function peso(v){return "₱"+Number(v||0).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2})}
 function todayStr(){
   const d=new Date();
   return d.toLocaleDateString("en-CA",{timeZone:"Asia/Manila"}); // en-CA gives YYYY-MM-DD
