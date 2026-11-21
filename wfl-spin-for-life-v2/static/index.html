@@ -247,7 +247,7 @@ body{background:radial-gradient(70% 45% at 50% 0%,rgba(47,227,154,.25),transpare
     <h2>Link maker · Spin For Life</h2>
     <p class="hint" id="adminGate">Checking access…</p>
     <div id="adminBody" hidden style="display:grid;gap:14px">
-      <p class="hint">Type the player's <b>username, user ID, or game ID</b>. The system reads their Success deposits (<span class="hrs">12:00 PM–9:00 PM</span>) and turnover for today straight from the Win For Life database. <b>Every <span class="perplay">₱200</span> deposit = 1 play (max <span class="maxplays">5</span>/day); each play unlocks after 1× turnover on <span class="wgame">any game</span>.</b> The server draws the prize (₱8.20 / ₱16.50 / ₱26) and records it in the wins ledger at once. The link stays playable until <span class="phrs">11:59 PM</span> today and expires at midnight.</p>
+      <p class="hint">Type the player's <b>username, user ID, or game ID</b>. The system reads their Success deposits (<span class="hrs">12:00 PM–9:00 PM</span>) and turnover for today straight from the Win For Life database. <b>Every <span class="perplay">₱200</span> deposit = 1 play (max <span class="maxplays">5</span>/day); each play unlocks after 1× turnover on <span class="wgame">any game</span>.</b> The server draws the prize (₱8.00 / ₱18.00 / ₱28.00) and records it in the wins ledger at once. The link stays playable until <span class="phrs">11:59 PM</span> today and expires at midnight.</p>
       <label class="field"><span>Player username, user ID, or game ID</span><div class="btnrow"><input class="inp" id="acct" type="text" autocomplete="off" spellcheck="false" placeholder="e.g. juan123 or 482910" style="flex:1;min-width:0"><button class="btn small" id="lookupBtn" type="button">Check</button></div></label>
       <div class="tierbox" id="aTier"></div>
       <div class="offerbox" id="offerBox" hidden></div>
@@ -333,7 +333,7 @@ body{background:radial-gradient(70% 45% at 50% 0%,rgba(47,227,154,.25),transpare
       <li>One deposit of ₱200 or more made between 12:00 PM and 9:00 PM gives 1 spin — a bigger deposit is still 1 spin, and two ₱300 deposits are 2 spins, up to 5 spins per player per day. Your spins are on the personal link from your agent; your deposits are checked automatically from your account. Pending, failed or reversed deposits do not qualify.</li>
       <li>Each spin unlocks only once your turnover for the day reaches 1× the deposit for that spin (₱200 deposit → ₱200 in bets, ₱400 → ₱400, and so on). Bets on any game count. Turnover is read from your account and refreshes every few minutes.</li>
       <li>The promo runs daily: deposits count from 12:00 PM to 9:00 PM, and the spins on your link must be used by 11:59 PM the same day — your link expires at midnight and cannot be used the next day. Total bonus paid by this promo is capped at ₱15,000 per day for all players; once the cap is reached, new spins wait for the next day.</li>
-      <li>Each spin's bonus is set at random by the system the moment you press SPIN: ₱8.20, ₱16.50 or ₱26 (the Kampeon jackpot, the rarest result). The wheel then stops on a pocket of that prize. How many pockets show an amount on the wheel does not reflect your actual chances. The ₱77, ₱177, ₱188 and ₱777 JACKPOT pockets are for display only and can never be won. This is an animated promo game only, not a live roulette or a bet.</li>
+      <li>Each spin's bonus is set at random by the system the moment you press SPIN: ₱8.00, ₱18.00 or ₱28.00 (the Kampeon jackpot, the rarest result). The wheel then stops on a pocket of that prize. How many pockets show an amount on the wheel does not reflect your actual chances. The ₱77, ₱177, ₱188 and ₱777 JACKPOT pockets are for display only and can never be won. This is an animated promo game only, not a live roulette or a bet.</li>
       <li>Results are final once you press SPIN. Refreshing the page, reopening the link or using another device does not give extra spins or a new bonus; an unclaimed spin is shown again as it was.</li>
       <li>Every win is recorded automatically. The bonus is credited the following day at 1:00 PM after verification and must be wagered 1× (1× wagering) before it can be withdrawn.</li>
       <li>One claim per spin. Multiple or linked accounts or any attempt to abuse this promo void the bonus and may lead to action on the account.</li>
@@ -350,7 +350,7 @@ body{background:radial-gradient(70% 45% at 50% 0%,rgba(47,227,154,.25),transpare
 // in the Win For Life retention database, deposits and turnover are read live, and the prize is drawn by the server (POST /api/play).
 // Nothing about the amount is decided in this browser; the board layout is cosmetic and saved with POST /api/plan.
 let CONF={brand:"winforlife",brandLabel:"Win For Life",game:"Spin For Life",perPlay:200,maxPlays:5,turnover:1,dailyCap:15000,depFrom:"12:00",depTo:"21:00",playFrom:"12:00",playUntil:"23:59",
-  prizes:[{amt:8.2,p:90},{amt:16.5,p:5},{amt:26,p:5}],wildRate:0,wildPrizes:[],wagerCats:["all"],maxPrize:777};
+  prizes:[{amt:8,p:97},{amt:18,p:3},{amt:28,p:0},{amt:38,p:0}],wildRate:0,wildPrizes:[],wagerCats:["all"],maxPrize:777};
 function hm12(s){const [h,m]=String(s||"00:00").split(":").map(Number);const ap=h>=12?"PM":"AM",hh=((h+11)%12)+1;return hh+":"+String(m||0).padStart(2,"0")+" "+ap}
 // hours() = the DEPOSIT window (a deposit only counts as a play inside it); playHours()/playEnd() = how long
 // the plays themselves stay usable. These two used to be the same string; since 2026-11-11 they differ
@@ -470,7 +470,7 @@ const WHEEL=(()=>{
   function setBall(){}
   function blur(v){if(v<.2){rotor.removeAttribute("filter");return}blurB.setAttribute("stdDeviation",v.toFixed(2));rotor.setAttribute("filter","url(#mb)")}
   function highlight(p){stage.querySelectorAll(".pk").forEach(e=>e.classList.toggle("hit",+e.dataset.i===p))}
-  function pocketFor(step){const c=PK().map((s,i)=>s===step?i:-1).filter(i=>i>=0);return c[Math.floor(rnd()*c.length)]}
+  function pocketFor(step){step=Math.max(0,Math.min(2,step));const c=PK().map((s,i)=>s===step?i:-1).filter(i=>i>=0);return c[Math.floor(rnd()*c.length)]}
   function flick(){ptr.animate([{transform:"rotate(-16deg)"},{transform:"rotate(0)"}],{duration:140,easing:"ease-out"})}
   // ---------- particles (screen space, drawn on a canvas over the wheel) ----------
   function ballXY(){const r=ptr.getBoundingClientRect(),c=fx.getBoundingClientRect();return [r.left+r.width/2-c.left,r.bottom-c.top]}
@@ -549,7 +549,7 @@ const WHEEL=(()=>{
       raf=requestAnimationFrame(frame);
     },
     stop(){if(raf)cancelAnimationFrame(raf);raf=null;stopIdle();if(fxRaf)cancelAnimationFrame(fxRaf);fxRaf=null;parts=[];timers.forEach(clearTimeout);timers=[];rot=0;ballA=0;spinning=false;done=false},
-    finish(ctx){const st=ctx.state.step,p=ctx.state.pocket!=null?ctx.state.pocket:PK().indexOf(st);rest(p,st===ctx.ladder.length-1);lbl.textContent="Huminto sa "+LABELS[st]+"!"}
+    finish(ctx){const st=ctx.state.step,p=ctx.state.pocket!=null?ctx.state.pocket:PK().indexOf(st);rest(p,st===ctx.ladder.length-1);lbl.textContent="Huminto sa "+LABELS[Math.max(0,Math.min(LABELS.length-1,st))]+"!"}
   };
   return G;
 })();
@@ -614,7 +614,7 @@ function renderMech(){
     "<b>"+wagerRule()+"</b> Each play unlocks once your "+wagerLabel()+" reaches <b>"+CONF.turnover+"× the deposit</b> ("+php(CONF.perPlay)+" deposit → "+php(CONF.perPlay*CONF.turnover)+" in bets). Your deposits and turnover are checked automatically from your account — nothing to send.",
     "<b>Hours:</b> deposits count "+hours()+" · play until "+playEnd()+" daily. <b>Max bonus:</b> "+php(CONF.dailyCap)+" per day for all players.",
     "<b>How to get your link:</b> ask your agent after you deposit. Your link works until "+playEnd()+" on the day it was issued, then expires at midnight; deposit again and your next play unlocks on the same link.",
-    "<b>Prize:</b> The bonus is random on every spin and is set when you press SPIN (₱8.20, ₱16.50 or ₱26 — Kampeon, the jackpot). The wheel then stops on a pocket of that prize. The ₱77, ₱177, ₱188 and ₱777 JACKPOT pockets are display-only and can never be won.",
+    "<b>Prize:</b> The bonus is random on every spin and is set when you press SPIN (₱8.00, ₱18.00 or ₱28.00 — Kampeon, the jackpot). The wheel then stops on a pocket of that prize. The ₱77, ₱177, ₱188 and ₱777 JACKPOT pockets are display-only and can never be won.",
     "<b>Claiming:</b> Your win is recorded the moment it is revealed. The bonus is credited the following day at 1:00 PM and must be wagered "+CONF.turnover+"× before it can be withdrawn.",
     "<b>Results are final.</b> Refreshing or reopening the link does not give extra plays; an unclaimed play is shown again."];
   $("mechSteps").innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
