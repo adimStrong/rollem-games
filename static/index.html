@@ -505,7 +505,7 @@ html,body{overflow-x:hidden}
     <h2>Link maker · Pearl Mine</h2>
     <p class="hint" id="adminGate">Checking access…</p>
     <div id="adminBody" hidden style="display:grid;gap:14px">
-      <p class="hint">Type the player's <b>username, user ID, or game ID</b>. The system reads their Success deposits (<span class="hrs">12:00 PM–9:00 PM</span>) and slot turnover for today straight from the POTS database. <b>Every <span class="perplay">₱150</span> deposit = 1 play (max <span class="maxplays">5</span>/day); each play unlocks after 1× slot turnover.</b> The server draws the prize (₱8 / ₱18) and records it in the wins ledger at once. The link stays playable until <span class="phrs">11:59 PM</span> today and expires at midnight.</p>
+      <p class="hint">Type the player's <b>username, user ID, or game ID</b>. The system reads their Success deposits (<span class="hrs">12:00 PM–9:00 PM</span>) and slot/casino turnover for today straight from the POTS database. <b>Every <span class="perplay">₱150</span> deposit = 1 play (max <span class="maxplays">5</span>/day); each play unlocks after 1× slot turnover.</b> The server draws the prize (₱8 / ₱18) and records it in the wins ledger at once. The link stays playable until <span class="phrs">11:59 PM</span> today and expires at midnight.</p>
       <label class="field"><span>Player username, user ID, or game ID</span><div class="btnrow"><input class="inp" id="acct" type="text" autocomplete="off" spellcheck="false" placeholder="e.g. juan123 or 482910" style="flex:1;min-width:0"><button class="btn small" id="lookupBtn" type="button">Check</button></div></label>
       <div class="tierbox" id="aTier"></div>
       <div class="offerbox" id="offerBox" hidden></div>
@@ -585,7 +585,7 @@ html,body{overflow-x:hidden}
       <ol>
         <li>Open to verified POTS players aged 21 and above. Self-excluded, restricted or unverified accounts are not eligible.</li>
         <li>One deposit of ₱150 or more made between 12:00 PM and 9:00 PM gives 1 play — a bigger deposit is still 1 play, and two ₱150 deposits are 2 plays, up to 5 plays per player per day. Your plays are on the personal link from your agent; your deposits are checked automatically from your account. Pending, failed or reversed deposits do not qualify.</li>
-        <li>Only bets on slot games count for this promo. Each play unlocks only once your slot turnover for the day reaches 1× the deposit for that play (₱150 deposit → ₱150 in slot bets, ₱300 → ₱300, and so on). Turnover is read from your account and refreshes every few minutes.</li>
+        <li>Bets on slot and casino games count for this promo. Each play unlocks only once your slot/casino turnover for the day reaches 1× the deposit for that play (₱150 deposit → ₱150 in slot or casino bets, ₱300 → ₱300, and so on). Turnover is read from your account and refreshes every few minutes.</li>
         <li>The promo runs daily: deposits count from 12:00 PM to 9:00 PM, and the plays on your link must be used by 11:59 PM the same day — your link expires at midnight and cannot be used the next day. Total bonus paid by this promo is capped at ₱10,000 per day for all players; once the cap is reached, new plays wait for the next day.</li>
         <li>Each play's bonus is set at random by the system the moment you press START. In Pearl Mine you open clams one by one: the pearls you find add up to your bonus. A sea urchin ends the round and you keep the pearls already found. If you press COLLECT before all the pearls of your bonus are found, the tide brings you the rest, so your total is the same either way. Which clams you open makes no difference. The prize ladder (₱8 · ₱18 · ₱28 · ₱38) shows your running total. The ₱28 and ₱38 tiers and the black ₱77 pearl are display tiers only and can never be won or collected. The pearls shown in the unopened clams at the end of a round — including the ₱777 pearls — are for display only and are not added to your bonus.</li>
         <li>Results are final once you press START. Refreshing the page, reopening the link or using another device does not give extra plays or a new bonus; an unfinished round continues where you left it.</li>
@@ -621,7 +621,7 @@ HOW TO JOIN
 
 • One deposit of ${php(CONF.perPlay)} or more = 1 FREE PLAY (a bigger deposit is still 1)
 • Maximum of ${CONF.maxPlays} FREE PLAYS per player per day.
-• Only slot games qualify for this promotion.
+• Slot and casino games qualify for this promotion.
 • Each FREE PLAY unlocks once you complete the ${CONF.turnover}× turnover requirement.
 • Deposits count only between ${hours()}. Ask your agent for your Pearl Mine link and use your plays until ${playEnd()} the same day.
 • Prizes up to ${php(CONF.maxPrize||777)}!
@@ -1361,7 +1361,7 @@ async function refresh(force){if(mode!=="player")return;let r=null;try{r=await f
 function renderMech(){
   $("mechOffer").textContent="POTS Pearl Mine Bonus · Community game";
   const steps=["<b>One deposit of "+php(CONF.perPlay)+" or more = 1 play</b>, up to <b>"+CONF.maxPlays+" plays per day</b>. A bigger deposit is still 1 play — deposit again for another. Deposits count from "+hours()+".",
-    "<b>Only slot games qualify.</b> Each play unlocks once your slot turnover reaches <b>"+CONF.turnover+"× the deposit</b> ("+php(CONF.perPlay)+" deposit → "+php(CONF.perPlay*CONF.turnover)+" in slot bets). Your deposits and turnover are checked automatically from your account — nothing to send.",
+    "<b>Slot and casino games qualify.</b> Each play unlocks once your slot/casino turnover reaches <b>"+CONF.turnover+"× the deposit</b> ("+php(CONF.perPlay)+" deposit → "+php(CONF.perPlay*CONF.turnover)+" in slot or casino bets). Your deposits and turnover are checked automatically from your account — nothing to send.",
     "<b>Hours:</b> deposits count "+hours()+" · play until "+playEnd()+" daily. <b>Max bonus:</b> "+php(CONF.dailyCap)+" per day for all players.",
     "<b>How to get your link:</b> ask your agent after you deposit. Your link works until "+playEnd()+" on the day it was issued, then expires at midnight; deposit again and your next play unlocks on the same link.",
     "<b>Prize:</b> The bonus is random on every play and is set when you press START. The pearls you find add up to your bonus, paid once. The prize ladder shows how far your pearls climb; ₱28, ₱38 and the black ₱77 pearl are display tiers only and cannot be won. The pearls shown in the unopened clams at the end — including the ₱777 pearls — are for display only.",
@@ -1378,7 +1378,7 @@ function lockView(label,msg){GAME.build($("play"));$("range").textContent="";$("
 function lockReason(){
   if(!S.playOpen)return {cheer:"Game closed for today.",note:"Pearl Mine is open "+playHours()+" daily. Come back tomorrow — ask your agent for a new link after your next deposit."};
   if(S.capped)return {cheer:"Daily bonus budget reached.",note:"Today's "+php(CONF.dailyCap)+" bonus budget is used up. Try again tomorrow."};
-  if(!S.betOk){const need=Math.max(0,S.nextNeed-S.slot);return {cheer:"Finish your slot turnover first.",note:"Play "+(S.playsUsed+1)+" unlocks once your slot turnover today reaches "+php(S.nextNeed)+" — mag-slots pa ng "+php(need)+" (now "+php(S.slot)+"). This page refreshes on its own."}}
+  if(!S.betOk){const need=Math.max(0,S.nextNeed-S.slot);return {cheer:"Finish your slot/casino turnover first.",note:"Play "+(S.playsUsed+1)+" unlocks once your slot/casino turnover today reaches "+php(S.nextNeed)+" — mag-slots o casino pa ng "+php(need)+" (now "+php(S.slot)+"). This page refreshes on its own."}}
   return {cheer:"Not ready yet.",note:(S.missing||[]).join(" · ")||"Please wait a moment."}}
 function buildView(){
   renderMech();
@@ -1568,8 +1568,8 @@ function renderLookup(){
   tb.className="tierbox"+(tot?"":" bad");
   tb.innerHTML="<b>"+esc(l.account)+"</b>"+(l.name&&l.name!==l.account?" ("+esc(l.name)+")":"")+(l.gameId?" · game ID "+esc(l.gameId):"")
     +"<br>Deposit today ("+hours()+"): <b>"+php(l.dep)+"</b> in "+deps.length+" deposit"+(deps.length===1?"":"s")+" → <b>"+tot+" play"+(tot===1?"":"s")+"</b> <small>(every "+php(CONF.perPlay)+" = 1 play, max "+CONF.maxPlays+"/day)</small>"
-    +"<br>Slot turnover today: <b>"+php(l.slot)+"</b>"+(l.syncedAt?" <small>(synced "+esc(String(l.syncedAt).slice(11,16))+")</small>":" <small>(not synced yet)</small>")+" · other games "+php(l.other)
-    +"<br>Plays used: <b>"+used+" of "+tot+"</b>"+(used<tot?" · next play needs slot turnover "+php(l.nextNeed)+(l.betOk?" ✓":" <span style='color:var(--bad)'>(short by "+php(Math.max(0,l.nextNeed-l.slot))+")</span>"):"")
+    +"<br>Slot/casino turnover today: <b>"+php(l.slot)+"</b>"+(l.syncedAt?" <small>(synced "+esc(String(l.syncedAt).slice(11,16))+")</small>":" <small>(not synced yet)</small>")+" · other games "+php(l.other)
+    +"<br>Plays used: <b>"+used+" of "+tot+"</b>"+(used<tot?" · next play needs slot/casino turnover "+php(l.nextNeed)+(l.betOk?" ✓":" <span style='color:var(--bad)'>(short by "+php(Math.max(0,l.nextNeed-l.slot))+")</span>"):"")
     +"<br><small>Links issued today: <b>"+(l.linksIssued||0)+"</b> · ready to play now: <b>"+(l.ready?"YES":"no")+"</b></small>";
   const odds=CONF.prizes.map(p=>php(p.amt)+" ("+p.p+"%)").join(" · ");
   ob.innerHTML="<strong>Status</strong>"+(l.missing&&l.missing.length?"<p>Kulang pa: "+l.missing.map(esc).join(" at ")+"</p>":"<p>Ready to play.</p>")
