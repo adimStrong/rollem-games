@@ -73,6 +73,12 @@ MIN_DEPOSIT = int(os.environ.get("MIN_DEPOSIT", "200"))         # deposits for t
 TURNOVER_MULT = float(os.environ.get("TURNOVER_MULT", "1"))     # eligibility gate AND post-win clearing multiplier
 WAGER_CATS = [c.strip() for c in os.environ.get("WAGER_CATS", "egame").split(",") if c.strip()]  # 2026-10-31: slot games ("egame") only -- the canned/sidebar text says "Only slot games qualify"; casino was removed to match it exactly
 DAILY_CAP = int(os.environ.get("DAILY_CAP", "10000"))
+# 2026-11-22 (JD, khiann01 case: 5x P200 deposited before spinning = only 1 spin): ENTRY_MODE=deposit
+# makes the wheel match the cg3 games -- each Success deposit >= MIN_DEPOSIT inside the window funds its
+# OWN spin (max ROUNDS_PER_DAY), and spin k unlocks at TURNOVER_MULT x the sum of the first k qualifying
+# deposits, compared against the day's ABSOLUTE slot turnover (no incremental baseline). The default
+# "amount" keeps the old pooled behavior where a round snapshots the whole day's deposit total.
+ENTRY_MODE = os.environ.get("ENTRY_MODE", "amount")
 ROUNDS_PER_DAY = int(os.environ.get("ROUNDS_PER_DAY", "5"))   # 2026-10-30: max 5 claims/spins per player per day -- each round STRICTLY also requires its own new, unconsumed deposit (see canPick's need_amt>0 guard in summary() and the matching backend check in /api/pick); this is enforced BOTH in canPick (UI hint) and as a hard block in /api/pick (elif len(rows)>=ROUNDS_PER_DAY)
 DEP_FROM = os.environ.get("DEP_FROM", "12:00")   # deposits counted from (inclusive, HH:MM)
 DEP_TO = os.environ.get("DEP_TO", "21:00")       # deposits counted until (exclusive)
@@ -91,7 +97,7 @@ CONFIG = {
     "brand": BRAND, "game": GAME_NAME, "version": "fw2", "cabins": N,
     "prizes": [{"amt": p["amt"], "p": _pct(p["p"])} for p in PRIZES],
     "minDeposit": MIN_DEPOSIT, "turnover": TURNOVER_MULT, "wagerCats": WAGER_CATS, "dailyCap": DAILY_CAP,
-    "roundsPerDay": ROUNDS_PER_DAY, "depFrom": DEP_FROM, "depTo": DEP_TO, "playUntil": PLAY_UNTIL, "maxPrize": MAX_PRIZE,
+    "roundsPerDay": ROUNDS_PER_DAY, "entryMode": ENTRY_MODE, "depFrom": DEP_FROM, "depTo": DEP_TO, "playUntil": PLAY_UNTIL, "maxPrize": MAX_PRIZE,
 }
 
 
@@ -390,21 +396,42 @@ def summary(cur, user, date: str):
     slot = max(0.0, slot_today - base)
     t = now()
     hm = hm_of(t)
-    dep_ok = dep_total >= MIN_DEPOSIT
-    # THIS round's own incremental turnover target: the cumulative deposit-based target minus
-    # whatever the baseline round already required -- NOT the full cumulative figure, which would
-    # compare a RELATIVE `slot` against an ABSOLUTE target and demand far more than intended
-    # (found 2026-10-29 via a real player: round 1 needed ₱200, round 2 was wrongly requiring
-    # ₱625 absolute instead of ₱200 more on top of what round 1 already covered).
-    need_amt = max(0.0, max(MIN_DEPOSIT, dep_total) * TURNOVER_MULT - prior_need)
     override = bool(cur_row and cur_row["status"] == "open" and cur_row.get("bet_override"))
-    bet_ok = slot >= need_amt or override
     play_open = hm <= PLAY_UNTIL
+    used = len(rows)
+    open_row = bool(cur_row and cur_row["status"] == "open")
+    plays_total = None
     missing = []
-    if not dep_ok:
-        missing.append("mag-deposit pa ng ₱%s" % f"{MIN_DEPOSIT - dep_total:,.0f}")
-    if not bet_ok:
-        missing.append("mag-slots/casino pa ng ₱%s" % f"{need_amt - slot:,.0f}")
+    if ENTRY_MODE == "deposit":
+        # each qualifying deposit funds its OWN spin (2026-11-22, matching the cg3 games): spin k's
+        # gate is ABSOLUTE -- today's slot turnover >= TURNOVER_MULT x the sum of quals 1..k. The
+        # incremental-baseline machinery above is deliberately unused in this mode.
+        quals = [d for d in deps if d["amount"] >= MIN_DEPOSIT]
+        plays_total = min(len(quals), ROUNDS_PER_DAY)
+        k = used if open_row else used + 1
+        need_amt = TURNOVER_MULT * sum(d["amount"] for d in quals[:min(k, len(quals))])
+        slot = slot_today
+        dep_ok = 1 <= k <= plays_total
+        bet_ok = slot >= need_amt or override
+        if used >= ROUNDS_PER_DAY and not open_row:
+            missing.append("tapos na ang %d ikot mo ngayong araw" % ROUNDS_PER_DAY)
+        elif not dep_ok:
+            missing.append("mag-deposit pa ng ₱%s pataas (bawat deposit = 1 ikot)" % f"{MIN_DEPOSIT:,.0f}")
+        if not bet_ok:
+            missing.append("mag-slots/casino pa ng ₱%s" % f"{need_amt - slot:,.0f}")
+    else:
+        dep_ok = dep_total >= MIN_DEPOSIT
+        # THIS round's own incremental turnover target: the cumulative deposit-based target minus
+        # whatever the baseline round already required -- NOT the full cumulative figure, which would
+        # compare a RELATIVE `slot` against an ABSOLUTE target and demand far more than intended
+        # (found 2026-10-29 via a real player: round 1 needed ₱200, round 2 was wrongly requiring
+        # ₱625 absolute instead of ₱200 more on top of what round 1 already covered).
+        need_amt = max(0.0, max(MIN_DEPOSIT, dep_total) * TURNOVER_MULT - prior_need)
+        bet_ok = slot >= need_amt or override
+        if not dep_ok:
+            missing.append("mag-deposit pa ng ₱%s" % f"{MIN_DEPOSIT - dep_total:,.0f}")
+        if not bet_ok:
+            missing.append("mag-slots/casino pa ng ₱%s" % f"{need_amt - slot:,.0f}")
     wg = wager(cur, uid)   # may mark rows cleared -> fetch history after it
     cur.execute(
         "SELECT * FROM fw_spins WHERE user_id=%s AND status='paid' ORDER BY spun_at DESC LIMIT 30", (uid,))
@@ -436,8 +463,11 @@ def summary(cur, user, date: str):
         # hasn't grown since the baseline round's own `dep` snapshot, which is the ordinary state
         # right after winning any round -- without this guard EVERY further round is free with no
         # new deposit at all (real incident 2026-10-29: 38 free rounds, ₱816, one player, ~10 min).
-        "canPick": (cur_row is not None and cur_row["status"] == "open")
-                   or (len(rows) < ROUNDS_PER_DAY and need_amt > 0),
+        "canPick": open_row
+                   or (used < ROUNDS_PER_DAY
+                       and ((used < plays_total) if ENTRY_MODE == "deposit" else need_amt > 0)),
+        "playsTotal": plays_total,
+        "entryMode": ENTRY_MODE,
         "needAmt": need_amt,
         "depOk": dep_ok,
         "betOk": bet_ok,
@@ -719,6 +749,7 @@ def config():
 
 
 _PUB = ("dep", "slot", "slotToday", "other", "syncedAt", "cur", "roundsUsed", "canPick", "needAmt", "depOk", "betOk",
+        "playsTotal", "entryMode",
         "ready", "missing", "wager", "hist", "week", "capLeft", "capped", "windowOpen", "playOpen", "serverTime",
         "stopped", "stopNote")
 
@@ -794,7 +825,11 @@ def pick(code):
         elif len(rows) >= ROUNDS_PER_DAY:
             conn.rollback()
             return jsonify({"error": "done", "msg": "Tapos na ang ikot mo ngayong araw. Pumili ulit bukas."}), 409
-        elif need_amt <= 0:
+        elif ENTRY_MODE == "deposit" and len(rows) + 1 > (s.get("playsTotal") or 0):
+            # deposit mode: a new round exists only when a NEW qualifying deposit backs it
+            conn.rollback()
+            return jsonify({"error": "no_new_deposit", "msg": "Walang bagong deposit pa — bawat ₱%d na deposit = 1 ikot. Mag-deposit muna para sa susunod." % MIN_DEPOSIT}), 409
+        elif ENTRY_MODE != "deposit" and need_amt <= 0:
             # Backend enforcement, not just the frontend/canPick hint: a round can only be created
             # when there is a genuinely NEW, unconsumed deposit to fund it (need_amt > 0). This is
             # the exact gate that was missing in the 2026-10-29 incident -- never rely on canPick
