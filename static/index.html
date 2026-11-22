@@ -543,10 +543,10 @@ function render(){
     if(cur&&cur.status==="paid")hint.innerHTML=`Nakuha mo ang <b>${peso(cur.amount)}</b> ngayong araw mula sa Cabin ${cur.cabin}. ${S.canPick?"Pumili ng cabin para sa panibagong ikot.":"Pumili ulit bukas."}`;
     else if(cur&&S.ready)hint.innerHTML=`Abot na ang goal! Pindutin ang <b>SPIN</b>.`;
     else if(cur&&S.demo)hint.innerHTML=`<b>Cabin ${cur.cabin}</b> ang pili mo. Sa demo, pindutin ang <b>SPIN</b> para makita ang ikot.`;
-    else if(cur){const miss=[];if(!S.depOk)miss.push(`mag-deposit pa ng ${peso(CONF.minDeposit-S.dep)}`);if(!S.betOk)miss.push(`mag-slots/casino pa ng ${peso((S.needAmt||0)-S.slot)}`);
+    else if(cur){const miss=(S.missing&&S.missing.length)?S.missing.slice():[];if(!miss.length){if(!S.depOk)miss.push(`mag-deposit pa ng ${peso(CONF.minDeposit-S.dep)}`);if(!S.betOk)miss.push(`mag-slots/casino pa ng ${peso((S.needAmt||0)-S.slot)}`)}
       hint.innerHTML=`<b>Cabin ${cur.cabin}</b> ang pili mo. Para umikot: ${miss.join(" at ")}.`}
     else if(S.canPick)hint.innerHTML=`<b>Pumili ng cabin</b>. Pareho lang ang laban ng lahat.`;
-    else hint.innerHTML=`Tapos na ang ikot mo ngayong araw. Balik bukas.`;
+    else hint.innerHTML=(S.missing&&S.missing.length)?`Para sa panibagong ikot: ${S.missing.join(" at ")}.`:`Tapos na ang ikot mo ngayong araw. Balik bukas.`;
   }
 }
 
