@@ -547,6 +547,7 @@ function render(){
       hint.innerHTML=`<b>Cabin ${cur.cabin}</b> ang pili mo. Para umikot: ${miss.join(" at ")}.`}
     else if(S.canPick)hint.innerHTML=`<b>Pumili ng cabin</b>. Pareho lang ang laban ng lahat.`;
     else hint.innerHTML=(S.missing&&S.missing.length)?`Para sa panibagong ikot: ${S.missing.join(" at ")}.`:`Tapos na ang ikot mo ngayong araw. Balik bukas.`;
+if(S&&S.playsTotal!=null&&!S.demo){const paid=Math.max(0,(S.roundsUsed||0)-((cur&&cur.status==="open")?1:0));const left=Math.max(0,S.playsTotal-paid);hint.innerHTML+=`<br><b>Spins ngayong araw: ${paid} ng ${S.playsTotal} — ${left} pa ang natitira</b>`}
   }
 }
 
