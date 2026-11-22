@@ -54,7 +54,7 @@ def date_range_clauses(args, clauses, params):
             params.append(to_ms)
 
 
-RANGE_BRANDS = {"gopyesta", "pots", "tamasa", "gspot", "winforlife", "rollem", "t2b", "gobetplay"}  # pots (2026-11-06): Pearl Mine server-drawn ladder P7/P17 -- 7 is not in VALID_AMOUNTS; gspot (2026-11-09): Power-Up Cards pays P7/P17; winforlife P8.20/P16.50/P26 + rollem P7.50/P17.65/P27 (dev builds 2026-11-09)
+RANGE_BRANDS = {"gopyesta", "pots", "tamasa", "gspot", "winforlife", "rollem", "t2b", "gobetplay", "saliplay"}  # pots (2026-11-06): Pearl Mine server-drawn ladder P7/P17 -- 7 is not in VALID_AMOUNTS; gspot (2026-11-09): Power-Up Cards pays P7/P17; winforlife P8.20/P16.50/P26 + rollem P7.50/P17.65/P27 (dev builds 2026-11-09)
 # tamasa (2026-11-07): Swerte Lights pays P8.20 / P16.50 (centavo prizes), so `amount` is a decimal (DOUBLE PRECISION) from now on
 
 
@@ -64,7 +64,7 @@ def amount_ok(brand: str, amount: float) -> bool:
     return brand in RANGE_BRANDS and WHEEL_RANGE[0] <= amount <= WHEEL_RANGE[1]
 # gobetplay (2026-11-11): GoBet Race pays P7 / P27 by finishing place. It posts server-side like the
 # other platform-verified games, so it is NOT in TOKEN_BRANDS below -- its links carry no token.
-VALID_BRANDS = {"gopyesta", "pots", "rollem", "winforlife", "cow", "tamasa", "gspot", "t2b", "gobetplay"}
+VALID_BRANDS = {"gopyesta", "pots", "rollem", "winforlife", "cow", "tamasa", "gspot", "t2b", "gobetplay", "saliplay"}  # saliplay (2026-11-22): Sack Race, cg3 server in the saliplay-reporting project
 
 # ---- the two backend-less (static) games: day expiry enforced at the payout boundary ----
 # gspot and t2b have no server of their own, so their play window and one-day link expiry are gated in
@@ -412,7 +412,7 @@ def delete_wins_by_player():
 # equivalent lives here: every win posted for the brand in a PH date range. The token is derived from the admin password,
 # so no new Railway variable is needed: base64url(HMAC-SHA256(ADMIN_PASSWORD, "report:" + brand))[:32].
 BRAND_LABELS = {"gopyesta": "Gopyesta", "pots": "POTS", "rollem": "Roll'em", "winforlife": "Win For Life", "cow": "COW88",
-                "tamasa": "TamasaPH", "gspot": "GameSpot", "t2b": "Time2Bet", "gobetplay": "GoBetPlay"}
+                "tamasa": "TamasaPH", "gspot": "GameSpot", "t2b": "Time2Bet", "gobetplay": "GoBetPlay", "saliplay": "SaliPlay"}
 
 
 def report_token(brand: str) -> str:
