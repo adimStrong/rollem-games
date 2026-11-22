@@ -252,6 +252,7 @@ h2{font:800 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;col
       </div>
       <div class="spinrow"><button class="btn start" id="startBtn" hidden>SPIN</button></div>
       <div class="hint" id="hint"></div>
+      <div class="hint" id="histBox" hidden style="margin-top:8px"></div>
     </section>
     <aside class="stack">
       <div class="panel">
@@ -548,6 +549,7 @@ function render(){
     else if(S.canPick)hint.innerHTML=`<b>Pumili ng cabin</b>. Pareho lang ang laban ng lahat.`;
     else hint.innerHTML=(S.missing&&S.missing.length)?`Para sa panibagong ikot: ${S.missing.join(" at ")}.`:`Tapos na ang ikot mo ngayong araw. Balik bukas.`;
 if(S&&S.playsTotal!=null&&!S.demo){const paid=Math.max(0,(S.roundsUsed||0)-((cur&&cur.status==="open")?1:0));const left=Math.max(0,S.playsTotal-paid);hint.innerHTML+=`<br><b>Spins ngayong araw: ${paid} ng ${S.playsTotal} — ${left} pa ang natitira</b>`}
+const hb=$("histBox");if(hb){const hs=(S&&S.hist)||[];if(hs.length&&!S.demo){hb.hidden=false;hb.innerHTML=`<b>🏆 Mga panalo mo</b><br>`+hs.slice(0,10).map(h=>`${h.day}${h.spun_at?" "+h.spun_at.slice(11):""} · Cabin ${h.cabin} · <b>${peso(h.amount)}</b>${h.cleared?"":""}`).join("<br>")+(hs.length>10?`<br>… at ${hs.length-10} pa`:"")}else hb.hidden=true}
   }
 }
 
