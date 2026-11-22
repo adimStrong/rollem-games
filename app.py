@@ -65,7 +65,8 @@ BRAND = "gopyesta"
 GAME_NAME = "Lucky Ferris Wheel"
 PRIZE_WEIGHT_SCALE = 10000  # each weight = intended percent * this, so dividing back out gives an EXACT display percent (e.g. 0.01%) with no float rounding anywhere
 _DEFAULT_PRIZES = [[17, 950000], [27, 50000], [37, 0], [77, 0], [177, 0], [777, 0]]  # 2026-10-30: 95%/5%, with 37/77/177/777 kept in the ladder at 0% -- display-only tiers the frontend shows on the cabins but pick_prize() (LIVE_PRIZES, p>0 only) can never actually draw
-PRIZES = [{"amt": int(a), "p": int(p)} for a, p in json.loads(os.environ.get("PRIZES") or json.dumps(_DEFAULT_PRIZES))]
+# 2026-11-22 (JD): amounts may carry centavos (7.77-style marketing ladder); weights stay ints
+PRIZES = [{"amt": float(a), "p": int(p)} for a, p in json.loads(os.environ.get("PRIZES") or json.dumps(_DEFAULT_PRIZES))]
 LIVE_PRIZES = [p for p in PRIZES if p["p"] > 0]
 assert LIVE_PRIZES, "PRIZES must include at least one prize with p > 0"
 N = int(os.environ.get("WHEEL_CABINS", "8"))        # cosmetic only — which gondola reveals the prize
@@ -190,6 +191,8 @@ def init_db():
         # turnover check. Deposit, play window, cap, kill switch still apply. Audit = time + note.
         cur.execute("ALTER TABLE fw_spins ADD COLUMN IF NOT EXISTS bet_override BIGINT")
         cur.execute("ALTER TABLE fw_spins ADD COLUMN IF NOT EXISTS bet_override_note TEXT")
+        # centavo amounts (7.77-style ladder, 2026-11-22): widen the old INTEGER amount column
+        cur.execute("ALTER TABLE fw_spins ALTER COLUMN amount TYPE DOUBLE PRECISION")
         cur.execute(
             """
             CREATE TABLE IF NOT EXISTS fw_kill_switch (
@@ -345,7 +348,7 @@ def kill_switch_status(cur):
 
 def pub_spin(r):
     return {"id": r["id"], "day": r["biz_date"], "round_no": r["round_no"], "cabin": r["cabin"],
-            "need": int(r["need"]), "status": r["status"], "amount": int(r["amount"] or 0), "seen": int(r["seen"] or 0),
+            "need": int(r["need"]), "status": r["status"], "amount": float(r["amount"] or 0), "seen": int(r["seen"] or 0),
             "dep": float(r["dep"] or 0), "slot": float(r["slot"] or 0),
             "spun_at": datetime.fromtimestamp(r["spun_at"] / 1000, TZ).strftime("%Y-%m-%d %H:%M") if r.get("spun_at") else None,
             "cleared": bool(r.get("cleared_at"))}
@@ -355,11 +358,11 @@ def wager(cur, user_id: int):
     """Bonus awaiting turnover: TURNOVER_MULT × the uncleared rewards, in slot+casino bets made after the oldest one."""
     cur.execute("SELECT * FROM fw_spins WHERE user_id=%s AND status='paid' ORDER BY spun_at", (user_id,))
     rows = [dict(r) for r in cur.fetchall()]
-    cleared = sum(int(r["amount"]) for r in rows if r.get("cleared_at"))
+    cleared = sum(float(r["amount"]) for r in rows if r.get("cleared_at"))
     open_rows = [r for r in rows if not r.get("cleared_at")]
     if not open_rows or TURNOVER_MULT <= 0:
         return {"bonus": 0, "need": 0, "done": 0, "cleared": cleared}
-    bonus = sum(int(r["amount"]) for r in open_rows)
+    bonus = sum(float(r["amount"]) for r in open_rows)
     need = bonus * TURNOVER_MULT
     first = open_rows[0]
     done = max(0.0, slot_bets_from(cur, user_id, first["biz_date"]) - float(first["slot_base"] or 0))
