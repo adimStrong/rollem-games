@@ -72,6 +72,7 @@ tr:hover td{background:#1c2029}
         <option value="gspot">GameSpot</option>
         <option value="t2b">Time2Bet</option>
         <option value="gobetplay">GoBetPlay</option>
+        <option value="saliplay">SaliPlay</option>
       </select>
       <select id="statusFilter">
         <option value="">All statuses</option>
@@ -99,7 +100,7 @@ tr:hover td{background:#1c2029}
 <script>
 const $=id=>document.getElementById(id);
 let adminToken=sessionStorage.getItem("wins-admin-token")||null;
-const BRAND_LABEL={gopyesta:"Gopyesta",pots:"POTS",rollem:"Roll'em",winforlife:"Win For Life",cow:"COW88",tamasa:"Tamasa",gspot:"GameSpot",t2b:"Time2Bet",gobetplay:"GoBetPlay"};
+const BRAND_LABEL={gopyesta:"Gopyesta",pots:"POTS",rollem:"Roll'em",winforlife:"Win For Life",cow:"COW88",tamasa:"Tamasa",gspot:"GameSpot",t2b:"Time2Bet",gobetplay:"GoBetPlay",saliplay:"SaliPlay"};
 
 function fmtDate(ms){
   const d=new Date(ms);
