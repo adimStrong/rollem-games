@@ -43,6 +43,8 @@ BRANDS = [
     {"key": "gspot",      "label": "GameSpot",     "game": "Power-Up Cards",     "kind": "cg3",    "url": "https://gspot-production.up.railway.app"},
     {"key": "t2b",        "label": "Time2Bet",     "game": "Time 2 Race",        "kind": "cg3",    "url": "https://t2b-production.up.railway.app"},
     {"key": "gobetplay",  "label": "GoBetPlay",    "game": "GoBet Race",         "kind": "cg3",    "url": "https://gobetplay-production.up.railway.app"},
+    # saliplay (2026-11-26): Sack Race, cg3, lives in the separate saliplay-reporting Railway project (DSN = its public proxy).
+    {"key": "saliplay",   "label": "SaliPlay",     "game": "Sack Race",          "kind": "cg3",    "url": "https://saliplay-game-production.up.railway.app"},
 ]
 
 _cache = {"at": 0.0, "payload": None}
