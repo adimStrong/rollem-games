@@ -737,7 +737,7 @@ body{background:radial-gradient(60% 38% at 50% 0%,rgba(255,184,40,.34),transpare
         <li>All your plays are made on the personal link from your agent. Results are final once you press START. Refreshing the page, reopening the link or using another device does not give extra plays. Only results confirmed by your agent count.</li>
         <li>Send a screenshot of each reward card to your agent. The bonus is credited after the agent verifies your deposit and result, within the time your agent announces.</li>
         <li>Wager ×1: the bonus must be wagered 1× before it can be withdrawn. Only bets on slot games are valid and count toward wagering.</li>
-        <li>Power-Up Cards is open from 1 PM to 9 PM (Philippine time) daily. Total bonus paid out by this game is capped at ₱10,000 per day; once the cap is reached, new plays are credited from the next promo day.</li>
+        <li>Power-Up Cards is open from 12 PM to 11:59 PM (Philippine time) daily. Total bonus paid out by this game is capped at ₱10,000 per day; once the cap is reached, new plays are credited from the next promo day.</li>
         <li>Multiple or linked accounts, edited links, or any attempt to abuse this promo void the bonus and may lead to action on the account.</li>
         <li>GameSpot may change, suspend or end this promo at any time. GameSpot management's decision on any dispute is final.</li>
         <li>Play responsibly. Set limits on your deposits and time, and ask for help if gambling stops being fun.</li>
@@ -753,7 +753,7 @@ const BRAND={"key":"gamespot-cards","name":"GameSpot","confetti":["#b8860b","#ff
   "script":"Hi! It's respawn time at GameSpot. Your verified deposit unlocked Power-Up Cards: press START, pick 1 of the 4 cards, and every play wins a bonus!"};
 // ---------- shared helpers ----------
 const $=id=>document.getElementById(id);
-const PLAY_DEP=200,DAILY_CAP=10000,WAGER_X=1; // every ₱200 verified deposit = 1 play; Wager ×1; 1 PM–9 PM; max bonus ₱10,000/day (GameSpot)
+const PLAY_DEP=200,DAILY_CAP=10000,WAGER_X=1; // every ₱200 verified deposit = 1 play; Wager ×1; 12 PM–11:59 PM; max bonus ₱10,000/day (GameSpot)
 const PRIZES=[7,17],WEIGHTS=[90,10]; // ₱7 Common (coin/potion/shield/boots) 90%, ₱17 Rare (sword/helmet/gem) 10% (the weights are admin only, never shown to players)
 // per-symbol WILD values in centavos; each group's symbols add up exactly to its prize (asserted at load). Players see them on the strip during a WILD round.
 // A normal stop pays the GROUP prize; a WILD round hits every symbol of one group once, so the wild total matches the same prizes.
@@ -799,7 +799,7 @@ let mode=RAW==="admin"?"admin":(CODE?"player":"demo");
 let cfg={code:CODE||"juan123"};
 let S=null;      // the live session from GET /api/session/<code>
 let SRV=null;    // the play the SERVER drew for the board on screen
-let CONF={perPlay:200,maxPlays:5,turnover:1,dailyCap:10000,depFrom:"12:00",depTo:"21:00",
+let CONF={perPlay:200,maxPlays:5,turnover:1,dailyCap:10000,depFrom:"12:00",depTo:"23:59",
           playFrom:"12:00",playUntil:"23:59"};
 let ADM=null;try{ADM=sessionStorage.getItem("gspot-adm-cg3")}catch(e){}
 let busyPlay=false,pollTimer=null;
@@ -1105,7 +1105,7 @@ function renderMech(){
     "<b>Validity:</b> 3 days from the call.",
     "<b>Every "+php(PLAY_DEP)+" deposit = 1 play.</b> For example, ₱1,000 = 5 plays, all on the personal link from your agent.",
     "<b>Only for slot games</b>. <b>Wager ×"+WAGER_X+"</b>: the bonus must be wagered "+WAGER_X+"× before it can be withdrawn.",
-    "<b>Hours:</b> 1 PM–9 PM daily. Max bonus <b>"+php(DAILY_CAP)+"</b> per day."];
+    "<b>Hours:</b> 12 PM–11:59 PM daily. Max bonus <b>"+php(DAILY_CAP)+"</b> per day."];
   $("mechSteps").innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
   const how=["Tick the T&C box.","Press <b>START</b> (or tap a card). The 4 power-up cards shuffle. They hold <b>₱7</b>, <b>₱17</b>, <b>₱77</b> and <b>₱177</b>.","<b>Pick 1 card.</b> It flips and shows your bonus: <b>₱7</b> (power-up) or <b>₱17</b> (rare). <b>Every play wins.</b>","The other 3 cards then flip for show only. Amounts on cards you did not pick are not won, and the ₱77 (epic) and ₱177 (legendary) cards are display only.","Take a screenshot of your reward card and send it to your agent to get it credited."];
   $("howSteps").innerHTML=how.map(s=>"<li>"+s+"</li>").join("");

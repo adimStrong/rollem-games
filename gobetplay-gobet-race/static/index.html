@@ -174,7 +174,7 @@ textarea{width:100%;min-height:180px;resize:vertical;font:600 16px/1.4 var(--bod
       <div class="gbrules">
         <h3>How it works</h3>
         <ul>
-          <li><b>One deposit of &#8369;200 or more</b> made between <b>12:00 PM and 9:00 PM</b> (Philippine time) = <b>1 free race</b>, up to <b>5 per day</b>. A bigger deposit is still 1 race &mdash; deposit again for another race.</li>
+          <li><b>One deposit of &#8369;200 or more</b> made between <b>12:00 PM and 11:59 PM</b> (Philippine time) = <b>1 free race</b>, up to <b>5 per day</b>. A bigger deposit is still 1 race &mdash; deposit again for another race.</li>
           <li>Each race unlocks once your turnover for the day reaches <b>1&times; that deposit</b> &mdash; bets on any game count. So a &#8369;5,000 deposit needs &#8369;5,000 of turnover before its race opens. Your deposits and turnover are read from your account automatically.</li>
           <li>Ask your agent for your personal link. It works until <b>11:59 PM</b> on the day it was issued and <b>expires at midnight</b>.</li>
           <li>Prizes go by finishing place: <b>3rd &#8369;27 &middot; 4th &#8369;17 &middot; 5th&ndash;8th &#8369;7</b>. <b>1st (&#8369;177) and 2nd (&#8369;77) are display only and can never be won by a player</b> &mdash; those two places always go to the house carabaos.</li>
@@ -1313,7 +1313,7 @@ let mode=RAW==='admin'?'admin':(CODE?'player':'demo');
 const NET={on:mode!=='demo',off:0,authed:false,token:null,race:null};
 try{NET.token=sessionStorage.getItem('gbr-admin')}catch(e){}
 const nowS=()=>Date.now()+NET.off;
-let CONF={perPlay:200,maxPlays:5,turnover:1,dailyCap:10000,depFrom:'12:00',depTo:'21:00',playFrom:'12:00',playUntil:'23:59',prizes:[{amt:7,p:95},{amt:27,p:5}],maxPrize:177,game:'GoBet Race',brandLabel:'GoBetplay'};
+let CONF={perPlay:200,maxPlays:5,turnover:1,dailyCap:10000,depFrom:'12:00',depTo:'23:59',playFrom:'12:00',playUntil:'23:59',prizes:[{amt:7,p:95},{amt:27,p:5}],maxPrize:177,game:'GoBet Race',brandLabel:'GoBetplay'};
 let SESS=null,CUR=null,PLAN=null,busyPlay=false,pollTimer=null;
 
 function php(n){const v=Number(n)||0;return '₱'+(Number.isInteger(v)?v.toLocaleString('en-US'):v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}))}
