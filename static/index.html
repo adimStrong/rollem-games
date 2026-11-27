@@ -428,7 +428,7 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(34px,10vw,50p
     <h2>Link maker · Swerte Lights</h2>
     <p class="hint" id="adminGate">Checking access…</p>
     <div id="adminBody" hidden style="display:grid;gap:14px">
-      <p class="hint">Type the player's <b>username, user ID, or game ID</b>. The system reads their Success deposits (<span class="hrs">12:00 PM–9:00 PM</span>) and turnover for today straight from the TamasaPH database. <b>Every <span class="perplay">₱200</span> deposit = 1 play (max <span class="maxplays">5</span>/day); each play unlocks after 1× turnover on <span class="wgame">any game</span>.</b> The server draws the prize (₱8.00 / ₱18.00, with a WILD round on some plays) and records it in the wins ledger at once. The link stays playable until <span class="phrs">11:59 PM</span> today and expires at midnight.</p>
+      <p class="hint">Type the player's <b>username, user ID, or game ID</b>. The system reads their Success deposits (<span class="hrs">12:00 PM–11:59 PM</span>) and turnover for today straight from the TamasaPH database. <b>Every <span class="perplay">₱200</span> deposit = 1 play (max <span class="maxplays">5</span>/day); each play unlocks after 1× turnover on <span class="wgame">any game</span>.</b> The server draws the prize (₱8.00 / ₱18.00, with a WILD round on some plays) and records it in the wins ledger at once. The link stays playable until <span class="phrs">11:59 PM</span> today and expires at midnight.</p>
       <label class="field"><span>Player username, user ID, or game ID</span><div class="btnrow"><input class="inp" id="acct" type="text" autocomplete="off" spellcheck="false" placeholder="e.g. juan123 or 482910" style="flex:1;min-width:0"><button class="btn small" id="lookupBtn" type="button">Check</button></div></label>
       <div class="tierbox" id="aTier"></div>
       <div class="offerbox" id="offerBox" hidden></div>
@@ -511,9 +511,9 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(34px,10vw,50p
       <h2 id="tncTitle">Swerte Lights Terms &amp; Conditions</h2>
       <ol>
         <li>Open to verified TamasaPH players aged 21 and above. Self-excluded, restricted or unverified accounts are not eligible.</li>
-        <li>One deposit of ₱200 or more made between 12:00 PM and 9:00 PM gives 1 play — a bigger deposit is still 1 play, and two ₱200 deposits are 2 plays, up to 5 plays per player per day. Your plays are on the personal link from your agent; your deposits are checked automatically from your account. Pending, failed or reversed deposits do not qualify.</li>
+        <li>One deposit of ₱200 or more made between 12:00 PM and 11:59 PM gives 1 play — a bigger deposit is still 1 play, and two ₱200 deposits are 2 plays, up to 5 plays per player per day. Your plays are on the personal link from your agent; your deposits are checked automatically from your account. Pending, failed or reversed deposits do not qualify.</li>
         <li>Each play unlocks only once your turnover for the day reaches 1× the deposit for that play (₱200 deposit → ₱200 in bets, ₱400 → ₱400, and so on). Bets on any game count. Turnover is read from your account and refreshes every few minutes.</li>
-        <li>The promo runs daily: deposits count from 12:00 PM to 9:00 PM, and the plays on your link must be used by 11:59 PM the same day — your link expires at midnight and cannot be used the next day. Total bonus paid by this promo is capped at ₱15,000 per day for all players; once the cap is reached, new plays wait for the next day.</li>
+        <li>The promo runs daily: deposits count from 12:00 PM to 11:59 PM, and the plays on your link must be used by 11:59 PM the same day — your link expires at midnight and cannot be used the next day. Total bonus paid by this promo is capped at ₱15,000 per day for all players; once the cap is reached, new plays wait for the next day.</li>
         <li>Each play's bonus is set at random by the system the moment you press START: ₱8.00 or ₱18.00. In Swerte Lights the light runs around the board and stops on a symbol of your prize group. On some plays the light lands on WILD and then hits every symbol of one group once; the hits add up to the same prizes. Where the light stops makes no difference to the amount. The ₱777 max jackpot (77), BAR BAR (₱77) and the ₱777 wild tease are display-only and can never be won or collected. This is an animated promo game only, not a bet.</li>
         <li>Results are final once you press START. Refreshing the page, reopening the link or using another device does not give extra plays or a new bonus; an unclaimed play is shown again as it was.</li>
         <li>Every win is recorded automatically. The bonus is credited the following day at 1:00 PM after verification and must be wagered 1× (1× wagering) before it can be withdrawn.</li>
@@ -530,12 +530,12 @@ h1.game{font-family:var(--display);font-weight:400;font-size:clamp(34px,10vw,50p
 // ---------- brand ----------
 // Server-driven build (2026-11-07): the admin looks the player up in the TamasaPH platform database, deposits and turnover
 // are read live, and the prize is drawn by the server (POST /api/play). See API.md. Nothing is decided in this browser.
-let CONF={brand:"tamasa",brandLabel:"TamasaPH",game:"Swerte Lights",perPlay:200,maxPlays:5,turnover:1,dailyCap:15000,depFrom:"12:00",depTo:"21:00",playFrom:"12:00",playUntil:"23:59",
+let CONF={brand:"tamasa",brandLabel:"TamasaPH",game:"Swerte Lights",perPlay:200,maxPlays:5,turnover:1,dailyCap:15000,depFrom:"12:00",depTo:"23:59",playFrom:"12:00",playUntil:"23:59",
   prizes:[{amt:8,p:97},{amt:18,p:3},{amt:28,p:0},{amt:38,p:0}],wildRate:0.05,wildPrizes:[{amt:8,p:97},{amt:18,p:3},{amt:777,p:0}],wagerCats:["all"]};
 function hm12(s){const [h,m]=String(s||"00:00").split(":").map(Number);const ap=h>=12?"PM":"AM",hh=((h+11)%12)+1;return hh+":"+String(m||0).padStart(2,"0")+" "+ap}
 // hours() = the DEPOSIT window (a deposit only counts as a play inside it); playHours()/playEnd() = how long
 // the plays themselves stay usable. These two used to be the same string; since 2026-11-11 they differ
-// (deposit 12:00-21:00, play to 23:59), so never use hours() to describe when a player may play.
+// (deposit 12:00-23:59, play to 23:59), so never use hours() to describe when a player may play.
 function hours(){return hm12(CONF.depFrom)+"–"+hm12(CONF.depTo)}
 function playHours(){return hm12(CONF.playFrom)+"–"+hm12(CONF.playUntil)}
 function playEnd(){return hm12(CONF.playUntil)}
