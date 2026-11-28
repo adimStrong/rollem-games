@@ -18,7 +18,9 @@
   const css=document.createElement("style");
   css.textContent=".crb{font:700 12px/1 system-ui,sans-serif;border-radius:999px;padding:6px 11px;cursor:pointer;white-space:nowrap;border:1px solid transparent}"+
     ".crb.yes{background:rgba(73,209,122,.16);color:#49d17a;border-color:rgba(73,209,122,.45)}"+
-    ".crb.no{background:rgba(255,255,255,.04);color:#c9c2d6;border-color:rgba(255,255,255,.22)}"+
+    ".crb.no{background:#49d17a;color:#06210f;border-color:#49d17a}.crb.no:hover{filter:brightness(1.08)}"+
+    ".crall{font:800 13px/1 system-ui,sans-serif;border-radius:9px;padding:9px 14px;cursor:pointer;border:1px solid #49d17a;background:#49d17a;color:#06210f;margin-left:10px}"+
+    ".crall.undo{background:transparent;color:#c9c2d6;border-color:rgba(255,255,255,.25)}.crall:disabled{opacity:.5;cursor:wait}"+
     ".crb.part{background:rgba(245,184,74,.15);color:#f5b84a;border-color:rgba(245,184,74,.45)}"+
     ".crb:disabled{opacity:.5;cursor:wait}.crnone{color:rgba(255,255,255,.35)}"+
     ".crsum{margin-left:auto;font-size:12.5px;opacity:.85}";
@@ -59,7 +61,7 @@
         tot++;
         if(st.done>=st.wins){done++;html="<button class='crb yes' data-k='"+encodeURIComponent(k)+"' data-v='0' title='Click to mark NOT credited'>✓ Credited</button>"}
         else if(st.done>0)html="<button class='crb part' data-k='"+encodeURIComponent(k)+"' data-v='1' title='Some wins credited — click to credit all'>Partial "+st.done+"/"+st.wins+"</button>";
-        else html="<button class='crb no' data-k='"+encodeURIComponent(k)+"' data-v='1' title='Click to mark credited'>Not yet</button>";
+        else html="<button class='crb no' data-k='"+encodeURIComponent(k)+"' data-v='1' title='Click to mark credited'>Mark credited</button>";
       }
       if(td.innerHTML!==html)td.innerHTML=html;
     }
@@ -69,7 +71,23 @@
       if(!s){s=document.createElement("span");s.className="crsum";totals.appendChild(s)}
       const txt=tot?("Credited: "+done+"/"+tot+(MODE==="win"?" wins":" players")):"";
       if(s.textContent!==txt)s.textContent=txt;
+      let a=totals.querySelector(".crall");
+      if(!a){a=document.createElement("button");a.type="button";a.className="crall";a.addEventListener("click",()=>toggleAll(a));totals.appendChild(a)}
+      a.hidden=!tot;
+      const all=done>=tot, lbl=all?"Undo all credited":"✓ Mark all credited ("+(tot-done)+")";
+      if(a.textContent!==lbl){a.textContent=lbl;a.classList.toggle("undo",all);a.dataset.v=all?"0":"1"}
     }
+  }
+  async function toggleAll(btn){
+    if(busy)return;
+    const r=range(),credited=btn.dataset.v==="1";
+    busy=true;btn.disabled=true;
+    try{
+      const res=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pin:pin(),credited,all:true,from:r.from,to:r.to})});
+      if(!res.ok)alert("Hindi na-save. Subukan ulit.");
+    }catch(e){alert("Connection error. Subukan ulit.")}
+    finally{busy=false;btn.disabled=false}
+    await refresh();
   }
   async function refresh(){
     const r=range();

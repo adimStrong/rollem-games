@@ -592,6 +592,8 @@ def credit_set(brand, token):
         clauses.append("LOWER(TRIM(player_name))=%s")
         params.append(player)
         date_range_clauses(payload, clauses, params)
+    elif payload.get("all") and payload.get("from") and payload.get("to"):
+        date_range_clauses(payload, clauses, params)          # "Mark all credited" for the page's From/To range
     else:
         return jsonify({"error": "player or ids required"}), 400
     now = int(time.time() * 1000)
