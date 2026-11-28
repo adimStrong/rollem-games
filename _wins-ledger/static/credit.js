@@ -4,7 +4,8 @@
    player mode (default): game reports, one row per player; the first text of the first cell is the account.
      The toggle covers that player's wins in the page's From/To range.
    win mode (data-mode="win"): ledger report-brand.html, one row per win, <tr data-id="<win id>">.
-   Anyone with the link sees the status; changing it asks for the Risk PIN once per browser. */
+   Anyone with the link sees the status and can toggle it with one click (no PIN since 2026-11-28;
+   RISK_PIN_REQUIRED=1 on the ledger brings the PIN prompt back). */
 (function(){
   const me=document.currentScript;
   const BRAND=me.dataset.brand||location.pathname.split("/").filter(Boolean)[1]||"", MODE=me.dataset.mode||"player";
@@ -80,14 +81,13 @@
   }
   async function toggle(btn){
     if(busy)return;
-    let p=pin();
-    if(!p){p=(prompt("Risk PIN (para ma-mark ang credited):")||"").trim();if(!p)return}
+    let p=pin();   // no PIN needed (2026-11-28); only asked for if the server answers 403
     const k=decodeURIComponent(btn.dataset.k),credited=btn.dataset.v==="1",r=range();
     const body=MODE==="win"?{pin:p,credited,ids:[Number(k)]}:{pin:p,credited,player:k,from:r.from,to:r.to};
     busy=true;btn.disabled=true;
     try{
       const res=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
-      if(res.status===403){setPin("");alert("Mali ang Risk PIN.");return}
+      if(res.status===403){setPin("");const q=(prompt("Risk PIN:")||"").trim();if(q){setPin(q)}return}
       if(!res.ok){alert("Hindi na-save. Subukan ulit.");return}
       setPin(p);
     }catch(e){alert("Connection error. Subukan ulit.")}

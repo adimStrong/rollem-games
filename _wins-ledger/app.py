@@ -576,9 +576,11 @@ def credit_set(brand, token):
     if not credit_access_ok(brand, token):
         return jsonify({"error": "not found"}), 404
     payload = request.get_json(force=True, silent=True) or {}
-    pin = str(payload.get("pin", ""))
-    if not RISK_PIN or not hmac.compare_digest(pin, RISK_PIN):
-        return jsonify({"error": "bad pin"}), 403
+    # 2026-11-28 JD: one click, no PIN -- the report link token is the key. Set RISK_PIN_REQUIRED=1 to bring the PIN back.
+    if os.environ.get("RISK_PIN_REQUIRED", "") not in ("", "0", "off", "false"):
+        pin = str(payload.get("pin", ""))
+        if not RISK_PIN or not hmac.compare_digest(pin, RISK_PIN):
+            return jsonify({"error": "bad pin"}), 403
     credited = bool(payload.get("credited"))
     clauses, params = ["brand=%s", "revoked=FALSE"], [brand]
     ids = [int(i) for i in (payload.get("ids") or []) if str(i).isdigit()][:500]
