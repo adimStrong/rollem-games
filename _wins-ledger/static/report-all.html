@@ -42,6 +42,7 @@ tr.tot td{font-weight:700;border-top:1px solid var(--line);color:var(--ink)}
 .st{font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:999px;white-space:nowrap}
 .st.pending{background:rgba(245,184,74,.15);color:var(--warn)}
 .st.sent_to_risk{background:rgba(73,209,122,.15);color:var(--ok)}
+.st.done{background:rgba(110,193,255,.16);color:#6ec1ff}
 .st.revoked{background:rgba(255,93,122,.15);color:var(--bad);text-decoration:line-through}
 tr.revoked td{opacity:.55}
 .brand{display:inline-block;padding:2px 8px;border-radius:999px;background:#242938;font-size:11.5px;font-weight:600;white-space:nowrap}
@@ -60,7 +61,7 @@ tr.revoked td{opacity:.55}
     <div class="btnrow">
       <div class="field"><label for="from">From</label><input id="from" type="date"></div>
       <div class="field"><label for="to">To</label><input id="to" type="date"></div>
-      <div class="field"><label for="status">Status</label><select id="status"><option value="">All statuses</option><option value="pending">Pending only</option><option value="sent_to_risk">Sent to Risk only</option><option value="revoked">Revoked only</option></select></div>
+      <div class="field"><label for="status">Status</label><select id="status"><option value="">All statuses</option><option value="pending">Pending only</option><option value="sent_to_risk">Sent to Risk only</option><option value="done">Done only</option><option value="revoked">Revoked only</option></select></div>
       <button id="loadBtn">Load</button>
       <button class="ghost" id="todayBtn" type="button">Today</button>
       <button class="ghost" id="weekBtn" type="button">Last 7 days</button>
@@ -71,7 +72,7 @@ tr.revoked td{opacity:.55}
   <div class="tiles" id="tiles" hidden></div>
   <div class="card" id="sitesCard" hidden>
     <h2>Per site</h2>
-    <div class="scroll"><table id="sites"><thead><tr><th>Site</th><th>Game</th><th class="r">Players</th><th class="r">Wins</th><th class="r">Pending</th><th class="r">Sent to Risk</th><th class="r">Revoked</th><th class="r">Pending ₱</th><th class="r">Total ₱</th></tr></thead><tbody></tbody></table></div>
+    <div class="scroll"><table id="sites"><thead><tr><th>Site</th><th>Game</th><th class="r">Players</th><th class="r">Wins</th><th class="r">Pending</th><th class="r">Sent to Risk</th><th class="r">Done</th><th class="r">Revoked</th><th class="r">Pending ₱</th><th class="r">Total ₱</th></tr></thead><tbody></tbody></table></div>
   </div>
   <div class="card" id="resultCard">
     <h2>Wins</h2>
@@ -89,7 +90,7 @@ const $=id=>document.getElementById(id);
 const PARTS=location.pathname.split("/").filter(Boolean); // report / all / <token>
 const TOKEN=PARTS[2]||"";
 const REFRESH_MS=30000;
-const STATUS={pending:"Pending",sent_to_risk:"Sent to Risk",revoked:"Revoked"};
+const STATUS={pending:"Pending",sent_to_risk:"Sent to Risk",done:"Done",revoked:"Revoked"};
 let brand="", last=null;
 function peso(v){return "₱"+Number(v||0).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2})}
 function todayStr(){return new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Manila"})}
@@ -111,6 +112,7 @@ async function load(){
   $("tiles").innerHTML="<div class='tile'><b>"+(t.wins||0)+"</b><span>Wins</span></div>"+
     "<div class='tile pend'><b>"+(t.pending||0)+"</b><span>Pending payout</span></div>"+
     "<div class='tile ok'><b>"+(t.sent_to_risk||0)+"</b><span>Sent to Risk</span></div>"+
+    "<div class='tile'><b style='color:#6ec1ff'>"+(t.done||0)+"</b><span>Done</span></div>"+
     "<div class='tile'><b>"+(t.players||0)+"</b><span>Players</span></div>"+
     "<div class='tile pend'><b>"+peso(t.pending_amount)+"</b><span>Pending ₱</span></div>"+
     "<div class='tile'><b>"+peso(t.amount)+"</b><span>Total ₱ (not revoked)</span></div>"+
@@ -122,9 +124,9 @@ async function load(){
   // per-site table (only when not narrowed, otherwise it is a single row)
   const rows=brand?by.filter(b=>b.brand===brand):by.filter(b=>b.wins||b.revoked);
   $("sitesCard").hidden=!rows.length;
-  const T=rows.reduce((a,b)=>({players:a.players+b.players,wins:a.wins+b.wins,pending:a.pending+b.pending,sent:a.sent+b.sent_to_risk,rev:a.rev+b.revoked,pamt:a.pamt+b.pending_amount,amt:a.amt+b.amount}),{players:0,wins:0,pending:0,sent:0,rev:0,pamt:0,amt:0});
-  $("sites").querySelector("tbody").innerHTML=rows.map(b=>"<tr><td><span class='brand'>"+esc(b.label)+"</span></td><td>"+esc(b.game||"—")+"</td><td class='r'>"+b.players+"</td><td class='r'>"+b.wins+"</td><td class='r'>"+b.pending+"</td><td class='r'>"+b.sent_to_risk+"</td><td class='r'>"+b.revoked+"</td><td class='r'>"+peso(b.pending_amount)+"</td><td class='r amt'>"+peso(b.amount)+"</td></tr>").join("")+
-    (rows.length>1?"<tr class='tot'><td>Total</td><td></td><td class='r'>"+T.players+"</td><td class='r'>"+T.wins+"</td><td class='r'>"+T.pending+"</td><td class='r'>"+T.sent+"</td><td class='r'>"+T.rev+"</td><td class='r'>"+peso(T.pamt)+"</td><td class='r amt'>"+peso(T.amt)+"</td></tr>":"");
+  const T=rows.reduce((a,b)=>({players:a.players+b.players,wins:a.wins+b.wins,pending:a.pending+b.pending,sent:a.sent+b.sent_to_risk,done:a.done+(b.done||0),rev:a.rev+b.revoked,pamt:a.pamt+b.pending_amount,amt:a.amt+b.amount}),{players:0,wins:0,pending:0,sent:0,done:0,rev:0,pamt:0,amt:0});
+  $("sites").querySelector("tbody").innerHTML=rows.map(b=>"<tr><td><span class='brand'>"+esc(b.label)+"</span></td><td>"+esc(b.game||"—")+"</td><td class='r'>"+b.players+"</td><td class='r'>"+b.wins+"</td><td class='r'>"+b.pending+"</td><td class='r'>"+b.sent_to_risk+"</td><td class='r'>"+(b.done||0)+"</td><td class='r'>"+b.revoked+"</td><td class='r'>"+peso(b.pending_amount)+"</td><td class='r amt'>"+peso(b.amount)+"</td></tr>").join("")+
+    (rows.length>1?"<tr class='tot'><td>Total</td><td></td><td class='r'>"+T.players+"</td><td class='r'>"+T.wins+"</td><td class='r'>"+T.pending+"</td><td class='r'>"+T.sent+"</td><td class='r'>"+T.done+"</td><td class='r'>"+T.rev+"</td><td class='r'>"+peso(T.pamt)+"</td><td class='r amt'>"+peso(T.amt)+"</td></tr>":"");
   const wins=j.wins||[];
   if(!wins.length){$("tbl").hidden=true;$("status_msg").textContent="Walang panalo sa petsang ito.";$("status_msg").className="hint";
     $("updatedAt").textContent="Last checked: "+new Date().toLocaleTimeString("en-PH",{timeZone:"Asia/Manila"});return}
