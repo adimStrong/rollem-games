@@ -536,6 +536,73 @@ def brand_report_api(brand, token):
     return jsonify({"brand": brand, "label": BRAND_LABELS.get(brand, brand), "game": game, "wins": wins, "totals": totals})
 
 
+# ---- Risk "Credited" toggle on every report page (2026-11-28) ----
+# Credited == the Done status. Read with the brand's report link token (the ledger's own token OR the
+# game report token held in GAME_REPORTS), so the add-on works on the game pages too. Writing also
+# needs RISK_PIN (Railway var), so a forwarded report link alone cannot tick boxes.
+RISK_PIN = os.environ.get("RISK_PIN", "")
+
+
+def credit_access_ok(brand: str, token: str) -> bool:
+    if brand not in VALID_BRANDS or not token:
+        return False
+    if report_access_ok(brand, token):
+        return True
+    url = _game_reports().get(brand, "")
+    game_token = url.rstrip("/").rsplit("/", 1)[-1] if url else ""
+    return bool(game_token) and hmac.compare_digest(token, game_token)
+
+
+@app.route("/api/credit/<brand>/<token>", methods=["GET"])
+def credit_status(brand, token):
+    if not credit_access_ok(brand, token):
+        return jsonify({"error": "not found"}), 404
+    clauses, params = ["brand=%s", "revoked=FALSE"], [brand]
+    date_range_clauses(request.args, clauses, params)
+    with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute(f"SELECT id, player_name, done FROM wins WHERE {' AND '.join(clauses)}", params)
+        rows = cur.fetchall()
+    players, ids = {}, {}
+    for r in rows:
+        p = players.setdefault((r["player_name"] or "").strip().lower(), {"wins": 0, "done": 0})
+        p["wins"] += 1
+        p["done"] += 1 if r["done"] else 0
+        ids[str(r["id"])] = bool(r["done"])
+    return jsonify({"players": players, "ids": ids})
+
+
+@app.route("/api/credit/<brand>/<token>", methods=["POST"])
+def credit_set(brand, token):
+    if not credit_access_ok(brand, token):
+        return jsonify({"error": "not found"}), 404
+    payload = request.get_json(force=True, silent=True) or {}
+    pin = str(payload.get("pin", ""))
+    if not RISK_PIN or not hmac.compare_digest(pin, RISK_PIN):
+        return jsonify({"error": "bad pin"}), 403
+    credited = bool(payload.get("credited"))
+    clauses, params = ["brand=%s", "revoked=FALSE"], [brand]
+    ids = [int(i) for i in (payload.get("ids") or []) if str(i).isdigit()][:500]
+    player = str(payload.get("player", "")).strip().lower()
+    if ids:
+        clauses.append("id = ANY(%s)")
+        params.append(ids)
+    elif player:
+        clauses.append("LOWER(TRIM(player_name))=%s")
+        params.append(player)
+        date_range_clauses(payload, clauses, params)
+    else:
+        return jsonify({"error": "player or ids required"}), 400
+    now = int(time.time() * 1000)
+    with db() as conn, conn.cursor() as cur:
+        if credited:
+            cur.execute("UPDATE wins SET done=TRUE, done_at=%s, claimed=TRUE, claimed_at=COALESCE(claimed_at,%s) "
+                        f"WHERE {' AND '.join(clauses)}", [now, now] + params)
+        else:
+            cur.execute(f"UPDATE wins SET done=FALSE, done_at=NULL WHERE {' AND '.join(clauses)}", params)
+        n = cur.rowcount
+    return jsonify({"ok": True, "updated": n})
+
+
 @app.route("/api/report-links", methods=["GET"])
 def report_links():
     """Admin-only: the public report link of every brand (so the dashboard password holder can hand them out)."""
