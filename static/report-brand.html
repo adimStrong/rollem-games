@@ -32,6 +32,7 @@ tr:hover td{background:rgba(255,255,255,.03)}
 .st{font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:999px;white-space:nowrap}
 .st.pending{background:rgba(245,184,74,.15);color:var(--warn)}
 .st.sent_to_risk{background:rgba(73,209,122,.15);color:var(--ok)}
+.st.done{background:rgba(110,193,255,.16);color:#6ec1ff}
 .st.revoked{background:rgba(255,93,122,.15);color:var(--bad);text-decoration:line-through}
 tr.revoked td{opacity:.55}
 .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:var(--mute)}
@@ -65,7 +66,7 @@ const $=id=>document.getElementById(id);
 const PARTS=location.pathname.split("/").filter(Boolean); // report / <brand> / <token>
 const BRAND=PARTS[1]||"",TOKEN=PARTS[2]||"";
 const REFRESH_MS=30000;
-const STATUS={pending:"Pending",sent_to_risk:"Sent to Risk",revoked:"Revoked"};
+const STATUS={pending:"Pending",sent_to_risk:"Sent to Risk",done:"Done",revoked:"Revoked"};
 function peso(v){return "₱"+Number(v||0).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2})}
 function todayStr(){return new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Manila"})}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}

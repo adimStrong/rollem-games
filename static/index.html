@@ -36,6 +36,9 @@ tr:hover td{background:#1c2029}
 .badge.pending{background:#3a2e12;color:#ffc857}
 .badge.claimed{background:#163a24;color:#4ade80}
 .badge.revoked{background:#3a1620;color:#f87171}
+.badge.done{background:#12304a;color:#6ec1ff}
+.doneBtn{font:700 11px inherit;background:#12304a;color:#6ec1ff;border:1px solid #1f4c70;border-radius:7px;padding:5px 10px;cursor:pointer;white-space:nowrap;margin-left:4px}
+.doneBtn:hover{background:#173c5c}
 .revokeBtn{font:600 11px inherit;background:transparent;color:#f87171;border:1px solid #5c1f2b;border-radius:7px;padding:5px 10px;cursor:pointer;white-space:nowrap;margin-left:4px}
 .revokeBtn:hover{background:#2a1017}
 .note{display:block;font-size:10px;color:var(--muted);margin-top:2px}
@@ -78,6 +81,7 @@ tr:hover td{background:#1c2029}
         <option value="">All statuses</option>
         <option value="pending">Pending lang</option>
         <option value="claimed">Sent to Risk lang</option>
+        <option value="done">Done lang</option>
         <option value="revoked">Revoked lang</option>
       </select>
       <input type="date" id="dateFrom" title="Mula (petsa)">
@@ -135,6 +139,7 @@ async function loadWins(){
 async function act(id,action){
   let note="";
   if(action==="claim"){note=prompt("Sent to Risk — batch ref / remarks (optional):","");if(note===null)return}
+  if(action==="done"){note=prompt("Done (naibigay na ang bonus) — remarks (optional):","");if(note===null)return}
   if(action==="revoke"){note=prompt("Revoke — dahilan (hal. turnover not met, duplicate account):","");if(note===null)return;if(!note.trim()){alert("Kailangan ng dahilan.");return}}
   try{
     const r=await fetch("/api/wins/"+id+"/"+action,{method:"POST",headers:{"X-Admin-Token":adminToken||"","Content-Type":"application/json"},body:JSON.stringify({note:note||""})});
@@ -166,19 +171,21 @@ function render(wins){
     "<td>"+(w.player_name||"—")+"</td>"+
     "<td class='amt'>₱"+(w.amount%1?Number(w.amount).toFixed(2):w.amount)+"</td>"+
     "<td>"+(w.link?"<a class='link' href='"+w.link+"' target='_blank' rel='noopener'>"+w.code+"</a>":w.code)+"</td>"+
-    "<td>"+(w.revoked?"<span class='badge revoked'>Revoked</span>":w.claimed?"<span class='badge claimed'>Sent to Risk</span>":"<span class='badge pending'>Pending</span>")+(w.note?"<span class='note'>"+escQ(w.note)+"</span>":"")+"</td>"+
-    "<td>"+((w.claimed||w.revoked)?"<button class='unclaimBtn' data-id='"+w.id+"' data-act='unclaim'>Undo</button>":"<button class='claimBtn' data-id='"+w.id+"' data-act='claim'>Sent to Risk</button><button class='revokeBtn' data-id='"+w.id+"' data-act='revoke'>Revoke</button>")+"</td></tr>"
+    "<td>"+(w.revoked?"<span class='badge revoked'>Revoked</span>":w.done?"<span class='badge done'>Done</span>":w.claimed?"<span class='badge claimed'>Sent to Risk</span>":"<span class='badge pending'>Pending</span>")+(w.note?"<span class='note'>"+escQ(w.note)+"</span>":"")+"</td>"+
+    "<td>"+((w.done||w.revoked)?"<button class='unclaimBtn' data-id='"+w.id+"' data-act='unclaim'>Undo</button>":w.claimed?"<button class='doneBtn' data-id='"+w.id+"' data-act='done' style='margin-left:0'>Done</button> <button class='unclaimBtn' data-id='"+w.id+"' data-act='unclaim'>Undo</button>":"<button class='claimBtn' data-id='"+w.id+"' data-act='claim'>Sent to Risk</button><button class='doneBtn' data-id='"+w.id+"' data-act='done'>Done</button><button class='revokeBtn' data-id='"+w.id+"' data-act='revoke'>Revoke</button>")+"</td></tr>"
   ).join("");
   $("emptyMsg").hidden=wins.length>0;
   const total=Math.round(wins.filter(w=>!w.revoked).reduce((a,w)=>a+w.amount,0)*100)/100;
   const pending=wins.filter(w=>!w.claimed&&!w.revoked).length;
   const revoked=wins.filter(w=>w.revoked).length;
+  const done=wins.filter(w=>w.done&&!w.revoked).length;
   const byBrand={};
   wins.forEach(w=>byBrand[w.brand]=(byBrand[w.brand]||0)+1);
   const topBrand=Object.entries(byBrand).sort((a,b)=>b[1]-a[1])[0];
   $("stats").innerHTML=
     "<div class='stat'><b>"+wins.length+"</b><span>Total wins shown</span></div>"+
     "<div class='stat pending-stat'><b>"+pending+"</b><span>Pending payout</span></div>"+
+    "<div class='stat'><b style='color:#6ec1ff'>"+done+"</b><span>Done</span></div>"+
     (revoked?"<div class='stat'><b>"+revoked+"</b><span>Revoked</span></div>":"")+
     "<div class='stat'><b>₱"+total.toLocaleString()+"</b><span>Total payout shown</span></div>"+
     (topBrand?"<div class='stat'><b>"+(BRAND_LABEL[topBrand[0]]||topBrand[0])+"</b><span>Most active brand</span></div>":"");

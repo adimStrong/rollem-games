@@ -180,6 +180,8 @@ def init_db():
         cur.execute("ALTER TABLE wins ADD COLUMN IF NOT EXISTS claimed_at BIGINT")
         cur.execute("ALTER TABLE wins ADD COLUMN IF NOT EXISTS revoked BOOLEAN NOT NULL DEFAULT FALSE")
         cur.execute("ALTER TABLE wins ADD COLUMN IF NOT EXISTS revoked_at BIGINT")
+        cur.execute("ALTER TABLE wins ADD COLUMN IF NOT EXISTS done BOOLEAN NOT NULL DEFAULT FALSE")
+        cur.execute("ALTER TABLE wins ADD COLUMN IF NOT EXISTS done_at BIGINT")
         cur.execute("ALTER TABLE wins ADD COLUMN IF NOT EXISTS note TEXT NOT NULL DEFAULT ''")
         # centavo prizes (tamasa Swerte Lights P8.20/P16.50): widen amount once; integers stored before stay exact
         cur.execute("SELECT data_type FROM information_schema.columns WHERE table_name='wins' AND column_name='amount'")
@@ -275,7 +277,9 @@ def list_wins():
     if status == "pending":
         clauses.append("claimed=FALSE AND revoked=FALSE")
     elif status == "claimed":
-        clauses.append("claimed=TRUE")
+        clauses.append("claimed=TRUE AND done=FALSE AND revoked=FALSE")
+    elif status == "done":
+        clauses.append("done=TRUE AND revoked=FALSE")
     elif status == "revoked":
         clauses.append("revoked=TRUE")
     date_range_clauses(request.args, clauses, params)
@@ -301,7 +305,9 @@ def export_wins_csv():
     if status == "pending":
         clauses.append("claimed=FALSE AND revoked=FALSE")
     elif status == "claimed":
-        clauses.append("claimed=TRUE")
+        clauses.append("claimed=TRUE AND done=FALSE AND revoked=FALSE")
+    elif status == "done":
+        clauses.append("done=TRUE AND revoked=FALSE")
     elif status == "revoked":
         clauses.append("revoked=TRUE")
     date_range_clauses(request.args, clauses, params)
@@ -314,7 +320,7 @@ def export_wins_csv():
     writer = csv.writer(buf)
     writer.writerow(["id", "date_ph", "brand", "game", "player_name", "code", "amount", "link", "status", "note"])
     for r in rows:
-        status_label = "revoked" if r["revoked"] else ("sent_to_risk" if r["claimed"] else "pending")
+        status_label = _status_of(r)
         date_ph = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(r["created_at"] / 1000 + 8 * 3600))
         writer.writerow([r["id"], date_ph, r["brand"], r["game"], r["player_name"], r["code"], r["amount"], r["link"], status_label, r["note"]])
 
@@ -335,9 +341,28 @@ def claim_win(win_id):
     note = str(payload.get("note", ""))[:200]
     with db() as conn, conn.cursor() as cur:
         cur.execute(
-            "UPDATE wins SET claimed=TRUE, claimed_at=%s, revoked=FALSE, revoked_at=NULL, "
+            "UPDATE wins SET claimed=TRUE, claimed_at=%s, done=FALSE, done_at=NULL, revoked=FALSE, revoked_at=NULL, "
             "note=CASE WHEN %s<>'' THEN %s ELSE note END WHERE id=%s",
             (int(time.time() * 1000), note, note, win_id),
+        )
+        if cur.rowcount == 0:
+            return jsonify({"error": "not found"}), 404
+    return jsonify({"ok": True})
+
+
+@app.route("/api/wins/<int:win_id>/done", methods=["POST"])
+def done_win(win_id):
+    """Bonus actually paid out to the player (after Sent to Risk, or straight from Pending). Optional JSON {note}."""
+    if not require_admin():
+        return jsonify({"error": "forbidden"}), 403
+    payload = request.get_json(force=True, silent=True) or {}
+    note = str(payload.get("note", ""))[:200]
+    now = int(time.time() * 1000)
+    with db() as conn, conn.cursor() as cur:
+        cur.execute(
+            "UPDATE wins SET done=TRUE, done_at=%s, claimed=TRUE, claimed_at=COALESCE(claimed_at,%s), revoked=FALSE, revoked_at=NULL, "
+            "note=CASE WHEN %s<>'' THEN %s ELSE note END WHERE id=%s",
+            (now, now, note, note, win_id),
         )
         if cur.rowcount == 0:
             return jsonify({"error": "not found"}), 404
@@ -350,7 +375,7 @@ def unclaim_win(win_id):
     if not require_admin():
         return jsonify({"error": "forbidden"}), 403
     with db() as conn, conn.cursor() as cur:
-        cur.execute("UPDATE wins SET claimed=FALSE, claimed_at=NULL, revoked=FALSE, revoked_at=NULL WHERE id=%s", (win_id,))
+        cur.execute("UPDATE wins SET claimed=FALSE, claimed_at=NULL, done=FALSE, done_at=NULL, revoked=FALSE, revoked_at=NULL WHERE id=%s", (win_id,))
         if cur.rowcount == 0:
             return jsonify({"error": "not found"}), 404
     return jsonify({"ok": True})
@@ -365,7 +390,7 @@ def revoke_win(win_id):
     note = str(payload.get("note", ""))[:200]
     with db() as conn, conn.cursor() as cur:
         cur.execute(
-            "UPDATE wins SET revoked=TRUE, revoked_at=%s, claimed=FALSE, claimed_at=NULL, note=%s WHERE id=%s",
+            "UPDATE wins SET revoked=TRUE, revoked_at=%s, claimed=FALSE, claimed_at=NULL, done=FALSE, done_at=NULL, note=%s WHERE id=%s",
             (int(time.time() * 1000), note, win_id),
         )
         if cur.rowcount == 0:
@@ -450,7 +475,11 @@ def _game_reports() -> dict:
 
 
 def _status_of(r):
-    return "revoked" if r["revoked"] else ("sent_to_risk" if r["claimed"] else "pending")
+    if r["revoked"]:
+        return "revoked"
+    if r.get("done"):
+        return "done"
+    return "sent_to_risk" if r["claimed"] else "pending"
 
 
 def _totals(wins):
@@ -458,6 +487,7 @@ def _totals(wins):
     return {"wins": len(valid), "revoked": len(wins) - len(valid),
             "pending": sum(1 for w in valid if w["status"] == "pending"),
             "sent_to_risk": sum(1 for w in valid if w["status"] == "sent_to_risk"),
+            "done": sum(1 for w in valid if w["status"] == "done"),
             "players": len({(w["player_name"] or w["code"]).lower() for w in valid}),
             "amount": round(sum(float(w["amount"]) for w in valid), 2),
             "pending_amount": round(sum(float(w["amount"]) for w in valid if w["status"] == "pending"), 2)}
@@ -476,13 +506,15 @@ def brand_report_api(brand, token):
     if status == "pending":
         clauses.append("claimed=FALSE AND revoked=FALSE")
     elif status == "sent_to_risk":
-        clauses.append("claimed=TRUE AND revoked=FALSE")
+        clauses.append("claimed=TRUE AND done=FALSE AND revoked=FALSE")
+    elif status == "done":
+        clauses.append("done=TRUE AND revoked=FALSE")
     elif status == "revoked":
         clauses.append("revoked=TRUE")
     date_range_clauses(request.args, clauses, params)
     where = ("WHERE " + " AND ".join(clauses)) if clauses else ""
     with db() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        cur.execute(f"SELECT id, brand, game, player_name, code, amount, created_at, claimed, revoked, note FROM wins {where} "
+        cur.execute(f"SELECT id, brand, game, player_name, code, amount, created_at, claimed, done, revoked, note FROM wins {where} "
                     "ORDER BY created_at DESC LIMIT 5000", params)
         rows = cur.fetchall()
     wins = []
